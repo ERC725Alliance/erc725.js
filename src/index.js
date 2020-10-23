@@ -12,8 +12,8 @@
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * @file tbd
- * @author Fabian Vogelsteller <fabian@ethereum.org>, Robert McLeod <robertdavid010>
+ * @file index.js
+ * @author Fabian Vogelsteller <fabian@lukso.network>, Robert McLeod <@robertdavid010>
  * @date 2020
  */
 
