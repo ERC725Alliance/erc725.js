@@ -18,6 +18,7 @@
  */
 
 import * as web3utils from 'web3-utils'
+import { ERC725Source as source } from './dataSource/gqlApollo'
 
 // TODO: First initial steps
 // 0. Get the basic library definitions from the ERC725 spec basicc import some type of ERC735 library standard
@@ -29,23 +30,32 @@ import * as web3utils from 'web3-utils'
 // NOTE: We want to avoid using whole web3 library
 // NOTE: Most likely create seperate source files for dataSrouce types based on provider
 
+console.log('do we have the package?')
+
 export class ERC725 {
-  constructor(schema, address, provider) {
-    super()
+  // NOTE: Conditionally leaving out 'address' for now during development to test with multiple entity datastore
+  constructor(name, schema, provider, providerType, address) {
+    // super()
     // TODO: Add more sophistiacted includes/checks
     this.options = {
+      name,
       schema, // typeof Array
-      contractAddress: address,
+      // contractAddress: address, // Would be more difficult to set address here, since each ERC725 instance has unique address
+      providerType: providerType || 'gql', // manual for now
+      currentProvider: provider,
+      address
     }
-    this.currentProvider = provider // follows web3 'Contract' convention
-    // this.setProvider = this.setProvider.bind(this)
+    // this.options.currentProvider = provider // follows web3 'Contract' convention
+    // NOTE: For initial development we are hard coding usage of apollo graphql provider
+    // support 4 types of current provider:
+    // 1. graphql server @param 'gql'
+    // 2. graphql websocket server @param 'gql-socket'
+    // 3. web3 rpc @param 'web3'
+    // 4. ethereum rpc @param 'rpc'
   }
 
-  // placeholder method
-  _setProvider() {
-
-  }
-  
+  // placeholder method in case...
+  _setProvider() { }
 
   _decodeDataByType(type, value) {
     // TODO: add type checks
@@ -73,15 +83,28 @@ export class ERC725 {
 
   }
 
-  _getDataFromSource() {
-    // querey the actual source
-    // We will need to check the currentProvider for which type it is...
+  _getEntityFromSource() {
+    // This likely returns some entity basic info, and a list of keys
+  }
 
-    if (currentSourceType === 'graphql') {
+  _getDataFromSource(definition) {
+    // query the actual source
+    // We will need to check the currentProvider for which type it is...
+    let sourceData
+
+    const type = this.options.sourceType
+    if (type === 'gql') {
       // query ERC725 subraph
     } else {
       // query web3 or ethereum rpc
     }
+    return sourceData
+  }
+
+  _getDataByKey () {
+
+  }
+  _getDataByEntity () {
 
   }
 
@@ -91,10 +114,19 @@ export class ERC725 {
   }
 
 
+  getEntity(id) {
+    // return DataCue.getEntity(hash)
+    return source.getEntity(id)
+  }
+  getEntityData(id) {
+    return source.getDataByEntity(id)
+  }
 
-  getData(key) {
+  getData(key, id) {
     // this needs to know the keyname hash... technically we don't need the string name
     // TODO: check for firt 'bytes' to see of it's a hash?
+    // id is assumed address...
+    let addy = id || this.address
     let keyHash
     if (key.substr(0,2) !== "0x") {
       // Assumes no plain text names starting with 0x
@@ -113,12 +145,13 @@ export class ERC725 {
       }
     }
 
-    if (!keyDefinition) {
-      return Error('there is no key of this name defined')
-    }
+    // if (!keyDefinition) {
+    //   return Error('there is no key of this name defined')
+    // }
 
     // Now we must get the data
-    this._getDataFromSource(keyDefinition)
+    const rawData = this._getDataFromSource(keyDefinition, addy)
+    const decoodedData = this._decodeDataByType(rawData, keyDefinition)
 
   }
 }
