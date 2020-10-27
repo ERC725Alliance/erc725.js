@@ -49,9 +49,9 @@ export class ERC725 {
     // NOTE: For initial development we are hard coding usage of apollo graphql provider
     // support 4 types of current provider:
     // 1. graphql server @param 'gql'
-    // 2. graphql websocket server @param 'gql-socket'
+    // 2. graphql websocket server @param 'gql-ws'
     // 3. web3 rpc @param 'web3'
-    // 4. ethereum rpc @param 'rpc'
+    // 4. ethereum rpc @param 'eth-rpc'
   }
 
   // placeholder method in case...
@@ -113,8 +113,14 @@ export class ERC725 {
     return web3utils.keccak256(string)
   }
 
+  getAllEntities(opts){ source.getAllEntities(opts) }
+
+  getEntitiesList(ids,opts) {
+    return source.getEntitiesList(ids,opts)
+  }
 
   getEntity(id) {
+    // this should suppor arrays...
     // return DataCue.getEntity(hash)
     return source.getEntity(id)
   }
@@ -126,7 +132,7 @@ export class ERC725 {
     // this needs to know the keyname hash... technically we don't need the string name
     // TODO: check for firt 'bytes' to see of it's a hash?
     // id is assumed address...
-    let addy = id || this.address
+    let addr = id || this.address
     let keyHash
     if (key.substr(0,2) !== "0x") {
       // Assumes no plain text names starting with 0x
@@ -150,8 +156,9 @@ export class ERC725 {
     // }
 
     // Now we must get the data
-    const rawData = this._getDataFromSource(keyDefinition, addy)
+    const rawData = this._getDataFromSource(keyDefinition, addr)
     const decoodedData = this._decodeDataByType(rawData, keyDefinition)
+    return decoodedData
 
   }
 }
