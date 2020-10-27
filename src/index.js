@@ -35,15 +35,14 @@ console.log('do we have the package?')
 export class ERC725 {
   // NOTE: Conditionally leaving out 'address' for now during development to test with multiple entity datastore
   constructor(name, schema, provider, providerType, address) {
-    // super()
     // TODO: Add more sophistiacted includes/checks
     this.options = {
       name,
-      schema, // typeof Array
+      schema: schema || null, // typeof Array
       // contractAddress: address, // Would be more difficult to set address here, since each ERC725 instance has unique address
       providerType: providerType || 'gql', // manual for now
       currentProvider: provider,
-      address
+      address: address
     }
     // this.options.currentProvider = provider // follows web3 'Contract' convention
     // NOTE: For initial development we are hard coding usage of apollo graphql provider
@@ -61,7 +60,7 @@ export class ERC725 {
     // TODO: add type checks
     switch (type) {
       case "String":
-        return value
+        return web3.utils.hexToUtf8(value)
       case "Address":
         break;
       case "Keccak256":
@@ -74,8 +73,8 @@ export class ERC725 {
         break;
       case "Markdown":
         break;
-      case type.substr(0,2) === "0x":
-        break;
+      // case substr(0,2) === "0x":
+      //   break;
     
       default:
         break;
@@ -87,56 +86,38 @@ export class ERC725 {
     // This likely returns some entity basic info, and a list of keys
   }
 
-  _getDataFromSource(definition) {
+  async _getDataFromSource(definition) {
     // query the actual source
-    // We will need to check the currentProvider for which type it is...
-    let sourceData
-
-    const type = this.options.sourceType
-    if (type === 'gql') {
-      // query ERC725 subraph
-    } else {
-      // query web3 or ethereum rpc
-    }
-    return sourceData
+    // TODO: We will need to check the currentProvider for which type it is...
+    return await source.getEntityDataByKey(this.options.address, definition.key)
   }
 
-  _getDataByKey () {
-
-  }
-  _getDataByEntity () {
-
-  }
+  _getDataByKey () { }
+  _getDataByEntity () { }
 
   _getKeyNameHash(name) {
-    // return the keccack265 hash of the string
-    return web3utils.keccak256(string)
-  }
-
-  getAllEntities(opts){ source.getAllEntities(opts) }
-
-  getEntitiesList(ids,opts) {
-    return source.getEntitiesList(ids,opts)
+    return web3utils.keccak256(name)
   }
 
   getEntity(id) {
+    id = id || this.options.address
+    console.log('trying to get the single entity...')
+    console.log(id)
     // this should suppor arrays...
     // return DataCue.getEntity(hash)
     return source.getEntity(id)
   }
-  getEntityData(id) {
-    return source.getDataByEntity(id)
+  async getEntityRawData(id) {
+    id = id || this.options.address
+    return await source.getDataByEntity(id)
   }
 
-  getData(key, id) {
-    // this needs to know the keyname hash... technically we don't need the string name
-    // TODO: check for firt 'bytes' to see of it's a hash?
-    // id is assumed address...
-    let addr = id || this.address
+  async getData(key) {
     let keyHash
+    // Convert key to hashed version regardless
     if (key.substr(0,2) !== "0x") {
-      // Assumes no plain text names starting with 0x
-      keyhash = this._getKeyNameHash(key)
+      // NOTE: Assumes no plain text names starting with 0x aka zero byte
+      keyHash = this._getKeyNameHash(key)
     } else {
       keyHash = key
     }
@@ -145,20 +126,21 @@ export class ERC725 {
     let keyDefinition = null
     for (let i = 0; i < this.options.schema.length; i++) {
       const e = this.options.schema[i];
-      if (e === keyHash) {
+      console.log(e)
+      if (e.key === keyHash) {
         keyDefinition = e
         break
       }
     }
 
-    // if (!keyDefinition) {
-    //   return Error('there is no key of this name defined')
-    // }
+    if (!keyDefinition) {
+      return Error('there is no key of this name defined')
+    }
 
-    // Now we must get the data
-    const rawData = this._getDataFromSource(keyDefinition, addr)
-    const decoodedData = this._decodeDataByType(rawData, keyDefinition)
-    return decoodedData
-
+    // Get the actual data the data
+    const rawData = await this._getDataFromSource(keyDefinition)
+    // Decode and return the data
+    // TODO: Handle multiple same types with loop
+    return this._decodeDataByType(keyDefinition.valueContent, rawData.data.erc725DataStores[0].value)
   }
 }

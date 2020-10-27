@@ -35,11 +35,11 @@ const apolloClient = new ApolloClient({
 
 function cleanOptions(options) {
   /** NOTE: We are translating skip/first to offset/limit as per more normal conventions
-  // options fieds supported
+  * options fieds supported:
   @param offset: @type int @description 'initial offest'
   @param limit: @type int @description 'number or results to return'
   @param orderBy: @type string @description 'field to order by'
-  @param orderDirection: @type enum @description 'direction to order by, either "asc" or "desc"'
+  @param orderDirection: @type enum @description 'direction to order by, either "asc" or "desc" as string'
   */
   const opts = {}
   opts.skip = options && options.offset || null,
@@ -49,21 +49,22 @@ function cleanOptions(options) {
   return opts
 }
 
-async function getAllEntities (options) {
-  opts = cleanOptions(options)
+async function getAllEntities(options) {
+  const opts = cleanOptions(options)
   ERC725_QUERY = gql`
-  {
-    erc725S(skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}) {
-      id
-      dataStore
+    {
+      erc725S(skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}) {
+        id
+        dataStore
+      }
     }
-  }
   `
-  return await apolloClient.query({ query: ERC725_QUERY })
-
+  const result = await apolloClient.query({ query: ERC725_QUERY })
+  return result
 }
+
 async function getEntitiesList(entityIds, options) {
-  opts = cleanOptions(options)
+  const opts = cleanOptions(options)
   let arrayStr = ""
   entityIds.forEach((e,i,a) => {
     arrayStr = arrayStr + "\"" + e + "\""
@@ -121,11 +122,12 @@ async function getEntityDataByKey(entityId, keyHash) {
   return await apolloClient.query({ query: ERC725_DATA_QUERY }) 
 }
 
-async function getDataByKey(keyHash) {
+async function getDataByKey(keyHash, options) {
+  const opts = cleanOptions(options)
   // Get all data by key (multiple ERC725 instances possible)
   const ERC725_DATA_QUERY = gql`
   {
-    erc725DataStores (where:{key:"${keyHash}"}) {
+    erc725DataStores (where:{key:"${keyHash}",skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}}) {
       erc725id
       key
       value
