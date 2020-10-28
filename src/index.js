@@ -30,14 +30,11 @@ import { ERC725Source as source } from './dataSource/gqlApollo'
 // NOTE: We want to avoid using whole web3 library
 // NOTE: Most likely create seperate source files for dataSrouce types based on provider
 
-console.log('do we have the package?')
-
 export class ERC725 {
   // NOTE: Conditionally leaving out 'address' for now during development to test with multiple entity datastore
-  constructor(name, schema, provider, providerType, address) {
+  constructor(schema, address, provider, providerType) {
     // TODO: Add more sophistiacted includes/checks
     this.options = {
-      name,
       schema: schema || null, // typeof Array
       // contractAddress: address, // Would be more difficult to set address here, since each ERC725 instance has unique address
       providerType: providerType || 'gql', // manual for now
@@ -52,67 +49,100 @@ export class ERC725 {
     // 3. web3 rpc @param 'web3'
     // 4. ethereum rpc @param 'eth-rpc'
   }
-
-  // placeholder method in case...
+  
   _setProvider() { }
 
-  _decodeDataByType(type, value) {
-    // TODO: add type checks
-    switch (type) {
-      case "String":
-        return web3.utils.hexToUtf8(value)
-      case "Address":
+  _validateData(schema, data) {
+
+  }
+
+  _decodeData(schemaElementDefinition, value) {
+    // Detect valueContent type, and handle case
+    switch (schemaElementDefinition.valueContent.toLowerCase()) {
+      case "string":
+        return web3utils.hexToUtf8(value)
+      case "address":
+        return value
+      case "arraylength":
+        return web3utils.hexToNumber(value)
+      case "keccak256":
+        // we cannot reverse assymetric encryption to check...?
+        return value
+      case "hashedasseturi":
         break;
-      case "Keccak256":
+      case "jsonuri":
+        // reverse process in schema definition
+      case "uri":
+        return web3utils.hexToUtf8(value)
+      case "markdown":
         break;
-      case "HashedAssetURI":
-        break;
-      case "JSONURI":
-        break;
-      case "URI":
-        break;
-      case "Markdown":
-        break;
-      // case substr(0,2) === "0x":
-      //   break;
-    
       default:
         break;
     }
 
   }
 
-  _getEntityFromSource() {
-    // This likely returns some entity basic info, and a list of keys
+  async _decodeDataByType(schemaElementDefinition, value) {
+
+    // ARRAY
+    if (schemaElementDefinition.keyType.toLowerCase() === "array") {
+      // Get the array length first
+      const arrayLength = this._decodeData(schemaElementDefinition, value)
+
+      let result = []
+      // Construct the schema for each element, and fetch
+      for (let index = 0; index < arrayLength; index++) {
+        const elementKey = schemaElementDefinition.elementKey + web3utils.leftPad(web3utils.numberToHex(index), 32).replace('0x','')
+        const schemaElement = {
+          key: elementKey,
+          keyType: "Singleton",
+          valueContent: schemaElementDefinition.elementValueContent,
+          valueType: schemaElementDefinition.elementValueType,
+        }
+        result.push(await this.getData(elementKey, schemaElement))
+      }
+      return result
+
+    // SINGLETON
+    } else if (schemaElementDefinition.keyType.toLowerCase() === "singleton") {
+      return this._decodeData(schemaElementDefinition, value)
+
+    // UNKNOWN
+    } else {
+      return Error('There is no recognized keyType for this key.')
+    }
+
   }
 
-  async _getDataFromSource(definition) {
+  async _fetchDataFromSource(definition) {
     // query the actual source
     // TODO: We will need to check the currentProvider for which type it is...
     return await source.getEntityDataByKey(this.options.address, definition.key)
   }
 
-  _getDataByKey () { }
-  _getDataByEntity () { }
-
   _getKeyNameHash(name) {
     return web3utils.keccak256(name)
   }
 
-  getEntity(id) {
+  async getEntity(id) {
     id = id || this.options.address
-    console.log('trying to get the single entity...')
-    console.log(id)
     // this should suppor arrays...
     // return DataCue.getEntity(hash)
     return source.getEntity(id)
+  }
+  async getEntityData(id) {
+    id = id || this.options.address
+
+    // TODO: Get all the data for the entire entity
+    // const rawEntity = this.getEntityRawData(id)
+
   }
   async getEntityRawData(id) {
     id = id || this.options.address
     return await source.getDataByEntity(id)
   }
 
-  async getData(key) {
+  async getData(key, customSchema) { // optional schemaElement if handling array keyTypes
     let keyHash
     // Convert key to hashed version regardless
     if (key.substr(0,2) !== "0x") {
@@ -123,24 +153,26 @@ export class ERC725 {
     }
 
     // Get the correct schema key definition
-    let keyDefinition = null
-    for (let i = 0; i < this.options.schema.length; i++) {
-      const e = this.options.schema[i];
-      console.log(e)
-      if (e.key === keyHash) {
-        keyDefinition = e
-        break
-      }
+    let schemaElementDefinition
+    if (!customSchema && this.options.schema) {
+      this.options.schema.forEach(e => {
+        if (e.key === keyHash) {
+          schemaElementDefinition = e
+        }
+      })
+    } else {
+      schemaElementDefinition = customSchema
     }
 
-    if (!keyDefinition) {
-      return Error('there is no key of this name defined')
+    if (!schemaElementDefinition) {
+      return Error('There is no matching key in this schema.')
     }
 
     // Get the actual data the data
-    const rawData = await this._getDataFromSource(keyDefinition)
+    const rawData = await this._fetchDataFromSource(schemaElementDefinition)
     // Decode and return the data
     // TODO: Handle multiple same types with loop
-    return this._decodeDataByType(keyDefinition.valueContent, rawData.data.erc725DataStores[0].value)
+    // TODO: Return raw value from fetch source
+    return this._decodeDataByType(schemaElementDefinition, rawData.data.erc725DataStores[0].value)
   }
 }

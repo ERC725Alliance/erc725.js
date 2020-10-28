@@ -34,8 +34,8 @@ const apolloClient = new ApolloClient({
 })
 
 function cleanOptions(options) {
-  /** NOTE: We are translating skip/first to offset/limit as per more normal conventions
-  * options fieds supported:
+  /** NOTE: We are translating skip/first fo GraphQL to offset/limit as per more normal conventions
+  Option types supported as keys in options object:
   @param offset: @type int @description 'initial offest'
   @param limit: @type int @description 'number or results to return'
   @param orderBy: @type string @description 'field to order by'
@@ -119,7 +119,7 @@ async function getEntityDataByKey(entityId, keyHash) {
     }
   }
   `
-  return await apolloClient.query({ query: ERC725_DATA_QUERY }) 
+  return await apolloClient.query({ query: ERC725_DATA_QUERY }) //TODO: return the value only
 }
 
 async function getDataByKey(keyHash, options) {
