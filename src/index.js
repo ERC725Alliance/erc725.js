@@ -18,7 +18,11 @@
  */
 
 import * as web3utils from 'web3-utils'
-import { ERC725Source as source } from './dataSource/gqlApollo'
+import GraphSource from './dataSource/graph'
+import Web3Source from './dataSource/web3'
+
+
+// import Providers from './provider
 
 // TODO: First initial steps
 // 0. Get the basic library definitions from the ERC725 spec basicc import some type of ERC735 library standard
@@ -37,10 +41,29 @@ export class ERC725 {
     this.options = {
       schema: schema || null, // typeof Array
       // contractAddress: address, // Would be more difficult to set address here, since each ERC725 instance has unique address
-      providerType: providerType || 'gql', // manual for now
+      providerType: providerType || 'graph', // manual for now
       currentProvider: provider,
       address: address
     }
+
+    // TODO: Add conditionals
+    // this.currentProvider = new GraphSource (provider)
+    if (providerType === 'graph') {
+      this.source = new GraphSource({uri:provider})
+      // this is graphql
+      // this.options.providerType = 'graph'
+    } else if (providerType === 'web3') {
+      
+      // this.source = new Web3Source({provider})
+      // TODO: check if web3, and for which type of web3
+      // assume everything else is
+      console.error("THIS IS A WEB3 provider source")
+      this.source = new Web3Source({provider:provider})
+
+    } else if (providerType ==='metamask') {
+      console.log('we are using Metamask')
+    }
+    // 
     // this.options.currentProvider = provider // follows web3 'Contract' convention
     // NOTE: For initial development we are hard coding usage of apollo graphql provider
     // support 4 types of current provider:
@@ -71,7 +94,7 @@ export class ERC725 {
       case "hashedasseturi":
         break;
       case "jsonuri":
-        // reverse process in schema definition
+        // reverse process in LSP standards definition
       case "uri":
         return web3utils.hexToUtf8(value)
       case "markdown":
@@ -84,7 +107,7 @@ export class ERC725 {
 
   async _decodeDataByType(schemaElementDefinition, value) {
 
-    // ARRAY
+    // TYPE: ARRAY
     if (schemaElementDefinition.keyType.toLowerCase() === "array") {
       // Get the array length first
       const arrayLength = this._decodeData(schemaElementDefinition, value)
@@ -103,21 +126,36 @@ export class ERC725 {
       }
       return result
 
-    // SINGLETON
+    // TYPE: SINGLETON
     } else if (schemaElementDefinition.keyType.toLowerCase() === "singleton") {
       return this._decodeData(schemaElementDefinition, value)
 
-    // UNKNOWN
+    // TYPE: UNKNOWN
     } else {
       return Error('There is no recognized keyType for this key.')
     }
 
   }
 
+  async _fetchAllDataFromSource() {
+    const result = await this.source.getDataByEntity(this.options.address)
+    return result.data[Object.keys(result.data)[0]]
+  }
+
   async _fetchDataFromSource(definition) {
-    // query the actual source
-    // TODO: We will need to check the currentProvider for which type it is...
-    return await source.getEntityDataByKey(this.options.address, definition.key)
+    
+    const result = await this.source.getEntityDataByKey(this.options.address, definition.key)
+    if (this.options.providerType === 'graph' || this.options.providerType === 'graph-ws') {
+      // NOTE: Asssumes the gql result always has the data returned in the first element..PropTypes.any
+      // Probably not 100% guarantee. TODO: Confirm
+      const res = result.data[Object.keys(result.data)[0]][0].value 
+      return res
+    } else if (this.options.providerType === 'web3' || this.options.providerType === 'web3-ws') {
+      return result
+    } else {
+      // ASSUMES Ethereum RPC...
+    }
+    return result
   }
 
   _getKeyNameHash(name) {
@@ -128,7 +166,7 @@ export class ERC725 {
     id = id || this.options.address
     // this should suppor arrays...
     // return DataCue.getEntity(hash)
-    return source.getEntity(id)
+    return this.source.getEntity(id)
   }
   async getEntityData(id) {
     id = id || this.options.address
@@ -139,7 +177,7 @@ export class ERC725 {
   }
   async getEntityRawData(id) {
     id = id || this.options.address
-    return await source.getDataByEntity(id)
+    return await this.source.getDataByEntity(id)
   }
 
   async getData(key, customSchema) { // optional schemaElement if handling array keyTypes
@@ -173,6 +211,53 @@ export class ERC725 {
     // Decode and return the data
     // TODO: Handle multiple same types with loop
     // TODO: Return raw value from fetch source
-    return this._decodeDataByType(schemaElementDefinition, rawData.data.erc725DataStores[0].value)
+    return this._decodeDataByType(schemaElementDefinition, rawData)
+  }
+  async getAllData() {
+    const allRawData = await this._fetchAllDataFromSource()
+    let result = {}
+    // We map by the schema, as this is considered the limit of the data model
+    for (let index = 0; index < this.options.schema.length; index++) {
+      const schemaElement = this.options.schema[index]
+      let schemaElementDefinition = null
+      for (let i = 0; i < allRawData.length; i++) {
+        const dataElement = allRawData[i];
+        // If its an array, handle that
+        if (schemaElement.keyType.toLowerCase() === 'array') {
+          /// Set the array key
+          const elementKey = schemaElement.elementKey + web3utils.leftPad(dataElement.key.substr(dataElement.key.length - 32), 32).replace('0x','')
+          // Form new schema schema to check data against
+          schemaElementDefinition = {
+            key: elementKey,
+            keyType: "Singleton",
+            valueContent: schemaElement.elementValueContent,
+            valueType: schemaElement.elementValueType,
+          }
+        } else {
+          // Its not an array
+          schemaElementDefinition = schemaElement
+        }
+
+        // Check if the data is a match with the schema
+        if (dataElement.key === schemaElementDefinition.key) {
+          // decode the data, and add to result
+          const decodedElement = this._decodeData(schemaElementDefinition, dataElement.value)
+          // Special case for arrays
+          if (schemaElement.keyType.toLowerCase() === 'array') { 
+            // Error catch as conditional for simple test for number as the array length, which not needed here
+            try {
+              web3utils.hexToNumber(dataElement.value) // this will fail when anything BUT the arrayLength key
+            } catch (error) {
+              result[schemaElement.name] ? result[schemaElement.name].push(decodedElement) : result[schemaElement.name] = [decodedElement]
+            }
+          } else {
+            result[schemaElementDefinition.name] = decodedElement
+          }
+        }
+
+      }
+
+    }
+    return result
   }
 }
