@@ -57,7 +57,6 @@ export class ERC725 {
       // this.source = new Web3Source({provider})
       // TODO: check if web3, and for which type of web3
       // assume everything else is
-      console.error("THIS IS A WEB3 provider source")
       this.source = new Web3Source({provider:provider})
 
     } else if (providerType ==='metamask') {
@@ -142,8 +141,6 @@ export class ERC725 {
     if (this.options.providerType === 'graph' || this.options.providerType === 'graph-ws') {
       return result.data[Object.keys(result.data)[0]]
     } else {
-      console.log('now we are handling all the entity data from web3')
-      console.log(result)
       return result
     }
   }
