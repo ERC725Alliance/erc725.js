@@ -139,7 +139,13 @@ export class ERC725 {
 
   async _fetchAllDataFromSource() {
     const result = await this.source.getDataByEntity(this.options.address)
-    return result.data[Object.keys(result.data)[0]]
+    if (this.options.providerType === 'graph' || this.options.providerType === 'graph-ws') {
+      return result.data[Object.keys(result.data)[0]]
+    } else {
+      console.log('now we are handling all the entity data from web3')
+      console.log(result)
+      return result
+    }
   }
 
   async _fetchDataFromSource(definition) {
@@ -213,10 +219,12 @@ export class ERC725 {
     // TODO: Return raw value from fetch source
     return this._decodeDataByType(schemaElementDefinition, rawData)
   }
+
   async getAllData() {
     const allRawData = await this._fetchAllDataFromSource()
     let result = {}
     // We map by the schema, as this is considered the limit of the data model
+
     for (let index = 0; index < this.options.schema.length; index++) {
       const schemaElement = this.options.schema[index]
       let schemaElementDefinition = null

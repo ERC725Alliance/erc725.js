@@ -23,9 +23,13 @@
 */
 
 import * as web3utils from 'web3-utils'
+import * as abi from 'web3-eth-abi'
+const web3abi = abi.default
 
 const CONSTANTS = {
-  getDataFunctionSignature: "0x54f6127f" // Replaced need for abi
+  getDataFunctionSignature: '0x54f6127f',
+  dataCountFunctionSignature: '0x5da40c47',
+  allDataKeysFunctionSignature: '0xc559acef'
 }
 
 export default class Web3Source {
@@ -34,19 +38,43 @@ export default class Web3Source {
   }
 
   async getEntityDataByKey (entityId, keyHash) {
-    const data = CONSTANTS.getDataFunctionSignature + web3utils.padLeft(keyHash.replace('0x',''),32)
+    const data = CONSTANTS.getDataFunctionSignature + keyHash.replace('0x', '')
+    const result = await this.contractCall(entityId, data)
+    return web3abi.decodeParameter('bytes',result)
+  }
+
+  async getDataByEntity (address, keyHashes) {
+    // This gets all the data for an entity
+    const data = CONSTANTS.allDataKeysFunctionSignature + web3utils.padLeft('',32)
+    const allKeys = await this.contractCall(address, data)
+    const keys = web3abi.decodeParameter('bytes32[]',allKeys)
+    const results = []
+    // Must use 'for' instead of 'forEach' to 'await' properly
+    for (let index = 0; index < keys.length; index++) {
+      const key = keys[index];
+      const d = CONSTANTS.getDataFunctionSignature + key.replace('0x','')
+      const res = await this.contractCall(address, d)
+      const r = {}
+      r.key = key
+      r.value = web3abi.decodeParameter('bytes',res)
+      results.push(r)
+    }
+    return results
+    
+  }
+
+  async contractCall (address, data) {
 
     const payload = {
       jsonrpc:"2.0",
       method:"eth_call",
       params:[
         {
-          to: entityId,
+          to: address,
           gas: web3utils.numberToHex(2000000),
           gasPrice: web3utils.numberToHex(100000000),
           value: web3utils.numberToHex(0),
           data: data
-        // (manually generate this method call functionSig (4bytes) + key (32bytes)
         }
       ],
       id:1
@@ -62,9 +90,8 @@ export default class Web3Source {
       }
       this.currentProvider.send(payload,cb)
     })
-
     return await callMethod
-    
+
   }
   
 }

@@ -37,5 +37,7 @@
     "babel-cli": "^6.24.1",
     "babel-preset-es2015": "^6.24.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "web3-eth-abi": "^1.3.0"
+  }
 }
