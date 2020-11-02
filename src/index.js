@@ -36,47 +36,46 @@ import Web3Source from './dataSource/web3'
 
 export class ERC725 {
   // NOTE: Conditionally leaving out 'address' for now during development to test with multiple entity datastore
-  constructor(schema, address, provider, providerType) {
+  constructor(schema, address, provider) {
     // TODO: Add more sophistiacted includes/checks
     this.options = {
       schema: schema || null, // typeof Array
-      // contractAddress: address, // Would be more difficult to set address here, since each ERC725 instance has unique address
-      providerType: providerType || 'graph', // manual for now
       currentProvider: provider,
       address: address
     }
+    // TODO: Check for required props
 
-    // TODO: Add conditionals
-    // this.currentProvider = new GraphSource (provider)
-    if (providerType === 'graph') {
-      this.source = new GraphSource({uri:provider})
-      // this is graphql
-      // this.options.providerType = 'graph'
-    } else if (providerType === 'web3') {
-      
-      // this.source = new Web3Source({provider})
-      // TODO: check if web3, and for which type of web3
-      // assume everything else is
+    // so send a custom provider object for graph
+    // {
+    //   uri: 'string'
+    //   type: 'graphql'
+    // }
+
+    // TEST CHECKING for provider type (cannot be confirmed until live data on Ethereum chain, and error handling)
+    // TODO: check httpsProvider/websocket etc
+    const providerName = provider && provider.constructor && provider.constructor.name || null
+    if (providerName === 'HttpProvider') {
+      // We have web3 provider
+      this.options.providerType = 'web3'
       this.source = new Web3Source({provider:provider})
-
-    } else if (providerType ==='metamask') {
-      console.log('we are using Metamask')
+    } else if (provider.type === 'graph') {
+      // We have a graph node provider
+      this.options.providerType = 'graph'
+      this.source = new GraphSource({uri:provider.uri})
+    } else if (!providerName && provider.request) {
+      this.options.providerType = 'ethereum'
+      console.log('Detected ethereum type')
+      // TODO: Complete support of ethereum/metamask
+      this.source = new Web3Source({provider:provider})
     }
-    // 
-    // this.options.currentProvider = provider // follows web3 'Contract' convention
-    // NOTE: For initial development we are hard coding usage of apollo graphql provider
-    // support 4 types of current provider:
-    // 1. graphql server @param 'gql'
-    // 2. graphql websocket server @param 'gql-ws'
-    // 3. web3 rpc @param 'web3'
-    // 4. ethereum rpc @param 'eth-rpc'
+
   }
   
-  _setProvider() { }
+  // _setProvider() { }
 
-  _validateData(schema, data) {
+  // _validateData(schema, data) {
 
-  }
+  // }
 
   _decodeData(schemaElementDefinition, value) {
     // Detect valueContent type, and handle case
@@ -93,7 +92,7 @@ export class ERC725 {
       case "hashedasseturi":
         break;
       case "jsonuri":
-        // reverse process in LSP standards definition
+        return web3utils.hexToUtf8(value)
       case "uri":
         return web3utils.hexToUtf8(value)
       case "markdown":
@@ -163,24 +162,6 @@ export class ERC725 {
 
   _getKeyNameHash(name) {
     return web3utils.keccak256(name)
-  }
-
-  async getEntity(id) {
-    id = id || this.options.address
-    // this should suppor arrays...
-    // return DataCue.getEntity(hash)
-    return this.source.getEntity(id)
-  }
-  async getEntityData(id) {
-    id = id || this.options.address
-
-    // TODO: Get all the data for the entire entity
-    // const rawEntity = this.getEntityRawData(id)
-
-  }
-  async getEntityRawData(id) {
-    id = id || this.options.address
-    return await this.source.getDataByEntity(id)
   }
 
   async getData(key, customSchema) { // optional schemaElement if handling array keyTypes

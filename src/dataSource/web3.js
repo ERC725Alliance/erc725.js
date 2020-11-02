@@ -35,6 +35,7 @@ const CONSTANTS = {
 export default class Web3Source {
   constructor(props) {
     this.currentProvider = props.provider
+    this.idCount = 1 // this has to be available to the instance...
   }
 
   async getEntityDataByKey (entityId, keyHash) {
@@ -77,20 +78,32 @@ export default class Web3Source {
           data: data
         }
       ],
-      id:1
+      id: this.idCount
+    }
+    this.idCount ++
+
+    if (this.currentProvider && this.currentProvider.request) {
+      return await this.currentProvider.request({method:'eth_call', params:payload.params})
+    } else {
+      // Handle no provmis of old 'send' method
+      const callMethod = new Promise((resolve, reject) => {
+        // The callback to resolve the promise
+        const cb = (e,r) => {
+          if (e) {
+            reject(e)
+          } else {
+            resolve(r.result)
+          }
+        }
+        // Make the send call
+        this.currentProvider.send(payload,cb)
+        
+      })
+      // Call the promise
+      return await callMethod
+
     }
 
-    const callMethod = new Promise((resolve, reject) => {
-      const cb = (e,r) => {
-        if (e) {
-          reject(e)
-        } else {
-          resolve(r.result)
-        }
-      }
-      this.currentProvider.send(payload,cb)
-    })
-    return await callMethod
 
   }
   
