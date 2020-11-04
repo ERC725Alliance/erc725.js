@@ -21,6 +21,7 @@
   This file will handle querying the Ethereum web3 rpc based on a given provider
   in accordance with implementation of smart contract interfaces of ERC725
 */
+let idCount = 1
 
 import * as web3utils from 'web3-utils'
 import * as abi from 'web3-eth-abi'
@@ -32,25 +33,35 @@ const CONSTANTS = {
   allDataKeysFunctionSignature: '0xc559acef'
 }
 
+// TODO: rename to web3provider
+// Sho
 export default class Web3Source {
   constructor(props) {
     this.currentProvider = props.provider
-    this.idCount = 1 // this has to be available to the instance...
+    // this.idCount = 1 // this has to be available to the instance...
   }
 
-  async getEntityDataByKey (entityId, keyHash) {
+  async getData (entityId, keyHash) {
     const data = CONSTANTS.getDataFunctionSignature + keyHash.replace('0x', '')
     const result = await this.contractCall(entityId, data)
     return web3abi.decodeParameter('bytes',result)
   }
 
-  async getDataByEntity (address, keyHashes) {
+  async getAllData (address, keyHashes) {
     // This gets all the data for an entity
-    const data = CONSTANTS.allDataKeysFunctionSignature + web3utils.padLeft('',32)
-    const allKeys = await this.contractCall(address, data)
-    const keys = web3abi.decodeParameter('bytes32[]',allKeys)
+    // This funtion should get the data form the scheam, not `allKeys`
+    // TODO: Use the schema as the source of truth.
+    let keys
+    if (!keyHashes) {
+      const data = CONSTANTS.allDataKeysFunctionSignature + web3utils.padLeft('',32)
+      const allKeys = await this.contractCall(address, data)
+      keys = web3abi.decodeParameter('bytes32[]',allKeys)
+    } else {
+      keys = keyHashes
+    }
+    // const keys = keyHashes
     const results = []
-    // Must use 'for' instead of 'forEach' to 'await' properly
+    
     for (let index = 0; index < keys.length; index++) {
       const key = keys[index];
       const d = CONSTANTS.getDataFunctionSignature + key.replace('0x','')
@@ -78,9 +89,9 @@ export default class Web3Source {
           data: data
         }
       ],
-      id: this.idCount
+      id: idCount++
     }
-    this.idCount ++
+    // idCount ++
 
     if (this.currentProvider && this.currentProvider.request) {
       return await this.currentProvider.request({method:'eth_call', params:payload.params})

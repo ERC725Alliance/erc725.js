@@ -24,6 +24,7 @@
 */
 import { ApolloClient, InMemoryCache, createHttpLink, gql, NormalizedCacheObject } from '@apollo/client';
 
+// TODO: Rename to graphProvider
 export default class GraphSource {
   constructor(props) {
     this.apolloClient = new ApolloClient({
@@ -35,6 +36,8 @@ export default class GraphSource {
     })
   
   }
+  // TODO: remove all app specific to serpate codefile
+  // for universal profiles
 
   _cleanOptions(options) {
     /** NOTE: We are translating skip/first fo GraphQL to offset/limit as per more normal conventions
@@ -82,6 +85,7 @@ export default class GraphSource {
     return await this.apolloClient.query({ query: ERC725_QUERY })
   }
   
+  
   async getAllEntities(options) {
     const opts = this._cleanOptions(options)
     ERC725_QUERY = gql`
@@ -93,6 +97,26 @@ export default class GraphSource {
       }
     `
     return await this.apolloClient.query({ query: ERC725_QUERY })
+  }
+
+  async getAllData(id) {
+    const result = await this.getDataByEntity(id) 
+    // Return just the relevant data
+    return result.data[Object.keys(result.data)[0]]
+  }
+  async getData(id, keyHashes) {
+    if (Array.isArray(keyHashes)) {
+      // get by the keys for the address/id
+    } else if (!keyHashes){
+      // get all the data for required fields for the address/id
+      throw new Error('requires at least on field key, or an array of keys')
+    } else {
+
+      // Return the value for the specific key
+      const result = await this.getEntityDataByKey(id,keyHashes)
+      return result.data[Object.keys(result.data)[0]][0].value
+    }
+
   }
   
   async getDataByEntity (entityId) {

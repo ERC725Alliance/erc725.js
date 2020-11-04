@@ -18,32 +18,18 @@
  */
 
 import * as web3utils from 'web3-utils'
-import GraphSource from './dataSource/graph'
-import Web3Source from './dataSource/web3'
+import GraphSource from './providers/subgraphProviderWrapper'
+import Web3Source from './providers/web3ProviderWrapper'
+import EthereumSource from './providers/ethereumProviderWrapper'
 
-
-// import Providers from './provider
-
-// TODO: First initial steps
-// 0. Get the basic library definitions from the ERC725 spec basicc import some type of ERC735 library standard
-// 1. Bring in the schema, addres, and provider during instantiation
-// 2. Attach schema
-// 3. Attach web3 provider
-
-// NOTE: dont attach full web3 provider, just the provider object
-// NOTE: We want to avoid using whole web3 library
-// NOTE: Most likely create seperate source files for dataSrouce types based on provider
-
-export class ERC725 {
-  // NOTE: Conditionally leaving out 'address' for now during development to test with multiple entity datastore
-  constructor(schema, address, provider) {
-    // TODO: Add more sophistiacted includes/checks
-    this.options = {
-      schema: schema || null, // typeof Array
-      currentProvider: provider,
-      address: address
-    }
-    // TODO: Check for required props
+// TODO: nodescript test
+// TODO: Tests. Node script to all kind of key type, use for unit tests: Npm MOCHA
+// make one schema that tests every single type
+// make mockup provider. to check decoding
+// make test for encode. give key, string, returns encoded hexstring. example handling array is 
+// always returns and array of objects with kv pairs. if no array return the object
+// make test for decode, encode
+// TODO: Add encode method
 
     // so send a custom provider object for graph
     // {
@@ -51,58 +37,86 @@ export class ERC725 {
     //   type: 'graphql'
     // }
 
-    // TEST CHECKING for provider type (cannot be confirmed until live data on Ethereum chain, and error handling)
-    // TODO: check httpsProvider/websocket etc
+export class ERC725 {
+  constructor(schema, address, provider) {
+    if (!schema) { throw new Error('Missing schema.') } // TODO: Add check for schema format
+    if (!address) { throw new Error('Missing address.') } // TODO: check for proper address
+    if (!provider) { throw new Error('Missing provider.') }
+
+    // Init options member
+    this.options = {
+      schema: schema,
+      address: address
+    }
+
+    // Check provider types
     const providerName = provider && provider.constructor && provider.constructor.name || null
-    if (providerName === 'HttpProvider') {
-      // We have web3 provider
+    
+    if (providerName === 'HttpProvider' || providerName === 'WebsocketProvider' || providerName === 'IpcProvider') {
       this.options.providerType = 'web3'
       this.source = new Web3Source({provider:provider})
     } else if (provider.type === 'graph') {
       // We have a graph node provider
       this.options.providerType = 'graph'
       this.source = new GraphSource({uri:provider.uri})
+      // TODO: add
+      // If no provider name or graph, and doesnt have request, and instead send
     } else if (!providerName && provider.request) {
       this.options.providerType = 'ethereum'
       console.log('Detected ethereum type')
       // TODO: Complete support of ethereum/metamask
-      this.source = new Web3Source({provider:provider})
-    }
+      this.source = new EthereumSource({provider:provider})
 
-  }
-  
-  // _setProvider() { }
-
-  // _validateData(schema, data) {
-
-  // }
-
-  _decodeData(schemaElementDefinition, value) {
-    // Detect valueContent type, and handle case
-    switch (schemaElementDefinition.valueContent.toLowerCase()) {
-      case "string":
-        return web3utils.hexToUtf8(value)
-      case "address":
-        return value
-      case "arraylength":
-        return web3utils.hexToNumber(value)
-      case "keccak256":
-        // we cannot reverse assymetric encryption to check...?
-        return value
-      case "hashedasseturi":
-        break;
-      case "jsonuri":
-        return web3utils.hexToUtf8(value)
-      case "uri":
-        return web3utils.hexToUtf8(value)
-      case "markdown":
-        break;
-      default:
-        break;
+      // this.source = new Web3Source({provider:provider})
+    } else {
+      throw new Error('Incorrect or unsupported provider')
     }
 
   }
 
+  async getData(key, customSchema) {
+    // @param key can be either the name or the key in the schema
+    // NOTE: Assumes no plain text names starting with 0x aka zero byte
+    const keyHash = (key.substr(0,2) !== "0x") ? this._getKeyNameHash(key) : key
+
+    // Get the correct schema key definition if its not passed as a parameter
+    const keySchema = (!customSchema) ? this.options.schema.find(f => { return keyHash === f.key }) : customSchema
+    // Helpful error
+    if (!keySchema) { throw Error('There is no matching key in schema.') }
+
+    // Get the raw data
+    const rawData = await this.source.getData(this.options.address, keySchema.key)
+    // Decode and return the data
+    return this._decodeDataByType(keySchema, rawData)
+  }
+
+  async getAllData() {
+    // Get all the key hashes from the schema
+    const keyHashes = this.options.schema.map(e => { return e.key })
+    // Get all the raw data from the provider based on schema key hashes
+    let allRawData = await this.source.getAllData(this.options.address, keyHashes)
+    // Take out null values
+    allRawData = allRawData.filter(e => { return e.value !== null })
+    
+    // Stage results array
+    const results = []
+
+    // Decode the raw data
+    allRawData.forEach(async (e) => {
+      // Get the relevant schema key definition so we know decode type
+      const keySchema = this.options.schema.find(f => {
+        return e.key === f.key
+      })
+      const obj = {}
+      // Add decoded data to results array
+      obj[keySchema.name] = await this._decodeDataByType(keySchema, e.value)
+      results.push(obj)
+    })
+
+    return results
+  }
+
+  // DetermineType
   async _decodeDataByType(schemaElementDefinition, value) {
 
     // TYPE: ARRAY
@@ -135,115 +149,35 @@ export class ERC725 {
 
   }
 
-  async _fetchAllDataFromSource() {
-    const result = await this.source.getDataByEntity(this.options.address)
-    if (this.options.providerType === 'graph' || this.options.providerType === 'graph-ws') {
-      return result.data[Object.keys(result.data)[0]]
-    } else {
-      return result
+  _decodeData(schemaElementDefinition, value) {
+    // Detect valueContent type, and handle case
+    switch (schemaElementDefinition.valueContent.toLowerCase()) {
+      case "string":
+        return web3utils.hexToUtf8(value)
+      case "address":
+        return value
+      case "arraylength":
+        return web3utils.hexToNumber(value)
+      case "keccak256":
+        // we cannot reverse assymetric encryption to check...
+        return value
+      case "hashedasseturi":
+        // TODO: properly decode here
+        return value
+      case "jsonuri":
+        return web3utils.hexToUtf8(value)
+      case "uri":
+        return web3utils.hexToUtf8(value)
+      case "markdown":
+        break;
+      default:
+        break;
     }
-  }
 
-  async _fetchDataFromSource(definition) {
-    
-    const result = await this.source.getEntityDataByKey(this.options.address, definition.key)
-    if (this.options.providerType === 'graph' || this.options.providerType === 'graph-ws') {
-      // NOTE: Asssumes the gql result always has the data returned in the first element..PropTypes.any
-      // Probably not 100% guarantee. TODO: Confirm
-      const res = result.data[Object.keys(result.data)[0]][0].value 
-      return res
-    } else if (this.options.providerType === 'web3' || this.options.providerType === 'web3-ws') {
-      return result
-    } else {
-      // ASSUMES Ethereum RPC...
-    }
-    return result
   }
 
   _getKeyNameHash(name) {
     return web3utils.keccak256(name)
   }
 
-  async getData(key, customSchema) { // optional schemaElement if handling array keyTypes
-    let keyHash
-    // Convert key to hashed version regardless
-    if (key.substr(0,2) !== "0x") {
-      // NOTE: Assumes no plain text names starting with 0x aka zero byte
-      keyHash = this._getKeyNameHash(key)
-    } else {
-      keyHash = key
-    }
-
-    // Get the correct schema key definition
-    let schemaElementDefinition
-    if (!customSchema && this.options.schema) {
-      this.options.schema.forEach(e => {
-        if (e.key === keyHash) {
-          schemaElementDefinition = e
-        }
-      })
-    } else {
-      schemaElementDefinition = customSchema
-    }
-
-    if (!schemaElementDefinition) {
-      return Error('There is no matching key in this schema.')
-    }
-
-    // Get the actual data the data
-    const rawData = await this._fetchDataFromSource(schemaElementDefinition)
-    // Decode and return the data
-    // TODO: Handle multiple same types with loop
-    // TODO: Return raw value from fetch source
-    return this._decodeDataByType(schemaElementDefinition, rawData)
-  }
-
-  async getAllData() {
-    const allRawData = await this._fetchAllDataFromSource()
-    let result = {}
-    // We map by the schema, as this is considered the limit of the data model
-
-    for (let index = 0; index < this.options.schema.length; index++) {
-      const schemaElement = this.options.schema[index]
-      let schemaElementDefinition = null
-      for (let i = 0; i < allRawData.length; i++) {
-        const dataElement = allRawData[i];
-        // If its an array, handle that
-        if (schemaElement.keyType.toLowerCase() === 'array') {
-          /// Set the array key
-          const elementKey = schemaElement.elementKey + web3utils.leftPad(dataElement.key.substr(dataElement.key.length - 32), 32).replace('0x','')
-          // Form new schema schema to check data against
-          schemaElementDefinition = {
-            key: elementKey,
-            keyType: "Singleton",
-            valueContent: schemaElement.elementValueContent,
-            valueType: schemaElement.elementValueType,
-          }
-        } else {
-          // Its not an array
-          schemaElementDefinition = schemaElement
-        }
-
-        // Check if the data is a match with the schema
-        if (dataElement.key === schemaElementDefinition.key) {
-          // decode the data, and add to result
-          const decodedElement = this._decodeData(schemaElementDefinition, dataElement.value)
-          // Special case for arrays
-          if (schemaElement.keyType.toLowerCase() === 'array') { 
-            // Error catch as conditional for simple test for number as the array length, which not needed here
-            try {
-              web3utils.hexToNumber(dataElement.value) // this will fail when anything BUT the arrayLength key
-            } catch (error) {
-              result[schemaElement.name] ? result[schemaElement.name].push(decodedElement) : result[schemaElement.name] = [decodedElement]
-            }
-          } else {
-            result[schemaElementDefinition.name] = decodedElement
-          }
-        }
-
-      }
-
-    }
-    return result
-  }
 }

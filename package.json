@@ -3,9 +3,10 @@
   "version": "0.0.1",
   "description": "Library to interact with ERC725 smart contracts",
   "main": "src/index.js",
+  "type": "module",
   "scripts": {
     "build": "babel src --out-dir=lib",
-    "test": "mocha test/test.js"
+    "test": "mocha test/test.mjs"
   },
   "repository": {
     "type": "git",
@@ -38,6 +39,7 @@
     "babel-preset-es2015": "^6.24.1"
   },
   "dependencies": {
+    "mocha": "^8.2.1",
     "web3-eth-abi": "^1.3.0"
   }
 }
