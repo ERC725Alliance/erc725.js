@@ -30,6 +30,29 @@ export default class GraphSource {
     this.provider = provider
   }
 
+
+  async getData(id, keyHashes) {
+    if (Array.isArray(keyHashes)) {
+      // get by the keys for the address/id
+    } else if (!keyHashes){
+      // get all the data for required fields for the address/id
+      throw new Error('requires at least on field key, or an array of keys')
+    } else {
+
+      // Return the value for the specific key
+      const result = await this.getEntityDataByKey(id,keyHashes)
+      return result.data[Object.keys(result.data)[0]][0].value
+    }
+
+  }
+
+  async getAllData(id) {
+    const result = await this.getDataByEntity(id) 
+    // Return just the relevant data
+    return result.data[Object.keys(result.data)[0]]
+  }
+  
+
   // TODO: remove all app specific to serpate codefile
   // for universal profiles
 
@@ -93,26 +116,6 @@ export default class GraphSource {
     return await this.provider.query({ query: ERC725_QUERY })
   }
 
-  async getAllData(id) {
-    const result = await this.getDataByEntity(id) 
-    // Return just the relevant data
-    return result.data[Object.keys(result.data)[0]]
-  }
-  async getData(id, keyHashes) {
-    if (Array.isArray(keyHashes)) {
-      // get by the keys for the address/id
-    } else if (!keyHashes){
-      // get all the data for required fields for the address/id
-      throw new Error('requires at least on field key, or an array of keys')
-    } else {
-
-      // Return the value for the specific key
-      const result = await this.getEntityDataByKey(id,keyHashes)
-      return result.data[Object.keys(result.data)[0]][0].value
-    }
-
-  }
-  
   async getDataByEntity (entityId) {
     // Get the ERC725 instance kv pairs
     const ERC725_DATA_QUERY = gql`

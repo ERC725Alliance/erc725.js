@@ -146,7 +146,7 @@ class ApolloClient {
 
 describe('erc725.js', function() {
 
-    describe('decode data', function() {
+    describe('Getting data by provider type...', function() {
         mockSchema.forEach(schema => {
           it('with web3.currentProvider', async function() {
               const provider = new HttpProvider()

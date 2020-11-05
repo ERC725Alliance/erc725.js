@@ -103,10 +103,13 @@ export class ERC725 {
       const keySchema = this.options.schema.find(f => {
         return e.key === f.key
       })
-      const obj = {}
-      // Add decoded data to results array
-      obj[keySchema.name] = await this._decodeDataBySchema(keySchema, e.value)
-      results.push(obj)
+      // Array keys will not match, and will be handled in decode method
+      if (keySchema) {
+        const obj = {}
+        // Add decoded data to results array
+        obj[keySchema.name] = await this._decodeDataBySchema(keySchema, e.value)
+        results.push(obj)
+      }
     })
     return results
   }
