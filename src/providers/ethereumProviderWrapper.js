@@ -24,7 +24,7 @@
 // import * as web3utils from 'web3-utils'
 import * as abi from 'web3-eth-abi'
 const web3Abi = abi.default
-import { CONSTANTS } from './constants.js'
+import { CONSTANTS } from '../lib/constants.js'
 
 // QUESTION: ethereum payload does not require 'id'?
 export default class EthereumSource {

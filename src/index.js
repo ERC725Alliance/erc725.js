@@ -23,6 +23,7 @@ import Web3Source from './providers/web3ProviderWrapper.js'
 import EthereumSource from './providers/ethereumProviderWrapper.js'
 
 // TODO: Add encode method
+// TODO: DEBUG: Why is the array handler lagging on providing results (missing await somewhere?)
 
 export class ERC725 {
   constructor(schema, address, provider) {

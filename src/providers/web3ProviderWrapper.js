@@ -24,7 +24,7 @@
 
 // import * as web3utils from 'web3-utils'
 import * as abi from 'web3-eth-abi'
-import { CONSTANTS } from './constants.js'
+import { CONSTANTS } from '../lib/constants.js'
 const web3abi = abi.default
 // Incrementor for params id
 let idCount = 1
