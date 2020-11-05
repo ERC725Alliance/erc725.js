@@ -21,10 +21,10 @@
   This file will handle querying the Ethereum proivder api in accordance with
   implementation of smart contract interfaces of ERC725
 */
-import * as web3utils from 'web3-utils'
+// import * as web3utils from 'web3-utils'
 import * as abi from 'web3-eth-abi'
 const web3abi = abi.default
-import { CONSTANTS } from './constants'
+import { CONSTANTS } from './constants.js'
 
 // QUESTION: ethereum payload does not require 'id'?
 export default class EthereumSource {
@@ -89,8 +89,8 @@ export default class EthereumSource {
     return results
   }
 
-  async _getPayloadData(keyHash) {
-    return CONSTANTS.getData.sig + keyHash.replace('0x','')
+  _getPayloadData(keyHash) {
+    return CONSTANTS.methods.getData.sig + keyHash.replace('0x','')
   }
 
   async _callContract (address, data) {
@@ -98,9 +98,9 @@ export default class EthereumSource {
     const params = [
       {
         to: address,
-        gas: CONSTANTS.getData.gas,
-        gasPrice: CONSTANTS.getData.gasPrice,
-        value: CONSTANTS.getData.value,
+        gas: CONSTANTS.methods.getData.gas,
+        gasPrice: CONSTANTS.methods.getData.gasPrice,
+        value: CONSTANTS.methods.getData.value,
         data: data
       }
     ]

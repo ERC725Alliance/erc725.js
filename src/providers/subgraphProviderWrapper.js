@@ -22,18 +22,20 @@
   in accordance with implementation of datastore in subgraph definition
   TODO: Add link to subgraph definition
 */
-import { ApolloClient, InMemoryCache, createHttpLink, gql, NormalizedCacheObject } from '@apollo/client';
+import { gql } from '@apollo/client';
 
 // TODO: Rename to graphProvider
 export default class GraphSource {
-  constructor(props) {
-    this.apolloClient = new ApolloClient({
-      uri: props.uri,
-      cache: new InMemoryCache(),
-      fetchOptions: {
-        mode: 'no-cors'
-      }
-    })
+  constructor(provider) {
+    // console.log(props.provider)
+    this.provider = provider
+    // this.provider = new ApolloClient({
+    //   uri: props.uri,
+    //   cache: new InMemoryCache(),
+    //   fetchOptions: {
+    //     mode: 'no-cors'
+    //   }
+    // })
   
   }
   // TODO: remove all app specific to serpate codefile
@@ -64,7 +66,7 @@ export default class GraphSource {
       }
     }
     `
-    return await this.apolloClient.query({ query: ERC725_QUERY })
+    return await this.provider.query({ query: ERC725_QUERY })
   }
   
   async getEntitiesList(entityIds, options) {
@@ -82,7 +84,7 @@ export default class GraphSource {
       }
     }
     `
-    return await this.apolloClient.query({ query: ERC725_QUERY })
+    return await this.provider.query({ query: ERC725_QUERY })
   }
   
   
@@ -96,7 +98,7 @@ export default class GraphSource {
         }
       }
     `
-    return await this.apolloClient.query({ query: ERC725_QUERY })
+    return await this.provider.query({ query: ERC725_QUERY })
   }
 
   async getAllData(id) {
@@ -131,7 +133,10 @@ export default class GraphSource {
       }
     }
     `
-    return await this.apolloClient.query({ query: ERC725_DATA_QUERY }) 
+    const result = await this.provider.query({ query: ERC725_DATA_QUERY }) 
+    console.log('query result')
+    console.log(result)
+    return result
   }
 
   async getEntityDataByKey (entityId, keyHash) {
@@ -146,7 +151,10 @@ export default class GraphSource {
       }
     }
     `
-    return await this.apolloClient.query({ query: ERC725_DATA_QUERY }) //TODO: return the value only
+    const result = await this.provider.query({ query: ERC725_DATA_QUERY }) //TODO: return the value only
+    console.log('query result')
+    console.log(result)
+    return result
   }
 
   async getDataByKey(keyHash, options) {
@@ -162,7 +170,10 @@ export default class GraphSource {
       }
     }
     `
-    return await this.apolloClient.query({ query: ERC725_DATA_QUERY }) 
+    const result = await this.provider.query({ query: ERC725_DATA_QUERY }) 
+    console.log('query result')
+    console.log(result)
+    return result
   }
 
 }

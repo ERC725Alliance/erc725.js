@@ -17,10 +17,12 @@
  * @date 2020
  */
 
-import * as web3utils from 'web3-utils'
-import GraphSource from './providers/subgraphProviderWrapper'
-import Web3Source from './providers/web3ProviderWrapper'
-import EthereumSource from './providers/ethereumProviderWrapper'
+// import * as web3utils from 'web3-utils'
+import Web3Utils from 'web3-utils'
+const web3utils = Web3Utils
+import GraphSource from './providers/subgraphProviderWrapper.js'
+import Web3Source from './providers/web3ProviderWrapper.js'
+import EthereumSource from './providers/ethereumProviderWrapper.js'
 
 // TODO: nodescript test
 // TODO: Tests. Node script to all kind of key type, use for unit tests: Npm MOCHA
@@ -39,6 +41,7 @@ import EthereumSource from './providers/ethereumProviderWrapper'
 
 export class ERC725 {
   constructor(schema, address, provider) {
+    // NOTE: These errors will never constiently happen this way properly without type/format checking
     if (!schema) { throw new Error('Missing schema.') } // TODO: Add check for schema format
     if (!address) { throw new Error('Missing address.') } // TODO: check for proper address
     if (!provider) { throw new Error('Missing provider.') }
@@ -52,16 +55,21 @@ export class ERC725 {
     // Check provider types
     const providerName = provider && provider.constructor && provider.constructor.name || null
     
+    console.log('do we have a provider name?!?!?!?')
+    console.log(providerName)
+    console.log(provider)
     if (providerName === 'HttpProvider' || providerName === 'WebsocketProvider' || providerName === 'IpcProvider') {
       this.options.providerType = 'web3'
       this.source = new Web3Source({provider:provider})
-    } else if (provider.type === 'graph') {
+    } else if (providerName === 'ApolloClient' || provider.type === 'graph') {
       // We have a graph node provider
       this.options.providerType = 'graph'
-      this.source = new GraphSource({uri:provider.uri})
+      // this.source = new GraphSource({uri:provider.uri})
+      this.source = new GraphSource(provider)
+
       // TODO: add
       // If no provider name or graph, and doesnt have request, and instead send
-    } else if (!providerName && provider.request) {
+    } else if (provider.request) {
       this.options.providerType = 'ethereum'
       console.log('Detected ethereum type')
       // TODO: Complete support of ethereum/metamask

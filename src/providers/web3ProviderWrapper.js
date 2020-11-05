@@ -25,13 +25,14 @@ let idCount = 1
 
 import * as web3utils from 'web3-utils'
 import * as abi from 'web3-eth-abi'
+import { CONSTANTS } from './constants.js'
 const web3abi = abi.default
 
-const CONSTANTS = {
-  getDataFunctionSignature: '0x54f6127f',
-  dataCountFunctionSignature: '0x5da40c47',
-  allDataKeysFunctionSignature: '0xc559acef'
-}
+// const CONSTANTS = {
+//   getDataFunctionSignature: '0x54f6127f',
+//   dataCountFunctionSignature: '0x5da40c47',
+//   allDataKeysFunctionSignature: '0xc559acef'
+// }
 
 // TODO: rename to web3provider
 // Sho
@@ -41,9 +42,20 @@ export default class Web3Source {
     // this.idCount = 1 // this has to be available to the instance...
   }
 
-  async getData (entityId, keyHash) {
-    const data = CONSTANTS.getDataFunctionSignature + keyHash.replace('0x', '')
-    const result = await this.contractCall(entityId, data)
+  async getData (address, keyHash) {
+    const data = CONSTANTS.methods.getData.sig + keyHash.replace('0x', '')
+    const params = [
+      {
+        to: address,
+        gas: CONSTANTS.methods.getData.gas,
+        gasPrice: CONSTANTS.methods.getData.gasPrice,
+        value: CONSTANTS.methods.getData.value,
+        data: data
+      }
+    ]
+    const result = await this.contractCall(params)
+    console.log("CONTRACT QUERY RESULT RSULT!!!")
+    console.log(result)
     return web3abi.decodeParameter('bytes',result)
   }
 
@@ -53,8 +65,18 @@ export default class Web3Source {
     // TODO: Use the schema as the source of truth.
     let keys
     if (!keyHashes) {
-      const data = CONSTANTS.allDataKeysFunctionSignature + web3utils.padLeft('',32)
-      const allKeys = await this.contractCall(address, data)
+      const data = CONSTANTS.methods.allData.sig + web3utils.padLeft('',32)
+      const params = [
+        {
+          to: address,
+          gas: CONSTANTS.methods.allData.gas,
+          gasPrice: CONSTANTS.methods.allData.gasPrice,
+          value: CONSTANTS.methods.allData.value,
+          data: data
+        }
+
+      ]
+      const allKeys = await this.contractCall(params)
       keys = web3abi.decodeParameter('bytes32[]',allKeys)
     } else {
       keys = keyHashes
@@ -64,8 +86,18 @@ export default class Web3Source {
     
     for (let index = 0; index < keys.length; index++) {
       const key = keys[index];
-      const d = CONSTANTS.getDataFunctionSignature + key.replace('0x','')
-      const res = await this.contractCall(address, d)
+      const data = CONSTANTS.methods.getData.sig + key.replace('0x','')
+      const params = [
+        {
+          to: address,
+          gas: CONSTANTS.methods.getData.gas,
+          gasPrice: CONSTANTS.methods.getData.gasPrice,
+          value: CONSTANTS.methods.getData.value,
+          data: data
+        }
+
+      ]
+      const res = await this.contractCall(params)
       const r = {}
       r.key = key
       r.value = web3abi.decodeParameter('bytes',res)
@@ -75,20 +107,22 @@ export default class Web3Source {
     
   }
 
-  async contractCall (address, data) {
+  async contractCall (params) {
 
     const payload = {
       jsonrpc:"2.0",
       method:"eth_call",
-      params:[
-        {
-          to: address,
-          gas: web3utils.numberToHex(2000000),
-          gasPrice: web3utils.numberToHex(100000000),
-          value: web3utils.numberToHex(0),
-          data: data
-        }
-      ],
+      params: params,
+      // [
+        // {
+        //   to: address,
+        //   gas: web3utils.numberToHex(2000000),
+        //   gasPrice: web3utils.numberToHex(100000000),
+        //   value: web3utils.numberToHex(0),
+        //   data: data
+        // }
+      // ],
+      
       id: idCount++
     }
     // idCount ++
