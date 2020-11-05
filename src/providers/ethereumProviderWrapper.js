@@ -13,7 +13,7 @@
 */
 /**
  * @file providers/ethereumProviderWrapper.js
- * @author Fabian Vogelsteller <fabian@lukso.network>, Robert McLeod <@robertdavid010>
+ * @author Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
  * @date 2020
  */
 
@@ -23,78 +23,35 @@
 */
 // import * as web3utils from 'web3-utils'
 import * as abi from 'web3-eth-abi'
-const web3abi = abi.default
+const web3Abi = abi.default
 import { CONSTANTS } from './constants.js'
 
 // QUESTION: ethereum payload does not require 'id'?
 export default class EthereumSource {
   constructor(props) {
-    this.currentProvider = props.provider
+    this.provider = props.provider
   }
 
-  async getEntityDataByKey(address, key) {
-    console.log('this new module is working?!?!?')
-    return await this.getData(address, key)
-  }
-
-  async getDataByEntity(address, keyHashes) {
-    return await this._fetchAllData(address, keyHashes)
-  }
-
-  async getAllData(address, keyHashes) {
-    // return await this._fetchAllData(address, keyHashes)
-    return await this.getData(address, keyHashes)
-  }
   async getData(address, keys) {
     // Call the method based on the array suppor multiple keys
     if (!Array.isArray(keys)) {
-      console.log('no array here...')
-      return await this._fetchData(address,keys)
+      return await this._fetchData(address, keys)
     } else {
-      return await this._fetchAllData(address, keys)
+      return await this._fetchDataMultiple(address, keys)
+    }
+  }
+
+  async getAllData(address, keys) {
+    if (!keys) {
+      throw Error('Get all data requires an array of keys')
+    } else {
+      return await this._fetchDataMultiple(address, keys)
     }
   }
 
   async _fetchData(address, key) {
-    const d = this._getPayloadData(key)
-    const result = await this._callContract(address, d)
+    const data = CONSTANTS.methods.getData.sig + key.replace('0x','')
 
-    const newResult = await web3abi.decodeParameter('bytes',result)
-    console.log("WHY NO NEW RESULT?!?!?!")
-    console.log(newResult)
-    return newResult
-    // return result
-  }
-
-  async _fetchAllData(address, keyHashes) {
-    const results = []
-    // Must use 'for' instead of 'forEach' to 'await' properly
-    // const data = CONSTANTS.allData.sig + web3utils.padLeft('',32)
-    
-    // const allKeys = await this._callContract(address, data)
-    console.log(keyHashes)
-    const keys = keyHashes
-    // const keys = web3abi.decodeParameter('bytes32[]', allKeys)
-    console.log("WTF?!?!?")
-    for (let index = 0; index < keys.length; index++) {
-      const key = keys[index];
-      const d = this._getPayloadData(key)
-      // const d = CONSTANTS.getDataFunctionSignature + key.replace('0x','')
-      const res = await this._callContract(address, d)
-      const r = {}
-      r.key = key
-      r.value = web3abi.decodeParameter('bytes',res)
-      results.push(r)
-    }
-    return results
-  }
-
-  _getPayloadData(keyHash) {
-    return CONSTANTS.methods.getData.sig + keyHash.replace('0x','')
-  }
-
-  async _callContract (address, data) {
-    console.log('calling contract...')
     const params = [
       {
         to: address,
@@ -104,8 +61,36 @@ export default class EthereumSource {
         data: data
       }
     ]
-    console.log(params)
-    return await this.currentProvider.request({method:'eth_call', params:params})
+    const result = await this._callContract(params)
+    return web3Abi.decodeParameter('bytes',result)
+  }
+
+  async _fetchDataMultiple(address, keys) {
+    const results = []
+    // Must use 'for' instead of 'forEach' to 'await' properly?
+    for (let index = 0; index < keys.length; index++) {
+      const key = keys[index];
+      const data = CONSTANTS.methods.getData.sig + key.replace('0x','')
+      const params = [
+        {
+          to: address,
+          gas: CONSTANTS.methods.getData.gas,
+          gasPrice: CONSTANTS.methods.getData.gasPrice,
+          value: CONSTANTS.methods.getData.value,
+          data: data
+        }
+      ]
+      const res = await this._callContract(params)
+      results.push({
+        key: key,
+        value: web3Abi.decodeParameter('bytes',res)
+      })
+    }
+    return results
+  }
+
+  async _callContract (params) {
+    return await this.provider.request({method:'eth_call', params:params})
   }
 
 }

@@ -19,14 +19,14 @@
   ],
   "authors": [
     {
-      "name": "Fabian Vogelsteller",
-      "email": "fabian@lukso.network",
-      "homepage": "https://github.com/frozeman"
-    },
-    {
       "name": "Robert McLeod",
       "email": "robert@lukso.io",
       "url": "https://github.com/robertdavid010"
+    },
+    {
+      "name": "Fabian Vogelsteller",
+      "email": "fabian@lukso.network",
+      "homepage": "https://github.com/frozeman"
     }
   ],
   "license": "Apache-2.0",

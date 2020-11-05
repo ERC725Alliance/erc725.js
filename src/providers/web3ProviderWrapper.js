@@ -13,7 +13,7 @@
 */
 /**
  * @file dataSrouce/glqApollo.js
- * @author Fabian Vogelsteller <fabian@lukso.network>, Robert McLeod <@robertdavid010>
+ * @author  Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
  * @date 2020
  */
 
@@ -21,25 +21,17 @@
   This file will handle querying the Ethereum web3 rpc based on a given provider
   in accordance with implementation of smart contract interfaces of ERC725
 */
-let idCount = 1
 
-import * as web3utils from 'web3-utils'
+// import * as web3utils from 'web3-utils'
 import * as abi from 'web3-eth-abi'
 import { CONSTANTS } from './constants.js'
 const web3abi = abi.default
+// Incrementor for params id
+let idCount = 1
 
-// const CONSTANTS = {
-//   getDataFunctionSignature: '0x54f6127f',
-//   dataCountFunctionSignature: '0x5da40c47',
-//   allDataKeysFunctionSignature: '0xc559acef'
-// }
-
-// TODO: rename to web3provider
-// Sho
 export default class Web3Source {
   constructor(props) {
-    this.currentProvider = props.provider
-    // this.idCount = 1 // this has to be available to the instance...
+    this.provider = props.provider
   }
 
   async getData (address, keyHash) {
@@ -53,37 +45,12 @@ export default class Web3Source {
         data: data
       }
     ]
-    const result = await this.contractCall(params)
-    console.log("CONTRACT QUERY RESULT RSULT!!!")
-    console.log(result)
+    const result = await this._callContract(params)
     return web3abi.decodeParameter('bytes',result)
   }
 
-  async getAllData (address, keyHashes) {
-    // This gets all the data for an entity
-    // This funtion should get the data form the scheam, not `allKeys`
-    // TODO: Use the schema as the source of truth.
-    let keys
-    if (!keyHashes) {
-      const data = CONSTANTS.methods.allData.sig + web3utils.padLeft('',32)
-      const params = [
-        {
-          to: address,
-          gas: CONSTANTS.methods.allData.gas,
-          gasPrice: CONSTANTS.methods.allData.gasPrice,
-          value: CONSTANTS.methods.allData.value,
-          data: data
-        }
-
-      ]
-      const allKeys = await this.contractCall(params)
-      keys = web3abi.decodeParameter('bytes32[]',allKeys)
-    } else {
-      keys = keyHashes
-    }
-    // const keys = keyHashes
+  async getAllData (address, keys) {
     const results = []
-    
     for (let index = 0; index < keys.length; index++) {
       const key = keys[index];
       const data = CONSTANTS.methods.getData.sig + key.replace('0x','')
@@ -95,60 +62,37 @@ export default class Web3Source {
           value: CONSTANTS.methods.getData.value,
           data: data
         }
-
       ]
-      const res = await this.contractCall(params)
-      const r = {}
-      r.key = key
-      r.value = web3abi.decodeParameter('bytes',res)
-      results.push(r)
+      const res = await this._callContract(params)
+      results.push({
+        key: key,
+        value: web3abi.decodeParameter('bytes',res)
+      })
     }
     return results
     
   }
 
-  async contractCall (params) {
-
+  async _callContract (params) {
     const payload = {
       jsonrpc:"2.0",
       method:"eth_call",
       params: params,
-      // [
-        // {
-        //   to: address,
-        //   gas: web3utils.numberToHex(2000000),
-        //   gasPrice: web3utils.numberToHex(100000000),
-        //   value: web3utils.numberToHex(0),
-        //   data: data
-        // }
-      // ],
-      
       id: idCount++
     }
-    // idCount ++
 
-    if (this.currentProvider && this.currentProvider.request) {
-      return await this.currentProvider.request({method:'eth_call', params:payload.params})
-    } else {
-      // Handle no provmis of old 'send' method
-      const callMethod = new Promise((resolve, reject) => {
-        // The callback to resolve the promise
-        const cb = (e,r) => {
-          if (e) {
-            reject(e)
-          } else {
-            resolve(r.result)
-          }
+    const callMethod = new Promise((resolve, reject) => {
+      // Send old web3 method with callback to resolve promise
+      this.provider.send(payload, (e,r) => {
+        if (e) {
+          reject(e)
+        } else {
+          resolve(r.result)
         }
-        // Make the send call
-        this.currentProvider.send(payload,cb)
-        
       })
-      // Call the promise
-      return await callMethod
-
-    }
-
+    })
+    // Call the promise
+    return await callMethod
 
   }
   

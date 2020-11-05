@@ -12,8 +12,8 @@
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * @file dataSrouce/glqApollo.js
- * @author Fabian Vogelsteller <fabian@lukso.network>, Robert McLeod <@robertdavid010>
+ * @file dataSrouce/subgraphProviderWrapper.js
+ * @author Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
  * @date 2020
  */
 
@@ -27,17 +27,9 @@ import { gql } from '@apollo/client';
 // TODO: Rename to graphProvider
 export default class GraphSource {
   constructor(provider) {
-    // console.log(props.provider)
     this.provider = provider
-    // this.provider = new ApolloClient({
-    //   uri: props.uri,
-    //   cache: new InMemoryCache(),
-    //   fetchOptions: {
-    //     mode: 'no-cors'
-    //   }
-    // })
-  
   }
+
   // TODO: remove all app specific to serpate codefile
   // for universal profiles
 

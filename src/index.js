@@ -13,31 +13,16 @@
 */
 /**
  * @file index.js
- * @author Fabian Vogelsteller <fabian@lukso.network>, Robert McLeod <@robertdavid010>
+ * @author Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
  * @date 2020
  */
 
-// import * as web3utils from 'web3-utils'
 import Web3Utils from 'web3-utils'
-const web3utils = Web3Utils
 import GraphSource from './providers/subgraphProviderWrapper.js'
 import Web3Source from './providers/web3ProviderWrapper.js'
 import EthereumSource from './providers/ethereumProviderWrapper.js'
 
-// TODO: nodescript test
-// TODO: Tests. Node script to all kind of key type, use for unit tests: Npm MOCHA
-// make one schema that tests every single type
-// make mockup provider. to check decoding
-// make test for encode. give key, string, returns encoded hexstring. example handling array is 
-// always returns and array of objects with kv pairs. if no array return the object
-// make test for decode, encode
 // TODO: Add encode method
-
-    // so send a custom provider object for graph
-    // {
-    //   uri: 'string'
-    //   type: 'graphql'
-    // }
 
 export class ERC725 {
   constructor(schema, address, provider) {
@@ -55,27 +40,30 @@ export class ERC725 {
     // Check provider types
     const providerName = provider && provider.constructor && provider.constructor.name || null
     
-    console.log('do we have a provider name?!?!?!?')
-    console.log(providerName)
-    console.log(provider)
+    // CASE: WEB3 PROVIDER
     if (providerName === 'HttpProvider' || providerName === 'WebsocketProvider' || providerName === 'IpcProvider') {
       this.options.providerType = 'web3'
-      this.source = new Web3Source({provider:provider})
-    } else if (providerName === 'ApolloClient' || provider.type === 'graph') {
-      // We have a graph node provider
-      this.options.providerType = 'graph'
-      // this.source = new GraphSource({uri:provider.uri})
-      this.source = new GraphSource(provider)
+      this.provider = new Web3Source({provider:provider})
 
-      // TODO: add
-      // If no provider name or graph, and doesnt have request, and instead send
+    // CASE: GRAPH PROVIDER
+    } else if (providerName === 'ApolloClient' || provider.type === 'graph') {
+      this.options.providerType = 'graph'
+      // TODO: Confirm better is to just use passed in provider
+      // this.provider = new GraphSource({uri:provider.uri})
+      this.provider = new GraphSource(provider)
+
+    // CASE: WEB3 PROVIDER - DEFAULT for no named provider with a 'send' method
+    } else if (!providerName && !provider.request && provider.send) {
+      this.options.providerType = 'web3'
+      this.provider = new Web3Source({provider:provider})
+
+    // CASE: ETHEREUM PROVIDER EIP 1193
     } else if (provider.request) {
       this.options.providerType = 'ethereum'
-      console.log('Detected ethereum type')
+      this.provider = new EthereumSource({provider:provider})
       // TODO: Complete support of ethereum/metamask
-      this.source = new EthereumSource({provider:provider})
 
-      // this.source = new Web3Source({provider:provider})
+    // CASE: Unknown or incorrect provider
     } else {
       throw new Error('Incorrect or unsupported provider')
     }
@@ -83,7 +71,7 @@ export class ERC725 {
   }
 
   async getData(key, customSchema) {
-    // @param key can be either the name or the key in the schema
+    // Param key can be either the name or the key in the schema
     // NOTE: Assumes no plain text names starting with 0x aka zero byte
     const keyHash = (key.substr(0,2) !== "0x") ? this._getKeyNameHash(key) : key
 
@@ -93,20 +81,20 @@ export class ERC725 {
     if (!keySchema) { throw Error('There is no matching key in schema.') }
 
     // Get the raw data
-    const rawData = await this.source.getData(this.options.address, keySchema.key)
+    const rawData = await this.provider.getData(this.options.address, keySchema.key)
     // Decode and return the data
-    return this._decodeDataByType(keySchema, rawData)
+    return this._decodeDataBySchema(keySchema, rawData)
   }
 
   async getAllData() {
     // Get all the key hashes from the schema
     const keyHashes = this.options.schema.map(e => { return e.key })
     // Get all the raw data from the provider based on schema key hashes
-    let allRawData = await this.source.getAllData(this.options.address, keyHashes)
+    let allRawData = await this.provider.getAllData(this.options.address, keyHashes)
     // Take out null values
     allRawData = allRawData.filter(e => { return e.value !== null })
     
-    // Stage results array
+    // Stage results array. Can replace with map()
     const results = []
 
     // Decode the raw data
@@ -117,25 +105,24 @@ export class ERC725 {
       })
       const obj = {}
       // Add decoded data to results array
-      obj[keySchema.name] = await this._decodeDataByType(keySchema, e.value)
+      obj[keySchema.name] = await this._decodeDataBySchema(keySchema, e.value)
       results.push(obj)
     })
-
     return results
   }
 
   // DetermineType
-  async _decodeDataByType(schemaElementDefinition, value) {
+  async _decodeDataBySchema(schemaElementDefinition, value) {
 
     // TYPE: ARRAY
     if (schemaElementDefinition.keyType.toLowerCase() === "array") {
-      // Get the array length first
+      // Handling a schema elemnt of type Arra Get the array length first
       const arrayLength = this._decodeData(schemaElementDefinition, value)
 
       let result = []
       // Construct the schema for each element, and fetch
       for (let index = 0; index < arrayLength; index++) {
-        const elementKey = schemaElementDefinition.elementKey + web3utils.leftPad(web3utils.numberToHex(index), 32).replace('0x','')
+        const elementKey = schemaElementDefinition.elementKey + Web3Utils.leftPad(Web3Utils.numberToHex(index), 32).replace('0x','')
         const schemaElement = {
           key: elementKey,
           keyType: "Singleton",
@@ -161,11 +148,11 @@ export class ERC725 {
     // Detect valueContent type, and handle case
     switch (schemaElementDefinition.valueContent.toLowerCase()) {
       case "string":
-        return web3utils.hexToUtf8(value)
+        return Web3Utils.hexToUtf8(value)
       case "address":
         return value
       case "arraylength":
-        return web3utils.hexToNumber(value)
+        return Web3Utils.hexToNumber(value)
       case "keccak256":
         // we cannot reverse assymetric encryption to check...
         return value
@@ -173,11 +160,12 @@ export class ERC725 {
         // TODO: properly decode here
         return value
       case "jsonuri":
-        return web3utils.hexToUtf8(value)
+        return Web3Utils.hexToUtf8(value)
       case "uri":
-        return web3utils.hexToUtf8(value)
+        return Web3Utils.hexToUtf8(value)
       case "markdown":
-        break;
+        // TODO: which decoding to use here?
+        return value
       default:
         break;
     }
@@ -185,7 +173,7 @@ export class ERC725 {
   }
 
   _getKeyNameHash(name) {
-    return web3utils.keccak256(name)
+    return Web3Utils.keccak256(name)
   }
 
 }
