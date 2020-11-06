@@ -21,35 +21,18 @@
   This file will handle querying the Ethereum proivder api in accordance with
   implementation of smart contract interfaces of ERC725
 */
-// import * as web3utils from 'web3-utils'
+
 import * as abi from 'web3-eth-abi'
-const web3Abi = abi.default
 import { CONSTANTS } from '../lib/constants.js'
-
+const web3Abi = abi.default
 // QUESTION: ethereum payload does not require 'id'?
+
 export default class EthereumSource {
-  constructor(props) {
-    this.provider = props.provider
+  constructor(provider) {
+    this.provider = provider
   }
 
-  async getData(address, keys) {
-    // Call the method based on the array suppor multiple keys
-    if (!Array.isArray(keys)) {
-      return await this._fetchData(address, keys)
-    } else {
-      return await this._fetchDataMultiple(address, keys)
-    }
-  }
-
-  async getAllData(address, keys) {
-    if (!keys) {
-      throw Error('Get all data requires an array of keys')
-    } else {
-      return await this._fetchDataMultiple(address, keys)
-    }
-  }
-
-  async _fetchData(address, key) {
+  async getData(address, key) {
     const data = CONSTANTS.methods.getData.sig + key.replace('0x','')
 
     const params = [
@@ -65,7 +48,7 @@ export default class EthereumSource {
     return web3Abi.decodeParameter('bytes',result)
   }
 
-  async _fetchDataMultiple(address, keys) {
+  async getAllData(address, keys) {
     const results = []
     // Must use 'for' instead of 'forEach' to 'await' properly?
     for (let index = 0; index < keys.length; index++) {

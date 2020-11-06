@@ -44,7 +44,7 @@ export class ERC725 {
     // CASE: WEB3 PROVIDER
     if (providerName === 'HttpProvider' || providerName === 'WebsocketProvider' || providerName === 'IpcProvider') {
       this.options.providerType = 'web3'
-      this.provider = new Web3Source({provider:provider})
+      this.provider = new Web3Source(provider)
 
     // CASE: GRAPH PROVIDER
     } else if (providerName === 'ApolloClient' || provider.type === 'graph') {
@@ -56,12 +56,12 @@ export class ERC725 {
     // CASE: WEB3 PROVIDER - DEFAULT for no named provider with a 'send' method
     } else if (!providerName && !provider.request && provider.send) {
       this.options.providerType = 'web3'
-      this.provider = new Web3Source({provider:provider})
+      this.provider = new Web3Source(provider)
 
     // CASE: ETHEREUM PROVIDER EIP 1193
     } else if (provider.request) {
       this.options.providerType = 'ethereum'
-      this.provider = new EthereumSource({provider:provider})
+      this.provider = new EthereumSource(provider)
       // TODO: Complete support of ethereum/metamask
 
     // CASE: Unknown or incorrect provider

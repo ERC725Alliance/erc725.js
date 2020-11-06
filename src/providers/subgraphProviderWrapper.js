@@ -20,15 +20,14 @@
 /*
   This file will handle querying the graphql sever
   in accordance with implementation of datastore in subgraph definition
-  TODO: Add link to subgraph definition
 */
+
 import { queries } from '../lib/queries.js'
 
 export default class GraphSource {
   constructor(provider) {
     this.provider = provider
   }
-
 
   async getData(id, keys) {
     if (Array.isArray(keys)) {
@@ -39,6 +38,7 @@ export default class GraphSource {
       // Return the value for the specific single key
       const query = queries.getDataByKey(id, keys)
       const result = await this.provider.query({ query: query }) //TODO: return the value only
+      // Single out the first result
       return result.data[Object.keys(result.data)[0]][0].value
     }
 
@@ -48,6 +48,7 @@ export default class GraphSource {
     // TODO: Add support for multiple keys
     const query = queries.getAllData(id)
     const result = await this.provider.query({ query:query })
+    // Return the data query array
     return result.data[Object.keys(result.data)[0]]
   }
 

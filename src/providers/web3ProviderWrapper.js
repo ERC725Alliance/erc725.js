@@ -12,7 +12,7 @@
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * @file dataSrouce/glqApollo.js
+ * @file dataSrouce/web3ProviderWrapper.js
  * @author  Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
  * @date 2020
  */
@@ -22,16 +22,15 @@
   in accordance with implementation of smart contract interfaces of ERC725
 */
 
-// import * as web3utils from 'web3-utils'
 import * as abi from 'web3-eth-abi'
 import { CONSTANTS } from '../lib/constants.js'
 const web3abi = abi.default
-// Incrementor for params id
+// Incrementor for call payload id
 let idCount = 1
 
 export default class Web3Source {
-  constructor(props) {
-    this.provider = props.provider
+  constructor(provider) {
+    this.provider = provider
   }
 
   async getData (address, keyHash) {
