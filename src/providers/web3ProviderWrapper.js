@@ -13,7 +13,7 @@
 */
 /**
  * @file dataSrouce/web3ProviderWrapper.js
- * @author  Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
+ * @author Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
  * @date 2020
  */
 

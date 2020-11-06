@@ -84,27 +84,27 @@ export class ERC725 {
     // Get the raw data
     const rawData = await this.provider.getData(this.options.address, keySchema.key)
     // Decode and return the data
-    return this._decodeDataBySchema(keySchema, rawData)
+    return await this._decodeDataBySchema(keySchema, rawData)
   }
 
   async getAllData() {
     // Get all the key hashes from the schema
-    const keyHashes = this.options.schema.map(e => { return e.key })
+    const keyHashes = await this.options.schema.map(e => { return e.key })
     // Get all the raw data from the provider based on schema key hashes
     let allRawData = await this.provider.getAllData(this.options.address, keyHashes)
-    // Take out null values
-    allRawData = allRawData.filter(e => { return e.value !== null })
+    // Take out null values, since data may not fulfill entire schema
+    allRawData = await allRawData.filter(e => { return e.value !== null })
     
     // Stage results array. Can replace with map()
     const results = []
 
     // Decode the raw data
-    allRawData.forEach(async (e) => {
+    await allRawData.forEach(async (e) => {
       // Get the relevant schema key definition so we know decode type
       const keySchema = this.options.schema.find(f => {
         return e.key === f.key
       })
-      // Array keys will not match, and will be handled in decode method
+      // Array keys will not directly match, and will be handled in decodeBySchema method
       if (keySchema) {
         const obj = {}
         // Add decoded data to results array
@@ -121,7 +121,7 @@ export class ERC725 {
     // TYPE: ARRAY
     if (schemaElementDefinition.keyType.toLowerCase() === "array") {
       // Handling a schema elemnt of type Arra Get the array length first
-      const arrayLength = this._decodeData(schemaElementDefinition, value)
+      const arrayLength = this._decodeKeyValue(schemaElementDefinition, value)
 
       let result = []
       // Construct the schema for each element, and fetch
@@ -133,13 +133,15 @@ export class ERC725 {
           valueContent: schemaElementDefinition.elementValueContent,
           valueType: schemaElementDefinition.elementValueType,
         }
-        result.push(await this.getData(elementKey, schemaElement))
+        const res = await this.getData(elementKey, schemaElement)
+        result.push(res)
+        // result.push(await this.getData(elementKey, schemaElement))
       }
       return result
 
     // TYPE: SINGLETON
     } else if (schemaElementDefinition.keyType.toLowerCase() === "singleton") {
-      return this._decodeData(schemaElementDefinition, value)
+      return this._decodeKeyValue(schemaElementDefinition, value)
 
     // TYPE: UNKNOWN
     } else {
@@ -148,7 +150,7 @@ export class ERC725 {
 
   }
 
-  _decodeData(schemaElementDefinition, value) {
+  _decodeKeyValue(schemaElementDefinition, value) {
     // Detect valueContent type, and handle case
     switch (schemaElementDefinition.valueContent.toLowerCase()) {
       case "string":
