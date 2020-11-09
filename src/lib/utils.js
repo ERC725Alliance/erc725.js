@@ -18,6 +18,7 @@
  */
 
 import Web3Utils from 'web3-utils'
+import { CONSTANTS } from './constants.js'
 
 export const utils = {
 
@@ -51,13 +52,14 @@ export const utils = {
           newSchemaElement = schemaElement
         }
 
-        // Check if the data is a match with the checked 
+        // Check if the data is a match with the checked/moodified schema element
         if (dataElement.key === newSchemaElement.key) {
-          // decode the data, and add to result
+          // Yes, so decode the data, and add to result
           const decodedElement = utils.decodeKeyValue(newSchemaElement, dataElement.value)
-          // Special case for arrays
+          // Handle arrays
           if (schemaElement.keyType.toLowerCase() === 'array') { 
-            // Error catch as conditional for simple test for number as the array length, which not needed here
+            // Error catch as conditional for simple test for number as the array length
+            // which not be included as a key-value in the decoded results (discarded)
             try {
               Web3Utils.hexToNumber(dataElement.value) // this will fail when anything BUT the arrayLength key, and essentially fail silently
             } catch (error) {
@@ -73,6 +75,7 @@ export const utils = {
               }
             }
           } else {
+            // Handle singleton decoded result
             const obj = {}
             obj[newSchemaElement.name] = decodedElement
             results.push(obj)
@@ -91,6 +94,7 @@ export const utils = {
   },
 
   // TODO: This will not function withouth 'this' context of ERC725 class at the moment
+  // since it requires the provider to loop through unknown array keys
   decodeDataBySchema: async (schemaElementDefinition, value) => {
 
     // TYPE: ARRAY
@@ -140,12 +144,49 @@ export const utils = {
         // TODO: properly decode here
         return value
       case "jsonuri":
-        return Web3Utils.hexToUtf8(value)
+        // NOTE: In progress
+        // bytes4(keccak256('hashFunctionName')) + bytes32(jsonHash) + utf8ToHex('ipfs://QmQ2CN2VUdb5nVAz28R47aWP6BjDLPGNJaSBniBuZRs3Jt')
+        // 1. remove 0x + 4 bytes (8chars)
+        const data = value.replace('0x','').substr(8) // remove hash function
+        const jsonHash = Web3Utils.hexToUtf8('0x' + data.substr(0,32)) 
+        const jsonURI = Web3Utils.hexToUtf8('0x' + data.substr(32))
+        // 2. remove next 32 bytes and hexToString it (this is the hash)
+        // 3. decode
+        return {jsonHash, jsonURI}
       case "uri":
         return Web3Utils.hexToUtf8(value)
       case "markdown":
         // TODO: which decoding to use here?
+        return Web3Utils.hexToUtf8(value)
+      default:
+        break;
+    }
+
+  },
+  
+  encodeKeyValue: (schemaElementDefinition, value) => {
+
+    switch (schemaElementDefinition.valueContent.toLowerCase()) {
+      case "string":
+        return Web3Utils.utf8ToHex(value)
+      case "address":
+        return value // No manipulation necessary
+      case "arraylength":
+        return Web3Utils.numberToHex(value)
+      case "keccak256":
+        // we cannot reverse assymetric encryption
         return value
+      case "hashedasseturi":
+        // TODO: properly decode here
+        return value
+      case "jsonuri":
+        // in this case, value will be an object of form: {jsonHash:"{...}", uri:"ipfs://Q..."}
+        const jsonHash = Web3Utils.padLeft(Web3Utils.stringToHex(value.jsonHash),32).replace('0x','')
+        return CONSTANTS.hashFunctions.jsonURI + jsonHash + Web3Utils.utf8ToHex(value.uri).replace('0x','')
+      case "uri":
+        return Web3Utils.utf8ToHex(value)
+      case "markdown":
+        return Web3Utils.utf8ToHex(value)
       default:
         break;
     }

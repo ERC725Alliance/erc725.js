@@ -22,5 +22,9 @@ export const CONSTANTS = {
       value: Web3Utils.numberToHex(0),
     }
 
-  }
+  },
+  hashFunctions:
+    {
+      jsonURI: '0xb7845733', // keccak256
+    },
 }

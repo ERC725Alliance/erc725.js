@@ -1,6 +1,6 @@
 // Tests for the ERC725.js package
 import assert from 'assert'
-import { ERC725 } from '../src/index.js'
+import ERC725 from '../src/index.js'
 import { mockSchema } from './mockSchema.js'
 
 const address = "0x0c03fba782b07bcf810deb3b7f0595024a444f4e"
@@ -11,8 +11,6 @@ class HttpProvider {
     this.returnData = Array.isArray(props.returnData) ? [...props.returnData] : props.returnData
   }
   send(payload, cb) {
-    // const callSig = payload.params[0].data
-    // const schema = mockSchema.find(e => { return e.ethereumCallSig === callSig})
     setTimeout(() => {
       return cb(null, {
         result: (Array.isArray(this.returnData)) ? this.returnData.shift() : this.returnData
@@ -25,9 +23,7 @@ class EthereumProvider {
   constructor(props) {
     this.returnData = Array.isArray(props.returnData) ? [...props.returnData] : props.returnData
   }
-  request(props) {
-    // const callSig = props.params[0].data
-    // const schema = mockSchema.find(e => { return e.ethereumCallSig === callSig})
+  request() {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const result = (Array.isArray(this.returnData)) ? this.returnData.shift() : this.returnData
@@ -53,8 +49,7 @@ class ApolloClient {
     const val = (Array.isArray(this.returnData) && !this.getAll) ? this.returnData.shift() : this.returnData
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        // TODO: Handle reject
-        // we need a flag for get all data
+        // this.getAll flag is used to return different expected query results
         const res = this.getAll ? {data:{mockResults: this.returnData}} : {data:{mockResults:[{key:this.returnKey ,value:val}]}}
         resolve(res)
       }, 200);
@@ -118,7 +113,6 @@ describe('erc725.js', function() {
             allRawData.push(element.returnRawData)
             allGraphData.push({key:element.key ,value:element.returnGraphData})
           }
-
           
         }
 

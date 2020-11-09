@@ -21,12 +21,13 @@ import Web3Utils from 'web3-utils'
 import GraphSource from './providers/subgraphProviderWrapper.js'
 import Web3Source from './providers/web3ProviderWrapper.js'
 import EthereumSource from './providers/ethereumProviderWrapper.js'
-import { utils } from './lib/utils.js'
+import { utils as Utils } from './lib/utils.js'
+export const utils = Utils
 
 // TODO: Add encode method
 // TODO: DEBUG: Why is the array handler lagging on providing results (missing await somewhere?)
 
-export class ERC725 {
+export default class ERC725 {
   constructor(schema, address, provider) {
     // NOTE: These errors will never constiently happen this way properly without type/format checking
     if (!schema) { throw new Error('Missing schema.') } // TODO: Add check for schema format
@@ -102,11 +103,8 @@ export class ERC725 {
     // Stage results array. Can replace with map()
 
     if (this.options.providerType === 'graph') {
-      console.log("decoding full dataset with util method!!!!!!!")
-      // obj[keySchema.name] = await utils.decodeByData(keySchema, e.value)
-      const res = await utils.decodeAllData(this.options.schema, allRawData)
-      console.log(res)
-      return res
+      // expects all key/values returned from graph query
+      return utils.decodeAllData(this.options.schema, allRawData)
     } else {
       const results = []
       for (let i = 0; i < allRawData.length; i++) {
@@ -120,7 +118,6 @@ export class ERC725 {
         if (keySchema) {
           const obj = {}
           // Add decoded data to results array
-          // Check if graph, since graph returns all (even nested array) keys. Then we can use decodeByData()
           obj[keySchema.name] = await this._decodeDataBySchema(keySchema, e.value)
           results.push(obj)
         }
