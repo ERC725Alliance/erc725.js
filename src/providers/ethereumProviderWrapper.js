@@ -25,11 +25,11 @@
 import * as abi from 'web3-eth-abi'
 import { CONSTANTS } from '../lib/constants.js'
 const web3Abi = abi.default
-// QUESTION: ethereum payload does not require 'id'?
 
 export default class EthereumSource {
-  constructor(provider) {
+  constructor(provider, deprecated) {
     this.provider = provider
+    this.deprecated = (deprecated === 'deprecated')
   }
 
   async getData(address, key) {
@@ -45,35 +45,25 @@ export default class EthereumSource {
       }
     ]
     const result = await this._callContract(params)
-    return web3Abi.decodeParameter('bytes',result)
+    return web3Abi.decodeParameter('bytes', (this.deprecated ? result.result : result))
   }
 
   async getAllData(address, keys) {
     const results = []
-    // Must use 'for' instead of 'forEach' to 'await' properly?
+    
     for (let index = 0; index < keys.length; index++) {
-      const key = keys[index];
-      const data = CONSTANTS.methods.getData.sig + key.replace('0x','')
-      const params = [
-        {
-          to: address,
-          gas: CONSTANTS.methods.getData.gas,
-          gasPrice: CONSTANTS.methods.getData.gasPrice,
-          value: CONSTANTS.methods.getData.value,
-          data: data
-        }
-      ]
-      const res = await this._callContract(params)
       results.push({
-        key: key,
-        value: web3Abi.decodeParameter('bytes',res)
+        key: keys[index],
+        value: await this.getData(address, keys[index])
       })
     }
     return results
   }
 
   async _callContract (params) {
-    return await this.provider.request({method:'eth_call', params:params})
+    return this.deprecated
+      ? await this.provider.send('eth_call', params)
+      : await this.provider.request({method:'eth_call', params:params})
   }
 
 }

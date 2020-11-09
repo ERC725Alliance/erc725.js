@@ -21,6 +21,7 @@ import Web3Utils from 'web3-utils'
 import GraphSource from './providers/subgraphProviderWrapper.js'
 import Web3Source from './providers/web3ProviderWrapper.js'
 import EthereumSource from './providers/ethereumProviderWrapper.js'
+import { utils } from './lib/utils.js'
 
 // TODO: Add encode method
 // TODO: DEBUG: Why is the array handler lagging on providing results (missing await somewhere?)
@@ -53,16 +54,16 @@ export class ERC725 {
       // this.provider = new GraphSource({uri:provider.uri})
       this.provider = new GraphSource(provider)
 
-    // CASE: WEB3 PROVIDER - DEFAULT for no named provider with a 'send' method
+    // CASE: OLD WEB3 PROVIDER - no named provider only with a 'send' method
     } else if (!providerName && !provider.request && provider.send) {
-      this.options.providerType = 'web3'
-      this.provider = new Web3Source(provider)
+      // THis is for older metamask
+      this.options.providerType = 'ethereum-deprecated'
+      this.provider = new EthereumSource(provider, 'deprecated')
 
     // CASE: ETHEREUM PROVIDER EIP 1193
     } else if (provider.request) {
       this.options.providerType = 'ethereum'
       this.provider = new EthereumSource(provider)
-      // TODO: Complete support of ethereum/metamask
 
     // CASE: Unknown or incorrect provider
     } else {
@@ -74,7 +75,8 @@ export class ERC725 {
   async getData(key, customSchema) {
     // Param key can be either the name or the key in the schema
     // NOTE: Assumes no plain text names starting with 0x aka zero byte
-    const keyHash = (key.substr(0,2) !== "0x") ? this._getKeyNameHash(key) : key
+    // const keyHash = (key.substr(0,2) !== "0x") ? this._getKeyNameHash(key) : key
+    const keyHash = (key.substr(0,2) !== "0x") ? utils.encodeKeyName(key) : key
 
     // Get the correct schema key definition if its not passed as a parameter
     const keySchema = (!customSchema) ? this.options.schema.find(f => { return keyHash === f.key }) : customSchema
@@ -82,7 +84,9 @@ export class ERC725 {
     if (!keySchema) { throw Error('There is no matching key in schema.') }
 
     // Get the raw data
+    console.log('getting rawData from source')
     const rawData = await this.provider.getData(this.options.address, keySchema.key)
+    console.log('GOT raw data from source...')
     // Decode and return the data
     return await this._decodeDataBySchema(keySchema, rawData)
   }
@@ -96,23 +100,37 @@ export class ERC725 {
     allRawData = await allRawData.filter(e => { return e.value !== null })
     
     // Stage results array. Can replace with map()
-    const results = []
 
-    // Decode the raw data
-    await allRawData.forEach(async (e) => {
-      // Get the relevant schema key definition so we know decode type
-      const keySchema = this.options.schema.find(f => {
-        return e.key === f.key
-      })
-      // Array keys will not directly match, and will be handled in decodeBySchema method
-      if (keySchema) {
-        const obj = {}
-        // Add decoded data to results array
-        obj[keySchema.name] = await this._decodeDataBySchema(keySchema, e.value)
-        results.push(obj)
+    if (this.options.providerType === 'graph') {
+      console.log("decoding full dataset with util method!!!!!!!")
+      // obj[keySchema.name] = await utils.decodeByData(keySchema, e.value)
+      const res = await utils.decodeAllData(this.options.schema, allRawData)
+      console.log(res)
+      return res
+    } else {
+      const results = []
+      for (let i = 0; i < allRawData.length; i++) {
+        const e = allRawData[i];
+
+        const keySchema = this.options.schema.find(f => {
+          return e.key === f.key
+        })
+        // Array keys may not directly match, and will be handled in decodeBySchema if matched
+        // Nulls & mismatches ignored
+        if (keySchema) {
+          const obj = {}
+          // Add decoded data to results array
+          // Check if graph, since graph returns all (even nested array) keys. Then we can use decodeByData()
+          obj[keySchema.name] = await this._decodeDataBySchema(keySchema, e.value)
+          results.push(obj)
+        }
+        
       }
-    })
-    return results
+      console.log('full results from getAllData')
+      console.log(results)
+      return results
+    }
+
   }
 
   // DetermineType
@@ -121,7 +139,7 @@ export class ERC725 {
     // TYPE: ARRAY
     if (schemaElementDefinition.keyType.toLowerCase() === "array") {
       // Handling a schema elemnt of type Arra Get the array length first
-      const arrayLength = this._decodeKeyValue(schemaElementDefinition, value)
+      const arrayLength = utils.decodeKeyValue(schemaElementDefinition, value)
 
       let result = []
       // Construct the schema for each element, and fetch
@@ -133,53 +151,20 @@ export class ERC725 {
           valueContent: schemaElementDefinition.elementValueContent,
           valueType: schemaElementDefinition.elementValueType,
         }
-        const res = await this.getData(elementKey, schemaElement)
-        result.push(res)
-        // result.push(await this.getData(elementKey, schemaElement))
+        result.push(await this.getData(elementKey, schemaElement))
       }
       return result
 
     // TYPE: SINGLETON
     } else if (schemaElementDefinition.keyType.toLowerCase() === "singleton") {
-      return this._decodeKeyValue(schemaElementDefinition, value)
+      // return this._decodeKeyValue(schemaElementDefinition, value)
+      return utils.decodeKeyValue(schemaElementDefinition, value)
 
     // TYPE: UNKNOWN
     } else {
       return Error('There is no recognized keyType for this key.')
     }
 
-  }
-
-  _decodeKeyValue(schemaElementDefinition, value) {
-    // Detect valueContent type, and handle case
-    switch (schemaElementDefinition.valueContent.toLowerCase()) {
-      case "string":
-        return Web3Utils.hexToUtf8(value)
-      case "address":
-        return value
-      case "arraylength":
-        return Web3Utils.hexToNumber(value)
-      case "keccak256":
-        // we cannot reverse assymetric encryption to check...
-        return value
-      case "hashedasseturi":
-        // TODO: properly decode here
-        return value
-      case "jsonuri":
-        return Web3Utils.hexToUtf8(value)
-      case "uri":
-        return Web3Utils.hexToUtf8(value)
-      case "markdown":
-        // TODO: which decoding to use here?
-        return value
-      default:
-        break;
-    }
-
-  }
-
-  _getKeyNameHash(name) {
-    return Web3Utils.keccak256(name)
   }
 
 }

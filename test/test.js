@@ -1,49 +1,62 @@
 // Tests for the ERC725.js package
 import assert from 'assert'
 import { ERC725 } from '../src/index.js'
-import { mockData } from './mockData.js'
 import { mockSchema } from './mockSchema.js'
-
-// make one schema that tests every single type
-// make mockup provider. to check decoding
-// make test for encode. give key, string, returns encoded hexstring. example handling array is 
-// always returns and array of objects with kv pairs. if no array return the object
-// make test for decode, encode
 
 const address = "0x0c03fba782b07bcf810deb3b7f0595024a444f4e"
 
 class HttpProvider {
+  constructor(props) {
+    // Deconstruct to create local copy of array
+    this.returnData = Array.isArray(props.returnData) ? [...props.returnData] : props.returnData
+  }
   send(payload, cb) {
-    const callSig = payload.params[0].data
-    const schema = mockSchema.find(e => { return e.ethereumCallSig === callSig})
+    // const callSig = payload.params[0].data
+    // const schema = mockSchema.find(e => { return e.ethereumCallSig === callSig})
     setTimeout(() => {
-      return cb(null, {result:schema.ethereumRawData})
+      return cb(null, {
+        result: (Array.isArray(this.returnData)) ? this.returnData.shift() : this.returnData
+      })
     }, 200);
   }
 }
 
-const EthereumProvider = {
+class EthereumProvider {
+  constructor(props) {
+    this.returnData = Array.isArray(props.returnData) ? [...props.returnData] : props.returnData
+  }
   request(props) {
-    const callSig = props.params[0].data
-    const schema = mockSchema.find(e => { return e.ethereumCallSig === callSig})
+    // const callSig = props.params[0].data
+    // const schema = mockSchema.find(e => { return e.ethereumCallSig === callSig})
     return new Promise((resolve, reject) => {
       setTimeout(() => {
+        const result = (Array.isArray(this.returnData)) ? this.returnData.shift() : this.returnData
         // TODO: Handle reject
-        resolve(schema.ethereumRawData)
+        resolve(result)
       }, 200);
     })
   }
 }
 
 class ApolloClient {
+  constructor(props) {
+    // mock data
+    this.returnData = props.returnData
+    this.returnKey = props.returnKey
+    this.getAll = (props.getAll)
+  }
   query(props) {
-    const fieldKey = props.query.definitions[0].selectionSet.selections[0].arguments[0].value.fields[1].value // this gives the field key in query
-    const schema = mockSchema.find(e => { return e.key === fieldKey.value})
-    const data = mockData.find(e => { return e.key === schema.key })
+    // const fieldKey = props.query.definitions[0].selectionSet.selections[0].arguments[0].value.fields[1].value // this gives the field key in query
+    // const schema = mockSchema.find(e => { return e.key === fieldKey.value})
+    // const data = mockData.find(e => { return e.key === schema.key })
+
+    const val = (Array.isArray(this.returnData) && !this.getAll) ? this.returnData.shift() : this.returnData
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         // TODO: Handle reject
-        resolve({data:{resultData:[{key:schema.key,value:data.value}]}})
+        // we need a flag for get all data
+        const res = this.getAll ? {data:{mockResults: this.returnData}} : {data:{mockResults:[{key:this.returnKey ,value:val}]}}
+        resolve(res)
       }, 200);
     })
   }
@@ -51,52 +64,94 @@ class ApolloClient {
 
 describe('erc725.js', function() {
 
-    describe('Getting data by provider type...', function() {
-        mockSchema.forEach(schema => {
-          it('with web3.currentProvider', async function() {
-              const provider = new HttpProvider()
-              const erc725 = new ERC725(mockSchema, address, provider)
-              const result = await erc725.getData(schema.key)
-              assert.strictEqual(result, schema.expectedResult)
+    describe('Getting single data by provider and schema type', function() {
+        mockSchema.forEach(schemaElement => {
 
-//               // getAllData
-//               // const data = erc725.getAllData()
-//               // assert.equal(_.find(data, ()=>{}), expectedResult)
-              
-          })
-          it('with ethereumProvider EIP 1193', async function() {
-              const provider = EthereumProvider
-              const erc725 = new ERC725(mockSchema, address, provider)
-              const result = await erc725.getData(schema.key)
-              assert.strictEqual(result, schema.expectedResult)
+            it('with web3.currentProvider', async () => {
+                const provider = new HttpProvider({returnData:schemaElement.returnRawData})
+                const erc725 = new ERC725(mockSchema, address, provider)
+                const result = await erc725.getData(schemaElement.key)
+                assert.deepStrictEqual(result, schemaElement.expectedResult)
+            })
 
-              // getAllData
-              // const data = erc725.getAllData()
-              // assert.equal(_.find(data, ()=>{}), expectedResult)
-          })
-          it('with apollo graph provider', async function() {
-              const provider = new ApolloClient()
-              const erc725 = new ERC725(mockSchema, address, provider)
-              const result = await erc725.getData(schema.key)
-              assert.strictEqual(result, schema.expectedResult)
+            it('with ethereumProvider EIP 1193', async () => {
+                const provider = new EthereumProvider({returnData:schemaElement.returnRawData})
+                const erc725 = new ERC725(mockSchema, address, provider)
+                const result = await erc725.getData(schemaElement.key)
+                assert.deepStrictEqual(result, schemaElement.expectedResult)
+            })
 
-              // getAllData
-              // const data = erc725.getAllData()
-              // assert.equal(_.find(data, ()=>{}), mockSchema.expectedResult)
-          })
+            it('with apollo graph provider', async () => {
+                const provider = new ApolloClient({returnKey:schemaElement.key, returnData: schemaElement.returnGraphData})
+                const erc725 = new ERC725(mockSchema, address, provider)
+                const result = await erc725.getData(schemaElement.key)
+                assert.deepStrictEqual(result, schemaElement.expectedResult)
+            })
 
-//         })
-
-//         // it('with decodeData', function() {
-
-//         //     const erc725 = new ERC725(erc726Address, schema, {})
-//         //     assert.equal(erc725.decodeData(key, mockDataGraphProvider), expectedResult)
-//         // })
-//         // it('with encodeData', function() {
-
-//         //     const erc725 = new ERC725(erc726Address, schema, {})
-//         //     assert.equal(erc725.encodeData(key, mockDataGraphProvider), expectedResult)
         })
         
     })
+
+    describe('Getting all data by provider', function() {
+        // Construct the full return object....
+        const fullResults = mockSchema.map(e => {
+          const obj = {}
+          obj[e.name] = e.expectedResult
+          return obj
+        })
+
+        // Construct simluated raw data result
+        const allRawData = []
+        const allGraphData = []
+        for (let index = 0; index < mockSchema.length; index++) {
+          const element = mockSchema[index];
+          // if is array push data
+          if (element.keyType === 'Array') {
+            element.returnRawData.forEach(e => {
+              allRawData.push(e)
+            })
+            element.returnGraphData.forEach(e => {
+              // push as objects to simulate graph query result
+              allGraphData.push({key:element.key ,value:e})
+            })
+          } else {
+            allRawData.push(element.returnRawData)
+            allGraphData.push({key:element.key ,value:element.returnGraphData})
+          }
+
+          
+        }
+
+        it('with web3.currentProvider', async () => {
+            const provider = new HttpProvider({returnData:allRawData})
+            const erc725 = new ERC725(mockSchema, address, provider)
+            const result = await erc725.getAllData()
+            assert.deepStrictEqual(result, fullResults)
+        })
+        it('with ethereumProvider EIP 1193', async () => {
+            const provider = new EthereumProvider({returnData:allRawData})
+            const erc725 = new ERC725(mockSchema, address, provider)
+            const result = await erc725.getAllData()
+            assert.deepStrictEqual(result, fullResults)
+        })
+        it('with apollo client', async () => {
+            const provider = new ApolloClient({returnKey:'test', returnData: allGraphData, getAll:true})
+            const erc725 = new ERC725(mockSchema, address, provider)
+            const result = await erc725.getAllData()
+            assert.deepStrictEqual(result, fullResults)
+        })
+      
+    })
 })
+
+
+// make test for decode/encode. give key, string, returns encoded hexstring. example handling array is 
+
+        // const allRawData = mockSchema.map(e => {
+        //   // check for nested array
+
+        //   return e.returnRawData
+        // })
+        // const allGraphData = mockSchema.map(e => {
+        //   // check for nested array
+        // })

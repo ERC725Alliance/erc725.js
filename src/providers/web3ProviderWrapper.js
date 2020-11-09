@@ -25,7 +25,6 @@
 import * as abi from 'web3-eth-abi'
 import { CONSTANTS } from '../lib/constants.js'
 const web3abi = abi.default
-// Incrementor for call payload id
 let idCount = 1
 
 export default class Web3Source {
@@ -45,27 +44,19 @@ export default class Web3Source {
       }
     ]
     const result = await this._callContract(params)
+    console.log('raw data for:', keyHash)
+    console.log(result)
     return web3abi.decodeParameter('bytes',result)
   }
 
   async getAllData (address, keys) {
     const results = []
     for (let index = 0; index < keys.length; index++) {
-      const key = keys[index];
-      const data = CONSTANTS.methods.getData.sig + key.replace('0x','')
-      const params = [
-        {
-          to: address,
-          gas: CONSTANTS.methods.getData.gas,
-          gasPrice: CONSTANTS.methods.getData.gasPrice,
-          value: CONSTANTS.methods.getData.value,
-          data: data
-        }
-      ]
-      const res = await this._callContract(params)
+      // const key = keys[index];
+      const theValue = await this.getData(address, keys[index]) 
       results.push({
-        key: key,
-        value: web3abi.decodeParameter('bytes',res)
+        key: keys[index],
+        value: theValue
       })
     }
     return results
