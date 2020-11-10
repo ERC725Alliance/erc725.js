@@ -44,9 +44,6 @@ export const utils = {
             valueType: schemaElement.elementValueType,
           }
 
-
-
-
         } else {
           // Its not an array, so add the single element
           newSchemaElement = schemaElement
@@ -82,19 +79,16 @@ export const utils = {
           }
         }
 
-
-
-
       }
 
     }
 
     return results
-
   },
 
-  // TODO: This will not function withouth 'this' context of ERC725 class at the moment
+  // NOTE: This will not function withouth 'this' context of ERC725 class at the moment
   // since it requires the provider to loop through unknown array keys
+  // TODO: Make work with ERC725 class instance provider
   decodeDataBySchema: async (schemaElementDefinition, value) => {
 
     // TYPE: ARRAY
@@ -141,22 +135,18 @@ export const utils = {
         // we cannot reverse assymetric encryption to check...
         return value
       case "hashedasseturi":
-        // TODO: properly decode here
-        return value
+        const assetData = value.replace('0x','').substr(8) // remove function hash
+        const assetHash = '0x' + assetData.substr(0,64) // get assetHash
+        const assetURI = Web3Utils.hexToUtf8('0x' + assetData.substr(64)) // Get remainder as URI
+        return {assetHash, assetURI}
       case "jsonuri":
-        // NOTE: In progress
-        // bytes4(keccak256('hashFunctionName')) + bytes32(jsonHash) + utf8ToHex('ipfs://QmQ2CN2VUdb5nVAz28R47aWP6BjDLPGNJaSBniBuZRs3Jt')
-        // 1. remove 0x + 4 bytes (8chars)
-        const data = value.replace('0x','').substr(8) // remove hash function
-        const jsonHash = Web3Utils.hexToUtf8('0x' + data.substr(0,32)) 
-        const jsonURI = Web3Utils.hexToUtf8('0x' + data.substr(32))
-        // 2. remove next 32 bytes and hexToString it (this is the hash)
-        // 3. decode
+        const encoodedData = value.replace('0x','').substr(8) // remove function hash
+        const jsonHash = '0x' + encoodedData.substr(0,64) // Get jsonHash
+        const jsonURI = Web3Utils.hexToUtf8('0x' + encoodedData.substr(64)) // Get remainder as URI
         return {jsonHash, jsonURI}
       case "uri":
         return Web3Utils.hexToUtf8(value)
       case "markdown":
-        // TODO: which decoding to use here?
         return Web3Utils.hexToUtf8(value)
       default:
         break;
@@ -174,15 +164,15 @@ export const utils = {
       case "arraylength":
         return Web3Utils.numberToHex(value)
       case "keccak256":
-        // we cannot reverse assymetric encryption
-        return value
+        return Web3Utils.keccak256(value) // will do the hashing. Is this appropriate with other patterns?
       case "hashedasseturi":
-        // TODO: properly decode here
-        return value
+        console.log('encoding hashedAssetUri')
+        const assetData = Web3Utils.padLeft(value.assetHash,32).replace('0x','')
+        return CONSTANTS.hashFunctions.jsonURI + assetData + Web3Utils.utf8ToHex(value.uri).replace('0x','')
       case "jsonuri":
-        // in this case, value will be an object of form: {jsonHash:"{...}", uri:"ipfs://Q..."}
-        const jsonHash = Web3Utils.padLeft(Web3Utils.stringToHex(value.jsonHash),32).replace('0x','')
-        return CONSTANTS.hashFunctions.jsonURI + jsonHash + Web3Utils.utf8ToHex(value.uri).replace('0x','')
+        // TODO: Support hashFUnction constant
+        const jsonData = Web3Utils.padLeft(value.jsonHash,32).replace('0x','')
+        return CONSTANTS.hashFunctions.jsonURI + jsonData + Web3Utils.utf8ToHex(value.uri).replace('0x','')
       case "uri":
         return Web3Utils.utf8ToHex(value)
       case "markdown":

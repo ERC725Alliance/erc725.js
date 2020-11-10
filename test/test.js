@@ -15,7 +15,7 @@ class HttpProvider {
       return cb(null, {
         result: (Array.isArray(this.returnData)) ? this.returnData.shift() : this.returnData
       })
-    }, 200);
+    }, 100);
   }
 }
 
@@ -29,7 +29,7 @@ class EthereumProvider {
         const result = (Array.isArray(this.returnData)) ? this.returnData.shift() : this.returnData
         // TODO: Handle reject
         resolve(result)
-      }, 200);
+      }, 100);
     })
   }
 }
@@ -52,7 +52,7 @@ class ApolloClient {
         // this.getAll flag is used to return different expected query results
         const res = this.getAll ? {data:{mockResults: this.returnData}} : {data:{mockResults:[{key:this.returnKey ,value:val}]}}
         resolve(res)
-      }, 200);
+      }, 100);
     })
   }
 }
