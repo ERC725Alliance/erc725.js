@@ -89,38 +89,65 @@ export const utils = {
   // NOTE: This will not function withouth 'this' context of ERC725 class at the moment
   // since it requires the provider to loop through unknown array keys
   // TODO: Make work with ERC725 class instance provider
-  decodeDataBySchema: async (schemaElementDefinition, value) => {
+  // decodeDataBySchema: async (schemaElementDefinition, value) => {
 
-    // TYPE: ARRAY
-    if (schemaElementDefinition.keyType.toLowerCase() === "array") {
-      // Handling a schema elemnt of type Arra Get the array length first
-      const arrayLength = this.decodeKeyValue(schemaElementDefinition, value)
+  //   // TYPE: ARRAY
+  //   if (schemaElementDefinition.keyType.toLowerCase() === "array") {
+  //     // Handling a schema elemnt of type Arra Get the array length first
+  //     const arrayLength = this.decodeKeyValue(schemaElementDefinition, value)
 
-      let result = []
-      // Construct the schema for each element, and fetch
-      for (let index = 0; index < arrayLength; index++) {
-        const elementKey = schemaElementDefinition.elementKey + Web3Utils.leftPad(Web3Utils.numberToHex(index), 32).replace('0x','')
-        const schemaElement = {
-          key: elementKey,
-          keyType: "Singleton",
-          valueContent: schemaElementDefinition.elementValueContent,
-          valueType: schemaElementDefinition.elementValueType,
-        }
-        // TODO: This may never really work here because it needs the main class 'this'
-        result.push(await this.getData(elementKey, schemaElement))
-      }
-      return result
+  //     let result = []
+  //     // Construct the schema for each element, and fetch
+  //     for (let index = 0; index < arrayLength; index++) {
+  //       const elementKey = schemaElementDefinition.elementKey + Web3Utils.leftPad(Web3Utils.numberToHex(index), 32).replace('0x','')
+  //       const schemaElement = {
+  //         key: elementKey,
+  //         keyType: "Singleton",
+  //         valueContent: schemaElementDefinition.elementValueContent,
+  //         valueType: schemaElementDefinition.elementValueType,
+  //       }
+  //       // TODO: This may never really work here because it needs the main class 'this'
+  //       result.push(await this.getData(elementKey, schemaElement))
+  //     }
+  //     return result
 
-    // TYPE: SINGLETON
-    } else if (schemaElementDefinition.keyType.toLowerCase() === "singleton") {
-      return this.decodeKeyValue(schemaElementDefinition, value)
+  //   // TYPE: SINGLETON
+  //   } else if (schemaElementDefinition.keyType.toLowerCase() === "singleton") {
+  //     return this.decodeKeyValue(schemaElementDefinition, value)
 
-    // TYPE: UNKNOWN
-    } else {
-      return Error('There is no recognized keyType for this key.')
-    }
+  //   // TYPE: UNKNOWN
+  //   } else {
+  //     return Error('There is no recognized keyType for this key.')
+  //   }
 
-  },
+  // },
+  // TODO: ass encodeAllData function
+
+  // 
+  // encodeAllData: (schema, data) => {
+  //   const results = []
+  //   // NOTE: This requires properly formatted input data. id. nested objects/arrays etc are properly arranged as per the schema
+  //   // 1. loop through data // we do this first because it can contain array keys as well
+  //   for (let index = 0; index < data.length; index++) {
+  //     const dataElement = data[index];
+
+  //     // 2. Find schema by data
+  //     // NOTE: Each data element should have an object with a single key, with that key being the schema field name
+  //     const objKey = Object.keys(dataElement)[0]
+  //     const schemaElement = schema.find(e => { return e.name === Object.keys(dataElement)[0]})
+
+  //     // 2.1 test to see if matching with an array '[]' key
+  //     if (objKey.substr(objKey.length - 2 ) === '[]') {
+  //       // this is an array
+  //       results.push(dataElement[objKey].map(e => {}))
+  //     }
+  //     results.push(utils.encodeKeyValue(dataElement[schemaElement.name]))
+
+      
+
+  //   }
+  //   // 3. encode data by schema types
+  // },
 
   decodeKeyValue : (schemaElementDefinition, value) => {
     // Detect valueContent type, and handle case
@@ -132,18 +159,13 @@ export const utils = {
       case "arraylength":
         return Web3Utils.hexToNumber(value)
       case "keccak256":
-        // we cannot reverse assymetric encryption to check...
         return value
       case "hashedasseturi":
-        const assetData = value.replace('0x','').substr(8) // remove function hash
-        const assetHash = '0x' + assetData.substr(0,64) // get assetHash
-        const assetURI = Web3Utils.hexToUtf8('0x' + assetData.substr(64)) // Get remainder as URI
-        return {assetHash, assetURI}
+        const assetResult = utils._decodeDataSourceWithHash(value)
+        return {hashFunction: assetResult.hashFunction, assetHash: assetResult.dataHash, assetURI: assetResult.dataSource}
       case "jsonuri":
-        const encoodedData = value.replace('0x','').substr(8) // remove function hash
-        const jsonHash = '0x' + encoodedData.substr(0,64) // Get jsonHash
-        const jsonURI = Web3Utils.hexToUtf8('0x' + encoodedData.substr(64)) // Get remainder as URI
-        return {jsonHash, jsonURI}
+        const jsonResult = utils._decodeDataSourceWithHash(value)
+        return { hashFunction: jsonResult.hashFunction, jsonHash: jsonResult.dataHash, jsonURI: jsonResult.dataSource}
       case "uri":
         return Web3Utils.hexToUtf8(value)
       case "markdown":
@@ -155,7 +177,7 @@ export const utils = {
   },
   
   encodeKeyValue: (schemaElementDefinition, value) => {
-
+    // @param value: can contain single value, or obj as required by spec
     switch (schemaElementDefinition.valueContent.toLowerCase()) {
       case "string":
         return Web3Utils.utf8ToHex(value)
@@ -166,13 +188,15 @@ export const utils = {
       case "keccak256":
         return Web3Utils.keccak256(value) // will do the hashing. Is this appropriate with other patterns?
       case "hashedasseturi":
-        console.log('encoding hashedAssetUri')
+        // the hash function method name has to be passed in through 'value'
         const assetData = Web3Utils.padLeft(value.assetHash,32).replace('0x','')
-        return CONSTANTS.hashFunctions.jsonURI + assetData + Web3Utils.utf8ToHex(value.uri).replace('0x','')
+        const assetHashFunction = CONSTANTS.hashFunctions.find(e => { return e.name === value.hashFunction || e.sig === value.hashFunction })
+        return assetHashFunction + assetData + Web3Utils.utf8ToHex(value.uri).replace('0x','')
       case "jsonuri":
-        // TODO: Support hashFUnction constant
+        // the hash function method name has to be passed in through 'value'
         const jsonData = Web3Utils.padLeft(value.jsonHash,32).replace('0x','')
-        return CONSTANTS.hashFunctions.jsonURI + jsonData + Web3Utils.utf8ToHex(value.uri).replace('0x','')
+        const jsonHashFunction = CONSTANTS.hashFunctions.find(e => { return e.name === value.hashFunction || e.sig === value.hashFunction })
+        return jsonHashFunction + jsonData + Web3Utils.utf8ToHex(value.uri).replace('0x','')
       case "uri":
         return Web3Utils.utf8ToHex(value)
       case "markdown":
@@ -186,5 +210,25 @@ export const utils = {
   encodeKeyName: (name) => {
     return Web3Utils.keccak256(name)
   },
+
+  // Pseudo private functions for internal use
+  _encodeDataSourceWithHash: (hashType, dataHash, dataSource) => {
+      // NOTE: Assuming smart contract is checking for supported hash methods?
+      if (!CONSTANTS.hashFunctions[hashType]) { return Error('Unsupported hash type to encode hash and value') }
+      // NOTE: Do we need 'toHex', incase future algorithms do not output hex as keccak does?
+      const hashData = Web3Utils.padLeft(dataHash,32).replace('0x','') 
+      const hashFunction = CONSTANTS.hashFunctions.find(e => { return hashType === e.name || hashType === e.sig })
+      return hashFunction + hashData + Web3Utils.utf8ToHex(dataSource).replace('0x','')
+  },
+
+  _decodeDataSourceWithHash: (value) => {
+      const hashFunctionSig = value.substr(0, 10)
+      const hashFunction = CONSTANTS.hashFunctions.find(e => { return e.sig === hashFunctionSig })
+      const encoodedData = value.replace('0x','').substr(8) // Rest of data string after function hash
+      const dataHash = '0x' + encoodedData.substr(0,64) // Get jsonHash 32 bytes
+      const dataSource = Web3Utils.hexToUtf8('0x' + encoodedData.substr(64)) // Get remainder as URI
+      return { hashFunction: hashFunction.name, dataHash, dataSource }
+  },
+
 
 }

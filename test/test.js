@@ -136,6 +136,13 @@ describe('erc725.js', function() {
         })
       
     })
+
+    // describe('Testing utility methods', function() {
+    //     it('encode data', async () => {
+    //     })
+    //     it('decode data', async () => {
+    //     })
+    // })
 })
 
 

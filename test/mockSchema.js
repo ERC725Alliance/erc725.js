@@ -3,17 +3,6 @@
 
 export const mockSchema = [
 
-  // test mock fields
-  // {
-  //   "name":"LSP3TestAddress",
-  //   "key": "0xa49b3cf6cec9905e04094de0c86a9782023421ff4c735fb40a53392c2f6dce38",
-  //   "valueContent": "Address",
-  //   "valueType": "address",
-  //   // Testing fields
-  //   "returnRawData": "",
-  //   "returnGraphData": "",
-  //   "expectedResult": "0x0c03fba782b07bcf810deb3b7f0595024a444f4e"
-  // },
   {
     "name":"TestJSONURI",
     "key": "0xdf73948b014092c0ce1654e869800d78f6a16f50f1734073f9290553cbf1122c",
@@ -24,6 +13,7 @@ export const mockSchema = [
     "returnRawData": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000059b7845733733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a626400000000000000",
     "returnGraphData": "0xb7845733733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264",
     "expectedResult": {
+      "hashFunction": "keccak256",
       "jsonHash": "0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d", // hash of stringified json
       "jsonURI": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // same JSON uri from LSP3Profile below
     }
@@ -38,6 +28,7 @@ export const mockSchema = [
     "returnRawData": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000059b7845733a7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a626400000000000000",
     "returnGraphData":"0xb7845733a7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264",
     "expectedResult": {
+      "hashFunction": "keccak256",
       "assetHash": "0xa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81", // hash of address '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
       "assetURI": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // FAKE. just used from above
     }
@@ -136,20 +127,3 @@ export const mockSchema = [
 
   },
 ]
-
-// Tests to include for:
-// valueContent: The content in the returned value. Valid values are:
-// String: The content is a generic UTF8 string.
-// Address: The content is an address.
-// Keccak256: The content is an keccak256 32 bytes hash.
-// HashedAssetURI: The content is bytes containing the following format:
-// bytes4(keccak256('hashFunctionName')) + bytes32(assetHash) + utf8ToHex('ipfs://QmQ2CN2VUdb5nVAz28R47aWP6BjDLPGNJaSBniBuZRs3Jt')
-// Hash function types can be:
-// keccak256('keccak256') = 0xb7845733
-// TODO add more
-// JSONURI: The content is bytes containing the following format:
-// bytes4(keccak256('hashFunctionName')) + bytes32(jsonHash) + utf8ToHex('ipfs://QmQ2CN2VUdb5nVAz28R47aWP6BjDLPGNJaSBniBuZRs3Jt')
-// Hash function names like above.
-// URI: The content is an URI encoded as UTF8 string.
-// Markdown: The content is structured Markdown mostly encoded as UTF8 string.
-// 0x134...: If the value type is a specific hash than the return value is expected to equal that hash (This is used for specific e.g. LSP4Type).

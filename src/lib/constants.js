@@ -24,7 +24,12 @@ export const CONSTANTS = {
 
   },
   hashFunctions:
-    {
-      jsonURI: '0xb7845733', // keccak256
-    },
+    [
+      {
+        name: 'keccak256',
+        sig: '0xb7845733',
+        method: Web3Utils.keccak256
+      },
+
+    ]
 }
