@@ -1,6 +1,7 @@
 // Tests for the ERC725.js package
 import assert from 'assert'
-import ERC725 from '../src/index.js'
+import { assertType } from 'graphql'
+import ERC725, { utils } from '../src/index.js'
 import { mockSchema } from './mockSchema.js'
 
 const address = "0x0c03fba782b07bcf810deb3b7f0595024a444f4e"
@@ -137,22 +138,112 @@ describe('erc725.js', function() {
       
     })
 
-    // describe('Testing utility methods', function() {
-    //     it('encode data', async () => {
-    //     })
-    //     it('decode data', async () => {
-    //     })
-    // })
+    describe('Testing utility methods', function() {
+
+        it('decode all data', async () => {
+            // const allData = []
+            // const allExpectedResults = []
+            // mockSchema.forEach(e => {
+            //   if (e.keyType.toLowerCase() === 'array') {
+            //     console.log("WE ARE IN AN ARRAYYYYYYYYYYYYY!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            //     for (let index = 0; index < e.returnGraphData.length; index++) {
+            //       // in the first index... we put the array length?
+            //       // const elementKey = e.elementKey + Web3Utils.leftPad(dataElement.key.substr(e.key.length - 32), 32).replace('0x','')
+            //       const dataElement = e.returnGraphData[index]
+            //       const elementKey = e.elementKey.substr(34) + Web3Utils.leftPad(Web3Utils.numbertToHex(index + 1), 32)
+            //       // const dataElement = {key: elementKey, value: e.returnGraphData[index]}
+            //       allData.push({key: elementKey, value: dataElement})
+            //       if (index > 0) {
+            //         // Put the raw key/value length into the data
+            //         const obj = {}
+            //         obj[e.name] = e.expectedResult
+            //         allExpectedResults.push(obj)
+            //       }
+                  
+            //     }
+            //   } else {
+            //     allData.push({key: e.key, value: e.returnGraphData})
+            //     const obj = {}
+            //     obj[e.name] = e.expectedResult
+            //     allExpectedResults.push(obj) 
+            //   }
+            // })
+        const fullResults = mockSchema.map(e => {
+          const obj = {}
+          obj[e.name] = e.expectedResult
+          return obj
+        })
+
+        // Construct simluated raw data result
+        const allRawData = []
+        const allGraphData = []
+        for (let index = 0; index < mockSchema.length; index++) {
+          const element = mockSchema[index];
+          // if is array push data
+          if (element.keyType === 'Array') {
+            element.returnRawData.forEach(e => {
+              allRawData.push(e)
+            })
+            element.returnGraphData.forEach(e => {
+              // push as objects to simulate graph query result
+              allGraphData.push({key:element.key ,value:e})
+            })
+          } else {
+            allRawData.push(element.returnRawData)
+            allGraphData.push({key:element.key ,value:element.returnGraphData})
+          }
+          
+        }
+        //////
+            // console.log(allData)
+            // console.log(allExpectedResults)
+            const result = utils.decodeAllData(mockSchema, allGraphData)
+            assert.deepStrictEqual(result, fullResults)
+        })
+
+        // Testing encoding/decoding field by field
+        for (let index = 0; index < mockSchema.length; index++) {
+
+            const schemaElement = mockSchema[index]
+            if (schemaElement.keyType.toLowerCase() === "array") {
+
+              
+            } else {
+
+                it('encode data value', async () => {
+                    const result = utils.encodeKeyValue(schemaElement, schemaElement.expectedResult)
+                    assert.deepStrictEqual(result, schemaElement.returnGraphData)
+                })
+
+                it('decode data value', async () => {
+                    const result = utils.decodeKeyValue(schemaElement, schemaElement.returnGraphData)
+                    console.log('expected decode')
+                    console.log(schemaElement.expectedResult)
+                    console.log('result:')
+                    if (typeof result === 'object' && Object.keys(result).length > 0) {
+                      console.log('this returned an object!!!!!!!!')
+                      const newResult = {}
+                      for (const key in result) {
+                        if (result.hasOwnProperty(key)) {
+                          const element = result[key];
+                          newResult[key] = element
+                        }
+                      }
+                      console.log(result)
+                      assert.deepStrictEqual(newResult, schemaElement.expectedResult)
+                    } else {
+
+                      assert.deepStrictEqual(result, schemaElement.expectedResult)
+                    }
+                })
+
+
+            }
+          
+        }
+
+        // it('decode data', async () => {
+        // })
+    })
 })
 
-
-// make test for decode/encode. give key, string, returns encoded hexstring. example handling array is 
-
-        // const allRawData = mockSchema.map(e => {
-        //   // check for nested array
-
-        //   return e.returnRawData
-        // })
-        // const allGraphData = mockSchema.map(e => {
-        //   // check for nested array
-        // })

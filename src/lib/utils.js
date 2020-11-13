@@ -23,15 +23,19 @@ import { CONSTANTS } from './constants.js'
 export const utils = {
 
   decodeAllData: (schema, allRawData) => {
+    // Requires allRawData to be in an array of key/value pairs: {key:'0x908vsd98...',value:'0x9fuuh...'}
 
     const results = []
+
     // Loop throuch schema when provided all ERC725 keys from blockchain source of truth
     for (let index = 0; index < schema.length; index++) {
       const schemaElement = schema[index]
       let newSchemaElement = null
+
       // Looping through data
       for (let i = 0; i < allRawData.length; i++) {
         const dataElement = allRawData[i];
+
         // If its an array, handle that
         if (schemaElement.keyType.toLowerCase() === 'array') {
           /// Set the array key
@@ -124,30 +128,43 @@ export const utils = {
   // TODO: ass encodeAllData function
 
   // 
-  // encodeAllData: (schema, data) => {
-  //   const results = []
-  //   // NOTE: This requires properly formatted input data. id. nested objects/arrays etc are properly arranged as per the schema
-  //   // 1. loop through data // we do this first because it can contain array keys as well
-  //   for (let index = 0; index < data.length; index++) {
-  //     const dataElement = data[index];
+  encodeAllData: (schema, data) => {
+    const results = []
+    // NOTE: This requires properly formatted input data. id. nested objects/arrays etc are properly arranged as per the schema
+    // 1. loop through data // we do this first because it can contain array keys as well
+    for (let index = 0; index < data.length; index++) {
+      const dataElement = data[index];
 
-  //     // 2. Find schema by data
-  //     // NOTE: Each data element should have an object with a single key, with that key being the schema field name
-  //     const objKey = Object.keys(dataElement)[0]
-  //     const schemaElement = schema.find(e => { return e.name === Object.keys(dataElement)[0]})
+      // 2. Find schema by data
+      // NOTE: Each data element should have an object with a single key, with that key being the schema field name
+      const objKey = Object.keys(dataElement)[0]
+      const schemaElement = schema.find(e => { return e.name === objKey })
 
-  //     // 2.1 test to see if matching with an array '[]' key
-  //     if (objKey.substr(objKey.length - 2 ) === '[]') {
-  //       // this is an array
-  //       results.push(dataElement[objKey].map(e => {}))
-  //     }
-  //     results.push(utils.encodeKeyValue(dataElement[schemaElement.name]))
+      // 2.1 test to see if matching with an array '[]' key
+      if (objKey.substr(objKey.length - 2 ) === '[]') {
+        // this is an array
+        // rebuild the schema...
+
+        const elementKey = schemaElement.elementKey + Web3Utils.leftPad(dataElement.key.substr(dataElement.key.length - 32), 32).replace('0x','')
+        // Form new schema schema to check data against
+        newSchemaElement = {
+          key: elementKey,
+          keyType: "Singleton",
+          valueContent: schemaElement.elementValueContent,
+          valueType: schemaElement.elementValueType,
+        }
+        for (let i = 0; i < dataElement[objKey].length; i++) {
+          const e = dataElement[schemaElement.name][i];
+          results.push(utils.encodeKeyValue(e, e))
+        }
+      }
+      results.push(utils.encodeKeyValue(schemaElement, dataElement[schemaElement.name]))
 
       
 
-  //   }
-  //   // 3. encode data by schema types
-  // },
+    }
+    // 3. encode data by schema types
+  },
 
   decodeKeyValue : (schemaElementDefinition, value) => {
     // Detect valueContent type, and handle case
@@ -186,17 +203,11 @@ export const utils = {
       case "arraylength":
         return Web3Utils.numberToHex(value)
       case "keccak256":
-        return Web3Utils.keccak256(value) // will do the hashing. Is this appropriate with other patterns?
+        return value // Expected hashing external hashing. Is this appropriate with other patterns? TODO: lets hash it here?
       case "hashedasseturi":
-        // the hash function method name has to be passed in through 'value'
-        const assetData = Web3Utils.padLeft(value.assetHash,32).replace('0x','')
-        const assetHashFunction = CONSTANTS.hashFunctions.find(e => { return e.name === value.hashFunction || e.sig === value.hashFunction })
-        return assetHashFunction + assetData + Web3Utils.utf8ToHex(value.uri).replace('0x','')
+        return utils._encodeDataSourceWithHash(value.hashFunction, value.assetHash, value.assetURI)
       case "jsonuri":
-        // the hash function method name has to be passed in through 'value'
-        const jsonData = Web3Utils.padLeft(value.jsonHash,32).replace('0x','')
-        const jsonHashFunction = CONSTANTS.hashFunctions.find(e => { return e.name === value.hashFunction || e.sig === value.hashFunction })
-        return jsonHashFunction + jsonData + Web3Utils.utf8ToHex(value.uri).replace('0x','')
+        return utils._encodeDataSourceWithHash(value.hashFunction, value.jsonHash, value.jsonURI)
       case "uri":
         return Web3Utils.utf8ToHex(value)
       case "markdown":
@@ -211,14 +222,21 @@ export const utils = {
     return Web3Utils.keccak256(name)
   },
 
+  _transposeSchema: () => {
+    // TODO: Handle all schema transpositions here?
+    // used for keyType = 'Array'
+  },
+
   // Pseudo private functions for internal use
   _encodeDataSourceWithHash: (hashType, dataHash, dataSource) => {
       // NOTE: Assuming smart contract is checking for supported hash methods?
-      if (!CONSTANTS.hashFunctions[hashType]) { return Error('Unsupported hash type to encode hash and value') }
+      if (!CONSTANTS.hashFunctions.find(e => { return e.name === hashType || e.sig === hashType })) { 
+        return Error('Unsupported hash type to encode hash and value')
+      }
       // NOTE: Do we need 'toHex', incase future algorithms do not output hex as keccak does?
       const hashData = Web3Utils.padLeft(dataHash,32).replace('0x','') 
       const hashFunction = CONSTANTS.hashFunctions.find(e => { return hashType === e.name || hashType === e.sig })
-      return hashFunction + hashData + Web3Utils.utf8ToHex(dataSource).replace('0x','')
+      return '' + hashFunction.sig + hashData + Web3Utils.utf8ToHex(dataSource).replace('0x','')
   },
 
   _decodeDataSourceWithHash: (value) => {
