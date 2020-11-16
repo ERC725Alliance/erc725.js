@@ -135,7 +135,7 @@ describe('erc725.js', function() {
           }
           
         }
-        console.log("DONT WE HAVE FULL DATA????")
+        console.log("FULL DATA!!!!")
         console.log(allGraphData)
 
         it('with web3.currentProvider', async () => {
@@ -198,7 +198,8 @@ describe('erc725.js', function() {
         })
 
 
-        // it('decode data', async () => {
+        // it('encode all data', async () => {
+          // TODO: Write test for encodeAllData()
         // })
     })
 
@@ -207,11 +208,65 @@ describe('erc725.js', function() {
         /* **************************************** */
         /* Testing encoding/decoding field by field */
         for (let index = 0; index < mockSchema.length; index++) {
-
             const schemaElement = mockSchema[index]
+
             if (schemaElement.keyType.toLowerCase() === "array") {
+                console.log('we have an array...')
+                console.log(schemaElement)
+
+                it('encode data values in array', async () => {
+                    let results = []
+
+                    // Endcode array loop
+                    for (let i = 0; i < schemaElement.expectedResult.length; i++) {
+                        if (i === 0) {
+                          // Push the array length into the first element of results array
+                          results.push(Web3Utils.leftPad(Web3Utils.numberToHex(schemaElement.expectedResult.length),64))
+                        }
+                        results.push(utils.encodeKeyValue(schemaElement, schemaElement.expectedResult[i]))
+                      
+                    }
+                    assert.deepStrictEqual(results, schemaElement.returnGraphData)
+                })
+
+                it('decode data values in array', async () => {
+                    let results = []
+
+                    // decode array loop
+                    for (let i = 0; i < schemaElement.returnGraphData.length; i++) {
+                        const element = schemaElement.returnGraphData[i];
+
+                        try {
+                            Web3Utils.hexToNumber(element.value) // this will fail when anything BUT the arrayLength key, and essentially fail silently
+                        } catch (error) {
+                              const result = utils.decodeKeyValue(schemaElement, element)
+
+                            // Handle object types
+                            if (typeof result === 'object' && Object.keys(result).length > 0) {
+
+                                const objResult = {}
+                                for (const key in result) {
+                                  if (result.hasOwnProperty(key)) {
+                                    const element = result[key];
+                                    objResult[key] = element
+                                  }
+                                }
+
+                                results.push(objResult)
+                            } else {
+                                results.push(result)
+                            }
+                            assert.deepStrictEqual(results, schemaElement.expectedResult)
+
+                        }
+                      
+                    }
+
+
+                })
 
               
+              // This is not an array, assumed 'Singletoon
             } else {
 
                 it('encode data value', async () => {
