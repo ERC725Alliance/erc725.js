@@ -161,14 +161,6 @@ describe('erc725.js', function() {
 
     describe('Testing all data utility functions', function() {
 
-        it('decode all data', async () => {
-          const fullResults = mockSchema.map(e => {
-            const obj = {}
-            obj[e.name] = e.expectedResult
-            return obj
-          })
-
-          // Construct simluated raw bytes decoded blockchain data
           const allGraphData = []
           for (let index = 0; index < mockSchema.length; index++) {
             const element = mockSchema[index];
@@ -177,13 +169,14 @@ describe('erc725.js', function() {
             if (element.keyType === 'Array') {
               element.returnGraphData.forEach((e,i,a) => {
 
-                if (i > 0) {
-                  // This is array length key/value pair
-                  allGraphData.push({ key: element.key, value: e })
-                } else {
+                if (i === 0) {
                   // We need the new key, and to 'flatten the array as per expected from chain data
-                  const newElementKey = element.key.substr(34) + Web3Utils.leftPad(Web3Utils.numberToHex(index + 1), 32)
-                  allGraphData.push({key: newElementKey, value: e})
+                  // const newElementKey = '' + element.elementKey + Web3Utils.leftPad(Web3Utils.numberToHex(i), 32).replace('0x', '')
+                  allGraphData.push({key: element.key, value: Web3Utils.padLeft(Web3Utils.numberToHex(a.length - 1 ), 64)}) // we subtract one from length because this has the extra array length key in the array
+                } else {
+                  // This is array length key/value pair
+                  const newElementKey = '' + element.elementKey + Web3Utils.padLeft(Web3Utils.numberToHex(i - 1), 32).replace('0x','')
+                  allGraphData.push({ key: newElementKey, value: e })
                 }
               }) // end .forEach()
 
@@ -193,14 +186,23 @@ describe('erc725.js', function() {
 
           }
 
+          const fullResults = mockSchema.map(e => {
+            const obj = {}
+            obj[e.name] = e.expectedResult
+            return obj
+          })
+
+
+        it('decode all data', async () => {
           const result = utils.decodeAllData(mockSchema, allGraphData)
           assert.deepStrictEqual(result, fullResults)
         })
 
 
-        // it('encode all data', async () => {
-          // TODO: Write test for encodeAllData()
-        // })
+        it('encode all data', async () => {
+          const result = utils.encodeAllData(mockSchema, fullResults)
+          assert.deepStrictEqual(result, allGraphData)
+        })
     })
 
     describe('Testing encode/decode single key/value utility functions', function() {
