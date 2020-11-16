@@ -89,12 +89,12 @@ export default class ERC725 {
     const rawData = await this.provider.getData(this.options.address, keySchema.key)
     console.log('GOT raw data from source...')
     // Decode and return the data
-    return await this._decodeDataBySchema(keySchema, rawData)
+    return await this._decodeByKeyType(keySchema, rawData)
   }
 
   async getAllData() {
     // Get all the key hashes from the schema
-    const keyHashes = await this.options.schema.map(e => { return e.key })
+    const keyHashes = this.options.schema.map(e => { return e.key })
     // Get all the raw data from the provider based on schema key hashes
     let allRawData = await this.provider.getAllData(this.options.address, keyHashes)
     // Take out null values, since data may not fulfill entire schema
@@ -118,7 +118,7 @@ export default class ERC725 {
         if (keySchema) {
           const obj = {}
           // Add decoded data to results array
-          obj[keySchema.name] = await this._decodeDataBySchema(keySchema, e.value)
+          obj[keySchema.name] = await this._decodeByKeyType(keySchema, e.value)
           results.push(obj)
         }
         
@@ -131,11 +131,11 @@ export default class ERC725 {
   }
 
   // DetermineType
-  async _decodeDataBySchema(schemaElementDefinition, value) {
+  async _decodeByKeyType(schemaElementDefinition, value) {
 
     // TYPE: ARRAY
     if (schemaElementDefinition.keyType.toLowerCase() === "array") {
-      // Handling a schema elemnt of type Arra Get the array length first
+      // Handling a schema element of type Array Get the array length first
       const arrayLength = utils.decodeKeyValue(schemaElementDefinition, value)
 
       let result = []
@@ -154,7 +154,6 @@ export default class ERC725 {
 
     // TYPE: SINGLETON
     } else if (schemaElementDefinition.keyType.toLowerCase() === "singleton") {
-      // return this._decodeKeyValue(schemaElementDefinition, value)
       return utils.decodeKeyValue(schemaElementDefinition, value)
 
     // TYPE: UNKNOWN

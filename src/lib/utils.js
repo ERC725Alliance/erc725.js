@@ -18,6 +18,7 @@
  */
 
 import Web3Utils from 'web3-utils'
+import Web3Abi from 'web3-eth-abi'
 import { CONSTANTS } from './constants.js'
 
 export const utils = {
@@ -188,26 +189,40 @@ export const utils = {
   },
 
   decodeKeyValue : (schemaElementDefinition, value) => {
+
+    // decode value
+    if(
+        schemaElementDefinition.valueType !== 'bytes' &&
+        schemaElementDefinition.valueType !== 'address' &&
+        schemaElementDefinition.valueType !== 'string'
+    )
+      value = Web3Abi.decodeParameter(schemaElementDefinition.valueType, value)
+
     // Detect valueContent type, and handle case
     switch (schemaElementDefinition.valueContent.toLowerCase()) {
-      case "string":
-        return Web3Utils.hexToUtf8(value)
-      case "address":
-        return value
-      case "arraylength":
-        return Web3Utils.hexToNumber(value)
+      case "number":
       case "keccak256":
         return value
-      case "hashedasseturi":
-        const assetResult = utils._decodeDataSourceWithHash(value)
-        return {hashFunction: assetResult.hashFunction, assetHash: assetResult.dataHash, assetURI: assetResult.dataSource}
-      case "jsonuri":
-        const jsonResult = utils._decodeDataSourceWithHash(value)
-        return { hashFunction: jsonResult.hashFunction, jsonHash: jsonResult.dataHash, jsonURI: jsonResult.dataSource}
+      case "string":
       case "uri":
-        return Web3Utils.hexToUtf8(value)
       case "markdown":
         return Web3Utils.hexToUtf8(value)
+      case "address":
+        return Web3Utils.toChecksumAddress(value)
+      case "hashedasseturi":
+        const assetResult = utils._decodeDataSourceWithHash(value)
+        return {
+          hashFunction: assetResult.hashFunction,
+          assetHash: assetResult.dataHash,
+          assetURI: assetResult.dataSource
+        }
+      case "jsonuri":
+        const jsonResult = utils._decodeDataSourceWithHash(value)
+        return {
+          hashFunction: jsonResult.hashFunction,
+          jsonHash: jsonResult.dataHash,
+          jsonURI: jsonResult.dataSource
+        }
       default:
         break;
     }
@@ -215,24 +230,29 @@ export const utils = {
   },
   
   encodeKeyValue: (schemaElementDefinition, value) => {
+
+    if(
+        schemaElementDefinition.valueType !== 'bytes' &&
+        schemaElementDefinition.valueType !== 'address' &&
+        schemaElementDefinition.valueType !== 'string'
+    )
+      value = Web3Abi.encodeParameter(schemaElementDefinition.valueType, value)
+
     // @param value: can contain single value, or obj as required by spec
     switch (schemaElementDefinition.valueContent.toLowerCase()) {
-      case "string":
-        return Web3Utils.utf8ToHex(value)
-      case "address":
-        return value // No manipulation necessary
-      case "arraylength":
-        return Web3Utils.numberToHex(value)
+      case "number":
       case "keccak256":
         return value // Expected hashing external hashing. Is this appropriate with other patterns? TODO: lets hash it here?
+      case "string":
+      case "uri":
+      case "markdown":
+        return Web3Utils.utf8ToHex(value)
+      case "address":
+        return Web3Utils.toChecksumAddress(value)
       case "hashedasseturi":
         return utils._encodeDataSourceWithHash(value.hashFunction, value.assetHash, value.assetURI)
       case "jsonuri":
         return utils._encodeDataSourceWithHash(value.hashFunction, value.jsonHash, value.jsonURI)
-      case "uri":
-        return Web3Utils.utf8ToHex(value)
-      case "markdown":
-        return Web3Utils.utf8ToHex(value)
       default:
         break;
     }

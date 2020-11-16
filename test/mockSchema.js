@@ -55,8 +55,8 @@ export const mockSchema = [
     "valueType": "bytes",
     // Testing fi
     "returnRawData": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000140c03fba782b07bcf810deb3b7f0595024a444f4e000000000000000000000000",
-    "returnGraphData": "0x0c03fba782b07bcf810deb3b7f0595024a444f4e",
-    "expectedResult": "0x0c03fba782b07bcf810deb3b7f0595024a444f4e" // a real address
+    "returnGraphData": "0x0C03fBa782b07bCf810DEb3b7f0595024A444F4e",
+    "expectedResult": "0x0C03fBa782b07bCf810DEb3b7f0595024A444F4e" // a real address
   },
 
   {
@@ -64,7 +64,7 @@ export const mockSchema = [
     "key": "0x328f991bde3a9d8c548b7b2dbc303a362202dddbcd33219650d85bedcd75ac9b",
     "keyType": "Singleton",
     "valueContent": "Markdown",
-    "valueType": "string",
+    "valueType": "bytes",
     // T
     "returnRawData": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000033232054657374696e67206d61726b646f776e2e200a2057656c636f6d6520746f206d61726b646f776e202a2a746573742a2a2e00000000000000000000000000",
     "returnGraphData": "0x232054657374696e67206d61726b646f776e2e200a2057656c636f6d6520746f206d61726b646f776e202a2a746573742a2a2e",
@@ -78,7 +78,7 @@ export const mockSchema = [
     "key": "0xa5f15b1fa920bbdbc28f5d785e5224e3a66eb5f7d4092dc9ba82d5e5ae3abc87",
     "keyType": "Singleton",
     "valueContent": "String",
-    "valueType": "string",
+    "valueType": "bytes",
     // Testing fields
     "ethereumCallSig": "0x54f6127fa5f15b1fa920bbdbc28f5d785e5224e3a66eb5f7d4092dc9ba82d5e5ae3abc87",
     "returnRawData": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000107061747269636b2d6d63646f77656c6c00000000000000000000000000000000",
@@ -91,7 +91,7 @@ export const mockSchema = [
     "key": "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
     "keyType": "Singleton",
     "valueContent": "URI",
-    "valueType": "string",
+    "valueType": "bytes",
     // Testingfields
     "ethereumCallSig": "0x54f6127f5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5", // remove this
     "returnRawData": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000035697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a62640000000000000000000000",
@@ -102,7 +102,7 @@ export const mockSchema = [
     "name": "LSP3IssuedAssets[]",
     "key": "0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0",
     "keyType": "Array",
-    "valueContent": "ArrayLength",
+    "valueContent": "Number",
     "valueType": "uint256",
     "elementKey": "0x3a47ab5bd3a594c3a8995f8fa58d0876",
     "elementKeyType": "ArrayElement",
@@ -117,12 +117,12 @@ export const mockSchema = [
     ],
     "returnGraphData": [
       "0x0000000000000000000000000000000000000000000000000000000000000002", // array length
-      "0xc444009d38d3046bb0cf81fa2cd295ce46a67c78",
-      "0x4febc3491230571f6e1829e46602e3b110215a2e",
+      "0xc444009d38d3046bb0cF81Fa2Cd295ce46A67C78",
+      "0x4fEbC3491230571F6e1829E46602e3b110215A2E",
     ],
     "expectedResult" :[
-      "0xc444009d38d3046bb0cf81fa2cd295ce46a67c78",
-      "0x4febc3491230571f6e1829e46602e3b110215a2e",
+      "0xc444009d38d3046bb0cF81Fa2Cd295ce46A67C78",
+      "0x4fEbC3491230571F6e1829E46602e3b110215A2E",
     ]
 
   },
