@@ -214,8 +214,6 @@ describe('erc725.js', function() {
             const schemaElement = mockSchema[index]
 
             if (schemaElement.keyType.toLowerCase() === "array") {
-                console.log('we have an array...')
-                console.log(schemaElement)
 
                 it('encode data values in array', async () => {
                     let results = []
@@ -226,7 +224,12 @@ describe('erc725.js', function() {
                             // Push the array length into the first element of results array
                             results.push(Web3Utils.leftPad(Web3Utils.numberToHex(schemaElement.expectedResult.length),64))
                         }
-                        results.push(utils.encodeKeyValue(schemaElement, schemaElement.expectedResult[i]))
+                        // Change the encoding on the schema....
+                        const arraySchema = schemaElement
+                        arraySchema.valueContent = schemaElement.elementValueContent
+                        arraySchema.valueType = schemaElement.elementValueType
+                        arraySchema.keyType = 'Singleton'
+                        results.push(utils.encodeKeyValue(arraySchema, schemaElement.expectedResult[i]))
 
                     }
                     assert.deepStrictEqual(results, schemaElement.returnGraphData)

@@ -25,7 +25,6 @@ export const utils = {
 
   decodeAllData: (schema, allRawData) => {
     // Requires allRawData to be in an array of key/value pairs: {key:'0x908vsd98...',value:'0x9fuuh...'}
-
     const results = []
 
     // Loop throuch schema when provided all ERC725 keys from blockchain source of truth
@@ -42,10 +41,18 @@ export const utils = {
           /// Set the array key
           const elementKey = schemaElement.elementKey + Web3Utils.leftPad(dataElement.key.substr(dataElement.key.length - 32), 32).replace('0x','')
           // Form new schema schema to check data against
+          let newElementValueContent = ''
+          try {
+            Web3Utils.hexToNumber(dataElement.value) // this will be uint if is type array
+            newElementValueContent = schemaElement.valueType
+          } catch (error) {
+            newElementValueContent = schemaElement.elementValueType
+          }
           newSchemaElement = {
             key: elementKey,
             keyType: "Singleton",
-            valueContent: schemaElement.elementValueContent,
+            valueContent: newElementValueContent, // value content on first element in the array is
+            // valueContent: schemaElement.elementValueContent, // value content on first element in the array is
             valueType: schemaElement.elementValueType,
           }
 
@@ -55,9 +62,12 @@ export const utils = {
         }
 
         // Check if the data is a match with the checked/moodified schema element
+        // This is in case other data not in the schema is included for some reason
         if (dataElement.key === newSchemaElement.key) {
           // Yes, so decode the data, and add to result
-          const decodedElement = utils.decodeKeyValue(newSchemaElement, dataElement.value)
+          // we dont need to do it for the arrayLength type...
+          // The reason this is bugged: it is handling all values at the array elementValueType
+          const decodedElement = utils.decodeKeyValue(newSchemaElement, dataElement.value) // this will fail being writting to results below becuase it is a number
           // Handle arrays
           if (schemaElement.keyType.toLowerCase() === 'array') { 
             // Error catch as conditional for simple test for number as the array length
