@@ -34,19 +34,22 @@ export const utils = {
 
       // Looping through data
       for (let i = 0; i < allRawData.length; i++) {
-        const dataElement = allRawData[i];
+        const dataElement = allRawData[i]; // TODO: Call a change to 'shift()' on data array to avoid more looping
 
-        // If its an array, handle that
+        // MODIFY SCHEMA if we have keyType of array
         if (schemaElement.keyType.toLowerCase() === 'array') {
-          /// Set the array key
+          // Create appropriate schema element based on keyType and data element
+          // Set the assumed array elementKey based on potential match with data key
           const elementKey = schemaElement.elementKey + Web3Utils.leftPad(dataElement.key.substr(dataElement.key.length - 32), 32).replace('0x','')
+
           // Form new schema schema to check data against
           let newElementValueContent = ''
           try {
+            // TODO: QUESTION: what about an array of uints
             Web3Utils.hexToNumber(dataElement.value) // this will be uint if is type array
-            newElementValueContent = schemaElement.valueType
+            newElementValueContent = schemaElement.valueContent // therefore we will use the 'top' schema
           } catch (error) {
-            newElementValueContent = schemaElement.elementValueType
+            newElementValueContent = schemaElement.elementValueContent // otherwise we assume its no... 
           }
           newSchemaElement = {
             key: elementKey,
@@ -61,26 +64,25 @@ export const utils = {
           newSchemaElement = schemaElement
         }
 
-        // Check if the data is a match with the checked/moodified schema element
-        // This is in case other data not in the schema is included for some reason
+        // CHECK FOR MATCH, we can't be sure data not in the schema is included
         if (dataElement.key === newSchemaElement.key) {
-          // Yes, so decode the data, and add to result
-          // we dont need to do it for the arrayLength type...
-          // The reason this is bugged: it is handling all values at the array elementValueType
+          
           const decodedElement = utils.decodeKeyValue(newSchemaElement, dataElement.value) // this will fail being writting to results below becuase it is a number
-          // Handle arrays
+
           if (schemaElement.keyType.toLowerCase() === 'array') { 
-            // Error catch as conditional for simple test for number as the array length
-            // which not be included as a key-value in the decoded results (discarded)
+            // Handle arrays for original schemaElement (loop), since a match could also be an array length
+
             try {
-              Web3Utils.hexToNumber(dataElement.value) // this will fail when anything BUT the arrayLength key, and essentially fail silently
+              // This will fail when anything BUT the arrayLength key, and fail silently
+              // since we don't need array length key-value in the final decoded results
+              Web3Utils.hexToNumber(dataElement.value) 
             } catch (error) {
               // Check if there is already an array at the results index
               if (Array.isArray(results[index] && results[index][schemaElement.name])) {
-                // Add to the existing results element array
+                // If so, add to the existing results element array
                 results[index][schemaElement.name].push(decodedElement)
               } else {
-                // Create the new results element array
+                // Otherwise reate the new results element array
                 const obj = {}
                 obj[schemaElement.name] = [decodedElement]
                 results[index] = obj
@@ -92,53 +94,16 @@ export const utils = {
             obj[newSchemaElement.name] = decodedElement
             results.push(obj)
           }
-        }
+        } // end CHECK FOR MATCH
 
+        // null results/nothing happens with no match
       }
 
-    }
+    } // end forEach schema element
 
     return results
   },
 
-  // NOTE: This will not function withouth 'this' context of ERC725 class at the moment
-  // since it requires the provider to loop through unknown array keys
-  // TODO: Make work with ERC725 class instance provider
-  // decodeDataBySchema: async (schemaElementDefinition, value) => {
-
-  //   // TYPE: ARRAY
-  //   if (schemaElementDefinition.keyType.toLowerCase() === "array") {
-  //     // Handling a schema elemnt of type Arra Get the array length first
-  //     const arrayLength = this.decodeKeyValue(schemaElementDefinition, value)
-
-  //     let result = []
-  //     // Construct the schema for each element, and fetch
-  //     for (let index = 0; index < arrayLength; index++) {
-  //       const elementKey = schemaElementDefinition.elementKey + Web3Utils.leftPad(Web3Utils.numberToHex(index), 32).replace('0x','')
-  //       const schemaElement = {
-  //         key: elementKey,
-  //         keyType: "Singleton",
-  //         valueContent: schemaElementDefinition.elementValueContent,
-  //         valueType: schemaElementDefinition.elementValueType,
-  //       }
-  //       // TODO: This may never really work here because it needs the main class 'this'
-  //       result.push(await this.getData(elementKey, schemaElement))
-  //     }
-  //     return result
-
-  //   // TYPE: SINGLETON
-  //   } else if (schemaElementDefinition.keyType.toLowerCase() === "singleton") {
-  //     return this.decodeKeyValue(schemaElementDefinition, value)
-
-  //   // TYPE: UNKNOWN
-  //   } else {
-  //     return Error('There is no recognized keyType for this key.')
-  //   }
-
-  // },
-  // TODO: ass encodeAllData function
-
-  // 
   encodeAllData: (schema, data) => {
     // Data must come as key/value pairs, where keys are defined as per the schema
     const results = [] // results will be the flattened array of hex key/value pairs
@@ -207,9 +172,14 @@ export const utils = {
         schemaElementDefinition.valueType !== 'string'
     )
       value = Web3Abi.decodeParameter(schemaElementDefinition.valueType, value)
+      // TODO: Handle arrays?
 
+      // console.log('what is the value now?!?!?!?')
+      // console.log(value)
+      // console.log(schemaElementDefinition.valueType)
     // Detect valueContent type, and handle case
     switch (schemaElementDefinition.valueContent.toLowerCase()) {
+      case "arraylength":
       case "number":
       case "keccak256":
         return value
@@ -250,6 +220,7 @@ export const utils = {
 
     // @param value: can contain single value, or obj as required by spec
     switch (schemaElementDefinition.valueContent.toLowerCase()) {
+      case "arraylength":
       case "number":
       case "keccak256":
         return value // Expected hashing external hashing. Is this appropriate with other patterns? TODO: lets hash it here?

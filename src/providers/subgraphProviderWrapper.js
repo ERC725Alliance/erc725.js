@@ -38,9 +38,7 @@ export default class GraphSource {
       // Return the value for the specific single key
       const query = queries.getDataByKey(id, keys)
       const result = await this.provider.query({ query: query }) //TODO: return the value only
-      console.log('actual single graph data resultt')
-      console.log(result)
-      // Single out the first result
+      // Single out the first result as expected
       return result.data[Object.keys(result.data)[0]][0].value
     }
 
@@ -50,8 +48,8 @@ export default class GraphSource {
     // TODO: Add support for multiple keys
     const query = queries.getAllData(id)
     const result = await this.provider.query({ query:query })
-    console.log('ACTUAL GRAPH \'getAllData\' RESULT')
-    console.log(result)
+    // console.log('ACTUAL GRAPH \'getAllData\' RESULT')
+    // console.log(result)
     // Return the data query array
     return result.data[Object.keys(result.data)[0]]
   }

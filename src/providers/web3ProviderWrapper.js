@@ -44,8 +44,6 @@ export default class Web3Source {
       }
     ]
     const result = await this._callContract(params)
-    console.log('raw data for:', keyHash)
-    console.log(result)
     return web3abi.decodeParameter('bytes', result)
   }
 

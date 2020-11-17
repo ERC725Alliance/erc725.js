@@ -20,124 +20,19 @@
 // Tests for the ERC725.js package
 import assert from 'assert'
 import ERC725, { utils } from '../src/index.js'
-import { mockSchema } from './mockSchema.js'
 import Web3Utils from 'web3-utils'
+import { mockSchema } from './mockSchema.js'
+import { HttpProvider, EthereumProvider, ApolloClient } from './mockProviders.js'
 
 const address = "0x0c03fba782b07bcf810deb3b7f0595024a444f4e"
 
-class HttpProvider {
-    constructor(props) {
-        // Deconstruct to create local copy of array
-        this.returnData = Array.isArray(props.returnData) ? [...props.returnData] : props.returnData
-    }
-    send(payload, cb) {
-        setTimeout(() => {
-            return cb(null, {
-                result: (Array.isArray(this.returnData)) ? this.returnData.shift() : this.returnData
-            })
-        }, 100);
-    }
-}
+describe('Running erc725.js tests...', function() {
 
-class EthereumProvider {
-    constructor(props) {
-        this.returnData = Array.isArray(props.returnData) ? [...props.returnData] : props.returnData
-    }
-    request() {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                const result = (Array.isArray(this.returnData)) ? this.returnData.shift() : this.returnData
-                // TODO: Handle reject
-                resolve(result)
-            }, 100);
-        })
-    }
-}
-
-class ApolloClient {
-    constructor(props) {
-        // mock data
-        this.returnData = Array.isArray(props.returnData) ? [...props.returnData] : props.returnData
-        this.returnKey = props.returnKey
-        this.getAll = (props.getAll)
-    }
-    query(props) {
-        // const fieldKey = props.query.definitions[0].selectionSet.selections[0].arguments[0].value.fields[1].value // this gives the field key in query
-        // const schema = mockSchema.find(e => { return e.key === fieldKey.value})
-        // const data = mockData.find(e => { return e.key === schema.key })
-
-        const val = (Array.isArray(this.returnData) && !this.getAll) ? this.returnData.shift() : this.returnData
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                // this.getAll flag is used to return different expected query results
-                const res = this.getAll ? {data:{mockResults: this.returnData}} : {data:{mockResults:[{key:this.returnKey ,value:val}]}}
-                resolve(res)
-            }, 100);
-        })
-    }
-}
-
-describe('erc725.js', function() {
-
-    describe('Testing schema', function() {
-        mockSchema.forEach(schemaElement => {
-
-            it(schemaElement.name +' with web3.currentProvider', async () => {
-                const provider = new HttpProvider({returnData:schemaElement.returnRawData})
-                const erc725 = new ERC725(mockSchema, address, provider)
-                const result = await erc725.getData(schemaElement.key)
-                assert.deepStrictEqual(result, schemaElement.expectedResult)
-            })
-
-            it(schemaElement.name +' with ethereumProvider EIP 1193', async () => {
-                const provider = new EthereumProvider({returnData:schemaElement.returnRawData})
-                const erc725 = new ERC725(mockSchema, address, provider)
-                const result = await erc725.getData(schemaElement.key)
-                assert.deepStrictEqual(result, schemaElement.expectedResult)
-            })
-
-            it(schemaElement.name +' with apollo graph provider', async () => {
-                const provider = new ApolloClient({returnKey:schemaElement.key, returnData: schemaElement.returnGraphData})
-                const erc725 = new ERC725(mockSchema, address, provider)
-                const result = await erc725.getData(schemaElement.key)
-                assert.deepStrictEqual(result, schemaElement.expectedResult)
-            })
-
-        })
-
-    })
-
-    describe('Getting all data by provider', function() {
-        // Construct the full return object....
-        const fullResults = mockSchema.map(e => {
-            const obj = {}
-            obj[e.name] = e.expectedResult
-            return obj
-        })
-
-        // Construct simluated raw data result
-        const allRawData = []
-        const allGraphData = []
-        for (let index = 0; index < mockSchema.length; index++) {
-            const element = mockSchema[index];
-            // if is array push data
-            if (element.keyType === 'Array') {
-                element.returnRawData.forEach(e => {
-                    allRawData.push(e)
-                })
-                element.returnGraphData.forEach((e, i) => {
-                    // push as objects to simulate graph query result
-                    if(i > 0)
-                        allGraphData.push({key:element.key ,value:e})
-                })
-            } else {
-                allRawData.push(element.returnRawData)
-                allGraphData.push({key:element.key, value:element.returnGraphData})
-            }
-
-        }
-        // console.log("FULL DATA!!!!")
-        // console.log(allGraphData)
+    describe('Getting all data in schema by provider', function() {
+        // Construct the full data return and results objects....
+        const fullResults = generateAllResults(mockSchema)
+        const allRawData = generateAllRawData(mockSchema)
+        const allGraphData = generateAllData(mockSchema)
 
         it('with web3.currentProvider', async () => {
             const provider = new HttpProvider({returnData:allRawData})
@@ -152,7 +47,7 @@ describe('erc725.js', function() {
             assert.deepStrictEqual(result, fullResults)
         })
         it('with apollo client', async () => {
-            const provider = new ApolloClient({returnKey:'test', returnData: allGraphData, getAll:true})
+            const provider = new ApolloClient({returnData: allGraphData, getAll:true})
             const erc725 = new ERC725(mockSchema, address, provider)
             const result = await erc725.getAllData()
             assert.deepStrictEqual(result, fullResults)
@@ -160,62 +55,65 @@ describe('erc725.js', function() {
 
     })
 
-    describe('Testing all data utility functions', function() {
+    describe('Getting data by schema element by provider', function() {
+        mockSchema.forEach(schemaElement => {
 
-        const allGraphData = []
-        for (let index = 0; index < mockSchema.length; index++) {
-            const element = mockSchema[index];
+            it(schemaElement.name +' with web3.currentProvider', async () => {
+                const returnRawData = generateAllRawData([schemaElement])
+                const provider = new HttpProvider({returnData: returnRawData})
+                const erc725 = new ERC725(mockSchema, address, provider)
+                const result = await erc725.getData(schemaElement.key)
+                assert.deepStrictEqual(result, schemaElement.expectedResult)
+            })
 
-            // if is a 'nested' array, need to flatten it, and add {key,value} elements
-            if (element.keyType === 'Array') {
-                element.returnGraphData.forEach((e, i, a) => {
+            it(schemaElement.name +' with ethereumProvider EIP 1193', async () => {
+                const returnRawData = generateAllRawData([schemaElement])
+                const provider = new HttpProvider({returnData: returnRawData})
+                const erc725 = new ERC725(mockSchema, address, provider)
+                const result = await erc725.getData(schemaElement.key)
+                assert.deepStrictEqual(result, schemaElement.expectedResult)
+            })
 
-                    if (i === 0) {
-                        // We need the new key, and to 'flatten the array as per expected from chain data
-                        // const newElementKey = '' + element.elementKey + Web3Utils.leftPad(Web3Utils.numberToHex(i), 32).replace('0x', '')
-                        allGraphData.push({key: element.key, value: Web3Utils.padLeft(Web3Utils.numberToHex(a.length - 1 ), 64)}) // we subtract one from length because this has the extra array length key in the array
-                    } else {
-                        // This is array length key/value pair
-                        const newElementKey = '' + element.elementKey + Web3Utils.padLeft(Web3Utils.numberToHex(i - 1), 32).replace('0x','')
-                        allGraphData.push({ key: newElementKey, value: e })
-                    }
-                }) // end .forEach()
+            it(schemaElement.name +' with apollo graph provider', async () => {
+                const returnData = generateAllData([schemaElement])
+                const provider = new ApolloClient({returnData: returnData})
+                const erc725 = new ERC725(mockSchema, address, provider)
+                const result = await erc725.getData(schemaElement.key)
+                assert.deepStrictEqual(result, schemaElement.expectedResult)
+            })
 
-            } else {
-                allGraphData.push({ key: element.key, value: element.returnGraphData })
-            }
-
-        }
-
-        const fullResults = mockSchema.map(e => {
-            const obj = {}
-            obj[e.name] = e.expectedResult
-            return obj
         })
 
+    })
 
-        it('decode all data', async () => {
+
+    describe('Testing utility encoding & decoding functions', function() {
+
+        const allGraphData = generateAllData(mockSchema)
+        const fullResults = generateAllResults(mockSchema)
+
+        /* ********************************************* */
+        /* Testing encoding/decoding for all schema data */
+        it('Decode all data!', async () => {
             const result = utils.decodeAllData(mockSchema, allGraphData)
             assert.deepStrictEqual(result, fullResults)
         })
 
 
-        it('encode all data', async () => {
+        it('Encode all data!', async () => {
             const result = utils.encodeAllData(mockSchema, fullResults)
             assert.deepStrictEqual(result, allGraphData)
         })
-    })
-
-    describe('Testing encode/decode single key/value utility functions', function() {
 
         /* **************************************** */
         /* Testing encoding/decoding field by field */
         for (let index = 0; index < mockSchema.length; index++) {
             const schemaElement = mockSchema[index]
 
+            // ARRAY type:
             if (schemaElement.keyType.toLowerCase() === "array") {
 
-                it('encode data values in array', async () => {
+                it('Encode data values in array: ' + schemaElement.name, async () => {
                     let results = []
 
                     // Endcode array loop
@@ -231,11 +129,11 @@ describe('erc725.js', function() {
                         arraySchema.keyType = 'Singleton'
                         results.push(utils.encodeKeyValue(arraySchema, schemaElement.expectedResult[i]))
 
-                    }
+                    } // end for loop
                     assert.deepStrictEqual(results, schemaElement.returnGraphData)
                 })
 
-                it('decode data values in array', async () => {
+                it('Decode data values in array: ' + schemaElement.name, async () => {
                     let results = []
 
                     // decode array loop
@@ -266,21 +164,20 @@ describe('erc725.js', function() {
 
                         }
 
-                    }
+                    } // end for loop
 
 
                 })
 
-
-                // This is not an array, assumed 'Singletoon
+            // SINGLETON type: This is not an array, assumed 'Singletoon
             } else {
 
-                it('encode data value', async () => {
+                it('Encode data value for: ' + schemaElement.name, async () => {
                     const result = utils.encodeKeyValue(schemaElement, schemaElement.expectedResult)
                     assert.deepStrictEqual(result, schemaElement.returnGraphData)
                 })
 
-                it('decode data value', async () => {
+                it('Decode data value for: ' + schemaElement.name, async () => {
                     const result = utils.decodeKeyValue(schemaElement, schemaElement.returnGraphData)
 
                     if (typeof result === 'object' && Object.keys(result).length > 0) {
@@ -308,3 +205,64 @@ describe('erc725.js', function() {
     })
 })
 
+
+function generateAllRawData(schema) {
+    // takes the schema object and builds a full dataset as per expected from provider
+    const results = []
+    for (let index = 0; index < schema.length; index++) {
+        const element = schema[index];
+        // if is array push data
+        if (element.keyType === 'Array') {
+            element.returnRawData.forEach((e, i) => {
+                if (i === 0) { // we assume always first element in the array in returnData array is the length
+                    results.push({key: element.key, value: e}) // we subtract one from length because this has the extra array length key in the array
+                } else {
+                    // This is array length key/value pair
+                    const newElementKey = '' + element.elementKey + Web3Utils.padLeft(Web3Utils.numberToHex(i - 1), 32).replace('0x','')
+                    results.push({ key: newElementKey, value: e })
+                }
+            })
+        } else {
+            results.push({key:element.key, value: element.returnRawData})
+        }
+
+    }
+    return results
+}
+
+function generateAllData(schema) {
+    // takes the schema object and builds a full dataset as per expected from provider
+    const results = []
+    for (let index = 0; index < schema.length; index++) {
+        const element = schema[index];
+
+        // if is a 'nested' array, need to flatten it, and add {key,value} elements
+        if (element.keyType === 'Array') {
+            element.returnGraphData.forEach((e, i, a) => {
+
+                if (i === 0) {
+                    // We need the new key, and to 'flatten the array as per expected from chain data
+                    results.push({key: element.key, value: e}) // we subtract one from length because this has the extra array length key in the array
+                } else {
+                    // This is array length key/value pair
+                    const newElementKey = '' + element.elementKey + Web3Utils.padLeft(Web3Utils.numberToHex(i - 1), 32).replace('0x','')
+                    results.push({ key: newElementKey, value: e })
+                }
+            }) // end .forEach()
+
+        } else {
+            results.push({ key: element.key, value: element.returnGraphData })
+        }
+
+    }
+    return results
+}
+
+function generateAllResults(schema) {
+    // Take a schema objects and builds full expected results
+    return schema.map(e => {
+        const obj = {}
+        obj[e.name] = e.expectedResult
+        return obj
+    })
+}
