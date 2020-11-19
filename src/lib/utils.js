@@ -106,9 +106,8 @@ export const utils = {
 
   encodeAllData: (schema, data) => {
     // Data must come as key/value pairs, where keys are defined as per the schema
-    const results = [] // results will be the flattened array of hex key/value pairs
-    // NOTE: This requires properly formatted input data. id. nested objects/arrays etc are properly arranged as per the schema
-    // We are starting with unencoded data... this means array types much be nested as such (as would be expected from decoding results)
+    const results = [] // results will be the flattened array of key/value pairs able to be deployed using ABI
+    // NOTE: This requires properly formatted input data as per the schema (as expected from dedoce)
 
     // 1. loop through data // we do this first because it can contain array keys as well
     for (let index = 0; index < data.length; index++) {
@@ -122,12 +121,12 @@ export const utils = {
       // 2.1 test to see if matching with an array '[]' key
       // Better to just test for schemaElement keyType 'Array'?
       if (objKey.substr(objKey.length - 2 - 1 ) === '[]' || schemaElement.keyType.toLowerCase() === 'array') {
-        // // This is an array
-        // // Create the 'sub' schema for array elements
+        // This is an array
+        // Create the 'sub' schema for array elements
 
-        // // in the first element we put the length remember?
+        // in the first element we put the length remember?
         const elementKey = '' + schemaElement.elementKey + Web3Utils.leftPad(schemaElement.elementKey.substr(schemaElement.key.length - 32), 32).replace('0x','')
-        // // Form new schema schema to check data against
+        // Form new schema schema to check data against
         const newSchemaElement = {
           key: elementKey,
           keyType: "Singleton",
@@ -148,7 +147,7 @@ export const utils = {
               // This is array length key/value pair
               results.push({key:newElementKey, value: newElementValue})
             }
-          // const e = dataElement[schemaElement.name][i];
+            
           results.push({key: schemaElement.elementKey + Web3Utils.padLeft(i, 32).replace('0x',''), value: utils.encodeKeyValue(newSchemaElement, e)})
         }
       } else {
@@ -159,30 +158,38 @@ export const utils = {
       
 
     }
-    // 3. encode data by schema types
+    
     return results
   },
 
   decodeKeyValue : (schemaElementDefinition, value) => {
 
+    let sameEncoding = (CONSTANTS.valueContentTypeMap[schemaElementDefinition.valueContent] === schemaElementDefinition.valueType)
     // decode value
-    if(
-        schemaElementDefinition.valueType !== 'bytes' &&
-        schemaElementDefinition.valueType !== 'address' &&
-        schemaElementDefinition.valueType !== 'string'
-    )
+    if (
+        schemaElementDefinition.valueType !== 'bytes' // we ignore becuase all is decoded by bytes to start with (abi)
+        && !Web3Utils.isAddress(value) // checks for addresses, since technically an address is bytes?
+    ) {
       value = Web3Abi.decodeParameter(schemaElementDefinition.valueType, value)
-      // TODO: Handle arrays?
+    }
 
-      // console.log('what is the value now?!?!?!?')
-      // console.log(value)
-      // console.log(schemaElementDefinition.valueType)
+    // As per exception above, if address and sameEncoding, then the address still needs to be handled
+    if (sameEncoding && Web3Utils.isAddress(value) && !Web3Utils.checkAddressChecksum(value)) {
+      sameEncoding = !sameEncoding
+    }
+
+    // We are finished if duplicated encoding methods
+    if (sameEncoding) {
+      return value
+    }
+
     // Detect valueContent type, and handle case
     switch (schemaElementDefinition.valueContent.toLowerCase()) {
-      case "arraylength":
-      case "number":
       case "keccak256":
         return value
+      case "arraylength":
+      case "number":
+        return Web3Utils.hexToNumber(value)
       case "string":
       case "uri":
       case "markdown":
@@ -210,33 +217,56 @@ export const utils = {
   },
   
   encodeKeyValue: (schemaElementDefinition, value) => {
-
-    if(
-        schemaElementDefinition.valueType !== 'bytes' &&
-        schemaElementDefinition.valueType !== 'address' &&
-        schemaElementDefinition.valueType !== 'string'
-    )
-      value = Web3Abi.encodeParameter(schemaElementDefinition.valueType, value)
-
     // @param value: can contain single value, or obj as required by spec
+    let result
+
+    let sameEncoding = (CONSTANTS.valueContentTypeMap[schemaElementDefinition.valueContent] === schemaElementDefinition.valueType)
+
     switch (schemaElementDefinition.valueContent.toLowerCase()) {
+      case "keccak256":
+        result = value 
+        break;
       case "arraylength":
       case "number":
-      case "keccak256":
-        return value // Expected hashing external hashing. Is this appropriate with other patterns? TODO: lets hash it here?
+        result = Web3Utils.padLeft(Web3Utils.numberToHex(value), 64)
+        break;
       case "string":
       case "uri":
       case "markdown":
-        return Web3Utils.utf8ToHex(value)
+        result = Web3Utils.utf8ToHex(value)
+        break;
       case "address":
-        return Web3Utils.toChecksumAddress(value)
+        result = Web3Utils.toChecksumAddress(value)
+        break;
       case "hashedasseturi":
-        return utils._encodeDataSourceWithHash(value.hashFunction, value.assetHash, value.assetURI)
+        result = utils._encodeDataSourceWithHash(value.hashFunction, value.assetHash, value.assetURI)
+        break;
       case "jsonuri":
-        return utils._encodeDataSourceWithHash(value.hashFunction, value.jsonHash, value.jsonURI)
+        result = utils._encodeDataSourceWithHash(value.hashFunction, value.jsonHash, value.jsonURI)
       default:
         break;
     }
+
+
+    if (
+        schemaElementDefinition.valueType !== 'bytes'
+        && !sameEncoding
+    ) {
+      result = Web3Abi.encodeParameter(schemaElementDefinition.valueType, result)
+    } else {
+      // there is an issue with ['String','string'] type encoding?
+      if (
+        schemaElementDefinition.valueType === 'string'
+        && sameEncoding
+        // || schemaElementDefinition.valueType === 'uint256'
+
+      ) {
+        
+        result = Web3Abi.encodeParameter('bytes', result)
+      }
+
+    }
+    return result
 
   },
 
@@ -244,18 +274,13 @@ export const utils = {
     return Web3Utils.keccak256(name)
   },
 
-  _transposeSchema: () => {
-    // TODO: Handle all schema transpositions here?
-    // used for keyType = 'Array'
-  },
-
   // Pseudo private functions for internal use
   _encodeDataSourceWithHash: (hashType, dataHash, dataSource) => {
-      // NOTE: Assuming smart contract is checking for supported hash methods?
+    
       if (!CONSTANTS.hashFunctions.find(e => { return e.name === hashType || e.sig === hashType })) { 
         return Error('Unsupported hash type to encode hash and value')
       }
-      // NOTE: Do we need 'toHex', incase future algorithms do not output hex as keccak does?
+      // NOTE: QUESTION: Do we need 'toHex', incase future algorithms do not output hex as keccak does?
       const hashData = Web3Utils.padLeft(dataHash,32).replace('0x','') 
       const hashFunction = CONSTANTS.hashFunctions.find(e => { return hashType === e.name || hashType === e.sig })
       return '' + hashFunction.sig + hashData + Web3Utils.utf8ToHex(dataSource).replace('0x','')

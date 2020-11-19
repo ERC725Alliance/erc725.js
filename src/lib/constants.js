@@ -23,13 +23,23 @@ export const CONSTANTS = {
     }
 
   },
-  hashFunctions:
-    [
+  hashFunctions: [
       {
         name: 'keccak256',
         sig: '0xb7845733',
         method: Web3Utils.keccak256
       },
+  ],
+  valueContentTypeMap: {
+    Keccak256: 'bytes32',
+    ArrayLength: 'uint256',
+    Number: 'uint256',
+    Address: 'address',
+    String: 'string',
+    Markdown: 'string',
+    URI: 'string',
+    HashedAssetURI: 'custom',
+    JSONURI: 'custom',
+  }
 
-    ]
 }
