@@ -163,23 +163,32 @@ export const utils = {
   },
 
   decodeKeyValue : (schemaElementDefinition, value) => {
-
+    // console.log(value)
+    if (schemaElementDefinition.name === 'LSP3Name') {
+      console.log('something is wrong here...')
+      console.log(schemaElementDefinition.name)
+      console.log(schemaElementDefinition.valueContent)
+      console.log('type: ', schemaElementDefinition.valueType, 'value: ', value)
+    }
     let sameEncoding = (CONSTANTS.valueContentTypeMap[schemaElementDefinition.valueContent] === schemaElementDefinition.valueType)
-    // decode value
+
+    // BUG: This method fails for live data of this? But test data is the same??!
     if (
         schemaElementDefinition.valueType !== 'bytes' // we ignore becuase all is decoded by bytes to start with (abi)
+        && schemaElementDefinition.valueType !== 'string'
         && !Web3Utils.isAddress(value) // checks for addresses, since technically an address is bytes?
     ) {
+      if (schemaElementDefinition.name === 'LSP3Name') {console.log('The [BUG], its here!!!!!!!!!!!')}
       value = Web3Abi.decodeParameter(schemaElementDefinition.valueType, value)
     }
-
+    // console.log('not bugging')
     // As per exception above, if address and sameEncoding, then the address still needs to be handled
     if (sameEncoding && Web3Utils.isAddress(value) && !Web3Utils.checkAddressChecksum(value)) {
       sameEncoding = !sameEncoding
     }
 
     // We are finished if duplicated encoding methods
-    if (sameEncoding) {
+    if (sameEncoding && schemaElementDefinition.valueType !== 'string') {
       return value
     }
 
@@ -262,7 +271,7 @@ export const utils = {
 
       ) {
         
-        result = Web3Abi.encodeParameter('bytes', result)
+        // result = Web3Abi.encodeParameter('bytes', result)
       }
 
     }
