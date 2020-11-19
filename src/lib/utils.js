@@ -163,7 +163,8 @@ export const utils = {
   },
 
   decodeKeyValue : (schemaElementDefinition, value) => {
-    let sameEncoding = (CONSTANTS.valueContentTypeMap[schemaElementDefinition.valueContent] === schemaElementDefinition.valueType)
+    let sameEncoding = (CONSTANTS.valueContentTypeMap[schemaElementDefinition.valueContent] === schemaElementDefinition.valueType.split('[]')[0])
+    const isArray = (schemaElementDefinition.valueType.substr(schemaElementDefinition.valueType.length - 2) === '[]' ) ? true : false 
 
     if (
         schemaElementDefinition.valueType !== 'bytes' // we ignore becuase all is decoded by bytes to start with (abi)
@@ -184,6 +185,25 @@ export const utils = {
     if (sameEncoding && schemaElementDefinition.valueType !== 'string') {
       return value
     }
+    
+    if (isArray && Array.isArray(value)) {
+      console.log('we have an array!!!!!!')
+      console.log(value)
+      // value must be an array also
+      const results = []
+      for (let index = 0; index < value.length; index++) {
+        const element = value[index];
+        results.push(utils._handleDecodeKeyValue(schemaElementDefinition, element))
+      }
+      return results
+
+    } else {
+      return utils._handleDecodeKeyValue(schemaElementDefinition, value)
+    }
+
+  },
+
+  _handleDecodeKeyValue: (schemaElementDefinition, value) => {
 
     // Detect valueContent type, and handle case
     switch (schemaElementDefinition.valueContent.toLowerCase()) {
@@ -221,9 +241,48 @@ export const utils = {
   encodeKeyValue: (schemaElementDefinition, value) => {
     // @param value: can contain single value, or obj as required by spec
     let result
+    const isArray = (schemaElementDefinition.valueType.substr(schemaElementDefinition.valueType.length - 2) === '[]' ) ? true : false 
 
-    let sameEncoding = (CONSTANTS.valueContentTypeMap[schemaElementDefinition.valueContent] === schemaElementDefinition.valueType)
+    let sameEncoding = (CONSTANTS.valueContentTypeMap[schemaElementDefinition.valueContent] === schemaElementDefinition.valueType.split('[]')[0])
+    
+    if (isArray && Array.isArray(value) && !sameEncoding) {
+      // we have an array
+      const results = []
+      for (let index = 0; index < value.length; index++) {
+        const element = value[index];
+        results.push(utils._handleEncodeKeyValue(schemaElementDefinition, element))
+      }
+      result = results
+    } else if (!isArray) {
+      result = utils._handleEncodeKeyValue(schemaElementDefinition, value)
+    } else if (sameEncoding) {
+      result = value
+    }
 
+    if (
+        schemaElementDefinition.valueType !== 'bytes'
+        && !sameEncoding
+    ) {
+
+      result = Web3Abi.encodeParameter(schemaElementDefinition.valueType, result)
+    } else {
+      // there is an issue with ['String','string'] type encoding?
+      if (
+        schemaElementDefinition.valueType === 'string[]'
+        && sameEncoding
+        // || schemaElementDefinition.valueType === 'uint256'
+      ) {
+        
+        result = Web3Abi.encodeParameter('string[]', result)
+      }
+
+    }
+    return result
+
+  },
+
+  _handleEncodeKeyValue: (schemaElementDefinition, value) => {
+    let result
     switch (schemaElementDefinition.valueContent.toLowerCase()) {
       case "keccak256":
         result = value 
@@ -248,29 +307,9 @@ export const utils = {
       default:
         break;
     }
-
-
-    if (
-        schemaElementDefinition.valueType !== 'bytes'
-        && !sameEncoding
-    ) {
-      result = Web3Abi.encodeParameter(schemaElementDefinition.valueType, result)
-    } else {
-      // there is an issue with ['String','string'] type encoding?
-      if (
-        schemaElementDefinition.valueType === 'string'
-        && sameEncoding
-        // || schemaElementDefinition.valueType === 'uint256'
-
-      ) {
-        
-        // result = Web3Abi.encodeParameter('bytes', result)
-      }
-
-    }
     return result
-
   },
+
 
   encodeKeyName: (name) => {
     return Web3Utils.keccak256(name)

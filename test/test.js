@@ -180,21 +180,22 @@ describe('Running erc725.js tests...', function() {
                 it('Decode data value for: ' + schemaElement.name, async () => {
                     const result = utils.decodeKeyValue(schemaElement, schemaElement.returnGraphData)
 
-                    if (typeof result === 'object' && Object.keys(result).length > 0) {
+                    // NOTE: What was the original point of this?
+                    // if (typeof result === 'object' && Object.keys(result).length > 0) {
 
-                        const newResult = {}
-                        for (const key in result) {
-                            if (result.hasOwnProperty(key)) {
-                                const element = result[key];
-                                newResult[key] = element
-                            }
-                        }
+                    //     const newResult = {}
+                    //     for (const key in result) {
+                    //         if (result.hasOwnProperty(key)) {
+                    //             const element = result[key];
+                    //             newResult[key] = element
+                    //         }
+                    //     }
 
-                        assert.deepStrictEqual(newResult, schemaElement.expectedResult)
-                    } else {
+                    //     assert.deepStrictEqual(newResult, schemaElement.expectedResult)
+                    // } else {
 
                         assert.deepStrictEqual(result, schemaElement.expectedResult)
-                    }
+                    // }
                 })
 
 
@@ -215,7 +216,7 @@ function generateAllRawData(schema) {
         if (element.keyType === 'Array') {
             element.returnRawData.forEach((e, i) => {
                 if (i === 0) { // we assume always first element in the array in returnData array is the length
-                    results.push({key: element.key, value: e}) // we subtract one from length because this has the extra array length key in the array
+                    results.push({key: element.key, value: e}) 
                 } else {
                     // This is array length key/value pair
                     const newElementKey = '' + element.elementKey + Web3Utils.padLeft(Web3Utils.numberToHex(i - 1), 32).replace('0x','')
