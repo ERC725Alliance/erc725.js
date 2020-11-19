@@ -56,9 +56,8 @@ const schema = [
 ]
 ```
 
-## API
 
-### Instantiation
+## Instantiation
 
 ```js
 import ERC725 from `erc725.js`
@@ -81,7 +80,7 @@ const erc725 = new ERC725(schema, '0x09098...', web3.currentProvider)
 
 Creates a new instance of the ERC725 class with associated address, schema, and provider.
 
-### Methods
+## Methods
 
 #### getData
 ```js
@@ -101,7 +100,7 @@ This will return the decoded value as defined by the associated schema element f
 `Mixed`: Returns the decoded value.
 
 
-#### getAllData
+### getAllData
 
 ```js
 const allData = erc725.getAllData()
@@ -114,7 +113,7 @@ Returns all key value pairs from the ERC725 contract as defined in the provided 
 `Array`: An array of objects with schema element keys and the decoded data.
 
 
-### Utility Methods
+## Utility Methods
 
 These methods are made available for data encoding and decoding.
 
@@ -127,7 +126,7 @@ erc725.utils
 ```
 
 
-#### decodeKeyValue()
+### decodeKeyValue()
 
 ```js
 erc725.utils.decodeKeyValue(schemaKeyOrElement, hexValue)
@@ -149,7 +148,7 @@ erc725.utils.decodeKeyValue(schemaKeyOrElement, hexValue)
 ```
 
 
-#### encodeKeyValue()
+### encodeKeyValue()
 
 ```js
 erc725.utils.encodeKeyValue(schemaKeyOrElement, value)
@@ -186,7 +185,7 @@ erc725.utils.encodeKeyValue({
 
 
 
-#### decodeAllData()
+### decodeAllData()
 
 This method will take an array of key/value pairs as would be expected to be returned from and ERC725 contract through and ABI using `web3.contract` (for instance).
 
@@ -210,7 +209,7 @@ erc725.utils.decodeAllData(schema, data)
 ```
 
 
-#### encodeAllData()
+### encodeAllData()
 
 ```js
 erc725.utils.encodeAllData(schema, data)
