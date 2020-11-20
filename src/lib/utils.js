@@ -20,6 +20,7 @@
 import Web3Utils from 'web3-utils'
 import Web3Abi from 'web3-eth-abi'
 import { CONSTANTS } from './constants.js'
+import { encoder } from './encoder.js'
 
 export const utils = {
 
@@ -193,47 +194,12 @@ export const utils = {
       const results = []
       for (let index = 0; index < value.length; index++) {
         const element = value[index];
-        results.push(utils._handleDecodeKeyValue(schemaElementDefinition, element))
+        results.push(encoder.decodeValueContent(schemaElementDefinition.valueContent, element))
       }
       return results
 
     } else {
-      return utils._handleDecodeKeyValue(schemaElementDefinition, value)
-    }
-
-  },
-
-  _handleDecodeKeyValue: (schemaElementDefinition, value) => {
-
-    // Detect valueContent type, and handle case
-    switch (schemaElementDefinition.valueContent.toLowerCase()) {
-      case "keccak256":
-        return value
-      case "arraylength":
-      case "number":
-        return parseInt(Web3Utils.hexToNumber(value))
-      case "string":
-      case "uri":
-      case "markdown":
-        return Web3Utils.hexToUtf8(value)
-      case "address":
-        return Web3Utils.toChecksumAddress(value)
-      case "hashedasseturi":
-        const assetResult = utils._decodeDataSourceWithHash(value)
-        return {
-          hashFunction: assetResult.hashFunction,
-          assetHash: assetResult.dataHash,
-          assetURI: assetResult.dataSource
-        }
-      case "jsonuri":
-        const jsonResult = utils._decodeDataSourceWithHash(value)
-        return {
-          hashFunction: jsonResult.hashFunction,
-          jsonHash: jsonResult.dataHash,
-          jsonURI: jsonResult.dataSource
-        }
-      default:
-        break;
+      return encoder.decodeValueContent(schemaElementDefinition.valueContent, value)
     }
 
   },
@@ -250,11 +216,11 @@ export const utils = {
       const results = []
       for (let index = 0; index < value.length; index++) {
         const element = value[index];
-        results.push(utils._handleEncodeKeyValue(schemaElementDefinition, element))
+        results.push(encoder.encodeValueContent(schemaElementDefinition.valueContent, element))
       }
       result = results
     } else if (!isArray) {
-      result = utils._handleEncodeKeyValue(schemaElementDefinition, value)
+      result = encoder.encodeValueContent(schemaElementDefinition.valueContent, value)
     } else if (sameEncoding) {
       result = value
     }
@@ -281,59 +247,8 @@ export const utils = {
 
   },
 
-  _handleEncodeKeyValue: (schemaElementDefinition, value) => {
-    let result
-    switch (schemaElementDefinition.valueContent.toLowerCase()) {
-      case "keccak256":
-        result = value 
-        break;
-      case "arraylength":
-      case "number":
-        result = Web3Utils.padLeft(Web3Utils.numberToHex(value), 64)
-        break;
-      case "string":
-      case "uri":
-      case "markdown":
-        result = Web3Utils.utf8ToHex(value)
-        break;
-      case "address":
-        result = Web3Utils.toChecksumAddress(value)
-        break;
-      case "hashedasseturi":
-        result = utils._encodeDataSourceWithHash(value.hashFunction, value.assetHash, value.assetURI)
-        break;
-      case "jsonuri":
-        result = utils._encodeDataSourceWithHash(value.hashFunction, value.jsonHash, value.jsonURI)
-      default:
-        break;
-    }
-    return result
-  },
-
-
   encodeKeyName: (name) => {
     return Web3Utils.keccak256(name)
-  },
-
-  // Pseudo private functions for internal use
-  _encodeDataSourceWithHash: (hashType, dataHash, dataSource) => {
-    
-      if (!CONSTANTS.hashFunctions.find(e => { return e.name === hashType || e.sig === hashType })) { 
-        return Error('Unsupported hash type to encode hash and value')
-      }
-      // NOTE: QUESTION: Do we need 'toHex', incase future algorithms do not output hex as keccak does?
-      const hashData = Web3Utils.padLeft(dataHash,32).replace('0x','') 
-      const hashFunction = CONSTANTS.hashFunctions.find(e => { return hashType === e.name || hashType === e.sig })
-      return '' + hashFunction.sig + hashData + Web3Utils.utf8ToHex(dataSource).replace('0x','')
-  },
-
-  _decodeDataSourceWithHash: (value) => {
-      const hashFunctionSig = value.substr(0, 10)
-      const hashFunction = CONSTANTS.hashFunctions.find(e => { return e.sig === hashFunctionSig })
-      const encoodedData = value.replace('0x','').substr(8) // Rest of data string after function hash
-      const dataHash = '0x' + encoodedData.substr(0,64) // Get jsonHash 32 bytes
-      const dataSource = Web3Utils.hexToUtf8('0x' + encoodedData.substr(64)) // Get remainder as URI
-      return { hashFunction: hashFunction.name, dataHash, dataSource }
   },
 
 

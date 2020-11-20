@@ -12,7 +12,7 @@
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * @file dataSrouce/subgraphProviderWrapper.js
+ * @file providers/subgraphProviderWrapper.js
  * @author Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
  * @date 2020
  */
