@@ -12,7 +12,7 @@ export class HttpProvider {
               result: (Array.isArray(this.returnData)) ? this.returnData.find(e => { return e.key === keyParam}).value : this.returnData
               // result: (Array.isArray(this.returnData)) ? this.returnData.shift() : this.returnData
           })
-      }, 100);
+      }, 50);
   }
 }
 
@@ -29,7 +29,7 @@ export class EthereumProvider {
               // const result = (Array.isArray(this.returnData)) ? this.returnData.shift() : this.returnData
               // TODO: Handle reject
               resolve(result)
-          }, 100);
+          }, 50);
       })
   }
 }
@@ -54,7 +54,7 @@ export class ApolloClient {
               // this.getAll flag is used to return different expected query results
               const res = this.getAll ? {data:{mockResults: this.returnData}} : {data:{mockResults:[{key:keyParam ,value:val}]}}
               resolve(res)
-          }, 100);
+          }, 50);
       })
   }
 }

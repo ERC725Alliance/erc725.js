@@ -167,13 +167,16 @@ export const utils = {
     let sameEncoding = (CONSTANTS.valueContentTypeMap[schemaElementDefinition.valueContent] === schemaElementDefinition.valueType.split('[]')[0])
     const isArray = (schemaElementDefinition.valueType.substr(schemaElementDefinition.valueType.length - 2) === '[]' ) ? true : false 
 
+    // VALUE TYPE
     if (
         schemaElementDefinition.valueType !== 'bytes' // we ignore becuase all is decoded by bytes to start with (abi)
         && schemaElementDefinition.valueType !== 'string'
         && !Web3Utils.isAddress(value) // checks for addresses, since technically an address is bytes?
     ) {
-      value = Web3Abi.decodeParameter(schemaElementDefinition.valueType, value)
+      value = encoder.decodeValueType(schemaElementDefinition.valueType, value)
       // Decode parameter for uint will return a string, not an integer
+      // we need accurate type for next step in decoding if necessary(?)
+      // TODO: Check for big number?
       value = schemaElementDefinition.valueType === 'uint256' ? parseInt(value) : value
     }
     
@@ -182,14 +185,14 @@ export const utils = {
       sameEncoding = !sameEncoding
     }
 
-    // We are finished if duplicated encoding methods
     if (sameEncoding && schemaElementDefinition.valueType !== 'string') {
       return value
     }
+
+    // VALUE CONTENT
+    // We are finished if duplicated encoding methods
     
     if (isArray && Array.isArray(value)) {
-      console.log('we have an array!!!!!!')
-      console.log(value)
       // value must be an array also
       const results = []
       for (let index = 0; index < value.length; index++) {
@@ -230,16 +233,18 @@ export const utils = {
         && !sameEncoding
     ) {
 
-      result = Web3Abi.encodeParameter(schemaElementDefinition.valueType, result)
+      // result = Web3Abi.encodeParameter(schemaElementDefinition.valueType, result)
+      result = encoder.encodeValueType(schemaElementDefinition.valueType, result)
     } else {
-      // there is an issue with ['String','string'] type encoding?
+      // there is an issue with ['String','string[]'] type encoding?
       if (
-        schemaElementDefinition.valueType === 'string[]'
+        (schemaElementDefinition.valueType === 'string[]'
+        || schemaElementDefinition.valueType === 'address[]')
         && sameEncoding
-        // || schemaElementDefinition.valueType === 'uint256'
       ) {
         
-        result = Web3Abi.encodeParameter('string[]', result)
+        result = encoder.encodeValueType(schemaElementDefinition.valueType, result)
+        // result = Web3Abi.encodeParameter('string[]', result)
       }
 
     }

@@ -25,63 +25,6 @@ import Web3Abi from 'web3-eth-abi'
 import Web3Utils from 'web3-utils'
 import { CONSTANTS } from './constants.js'
 
-const valueContentEncodingMap = {
-  "Keccak256": { type: 'bytes32', encode: (value) => { return value }, decode: (value) => { return value } },
-  "ArrayLength": { type: 'uint256', encode: (value) => { return Web3Utils.padLeft(Web3Utils.numberToHex(value), 64) }, decode: (value) => { return parseInt(Web3Utils.hexToNumber(value)) } },
-  "Number": { type: 'uint256', encode: (value) => { return Web3Utils.padLeft(Web3Utils.numberToHex(value), 64) }, decode: (value) => { return parseInt(Web3Utils.hexToNumber(value)) } },
-  // NOTE: This is not symmetrical!
-  "Address": { type: 'address', encode: (value) => { return Web3Utils.toChecksumAddress(value) }, decode: (value) => { return Web3Utils.toChecksumAddress(value) } },
-
-  "String": { type: 'string', encode: (value) => { return Web3Utils.utf8ToHex(value) }, decode: (value) => { return Web3Utils.hexToUtf8(value) } },
-  "Markdown": { type: 'string', encode: (value) => { return Web3Utils.utf8ToHex(value) }, decode: (value) => { return Web3Utils.hexToUtf8(value) } },
-  "URI": { type: 'string', encode: (value) => { return Web3Utils.utf8ToHex(value) }, decode: (value) => { return Web3Utils.hexToUtf8(value) } },
-  "HashedAssetURI": {
-    type: 'custom',
-    encode: (value) => { return encodeDataSourceWithHash(value.hashFunction, value.assetHash, value.assetURI) },
-    decode: (value) => { const result = decodeDataSourceWithHash(value); return { hashFunction: result.hashFunction, assetHash: result.dataHash, assetURI: result.dataSource } }
-  },
-  "JSONURI": {
-    type: 'custom',
-    encode: (value) => { return encodeDataSourceWithHash(value.hashFunction, value.jsonHash, value.jsonURI) },
-    decode: (value) => { const result = decodeDataSourceWithHash(value); return { hashFunction: result.hashFunction, jsonHash: result.dataHash, jsonURI: result.dataSource } }
-  },
-}
-
-const valueTypeEncodingMap = {
-  "string": {encode: (value) => { return Web3Abi.encodeParameter('string"', value) }, decode: (value) => { return Web3Abi.decodeParameter('string"', value)}},
-  "address": {encode: (value) => { return Web3Abi.encodeParameter('address"', value) }, decode: (value) => { return Web3Abi.decodeParameter('address"', value)}},
-  // NOTE: We could add conditional handling of numeric values here...
-  "uint256": {encode: (value) => { return Web3Abi.encodeParameter('uint256"', value) }, decode: (value) => { return Web3Abi.decodeParameter('uint256"', value)}},
-  "bytes32": {encode: (value) => { return Web3Abi.encodeParameter('bytes32"', value) }, decode: (value) => { return Web3Abi.decodeParameter('bytes32"', value)}},
-  "bytes": {encode: (value) => { return Web3Abi.encodeParameter('bytes"', value) }, decode: (value) => { return Web3Abi.decodeParameter('bytes"', value)}},
-  "string[]": {encode: (value) => { return Web3Abi.encodeParameter('string[]"', value) }, decode: (value) => { return Web3Abi.decodeParameter('string[]"', value)}},
-  "address[]": {encode: (value) => { return Web3Abi.encodeParameter('address[]"', value) }, decode: (value) => { return Web3Abi.decodeParameter('address[]"', value)}},
-  "uint256[]": {encode: (value) => { return Web3Abi.encodeParameter('uint256[]"', value) }, decode: (value) => { return Web3Abi.decodeParameter('uint256[]"', value)}},
-  "bytes32[]": {encode: (value) => { return Web3Abi.encodeParameter('bytes32[]"', value) }, decode: (value) => { return Web3Abi.decodeParameter('bytes32[]"', value)}},
-  "bytes[]": {encode: (value) => { return Web3Abi.encodeParameter('bytes[]"', value) }, decode: (value) => { return Web3Abi.decodeParameter('bytes[]"', value)}},
-}
-
-const encodeDataSourceWithHash = (hashType, dataHash, dataSource) => {
-  
-    if (!CONSTANTS.hashFunctions.find(e => { return e.name === hashType || e.sig === hashType })) { 
-      return Error('Unsupported hash type to encode hash and value: ' + hashType)
-    }
-    // NOTE: QUESTION: Do we need 'toHex', incase future algorithms do not output hex as keccak does?
-    const hashData = Web3Utils.padLeft(dataHash,32).replace('0x','') 
-    const hashFunction = CONSTANTS.hashFunctions.find(e => { return hashType === e.name || hashType === e.sig })
-    return '' + hashFunction.sig + hashData + Web3Utils.utf8ToHex(dataSource).replace('0x','')
-}
-
-const decodeDataSourceWithHash = (value) => {
-    const hashFunctionSig = value.substr(0, 10)
-    const hashFunction = CONSTANTS.hashFunctions.find(e => { return e.sig === hashFunctionSig })
-    const encoodedData = value.replace('0x','').substr(8) // Rest of data string after function hash
-    const dataHash = '0x' + encoodedData.substr(0,64) // Get jsonHash 32 bytes
-    const dataSource = Web3Utils.hexToUtf8('0x' + encoodedData.substr(64)) // Get remainder as URI
-    return { hashFunction: hashFunction.name, dataHash, dataSource }
-}
-
-
 export const encoder = {
 
   encodeValueType: (type, value) => {
@@ -106,3 +49,114 @@ export const encoder = {
   },
 
 }
+
+const valueTypeEncodingMap = {
+  "string": {
+    encode: (value) => { return Web3Abi.encodeParameter('string', value) },
+    decode: (value) => { return Web3Abi.decodeParameter('string', value) }
+  },
+  "address": {
+    encode: (value) => { return Web3Abi.encodeParameter('address', value) },
+    decode: (value) => { return Web3Abi.decodeParameter('address', value) }
+  },
+  // NOTE: We could add conditional handling of numeric values here...
+  "uint256": {
+    encode: (value) => { return Web3Abi.encodeParameter('uint256', value) },
+    decode: (value) => { return Web3Abi.decodeParameter('uint256', value) }
+  },
+  "bytes32": {
+    encode: (value) => { return Web3Abi.encodeParameter('bytes32', value) },
+    decode: (value) => { return Web3Abi.decodeParameter('bytes32', value) }
+  },
+  "bytes": {
+    encode: (value) => { return Web3Abi.encodeParameter('bytes', value) },
+    decode: (value) => { return Web3Abi.decodeParameter('bytes', value) }
+  },
+  "string[]": {
+    encode: (value) => { return Web3Abi.encodeParameter('string[]', value) },
+    decode: (value) => { return Web3Abi.decodeParameter('string[]', value) }
+  },
+  "address[]": {
+    encode: (value) => { return Web3Abi.encodeParameter('address[]', value) },
+    decode: (value) => { return Web3Abi.decodeParameter('address[]', value) }
+  },
+  "uint256[]": {
+    encode: (value) => { return Web3Abi.encodeParameter('uint256[]', value) },
+    decode: (value) => { return Web3Abi.decodeParameter('uint256[]', value) }
+  },
+  "bytes32[]": {
+    encode: (value) => { return Web3Abi.encodeParameter('bytes32[]', value) },
+    decode: (value) => { return Web3Abi.decodeParameter('bytes32[]', value) }
+  },
+  "bytes[]": {
+    encode: (value) => { return Web3Abi.encodeParameter('bytes[]', value) },
+    decode: (value) => { return Web3Abi.decodeParameter('bytes[]', value) }
+  },
+}
+
+const valueContentEncodingMap = {
+  "Keccak256": { type: 'bytes32',
+    encode: (value) => { return value },
+    decode: (value) => { return value }
+  },
+  "ArrayLength": { type: 'uint256',
+    encode: (value) => { return Web3Utils.padLeft(Web3Utils.numberToHex(value), 64) },
+    decode: (value) => { return parseInt(Web3Utils.hexToNumber(value)) }
+  },
+  "Number": { type: 'uint256',
+    encode: (value) => { return Web3Utils.padLeft(Web3Utils.numberToHex(value), 64) },
+    decode: (value) => { return parseInt(Web3Utils.hexToNumber(value)) }
+  },
+  // NOTE: This is not symmetrical!
+  "Address": {
+    type: 'address',
+    encode: (value) => { return Web3Utils.toChecksumAddress(value) },
+    decode: (value) => { return Web3Utils.toChecksumAddress(value) }
+  },
+  "String": {
+    type: 'string',
+    encode: (value) => { return Web3Utils.utf8ToHex(value) },
+    decode: (value) => { return Web3Utils.hexToUtf8(value) }
+  },
+  "Markdown": {
+    type: 'string',
+    encode: (value) => { return Web3Utils.utf8ToHex(value) },
+    decode: (value) => { return Web3Utils.hexToUtf8(value) }
+  },
+  "URI": {
+    type: 'string',
+    encode: (value) => { return Web3Utils.utf8ToHex(value) },
+    decode: (value) => { return Web3Utils.hexToUtf8(value) }
+  },
+  "HashedAssetURI": {
+    type: 'custom',
+    encode: (value) => { return encodeDataSourceWithHash(value.hashFunction, value.assetHash, value.assetURI) },
+    decode: (value) => { const result = decodeDataSourceWithHash(value); return { hashFunction: result.hashFunction, assetHash: result.dataHash, assetURI: result.dataSource } }
+  },
+  "JSONURI": {
+    type: 'custom',
+    encode: (value) => { return encodeDataSourceWithHash(value.hashFunction, value.jsonHash, value.jsonURI) },
+    decode: (value) => { const result = decodeDataSourceWithHash(value); return { hashFunction: result.hashFunction, jsonHash: result.dataHash, jsonURI: result.dataSource } }
+  },
+}
+
+const encodeDataSourceWithHash = (hashType, dataHash, dataSource) => {
+  
+    if (!CONSTANTS.hashFunctions.find(e => { return e.name === hashType || e.sig === hashType })) { 
+      return Error('Unsupported hash type to encode hash and value: ' + hashType)
+    }
+    // NOTE: QUESTION: Do we need 'toHex', incase future algorithms do not output hex as keccak does?
+    const hashData = Web3Utils.padLeft(dataHash,32).replace('0x','') 
+    const hashFunction = CONSTANTS.hashFunctions.find(e => { return hashType === e.name || hashType === e.sig })
+    return '' + hashFunction.sig + hashData + Web3Utils.utf8ToHex(dataSource).replace('0x','')
+}
+
+const decodeDataSourceWithHash = (value) => {
+    const hashFunctionSig = value.substr(0, 10)
+    const hashFunction = CONSTANTS.hashFunctions.find(e => { return e.sig === hashFunctionSig })
+    const encoodedData = value.replace('0x','').substr(8) // Rest of data string after function hash
+    const dataHash = '0x' + encoodedData.substr(0,64) // Get jsonHash 32 bytes
+    const dataSource = Web3Utils.hexToUtf8('0x' + encoodedData.substr(64)) // Get remainder as URI
+    return { hashFunction: hashFunction.name, dataHash, dataSource }
+}
+
