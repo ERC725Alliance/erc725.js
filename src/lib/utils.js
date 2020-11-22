@@ -173,11 +173,15 @@ export const utils = {
         && schemaElementDefinition.valueType !== 'string'
         && !Web3Utils.isAddress(value) // checks for addresses, since technically an address is bytes?
     ) {
+      if (schemaElementDefinition === 'uint256[]') {
+        console.log(' we got the uint256 array')
+      }
       value = encoder.decodeValueType(schemaElementDefinition.valueType, value)
       // Decode parameter for uint will return a string, not an integer
       // we need accurate type for next step in decoding if necessary(?)
       // TODO: Check for big number?
       value = schemaElementDefinition.valueType === 'uint256' ? parseInt(value) : value
+      value = schemaElementDefinition.valueType === 'uint256[]' ? value.map(e => {return parseInt(e)}) : value
     }
     
     // As per exception above, if address and sameEncoding, then the address still needs to be handled
@@ -238,8 +242,10 @@ export const utils = {
     } else {
       // there is an issue with ['String','string[]'] type encoding?
       if (
+        // array types [], need additional encoding
         (schemaElementDefinition.valueType === 'string[]'
-        || schemaElementDefinition.valueType === 'address[]')
+        || schemaElementDefinition.valueType === 'address[]'
+        || schemaElementDefinition.valueType === 'uint256[]')
         && sameEncoding
       ) {
         
