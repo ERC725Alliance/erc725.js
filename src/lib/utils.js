@@ -218,8 +218,9 @@ export const utils = {
 
     let sameEncoding = (CONSTANTS.valueContentTypeMap[schemaElementDefinition.valueContent] === schemaElementDefinition.valueType.split('[]')[0])
     
-    if (isArray && Array.isArray(value) && !sameEncoding) {
-      // we have an array
+    // We only loop if the valueType done by abi.encodeParameter can not handle it directly
+    if (Array.isArray(value) && !sameEncoding) { // value type encoding will handle it?
+      // we handle an array element encoding
       const results = []
       for (let index = 0; index < value.length; index++) {
         const element = value[index];
@@ -227,31 +228,23 @@ export const utils = {
       }
       result = results
     } else if (!isArray) {
+      // Straight forward encode
       result = encoder.encodeValueContent(schemaElementDefinition.valueContent, value)
     } else if (sameEncoding) {
-      result = value
+      result = value // leaving this for below
     }
 
     if (
+      // and we only skip bytes regardless
         schemaElementDefinition.valueType !== 'bytes'
+      // Requires encoding because !sameEncoding means both encodings are required
         && !sameEncoding
     ) {
 
-      // result = Web3Abi.encodeParameter(schemaElementDefinition.valueType, result)
       result = encoder.encodeValueType(schemaElementDefinition.valueType, result)
-    } else {
-      // there is an issue with ['String','string[]'] type encoding?
-      if (
-        // array types [], need additional encoding
-        (schemaElementDefinition.valueType === 'string[]'
-        || schemaElementDefinition.valueType === 'address[]'
-        || schemaElementDefinition.valueType === 'uint256[]')
-        && sameEncoding
-      ) {
-        
+    } else if (isArray && sameEncoding) {
+      
         result = encoder.encodeValueType(schemaElementDefinition.valueType, result)
-        // result = Web3Abi.encodeParameter('string[]', result)
-      }
 
     }
     return result
