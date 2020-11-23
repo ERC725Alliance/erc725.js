@@ -77,7 +77,6 @@ export default class ERC725 {
   async getData(key, customSchema) {
     // Param key can be either the name or the key in the schema
     // NOTE: Assumes no plain text names starting with 0x aka zero byte
-    // const keyHash = (key.substr(0,2) !== "0x") ? this._getKeyNameHash(key) : key
     const keyHash = (key.substr(0,2) !== "0x") ? utils.encodeKeyName(key) : key
 
     // Get the correct schema key definition if its not passed as a parameter
@@ -86,9 +85,7 @@ export default class ERC725 {
     if (!keySchema) { throw Error('There is no matching key in schema.') }
 
     // Get the raw data
-    // console.log('getting one rawData from source')
     const rawData = await this.provider.getData(this.options.address, keySchema.key)
-    // console.log('GOT raw data from source...')
     // Decode and return the data
     return await this._decodeByKeyType(keySchema, rawData)
   }
@@ -98,13 +95,11 @@ export default class ERC725 {
     const keyHashes = this.options.schema.map(e => { return e.key })
     // Get all the raw data from the provider based on schema key hashes
     let allRawData = await this.provider.getAllData(this.options.address, keyHashes)
-    // console.log('all raw data in getAllRawData().')
-    // console.log(this.options.providerType)
-    // console.log(allRawData)
+
     // Take out null values, since data may not fulfill entire schema
     allRawData = await allRawData.filter(e => { return e.value !== null })
     
-    // Stage results array. Can replace with map()
+    // Stage results array. Can replace with map()?
 
     if (this.options.providerType === 'graph') {
       // expects all key/values returned from graph query
@@ -127,8 +122,7 @@ export default class ERC725 {
         }
         
       }
-      // console.log('full results from getAllData')
-      // console.log(results)
+
       return results
     }
 
@@ -141,13 +135,6 @@ export default class ERC725 {
     if (schemaElementDefinition.keyType.toLowerCase() === "array") {
       // Handling a schema element of type Array Get the array length first
       const arrayLength = utils.decodeKeyValue(schemaElementDefinition, value)
-      if (schemaElementDefinition.name === 'TestObjArray[]') {
-        // console.log('IS NOT NOT AN ARRAY?')
-        // console.log(schemaElementDefinition)
-        
-        // console.log('The value of length? ', value)
-        // console.log('Array length: ', arrayLength)
-      }
 
       let result = []
       // Construct the schema for each element, and fetch
