@@ -150,8 +150,8 @@ const encodeDataSourceWithHash = (hashType, dataHash, dataSource) => {
       return Error('Unsupported hash type to encode hash and value: ' + hashType)
     }
     // NOTE: QUESTION: Do we need 'toHex', incase future algorithms do not output hex as keccak does?
-    const hashData = Web3Utils.padLeft(dataHash,32).replace('0x','') 
     const hashFunction = CONSTANTS.hashFunctions.find(e => { return hashType === e.name || hashType === e.sig })
+    const hashData = Web3Utils.padLeft(dataHash,32).replace('0x','') 
     return '' + hashFunction.sig + hashData + Web3Utils.utf8ToHex(dataSource).replace('0x','')
 }
 
