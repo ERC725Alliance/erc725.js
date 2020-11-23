@@ -29,17 +29,11 @@ export const CONSTANTS = {
         sig: '0xb7845733',
         method: Web3Utils.keccak256
       },
+      {
+        name: 'keccak256(utf8)',
+        sig: '0x6f357c6a',
+        method: Web3Utils.keccak256
+      },
   ],
-  valueContentTypeMap: {
-    Keccak256: 'bytes32',
-    ArrayLength: 'uint256',
-    Number: 'uint256',
-    Address: 'address',
-    String: 'string',
-    Markdown: 'string',
-    URI: 'string',
-    HashedAssetURI: 'custom',
-    JSONURI: 'custom',
-  }
 
 }

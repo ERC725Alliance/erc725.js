@@ -18,9 +18,7 @@
  */
 
 import Web3Utils from 'web3-utils'
-import Web3Abi from 'web3-eth-abi'
-import { CONSTANTS } from './constants.js'
-import { encoder } from './encoder.js'
+import { encoder, valueContentEncodingMap as valueContentMap } from './encoder.js'
 
 export const utils = {
 
@@ -164,7 +162,7 @@ export const utils = {
   },
 
   decodeKeyValue : (schemaElementDefinition, value) => {
-    let sameEncoding = (CONSTANTS.valueContentTypeMap[schemaElementDefinition.valueContent] === schemaElementDefinition.valueType.split('[]')[0])
+    let sameEncoding = (valueContentMap[schemaElementDefinition.valueContent].type === schemaElementDefinition.valueType.split('[]')[0])
     const isArray = (schemaElementDefinition.valueType.substr(schemaElementDefinition.valueType.length - 2) === '[]' ) ? true : false 
 
     // VALUE TYPE
@@ -208,7 +206,7 @@ export const utils = {
     let result
     const isArray = (schemaElementDefinition.valueType.substr(schemaElementDefinition.valueType.length - 2) === '[]' ) ? true : false 
 
-    let sameEncoding = (CONSTANTS.valueContentTypeMap[schemaElementDefinition.valueContent] === schemaElementDefinition.valueType.split('[]')[0])
+    let sameEncoding = (valueContentMap[schemaElementDefinition.valueContent].type === schemaElementDefinition.valueType.split('[]')[0])
     
     // We only loop if the valueType done by abi.encodeParameter can not handle it directly
     if (Array.isArray(value) && !sameEncoding) { // value type encoding will handle it?

@@ -94,7 +94,7 @@ const valueTypeEncodingMap = {
   },
 }
 
-const valueContentEncodingMap = {
+export const valueContentEncodingMap = {
   "Keccak256": { type: 'bytes32',
     encode: (value) => { return value },
     decode: (value) => { return value }
