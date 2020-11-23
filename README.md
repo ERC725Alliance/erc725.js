@@ -14,7 +14,7 @@ $ npm install erc725.js
 ## Usage
 
 ```js
-import ERC725 from `erc725.js`
+import ERC725 from 'erc725.js'
 
 const erc725 = new ERC725(schema, address, provider)
 
