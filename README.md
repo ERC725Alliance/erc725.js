@@ -60,7 +60,7 @@ const schema = [
 ## Instantiation
 
 ```js
-import ERC725 from `erc725.js`
+import ERC725 from 'erc725.js'
 
 const schema = [{...}]
 const web3 = new Web3(...)
