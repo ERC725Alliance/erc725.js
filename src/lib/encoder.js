@@ -104,10 +104,14 @@ const valueContentEncodingMap = {
     decode: (value) => { return parseInt(Web3Utils.hexToNumber(value)) }
   },
   "Number": { type: 'uint256',
-    encode: (value) => { return Web3Utils.padLeft(Web3Utils.numberToHex(value), 64) },
-    decode: (value) => { return parseInt(Web3Utils.hexToNumber(value)) }
+    // NOTE; extra logic is to handle and always return a string number
+    encode: (value) => { 
+      try { value = parseInt(value) } catch (error) { throw new Error(error) }
+      return Web3Utils.padLeft(Web3Utils.numberToHex(value), 64) 
+    },
+    decode: (value) => { return '' + parseInt(Web3Utils.hexToNumber(value)) }
   },
-  // NOTE: This is not symmetrical!
+  // NOTE: This is not symmetrical, and always returns a checksummed address
   "Address": {
     type: 'address',
     encode: (value) => { return Web3Utils.toChecksumAddress(value) },

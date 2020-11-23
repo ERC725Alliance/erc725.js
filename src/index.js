@@ -39,6 +39,7 @@ export default class ERC725 {
       schema: schema,
       address: address
     }
+    this.utils = Utils
 
     // Check provider types
     const providerName = provider && provider.constructor && provider.constructor.name || null
