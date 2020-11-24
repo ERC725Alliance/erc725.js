@@ -24,8 +24,6 @@ import EthereumSource from './providers/ethereumProviderWrapper.js'
 import { utils as Utils } from './lib/utils.js'
 export const utils = Utils
 
-// TODO: Add encode method
-// TODO: DEBUG: Why is the array handler lagging on providing results (missing await somewhere?)
 
 export default class ERC725 {
   constructor(schema, address, provider) {
@@ -92,33 +90,29 @@ export default class ERC725 {
 
   async getAllData() {
     // Get all the key hashes from the schema
-    const keyHashes = this.options.schema.map(e => { return e.key })
+    const keyHashes = this.options.schema.map(e => { return e.key }) // NOTE: Potentailly redundent, but cleaner
     // Get all the raw data from the provider based on schema key hashes
     let allRawData = await this.provider.getAllData(this.options.address, keyHashes)
 
-    // Take out null values, since data may not fulfill entire schema
+    // Take out null data values, since data may not fulfill entire schema
     allRawData = await allRawData.filter(e => { return e.value !== null })
     
-    // Stage results array. Can replace with map()?
-
     if (this.options.providerType === 'graph') {
-      // expects all key/values returned from graph query
+      // expects all key/values returned from graph query as an array
+      // Change this to a return object
       return utils.decodeAllData(this.options.schema, allRawData)
     } else {
-      const results = []
+
+      const results = {}
       for (let i = 0; i < allRawData.length; i++) {
         const e = allRawData[i];
 
-        const keySchema = this.options.schema.find(f => {
-          return e.key === f.key
-        })
-        // Array keys may not directly match, and will be handled in decodeBySchema if matched
+        // Array keys may not directly match with provided data, or vice-versa
+        const keySchema = this.options.schema.find(f => { return e.key === f.key })
         // Nulls & mismatches ignored
         if (keySchema) {
-          const obj = {}
-          // Add decoded data to results array
-          obj[keySchema.name] = await this._decodeByKeyType(keySchema, e.value)
-          results.push(obj)
+          // Add decoded data to results object
+          results[keySchema.name] = await this._decodeByKeyType(keySchema, e.value)
         }
         
       }

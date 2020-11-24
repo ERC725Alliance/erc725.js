@@ -260,10 +260,9 @@ function generateAllData(schema) {
 }
 
 function generateAllResults(schema) {
-    // Take a schema objects and builds full expected results
-    return schema.map(e => {
-        const obj = {}
-        obj[e.name] = e.expectedResult
-        return obj
-    })
+    // Take the test schema/cases and builds full expected results
+    const results = {}
+    schema.forEach(e => { results[e.name] = e.expectedResult })
+    return results
+
 }

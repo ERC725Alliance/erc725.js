@@ -24,7 +24,7 @@ export const utils = {
 
   decodeAllData: (schema, allRawData) => {
     // Requires allRawData to be in an array of key/value pairs: {key:'0x908vsd98...',value:'0x9fuuh...'}
-    const results = []
+    const results = {}
 
     // Loop throuch schema when provided all ERC725 keys from blockchain source of truth
     for (let index = 0; index < schema.length; index++) {
@@ -54,7 +54,6 @@ export const utils = {
             key: elementKey,
             keyType: "Singleton",
             valueContent: newElementValueContent, // value content on first element in the array is
-            // valueContent: schemaElement.elementValueContent, // value content on first element in the array is
             valueType: schemaElement.elementValueType,
           }
 
@@ -77,21 +76,19 @@ export const utils = {
               Web3Utils.hexToNumber(dataElement.value) 
             } catch (error) {
               // Check if there is already an array at the results index
-              if (Array.isArray(results[index] && results[index][schemaElement.name])) {
+              if (Array.isArray(results[schemaElement.name])) {
                 // If so, add to the existing results element array
-                results[index][schemaElement.name].push(decodedElement)
+                results[schemaElement.name].push(decodedElement)
               } else {
                 // Otherwise reate the new results element array
                 const obj = {}
                 obj[schemaElement.name] = [decodedElement]
-                results[index] = obj
+                results[schemaElement.name] = [decodedElement]
               }
             }
           } else {
             // Handle singleton decoded result
-            const obj = {}
-            obj[newSchemaElement.name] = decodedElement
-            results.push(obj)
+            results[newSchemaElement.name] = decodedElement
           }
         } // end CHECK FOR MATCH
 
@@ -105,58 +102,56 @@ export const utils = {
 
   encodeAllData: (schema, data) => {
     // Data must come as key/value pairs, where keys are defined as per the schema
+    // 1. Define results array, and loop through data by keys in the object
     const results = [] // results will be the flattened array of key/value pairs able to be deployed using ABI
     // NOTE: This requires properly formatted input data as per the schema (as expected from dedoce)
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        const dataElement = data[key];
 
-    // 1. loop through data // we do this first because it can contain array keys as well
-    for (let index = 0; index < data.length; index++) {
-      const dataElement = data[index];
+        // 2. Find schema for this data data
+        // NOTE: Each data element should have an object with a single key, with that key being the schema field name
+        const schemaElement = schema.find(e => { return e.name === key })
 
-      // 2. Find schema for this data data
-      // NOTE: Each data element should have an object with a single key, with that key being the schema field name
-      const objKey = Object.keys(dataElement)[0]
-      const schemaElement = schema.find(e => { return e.name === objKey })
+        // 2.1 test to see if matching with an array '[]' key
+        // Better to just test for schemaElement keyType 'Array'?
+        if (schemaElement.keyType.toLowerCase() === 'array') {
+          // This is an array
+          // Create the 'sub' schema for array elements
 
-      // 2.1 test to see if matching with an array '[]' key
-      // Better to just test for schemaElement keyType 'Array'?
-      if (objKey.substr(objKey.length - 2 - 1 ) === '[]' || schemaElement.keyType.toLowerCase() === 'array') {
-        // This is an array
-        // Create the 'sub' schema for array elements
+          // in the first element we put the length remember?
+          const elementKey = '' + schemaElement.elementKey + Web3Utils.leftPad(schemaElement.elementKey.substr(schemaElement.key.length - 32), 32).replace('0x','')
+          // Form new singleton schema schema to check data array element against
+          const newSchemaElement = {
+            key: elementKey,
+            keyType: "Singleton",
+            valueContent: schemaElement.elementValueContent,
+            valueType: schemaElement.elementValueType,
+          }
 
-        // in the first element we put the length remember?
-        const elementKey = '' + schemaElement.elementKey + Web3Utils.leftPad(schemaElement.elementKey.substr(schemaElement.key.length - 32), 32).replace('0x','')
-        // Form new schema schema to check data against
-        const newSchemaElement = {
-          key: elementKey,
-          keyType: "Singleton",
-          valueContent: schemaElement.elementValueContent,
-          valueType: schemaElement.elementValueType,
+          // 3.a Loop through the array of data results
+          for (let i = 0; i < dataElement.length; i++) {
+              const e = dataElement[i]
+
+              let newElementKey
+              let newElementValue
+
+              if (i === 0) {
+                newElementKey = schemaElement.key
+                newElementValue = Web3Utils.padLeft(Web3Utils.numberToHex(dataElement.length), 64)
+                // This is array length key/value pair
+                results.push({key:newElementKey, value: newElementValue})
+              }
+              
+            results.push({key: schemaElement.elementKey + Web3Utils.padLeft(i, 32).replace('0x',''), value: utils.encodeKeyValue(newSchemaElement, e)})
+          }
+        } else {
+          // 3.b This is a singleton instance
+          results.push({key: schemaElement.key, value: utils.encodeKeyValue(schemaElement, dataElement)})
         }
-
-        // Loop through the array of data results
-        for (let i = 0; i < dataElement[objKey].length; i++) {
-            const e = dataElement[objKey][i]
-
-            let newElementKey
-            let newElementValue
-
-            if (i === 0) {
-              newElementKey = schemaElement.key
-              newElementValue = Web3Utils.padLeft(Web3Utils.numberToHex(dataElement[objKey].length), 64)
-              // This is array length key/value pair
-              results.push({key:newElementKey, value: newElementValue})
-            }
-            
-          results.push({key: schemaElement.elementKey + Web3Utils.padLeft(i, 32).replace('0x',''), value: utils.encodeKeyValue(newSchemaElement, e)})
-        }
-      } else {
-        // this is a singleton instance
-        results.push({key: schemaElement.key, value: utils.encodeKeyValue(schemaElement, dataElement[schemaElement.name])})
+        
       }
-
-      
-
-    }
+    } // end for loop
     
     return results
   },
