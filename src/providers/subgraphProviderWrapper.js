@@ -25,33 +25,26 @@
 import { queries } from '../lib/queries.js'
 
 export default class GraphSource {
-  constructor(provider) {
-    this.provider = provider
-  }
-
-  async getData(id, keys) {
-    if (Array.isArray(keys)) {
-      // TODO: get by the keys for the address/id
-    } else if (!keys){
-      // TODO: get all the data for required fields for the address/id
-    } else {
-      // Return the value for the specific single key
-      const query = queries.getDataByKey(id, keys)
-      const result = await this.provider.query({ query: query }) //TODO: return the value only
-      // Single out the first result as expected
-      return result.data[Object.keys(result.data)[0]][0].value
+    constructor(provider) {
+        this.provider = provider
     }
 
-  }
+    async getData(id, keys) {
+        if (!keys || Array.isArray(keys)) {
+            // TODO: support array of keys
+            return new Error('Incorrect parameter \'keys\' in getData()')
+        }
+        // Get the value for the specific single key
+        const query = queries.getDataByKey(id, keys)
+        const result = await this.provider.query({ query })
+        // Single out the first result as expected
+        return result.data[Object.keys(result.data)[0]][0].value
+    }
 
-  async getAllData(id, keys) {
-    // TODO: Add support for multiple keys
-    const query = queries.getAllData(id)
-    const result = await this.provider.query({ query:query })
-    // console.log('ACTUAL GRAPH \'getAllData\' RESULT')
-    // console.log(result)
-    // Return the data query array
-    return result.data[Object.keys(result.data)[0]]
-  }
-
+    async getAllData(id) {
+        const query = queries.getAllData(id)
+        const result = await this.provider.query({ query })
+        // Return the data query array
+        return result.data[Object.keys(result.data)[0]]
+    }
 }
