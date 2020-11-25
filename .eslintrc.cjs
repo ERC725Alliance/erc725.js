@@ -38,7 +38,8 @@ module.exports = {
             exports: 'never',
             functions: 'never'
         }],
-        'no-await-in-loop': 0 // NOTE: This should be removed?
+        'no-await-in-loop': 0, // NOTE: This should be removed?
+        'import/prefer-default-export': 0
     },
     ignorePatterns: ['node_modules/**/*']
 }

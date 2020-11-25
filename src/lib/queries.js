@@ -1,5 +1,7 @@
 // Queries for ERC725 subgraph
+/* eslint-disable */
 import { gql } from '@apollo/client';
+
 
 export const queries = {
 
