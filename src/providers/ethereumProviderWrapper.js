@@ -24,46 +24,59 @@
 
 import * as abi from 'web3-eth-abi'
 import { CONSTANTS } from '../lib/constants.js'
+
 const web3Abi = abi.default
 
 export default class EthereumSource {
-  constructor(provider, deprecated) {
-    this.provider = provider
-    this.deprecated = (deprecated === 'deprecated')
-  }
 
-  async getData(address, key) {
-    const data = CONSTANTS.methods.getData.sig + key.replace('0x','')
+    constructor(provider, deprecated) {
 
-    const params = [
-      {
-        to: address,
-        gas: CONSTANTS.methods.getData.gas,
-        gasPrice: CONSTANTS.methods.getData.gasPrice,
-        value: CONSTANTS.methods.getData.value,
-        data: data
-      }
-    ]
-    const result = await this._callContract(params)
-    return web3Abi.decodeParameter('bytes', (this.deprecated ? result.result : result))
-  }
+        this.provider = provider
+        this.deprecated = (deprecated === 'deprecated')
 
-  async getAllData(address, keys) {
-    const results = []
-    
-    for (let index = 0; index < keys.length; index++) {
-      results.push({
-        key: keys[index],
-        value: await this.getData(address, keys[index])
-      })
     }
-    return results
-  }
 
-  async _callContract (params) {
-    return this.deprecated
-      ? await this.provider.send('eth_call', params)
-      : await this.provider.request({method:'eth_call', params:params})
-  }
+    async getData(address, key) {
+
+        const data = CONSTANTS.methods.getData.sig + key.replace('0x', '')
+
+        const params = [
+            {
+                to: address,
+                gas: CONSTANTS.methods.getData.gas,
+                gasPrice: CONSTANTS.methods.getData.gasPrice,
+                value: CONSTANTS.methods.getData.value,
+                data
+            }
+        ]
+        const result = await this._callContract(params)
+        return web3Abi.decodeParameter('bytes', (this.deprecated ? result.result : result))
+
+    }
+
+    async getAllData(address, keys) {
+
+        const results = []
+
+        for (let index = 0; index < keys.length; index++) {
+
+            results.push({
+                key: keys[index],
+                value: await this.getData(address, keys[index])
+            })
+
+        }
+
+        return results
+
+    }
+
+    async _callContract(params) {
+
+        return this.deprecated
+            ? this.provider.send('eth_call', params)
+            : this.provider.request({ method: 'eth_call', params })
+
+    }
 
 }

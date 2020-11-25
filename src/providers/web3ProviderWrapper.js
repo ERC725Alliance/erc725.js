@@ -24,64 +24,82 @@
 
 import * as abi from 'web3-eth-abi'
 import { CONSTANTS } from '../lib/constants.js'
+
 const web3abi = abi.default
 let idCount = 1
 
 export default class Web3Source {
-  constructor(provider) {
-    this.provider = provider
-  }
 
-  async getData (address, keyHash) {
-    const data = CONSTANTS.methods.getData.sig + keyHash.replace('0x', '')
-    const params = [
-      {
-        to: address,
-        gas: CONSTANTS.methods.getData.gas,
-        gasPrice: CONSTANTS.methods.getData.gasPrice,
-        value: CONSTANTS.methods.getData.value,
-        data: data
-      }
-    ]
-    const result = await this._callContract(params)
-    return web3abi.decodeParameter('bytes', result)
-  }
+    constructor(provider) {
 
-  async getAllData (address, keys) {
-    const results = []
-    for (let index = 0; index < keys.length; index++) {
-      // const key = keys[index];
-      const theValue = await this.getData(address, keys[index]) 
-      results.push({
-        key: keys[index],
-        value: theValue
-      })
-    }
-    return results
-    
-  }
+        this.provider = provider
 
-  async _callContract (params) {
-    const payload = {
-      jsonrpc:"2.0",
-      method:"eth_call",
-      params: params,
-      id: idCount++
     }
 
-    const callMethod = new Promise((resolve, reject) => {
-      // Send old web3 method with callback to resolve promise
-      this.provider.send(payload, (e,r) => {
-        if (e) {
-          reject(e)
-        } else {
-          resolve(r.result)
+    async getData(address, keyHash) {
+
+        const data = CONSTANTS.methods.getData.sig + keyHash.replace('0x', '')
+        const params = [
+            {
+                to: address,
+                gas: CONSTANTS.methods.getData.gas,
+                gasPrice: CONSTANTS.methods.getData.gasPrice,
+                value: CONSTANTS.methods.getData.value,
+                data
+            }
+        ]
+        const result = await this._callContract(params)
+        return web3abi.decodeParameter('bytes', result)
+
+    }
+
+    async getAllData(address, keys) {
+
+        const results = []
+        for (let index = 0; index < keys.length; index++) {
+
+            const theValue = await this.getData(address, keys[index])
+            results.push({
+                key: keys[index],
+                value: theValue
+            })
+
         }
-      })
-    })
-    // Call the promise
-    return await callMethod
 
-  }
-  
+        return results
+
+    }
+
+    async _callContract(params) {
+
+        const payload = {
+            jsonrpc: '2.0',
+            method: 'eth_call',
+            params,
+            id: idCount += 1
+        }
+
+        const callMethod = new Promise((resolve, reject) => {
+
+            // Send old web3 method with callback to resolve promise
+            this.provider.send(payload, (e, r) => {
+
+                if (e) {
+
+                    reject(e)
+
+                } else {
+
+                    resolve(r.result)
+
+                }
+
+            })
+
+        })
+        // Call the promise
+        return callMethod
+
+    }
+
 }
