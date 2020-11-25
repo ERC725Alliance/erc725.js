@@ -1,4 +1,5 @@
 // Mock data for tests
+/* eslint-disable */
 
 export const mockData = [
   {

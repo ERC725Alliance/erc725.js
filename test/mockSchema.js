@@ -1,5 +1,6 @@
 // Mock schema for tests
 // make one schema that tests every single type
+/* eslint-disable */
 
 export const mockSchema = [
 

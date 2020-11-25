@@ -15,6 +15,7 @@ module.exports = {
     rules: {
         // Mocha tests need imported file extension for ES modules support
         'import/extensions': ['warn', 'always', { js: 'ignorePackages' }],
+        'max-classes-per-file': ['error', 3],
         'max-len': ['error', { code: 120, ignoreTrailingComments: true, ignoreStrings: true }],
         quotes: ['error', 'single', { avoidEscape: true }],
         semi: ['error', 'never'],

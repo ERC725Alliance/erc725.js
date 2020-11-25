@@ -25,26 +25,36 @@
 import { queries } from '../lib/queries.js'
 
 export default class GraphSource {
+
     constructor(provider) {
+
         this.provider = provider
+
     }
 
     async getData(id, keys) {
+
         if (!keys || Array.isArray(keys)) {
+
             // TODO: support array of keys
             return new Error('Incorrect parameter \'keys\' in getData()')
+
         }
         // Get the value for the specific single key
         const query = queries.getDataByKey(id, keys)
         const result = await this.provider.query({ query })
         // Single out the first result as expected
         return result.data[Object.keys(result.data)[0]][0].value
+
     }
 
     async getAllData(id) {
+
         const query = queries.getAllData(id)
         const result = await this.provider.query({ query })
         // Return the data query array
         return result.data[Object.keys(result.data)[0]]
+
     }
+
 }
