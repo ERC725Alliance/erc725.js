@@ -15,7 +15,7 @@ module.exports = {
     rules: {
         // Mocha tests need imported file extension for ES modules support
         'import/extensions': ['warn', 'always', { js: 'ignorePackages' }],
-        'max-len': ['error', { code: 120 }],
+        'max-len': ['error', { code: 120, ignoreTrailingComments: true, ignoreStrings: true }],
         quotes: ['error', 'single', { avoidEscape: true }],
         semi: ['error', 'never'],
         'no-underscore-dangle': ['error', { allowAfterThis: true }],
@@ -37,7 +37,8 @@ module.exports = {
             imports: 'never',
             exports: 'never',
             functions: 'never'
-        }]
+        }],
+        'no-await-in-loop': 0 // NOTE: This should be removed?
     },
     ignorePatterns: ['node_modules/**/*']
 }
