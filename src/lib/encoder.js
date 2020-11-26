@@ -143,21 +143,29 @@ export const valueContentEncodingMap = {
     },
     AssetURL: {
         type: 'custom',
-        encode: value => encodeDataSourceWithHash(value.hashFunction, value.assetHash, value.assetURL),
+        encode: value => encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
         decode: value => {
 
             const result = decodeDataSourceWithHash(value)
-            return { hashFunction: result.hashFunction, assetHash: result.dataHash, assetURL: result.dataSource }
+            return {
+                hashFunction: result.hashFunction,
+                hash: result.dataHash,
+                url: result.dataSource
+            }
 
         }
     },
     JSONURL: {
         type: 'custom',
-        encode: value => encodeDataSourceWithHash(value.hashFunction, value.jsonHash, value.jsonURL),
+        encode: value => encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
         decode: value => {
 
             const result = decodeDataSourceWithHash(value)
-            return { hashFunction: result.hashFunction, jsonHash: result.dataHash, jsonURL: result.dataSource }
+            return {
+                hashFunction: result.hashFunction,
+                hash: result.dataHash,
+                url: result.dataSource
+            }
 
         }
     }
