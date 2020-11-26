@@ -5,10 +5,10 @@
 export const mockSchema = [
 
   {
-    "name":"TestJSONURI",
-    "key": "0xdf73948b014092c0ce1654e869800d78f6a16f50f1734073f9290553cbf1122c",
+    "name":"TestJSONURL",
+    "key": "0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99",
     "keyType": "Singleton",
-    "valueContent": "JSONURI",
+    "valueContent": "JSONURL",
     "valueType": "bytes",
     // Testing data
     "returnRawData": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000596f357c6a733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a626400000000000000",
@@ -16,14 +16,14 @@ export const mockSchema = [
     "expectedResult": {
       "hashFunction": "keccak256(utf8)",
       "jsonHash": "0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d", // hash of stringified json
-      "jsonURI": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // same JSON uri from LSP3Profile below
+      "jsonURL": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // same JSON uri from LSP3Profile below
     }
   },
   {
-    "name": "TestHashedAssetURI",
-    "key": "0xbb6581e5ed9fe56d79ca6dd876c902603912b84206c2991615ee20c2d73bccc7",
+    "name": "TestAssetURL",
+    "key": "0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee",
     "keyType": "Singleton",
-    "valueContent": "HashedAssetURI",
+    "valueContent": "AssetURL",
     "valueType": "bytes",
     // Testing data
     "returnRawData": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000596f357c6aa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a626400000000000000",
@@ -31,7 +31,7 @@ export const mockSchema = [
     "expectedResult": {
       "hashFunction": "keccak256(utf8)",
       "assetHash": "0xa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81", // hash of address '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
-      "assetURI": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // FAKE. just used from above
+      "assetURL": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // FAKE. just used from above
     }
   },
 
@@ -90,7 +90,7 @@ export const mockSchema = [
     "name": "LSP3Profile",
     "key": "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
     "keyType": "Singleton",
-    "valueContent": "URI",
+    "valueContent": "URL",
     "valueType": "bytes",
     // testing data
     "returnRawData": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000035697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a62640000000000000000000000",
@@ -133,7 +133,7 @@ export const mockSchema = [
     "valueType": "uint256",
     "elementKey": "0x9985edaf12cbacf5ac7d6ed54f0445cc",
     "elementKeyType": "ArrayElement",
-    "elementValueContent": "JSONURI",
+    "elementValueContent": "JSONURL",
     "elementValueType": "bytes",
     // testing data
     // the full array of values
@@ -152,13 +152,13 @@ export const mockSchema = [
       {
         "hashFunction": "keccak256(utf8)",
         "jsonHash": "0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d", // hash of stringified json
-        "jsonURI": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // same JSON uri from LSP3Profile below
+        "jsonURL": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // same JSON uri from LSP3Profile below
       },
       // this JSON hash is = {"test1":"value1","test2":"value2","test3":"value3"}
       {
         "hashFunction": "keccak256(utf8)",
         "jsonHash": "0x81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88", // hash of stringified json
-        "jsonURI": "ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd" // dummy uri
+        "jsonURL": "ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd" // dummy uri
       }
     ]
 
@@ -280,10 +280,10 @@ export const mockSchema = [
     ]
   },
   {
-    "name": "TestURIStringValueTypeArray",
-    "key": "0xefb2f3a62ed3c1b066ccb83990d34351e7b24403f550ca66476cec0be12343e8",
+    "name": "TestURLStringValueTypeArray",
+    "key": "0x1a9818703b62d00000bd3e8c7499296d42966619cd735a92eac7488de8881bb8",
     "keyType": "Singleton",
-    "valueContent": "URI",
+    "valueContent": "URL",
     "valueType": "string[]",
     // Testing fields
     "returnRawData": "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000035697066733a2f2f516d6245724b6833466a7378787878787878787878787878787878787878787878787878787639414a4a765a626400000000000000000000000000000000000000000000000000000000000000000000000000000000000035697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a62640000000000000000000000",

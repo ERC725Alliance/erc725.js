@@ -33,6 +33,11 @@ export const CONSTANTS = {
             name: 'keccak256(utf8)',
             sig: '0x6f357c6a',
             method: Web3Utils.keccak256
+        },
+        {
+            name: 'keccak256(bytes)',
+            sig: '0x8019f9b1',
+            method: Web3Utils.keccak256
         }
     ]
 

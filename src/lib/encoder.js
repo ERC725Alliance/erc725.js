@@ -136,28 +136,28 @@ export const valueContentEncodingMap = {
         encode: value => Web3Utils.utf8ToHex(value),
         decode: value => Web3Utils.hexToUtf8(value)
     },
-    URI: {
+    URL: {
         type: 'string',
         encode: value => Web3Utils.utf8ToHex(value),
         decode: value => Web3Utils.hexToUtf8(value)
     },
-    HashedAssetURI: {
+    AssetURL: {
         type: 'custom',
-        encode: value => encodeDataSourceWithHash(value.hashFunction, value.assetHash, value.assetURI),
+        encode: value => encodeDataSourceWithHash(value.hashFunction, value.assetHash, value.assetURL),
         decode: value => {
 
             const result = decodeDataSourceWithHash(value)
-            return { hashFunction: result.hashFunction, assetHash: result.dataHash, assetURI: result.dataSource }
+            return { hashFunction: result.hashFunction, assetHash: result.dataHash, assetURL: result.dataSource }
 
         }
     },
-    JSONURI: {
+    JSONURL: {
         type: 'custom',
-        encode: value => encodeDataSourceWithHash(value.hashFunction, value.jsonHash, value.jsonURI),
+        encode: value => encodeDataSourceWithHash(value.hashFunction, value.jsonHash, value.jsonURL),
         decode: value => {
 
             const result = decodeDataSourceWithHash(value)
-            return { hashFunction: result.hashFunction, jsonHash: result.dataHash, jsonURI: result.dataSource }
+            return { hashFunction: result.hashFunction, jsonHash: result.dataHash, jsonURL: result.dataSource }
 
         }
     }

@@ -1,3 +1,6 @@
+// This file has the '.cjs. extension as per https://eslint.org/docs/user-guide/configuring
+// 'use .eslintrc.cjs when running ESLint in JavaScript packages that specify "type":"module" in their package.json'
+
 module.exports = {
     env: {
         browser: true,
