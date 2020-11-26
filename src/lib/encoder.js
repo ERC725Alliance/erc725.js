@@ -168,7 +168,7 @@ export const encoder = {
 
     encodeValueType: (type, value) => {
 
-        if (!valueTypeEncodingMap[type]) { throw new Error('Could not encode with valueType: "' + type + '".') }
+        if (!valueTypeEncodingMap[type]) { throw new Error('Could not encode valueType: "' + type + '".') }
 
         return valueTypeEncodingMap[type].encode(value)
 
@@ -176,7 +176,7 @@ export const encoder = {
 
     decodeValueType: (type, value) => {
 
-        if (!valueTypeEncodingMap[type]) { throw new Error('Could not decode with valueType: "' + type + '".') }
+        if (!valueTypeEncodingMap[type]) { throw new Error('Could not decode valueType: "' + type + '".') }
 
         return valueTypeEncodingMap[type].decode(value)
 
@@ -185,7 +185,15 @@ export const encoder = {
 
     encodeValueContent: (type, value) => {
 
-        if (!valueContentEncodingMap[type]) { throw new Error('Could not encode with valueContent: "' + type + '".') }
+        if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
+
+            throw new Error('Could not encode valueContent: "' + type + '".')
+
+        } else if (type.substr(0, 2) === '0x') {
+
+            return (type === value) ? value : false
+
+        }
 
         return valueContentEncodingMap[type].encode(value)
 
@@ -193,7 +201,15 @@ export const encoder = {
 
     decodeValueContent: (type, value) => {
 
-        if (!valueContentEncodingMap[type]) { throw new Error('Could not decode with valueContent: "' + type + '".') }
+        if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
+
+            throw new Error('Could not decode valueContent: "' + type + '".')
+
+        } else if (type.substr(0, 2) === '0x') {
+
+            return (type === value) ? value : false
+
+        }
 
         return valueContentEncodingMap[type].decode(value)
 

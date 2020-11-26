@@ -293,6 +293,18 @@ export const mockSchema = [
       "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // {firefox metamask key}
     ]
   },
+  {
+    "name": "TestHashKey",
+    "key": "0xed579debad05d91a79b46589987171dfce1c8ffa8b1d8c1ddc851cc104ea6029",
+    "keyType": "Singleton",
+    "valueContent": "0x9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658", // keccak hash of 'test'
+    "valueType": "bytes32",
+    // Testing data
+    "returnRawData": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000209c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658", // this is bytes
+    "returnGraphData": "0x9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658",
+    "expectedResult": "0x9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658", // 'mytestdata'
+
+  },
   // Nested array tests
   // NOTE: The below are failing on decode all (no source loops, or individual) with data out-of-bounds
   // {
