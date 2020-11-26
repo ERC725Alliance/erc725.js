@@ -16,7 +16,7 @@ export const mockSchema = [
     "expectedResult": {
       "hashFunction": "keccak256(utf8)",
       "jsonHash": "0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d", // hash of stringified json
-      "jsonURL": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // same JSON uri from LSP3Profile below
+      "jsonURL": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // same JSON url from LSP3Profile below
     }
   },
   {
@@ -148,17 +148,17 @@ export const mockSchema = [
       "0x6f357c6a81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88697066733a2f2f516d6245724b6833466a7378787878787878787878787878787878787878787878787878787639414a4a765a6264",
     ],
     "expectedResult": [
-      // This JSON from JSONURI above...
+      // This JSON from JSONURL above...
       {
         "hashFunction": "keccak256(utf8)",
         "jsonHash": "0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d", // hash of stringified json
-        "jsonURL": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // same JSON uri from LSP3Profile below
+        "jsonURL": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // same JSON url from LSP3Profile below
       },
       // this JSON hash is = {"test1":"value1","test2":"value2","test3":"value3"}
       {
         "hashFunction": "keccak256(utf8)",
         "jsonHash": "0x81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88", // hash of stringified json
-        "jsonURL": "ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd" // dummy uri
+        "jsonURL": "ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd" // dummy url
       }
     ]
 
@@ -334,7 +334,7 @@ export const mockSchema = [
   //   "valueType": "uint256",
   //   "elementKey": "0xf9a149b854fc24a5b7c91cce364e1d83",
   //   "elementKeyType": "ArrayElement",
-  //   "elementValueContent": "JSONURI",
+  //   "elementValueContent": "JSONURL",
   //   "elementValueType": "bytes[]",
   //   // testing data
   //   // the full array of values
@@ -351,24 +351,24 @@ export const mockSchema = [
   //     "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000396f357c6acadb1115f687654d9b8077b1c0b8553f294e54862cf17e6afc0cade73dc35c88697066733a2f2f51773039656a66646b6a6678787800000000000000",
   //   ],
   //   "expectedResult": [
-  //     // This JSON from JSONURI above...
+  //     // This JSON from JSONURL above...
   //     [
 
   //       {
   //         "hashFunction": "keccak256(utf8)",
   //         "jsonHash": "0xcadb1115f687654d9b8077b1c0b8553f294e54862cf17e6afc0cade73dc35c88", // hash of stringified json = {test1:'value1',test2:'value2'}
-  //         "jsonURI": "ipfs://Qw09ejfdkjfxxx" // dummy uri
+  //         "jsonURL": "ipfs://Qw09ejfdkjfxxx" // dummy url
   //       },
         
   //       {
   //         "hashFunction": "keccak256(utf8)",
   //         "jsonHash": "0xb0bf98bf562a0191622eb530e185cff88dc086b92faa27cb535513a62591a5f7", // hash of stringified json = {test3:'value3',test4:'value4'}
-  //         "jsonURI": "ipfs://Qw09ejfdkjfyyy" // dummy uri
+  //         "jsonURL": "ipfs://Qw09ejfdkjfyyy" // dummy url
   //       },
   //       {
   //         "hashFunction": "keccak256(utf8)",
   //         "jsonHash": "0xd74263f10a321b733c6dc6aea656e383ce31d653814d1bcb35630729d2bf993c", // hash of stringified json = {test5:;value5',test6:'value6'}
-  //         "jsonURI": "ipfs://Qw09ejfdkjfzzz" // dummy uri
+  //         "jsonURL": "ipfs://Qw09ejfdkjfzzz" // dummy url
   //       }
   //       // encoded array: 0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000000396f357c6acadb1115f687654d9b8077b1c0b8553f294e54862cf17e6afc0cade73dc35c88697066733a2f2f51773039656a66646b6a667878780000000000000000000000000000000000000000000000000000000000000000000000000000396f357c6ab0bf98bf562a0191622eb530e185cff88dc086b92faa27cb535513a62591a5f7697066733a2f2f51773039656a66646b6a667979790000000000000000000000000000000000000000000000000000000000000000000000000000396f357c6ad74263f10a321b733c6dc6aea656e383ce31d653814d1bcb35630729d2bf993c697066733a2f2f51773039656a66646b6a667a7a7a00000000000000
 
@@ -378,13 +378,13 @@ export const mockSchema = [
   //       {
   //         "hashFunction": "keccak256(utf8)",
   //         "jsonHash": "0xcadb1115f687654d9b8077b1c0b8553f294e54862cf17e6afc0cade73dc35c88", // hash of stringified json = {test1:'value1',test2:'value2'}
-  //         "jsonURI": "ipfs://Qw09ejfdkjfxxx" // dummy uri
+  //         "jsonURL": "ipfs://Qw09ejfdkjfxxx" // dummy url
   //       },
         
   //       {
   //         "hashFunction": "keccak256(utf8)",
   //         "jsonHash": "0xb0bf98bf562a0191622eb530e185cff88dc086b92faa27cb535513a62591a5f7", // hash of stringified json = {test3:'value3',test4:'value4'}
-  //         "jsonURI": "ipfs://Qw09ejfdkjfyyy" // dummy uri
+  //         "jsonURL": "ipfs://Qw09ejfdkjfyyy" // dummy url
   //       },
   //       // encoded: 0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000396f357c6acadb1115f687654d9b8077b1c0b8553f294e54862cf17e6afc0cade73dc35c88697066733a2f2f51773039656a66646b6a667878780000000000000000000000000000000000000000000000000000000000000000000000000000396f357c6ab0bf98bf562a0191622eb530e185cff88dc086b92faa27cb535513a62591a5f7697066733a2f2f51773039656a66646b6a6679797900000000000000
 
@@ -394,7 +394,7 @@ export const mockSchema = [
   //       {
   //         "hashFunction": "keccak256(utf8)",
   //         "jsonHash": "0xcadb1115f687654d9b8077b1c0b8553f294e54862cf17e6afc0cade73dc35c88", // hash of stringified json = {test1:'value1',test2:'value2'}
-  //         "jsonURI": "ipfs://Qw09ejfdkjfxxx" // dummy uri
+  //         "jsonURL": "ipfs://Qw09ejfdkjfxxx" // dummy url
   //       },
   //       // encoded: 0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000396f357c6acadb1115f687654d9b8077b1c0b8553f294e54862cf17e6afc0cade73dc35c88697066733a2f2f51773039656a66646b6a6678787800000000000000
         
