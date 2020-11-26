@@ -32,7 +32,7 @@ export const utils = {
 
             const schemaElement = schema[index]
             let newSchemaElement = null
-            results[schemaElement.name] = null
+            results[schemaElement.name] = '' // ensure empty field per schema element
 
             // Looping through data
             for (let i = 0; i < allRawData.length; i++) {
@@ -47,7 +47,7 @@ export const utils = {
                     const elementKey = schemaElement.elementKey + Web3Utils.leftPad(dataElement.key.substr(dataElement.key.length - 32), 32).replace('0x', '')
 
                     // Form new schema schema to check data against
-                    let newElementValueContent = ''
+                    let newElementValueContent
                     try {
 
                         // TODO: QUESTION: what about an array of uints

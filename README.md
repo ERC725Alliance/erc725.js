@@ -145,6 +145,19 @@ erc725.utils.decodeKeyValue(schemaKeyOrElement, hexValue)
 **Example**
 
 ```js
+erc725.utils.decodeKeyValue(
+    // The schema definition
+    {
+      name: "LSP3Name",
+      key: "0xa5f15b1fa920bbdbc28f5d785e5224e3a66eb5f7d4092dc9ba82d5e5ae3abc87",
+      keyType: "Singleton",
+      valueContent: "String",
+      valueType: "string",
+    },
+    // The value to decode, returned as epected from smart contract
+    '0x6d792d636f6f6c2d6e616d65'
+)
+>  'my-cool-name'
 ```
 
 
@@ -167,20 +180,19 @@ erc725.utils.encodeKeyValue(schemaKeyOrElement, value)
 **Example**
 
 ```js
-erc725.utils.encodeKeyValue('LSPXName', 'My Cool name')
-> '0x000000f...'
-
-erc725.utils.encodeKeyValue('0x245...', 'My Cool name')
-> '0x000000f...'
-
-erc725.utils.encodeKeyValue({
-  name: 'LSPXName',
-  key: '0x356566..',
-  keyType: 'Singleton',
-  valueType: 'string',
-  valueContent: 'String'
-}, 'My Cool name')
-> '0x000000f...'
+erc725.utils.encodeKeyValue(
+    // The schema definition
+    {
+      name: "Username",
+      key: "0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da",
+      keyType: "Singleton",
+      valueContent: "String",
+      valueType: "string",
+    },
+    // the value to encode
+    'my-cool-name'
+)
+> '0x6d792d636f6f6c2d6e616d65'
 ```
 
 
@@ -206,6 +218,40 @@ erc725.utils.decodeAllData(schema, data)
 **Example**
 
 ```js
+erc725.decodeAllData(
+    // Array of schema keys
+    [
+        {
+            name: "Username",
+            key: "0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da",
+            keyType: "Singleton",
+            valueContent: "String",
+            valueType: "string",
+        },
+        {
+            name: "Description",
+            key: "0xfc5327884a7fb1912dcdd0d78d7e6753f03e61a8e0b845a4b62f5efde472d0a8",
+            keyType: "Singleton",
+            valueContent: "URL",
+            valueType: "string",
+        }
+    ],
+    // Array of data to decode
+    [
+        {
+            key: "0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da",
+            value: "0x6d792d636f6f6c2d6e616d65"
+        },
+        {
+            key: "0xfc5327884a7fb1912dcdd0d78d7e6753f03e61a8e0b845a4b62f5efde472d0a8",
+            value: "0x687474703a2f2f6d792d636f6f6c2d776562736974652e68746d6c"
+        }
+    ]
+)
+
+> { Username: 'my-cool-name', Description'http://my-cool-website.html' }
+
+]
 ```
 
 
@@ -228,6 +274,32 @@ erc725.utils.encodeAllData(schema, data)
 **Example**
 
 ```js
+erc725.encodeAllData(
+    [
+        {
+            name: "Username",
+            key: "0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da",
+            keyType: "Singleton",
+            valueContent: "String",
+            valueType: "string",
+        },
+        {
+            name: "Description",
+            key: "0xfc5327884a7fb1912dcdd0d78d7e6753f03e61a8e0b845a4b62f5efde472d0a8",
+            keyType: "Singleton",
+            valueContent: "URL",
+            valueType: "string",
+        }
+    ],
+    {
+        Username: 'my-cool-name',
+        Description: 'http://my-cool-website.html
+    }
+)
+> [
+    {key: '0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da', value: '0x6d792d636f6f6c2d6e616d65' },
+    {key: '0xfc5327884a7fb1912dcdd0d78d7e6753f03e61a8e0b845a4b62f5efde472d0a8', value: '0x687474703a2f2f6d792d636f6f6c2d776562736974652e68746d6c' }
+  ]
 ```
 
 
