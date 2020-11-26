@@ -201,7 +201,7 @@ export const utils = {
 
         }
 
-        let sameEncoding = (valueContentMap[schemaElementDefinition.valueContent].type === schemaElementDefinition.valueType.split('[]')[0])
+        let sameEncoding = (valueContentMap[schemaElementDefinition.valueContent] && valueContentMap[schemaElementDefinition.valueContent].type === schemaElementDefinition.valueType.split('[]')[0])
         const isArray = (schemaElementDefinition.valueType.substr(schemaElementDefinition.valueType.length - 2) === '[]')
 
         // VALUE TYPE
@@ -265,7 +265,7 @@ export const utils = {
         let result
         const isArray = (schemaElementDefinition.valueType.substr(schemaElementDefinition.valueType.length - 2) === '[]')
 
-        const sameEncoding = (valueContentMap[schemaElementDefinition.valueContent].type === schemaElementDefinition.valueType.split('[]')[0])
+        const sameEncoding = (valueContentMap[schemaElementDefinition.valueContent] && valueContentMap[schemaElementDefinition.valueContent].type === schemaElementDefinition.valueType.split('[]')[0])
 
         // We only loop if the valueType done by abi.encodeParameter can not handle it directly
         if (Array.isArray(value) && !sameEncoding) { // value type encoding will handle it?
