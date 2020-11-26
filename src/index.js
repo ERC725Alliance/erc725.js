@@ -30,6 +30,9 @@ export default class ERC725 {
 
     constructor(schema, address, provider) {
 
+        // provider param can be either the provider, or and object with {provider: ,type:}
+        // we first check if they sent a provider type with
+
         // NOTE: These errors will never constiently happen this way without type/format checking
         if (!schema) { throw new Error('Missing schema.') } // TODO: Add check for schema format
         if (!address) { throw new Error('Missing address.') } // TODO: check for proper address
@@ -43,8 +46,23 @@ export default class ERC725 {
         this.utils = Utils
 
         // Check provider types
-        // eslint-disable-next-line no-mixed-operators
-        const providerName = provider && provider.constructor && provider.constructor.name || null
+        let providerName
+
+        if (provider.type) {
+
+            providerName = provider.type
+            // eslint-disable-next-line no-param-reassign
+            provider = provider.provider
+
+        } else if (provider && provider.constructor && provider.constructor.name) {
+
+            providerName = provider.constructor.name
+
+        } else {
+
+            providerName = null
+
+        }
 
         // CASE: WEB3 PROVIDER
         if (providerName === 'HttpProvider' || providerName === 'WebsocketProvider' || providerName === 'IpcProvider') {
@@ -54,7 +72,7 @@ export default class ERC725 {
 
             // CASE: GRAPH PROVIDER
 
-        } else if (providerName === 'ApolloClient' || provider.type === 'graph') {
+        } else if (providerName === 'ApolloClient') {
 
             this.options.providerType = 'graph'
             // TODO: Confirm better is to just use passed in provider

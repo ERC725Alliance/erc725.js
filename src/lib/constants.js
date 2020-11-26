@@ -25,11 +25,6 @@ export const CONSTANTS = {
     },
     hashFunctions: [
         {
-            name: 'keccak256',
-            sig: '0xb7845733',
-            method: Web3Utils.keccak256
-        },
-        {
             name: 'keccak256(utf8)',
             sig: '0x6f357c6a',
             method: Web3Utils.keccak256
@@ -42,5 +37,3 @@ export const CONSTANTS = {
     ]
 
 }
-
-export default CONSTANTS
