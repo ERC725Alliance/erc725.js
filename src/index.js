@@ -143,6 +143,9 @@ export default class ERC725 {
 
         }
         const results = {}
+        // Add a null value by default for each schema item
+        this.options.schema.forEach(element => { results[element.name] = null })
+
         for (let i = 0; i < allRawData.length; i++) {
 
             const e = allRawData[i]

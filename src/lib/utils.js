@@ -32,6 +32,7 @@ export const utils = {
 
             const schemaElement = schema[index]
             let newSchemaElement = null
+            results[schemaElement.name] = null
 
             // Looping through data
             for (let i = 0; i < allRawData.length; i++) {
@@ -117,7 +118,7 @@ export const utils = {
 
                 // null results/nothing happens with no match
 
-            }
+            } // end forEach data element
 
         } // end forEach schema element
 
