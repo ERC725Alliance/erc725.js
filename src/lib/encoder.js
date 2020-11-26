@@ -168,7 +168,7 @@ export const encoder = {
 
     encodeValueType: (type, value) => {
 
-        if (!valueTypeEncodingMap[type]) { throw new Error(type + ' encoding type not supported.') }
+        if (!valueTypeEncodingMap[type]) { throw new Error('Could not encode with valueType: "' + type + '".') }
 
         return valueTypeEncodingMap[type].encode(value)
 
@@ -176,7 +176,7 @@ export const encoder = {
 
     decodeValueType: (type, value) => {
 
-        if (!valueTypeEncodingMap[type]) { throw new Error(type + ' decoding type not supported.') }
+        if (!valueTypeEncodingMap[type]) { throw new Error('Could not decode with valueType: "' + type + '".') }
 
         return valueTypeEncodingMap[type].decode(value)
 
@@ -185,7 +185,7 @@ export const encoder = {
 
     encodeValueContent: (type, value) => {
 
-        if (!valueContentEncodingMap[type]) { throw new Error(type + ' encoding type not supported.') }
+        if (!valueContentEncodingMap[type]) { throw new Error('Could not encode with valueContent: "' + type + '".') }
 
         return valueContentEncodingMap[type].encode(value)
 
@@ -193,7 +193,7 @@ export const encoder = {
 
     decodeValueContent: (type, value) => {
 
-        if (!valueContentEncodingMap[type]) { throw new Error(type + ' decoding type not supported.') }
+        if (!valueContentEncodingMap[type]) { throw new Error('Could not decode with valueContent: "' + type + '".') }
 
         return valueContentEncodingMap[type].decode(value)
 

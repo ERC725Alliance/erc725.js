@@ -194,6 +194,13 @@ export const utils = {
 
     decodeKeyValue: (schemaElementDefinition, value) => {
 
+        // Check for the missing map.
+        if (!valueContentMap[schemaElementDefinition.valueContent] && schemaElementDefinition.valueContent.substr(0, 2) !== '0x') {
+
+            throw new Error('The valueContent for "' + schemaElementDefinition.name + '" is not supported.')
+
+        }
+
         let sameEncoding = (valueContentMap[schemaElementDefinition.valueContent].type === schemaElementDefinition.valueType.split('[]')[0])
         const isArray = (schemaElementDefinition.valueType.substr(schemaElementDefinition.valueType.length - 2) === '[]')
 
@@ -246,6 +253,13 @@ export const utils = {
     },
 
     encodeKeyValue: (schemaElementDefinition, value) => {
+
+        // Check for the missing map.
+        if (!valueContentMap[schemaElementDefinition.valueContent] && schemaElementDefinition.valueContent.substr(0, 2) !== '0x') {
+
+            throw new Error('The valueContent for "' + schemaElementDefinition.name + '" is not supported.')
+
+        }
 
         // @param value: can contain single value, or obj as required by spec
         let result
