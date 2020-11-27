@@ -184,7 +184,9 @@ export const encoder = {
 
         if (!valueTypeEncodingMap[type]) { throw new Error('Could not encode valueType: "' + type + '".') }
 
-        if (value) return valueTypeEncodingMap[type].encode(value)
+        return (value)
+            ? valueTypeEncodingMap[type].encode(value)
+            : value
 
     },
 
@@ -192,7 +194,9 @@ export const encoder = {
 
         if (!valueTypeEncodingMap[type]) { throw new Error('Could not decode valueType: "' + type + '".') }
 
-        if (value) return valueTypeEncodingMap[type].decode(value)
+        return (value)
+            ? valueTypeEncodingMap[type].decode(value)
+            : value
 
     },
 
