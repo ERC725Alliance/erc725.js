@@ -58,7 +58,13 @@ const valueTypeEncodingMap = {
     },
     address: {
         encode: value => Web3Abi.encodeParameter('address', value),
-        decode: value => Web3Abi.decodeParameter('address', value)
+        decode: value => {
+
+            console.log(value)
+            Web3Abi.decodeParameter('address',
+                value)
+
+        }
     },
     // NOTE: We could add conditional handling of numeric values here...
     uint256: {
@@ -178,7 +184,7 @@ export const encoder = {
 
         if (!valueTypeEncodingMap[type]) { throw new Error('Could not encode valueType: "' + type + '".') }
 
-        return valueTypeEncodingMap[type].encode(value)
+        if (value) return valueTypeEncodingMap[type].encode(value)
 
     },
 
@@ -186,7 +192,7 @@ export const encoder = {
 
         if (!valueTypeEncodingMap[type]) { throw new Error('Could not decode valueType: "' + type + '".') }
 
-        return valueTypeEncodingMap[type].decode(value)
+        if (value) return valueTypeEncodingMap[type].decode(value)
 
     },
 
