@@ -311,7 +311,15 @@ export const utils = {
 
     },
 
-    encodeKeyName: name => Web3Utils.keccak256(name)
+    encodeKeyName: name => {
+        let colon = name.indexOf(':')
+        return (colon !== -1)
+            // if name:subname, then construct using bytes16(hashFirstWord) + bytes12(0) + bytes4(hashLastWord)
+            ? Web3Utils.keccak256(name.substr(0, colon)).substr(0, 34) +
+              Web3Utils.leftPad(Web3Utils.keccak256(name.substr(colon + 1)).substr(2, 8), 32)
+            // otherwise just bytes32(hash)
+            : Web3Utils.keccak256(name)
+    }
 
 
 }

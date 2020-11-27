@@ -3,7 +3,17 @@
 /* eslint-disable */
 
 export const mockSchema = [
-
+  {
+    "name": "SupportedStandards:ERC725Account",
+    "key": "0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6",
+    "keyType": "Singleton",
+    "valueContent": "0xafdeb5d6",
+    "valueType": "bytes",
+    // Testing data
+    "returnRawData": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000004afdeb5d600000000000000000000000000000000000000000000000000000000",
+    "returnGraphData": "0xafdeb5d6",
+    "expectedResult": '0xafdeb5d6'
+  },
   {
     "name":"TestJSONURL",
     "key": "0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99",

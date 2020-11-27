@@ -114,8 +114,9 @@ export default class ERC725 {
         const keySchema = (!customSchema)
             ? this.options.schema.find(f => keyHash === f.key)
             : customSchema
+
         // Helpful error
-        if (!keySchema) { throw Error('There is no matching key in schema.') }
+        if (!keySchema) { throw Error('There is no matching key in schema of hash: "'+ keyHash +'".') }
 
         // Get the raw data
         const rawData = await this.provider.getData(this.options.address, keySchema.key)
