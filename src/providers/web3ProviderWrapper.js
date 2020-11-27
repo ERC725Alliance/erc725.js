@@ -38,49 +38,73 @@ export default class Web3Source {
 
     async getData(address, keyHash) {
 
-        const data = CONSTANTS.methods.getData.sig + keyHash.replace('0x', '')
-        const params = [
-            {
-                to: address,
-                gas: CONSTANTS.methods.getData.gas,
-                gasPrice: CONSTANTS.methods.getData.gasPrice,
-                value: CONSTANTS.methods.getData.value,
-                data
-            }
-        ]
-        const result = await this._callContract(params)
-
-        return (result === '0x') ? null : web3abi.decodeParameter('bytes', result)
+        return this._decodeResult(
+            await this._callContract(this._constructJSONRPC(address, keyHash))
+        )
 
     }
 
     async getAllData(address, keys) {
 
-        const results = []
+        // generate payload
+        const payload = []
         for (let index = 0; index < keys.length; index++) {
 
-            const theValue = await this.getData(address, keys[index])
-            results.push({
+            payload.push(this._constructJSONRPC(address, keys[index]))
+
+        }
+
+        // call node
+        const results = await this._callContract(payload)
+
+        // map results to keys
+        const returnValues = []
+        for (let index = 0; index < keys.length; index++) {
+
+            returnValues.push({
                 key: keys[index],
-                value: theValue
+                value: this._decodeResult(
+                    results.find(element => payload[index].id === element.id)
+                )
             })
 
         }
 
-        return results
+        return returnValues
 
     }
 
-    async _callContract(params) {
+    _constructJSONRPC(address, keyHash) {
 
-        const payload = {
+        // eslint-disable-next-line no-return-assign
+        return {
             jsonrpc: '2.0',
             method: 'eth_call',
-            params,
+            params: [
+                {
+                    to: address,
+                    gas: CONSTANTS.methods.getData.gas,
+                    gasPrice: CONSTANTS.methods.getData.gasPrice,
+                    value: CONSTANTS.methods.getData.value,
+                    data: CONSTANTS.methods.getData.sig + keyHash.replace('0x', '')
+                }
+            ],
             id: idCount += 1
         }
 
-        const callMethod = new Promise((resolve, reject) => {
+    }
+
+    _decodeResult(result) {
+
+        const rpcResult = result.result
+
+        return (rpcResult === '0x') ? null : web3abi.decodeParameter('bytes', rpcResult)
+
+    }
+
+    async _callContract(payload) {
+
+        return new Promise((resolve, reject) => {
 
             // Send old web3 method with callback to resolve promise
             this.provider.send(payload, (e, r) => {
@@ -91,15 +115,13 @@ export default class Web3Source {
 
                 } else {
 
-                    resolve(r.result)
+                    resolve(r)
 
                 }
 
             })
 
         })
-        // Call the promise
-        return callMethod
 
     }
 
