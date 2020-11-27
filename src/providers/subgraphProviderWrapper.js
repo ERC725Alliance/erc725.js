@@ -44,7 +44,8 @@ export default class GraphSource {
         const query = queries.getDataByKey(id, keys)
         const result = await this.provider.query({ query })
         // Single out the first result as expected
-        return result.data[Object.keys(result.data)[0]][0].value
+        const ret = result.data[Object.keys(result.data)[0]][0].value
+        return (!ret || ret === '0x') ? null : ret // Reemove 0x values
 
     }
 
@@ -53,7 +54,9 @@ export default class GraphSource {
         const query = queries.getAllData(id)
         const result = await this.provider.query({ query })
         // Return the data query array
-        return result.data[Object.keys(result.data)[0]]
+        const ret = result.data[Object.keys(result.data)[0]]
+        // we need to remove 0x values
+        return ret.filter(e => e && e.value !== '0x')
 
     }
 

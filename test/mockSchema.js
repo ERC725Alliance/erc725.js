@@ -133,6 +133,7 @@ export const mockSchema = [
     ]
 
   },
+  // NOTE: This test can not be made to be symmetrical
   // {
   //   "name": "TestNotSetArray[]",
   //   "key": "0xa90924b9b409ab609ed5136d82249ce17851a12b49bbb6f20fdedd6b3a2be61b",
@@ -147,7 +148,7 @@ export const mockSchema = [
   //     "0x", // array length
   //   ],
   //   "returnGraphData": [
-  //     null, // array length
+  //     "0x", // array length
   //   ],
   //   "expectedResult" :[
   //   ]

@@ -26,6 +26,8 @@ export const utils = {
 
         // Requires allRawData to be in an array of key/value pairs: {key:'0x908vsd98...',value:'0x9fuuh...'}
         const results = {}
+        // console.log('we are trying to decode all results...')
+        // console.log(allRawData)
 
         // Loop throuch schema when provided all ERC725 keys from blockchain source of truth
         for (let index = 0; index < schema.length; index++) {
@@ -39,6 +41,14 @@ export const utils = {
             for (let i = 0; i < allRawData.length; i++) {
 
                 const dataElement = allRawData[i] // TODO: Call a change to 'shift()' on data array to avoid more looping
+                // console.log('data element...')
+                // console.log(dataElement.value)
+                if (dataElement.value === '0x') {
+
+                    // console.log('skip decoding...')
+                    break
+
+                }
 
                 // MODIFY SCHEMA if we have keyType of array
                 if (schemaElement.keyType.toLowerCase() === 'array') {
