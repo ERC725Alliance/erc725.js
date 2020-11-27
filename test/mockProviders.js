@@ -4,21 +4,50 @@ export class HttpProvider {
 
     constructor(props) {
 
-        // Deconstruct to create local copy of array
+        // clone array
         this.returnData = Array.isArray(props.returnData) ? [...props.returnData] : props.returnData
 
     }
 
     send(payload, cb) {
 
-        const keyParam = '0x' + payload.params[0].data.substr(10) // remove methodSig
-        
 
-        setTimeout(() => cb(null, {
-            result: (Array.isArray(this.returnData))
-                ? this.returnData.find(e => e.key === keyParam).value
-                : this.returnData
-        }), 50)
+        if (Array.isArray(payload)) {
+
+            const results = []
+            for (let index = 0; index < payload.length; index++) {
+
+                const foundResult = this.returnData.find(element => {
+
+                    // get call param (key)
+                    const keyParam = '0x' + payload[index].params[0].data.substr(10)
+                    return element.key === keyParam
+
+                })
+
+                results.push({
+                    jsonrpc: '2.0',
+                    id: payload[index].id,
+                    result: foundResult ? foundResult.value : '0x'
+                })
+
+            }
+
+            setTimeout(() => cb(null, results), 10)
+
+        } else {
+
+            // get call param (key)
+            const keyParam = '0x' + payload.params[0].data.substr(10)
+
+            setTimeout(() => cb(null, {
+                jsonrpc: '2.0',
+                result: (Array.isArray(this.returnData))
+                    ? this.returnData.find(e => e.key === keyParam).value
+                    : this.returnData
+            }), 10)
+
+        }
 
     }
 

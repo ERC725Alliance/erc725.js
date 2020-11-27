@@ -36,6 +36,7 @@ describe('Running erc725.js tests...', () => {
         const allRawData = generateAllRawData(mockSchema)
         const allGraphData = generateAllData(mockSchema)
 
+
         it('with web3.currentProvider', async () => {
 
             const provider = new HttpProvider({ returnData: allRawData })
