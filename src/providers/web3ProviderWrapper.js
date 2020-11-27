@@ -57,9 +57,10 @@ export default class Web3Source {
         // call node
         const results = await this._callContract(payload)
 
+
         // map results to keys
         const returnValues = []
-        for (let index = 0; index < keys.length; index++) {
+        for (let index = 0; index < payload.length; index++) {
 
             returnValues.push({
                 key: keys[index],
@@ -97,7 +98,6 @@ export default class Web3Source {
     _decodeResult(result) {
 
         const rpcResult = result.result
-
         return (rpcResult === '0x') ? null : web3abi.decodeParameter('bytes', rpcResult)
 
     }
