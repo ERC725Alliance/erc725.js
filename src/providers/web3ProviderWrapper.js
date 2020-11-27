@@ -49,7 +49,8 @@ export default class Web3Source {
             }
         ]
         const result = await this._callContract(params)
-        return web3abi.decodeParameter('bytes', result)
+
+        return (result === '0x') ? null : web3abi.decodeParameter('bytes', result)
 
     }
 

@@ -60,7 +60,6 @@ const valueTypeEncodingMap = {
         encode: value => Web3Abi.encodeParameter('address', value),
         decode: value => {
 
-            console.log(value)
             Web3Abi.decodeParameter('address',
                 value)
 
@@ -129,7 +128,17 @@ export const valueContentEncodingMap = {
     // NOTE: This is not symmetrical, and always returns a checksummed address
     Address: {
         type: 'address',
-        encode: value => Web3Utils.toChecksumAddress(value),
+        encode: value => {
+
+            if (Web3Utils.isAddress(value)) {
+
+                return value.toLowerCase()
+
+            }
+
+            throw new Error('Address: "' + value + '" is an invalid address.')
+
+        },
         decode: value => Web3Utils.toChecksumAddress(value)
     },
     String: {

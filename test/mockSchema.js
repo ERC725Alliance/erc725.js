@@ -66,7 +66,7 @@ export const mockSchema = [
     "valueType": "bytes",
     // Testing data
     "returnRawData": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000140c03fba782b07bcf810deb3b7f0595024a444f4e000000000000000000000000",
-    "returnGraphData": "0x0C03fBa782b07bCf810DEb3b7f0595024A444F4e",
+    "returnGraphData": "0x0c03fba782b07bcf810deb3b7f0595024a444f4e",
     "expectedResult": "0x0C03fBa782b07bCf810DEb3b7f0595024A444F4e" // a real address
   },
 
@@ -124,8 +124,8 @@ export const mockSchema = [
     ],
     "returnGraphData": [
       "0x0000000000000000000000000000000000000000000000000000000000000002", // array length
-      "0xc444009d38d3046bb0cF81Fa2Cd295ce46A67C78",
-      "0x4fEbC3491230571F6e1829E46602e3b110215A2E",
+      "0xc444009d38d3046bb0cf81fa2cd295ce46a67c78",
+      "0x4febc3491230571f6e1829e46602e3b110215a2e",
     ],
     "expectedResult" :[
       "0xc444009d38d3046bb0cF81Fa2Cd295ce46A67C78",
@@ -133,6 +133,26 @@ export const mockSchema = [
     ]
 
   },
+  // {
+  //   "name": "TestNotSetArray[]",
+  //   "key": "0xa90924b9b409ab609ed5136d82249ce17851a12b49bbb6f20fdedd6b3a2be61b",
+  //   "keyType": "Array",
+  //   "valueContent": "Number",
+  //   "valueType": "uint256",
+  //   "elementValueContent": "Address",
+  //   "elementValueType": "address",
+  //   // testing data
+  //   // the full array of values
+  //   "returnRawData": [
+  //     "0x", // array length
+  //   ],
+  //   "returnGraphData": [
+  //     null, // array length
+  //   ],
+  //   "expectedResult" :[
+  //   ]
+
+  // },
   {
     "name": "TestObjArray[]",
     "key": "0x9985edaf12cbacf5ac7d6ed54f0445cc0ea56075aee9b9942e4ab3bf4239f950",

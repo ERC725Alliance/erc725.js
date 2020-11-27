@@ -17,7 +17,6 @@
  * @date 2020
  */
 
-import Web3Utils from 'web3-utils'
 import GraphSource from './providers/subgraphProviderWrapper.js'
 import Web3Source from './providers/web3ProviderWrapper.js'
 import EthereumSource from './providers/ethereumProviderWrapper.js'
@@ -45,62 +44,77 @@ export default class ERC725 {
         }
         this.utils = Utils
 
-        // Check provider types
-        let providerName
 
-        if (provider.type) {
+        let givenProvider = provider.provider || provider
 
-            providerName = provider.type
-            // eslint-disable-next-line no-param-reassign
-            provider = provider.provider
-
-        } else if (provider && provider.constructor && provider.constructor.name) {
-
-            providerName = provider.constructor.name
-
-        } else {
-
-            providerName = null
-
-        }
-
-        // CASE: WEB3 PROVIDER
-        if (providerName === 'HttpProvider' || providerName === 'WebsocketProvider' || providerName === 'IpcProvider') {
-
-            this.options.providerType = 'web3'
-            this.provider = new Web3Source(provider)
-
-            // CASE: GRAPH PROVIDER
-
-        } else if (providerName === 'ApolloClient') {
+        if (provider.type === 'ApolloClient') {
 
             this.options.providerType = 'graph'
             // TODO: Confirm better is to just use passed in provider
             // this.provider = new GraphSource({uri:provider.uri})
-            this.provider = new GraphSource(provider)
+            this.provider = new GraphSource(givenProvider)
 
-            // CASE: OLD WEB3 PROVIDER - no named provider only with a 'send' method
 
-        } else if (!providerName && !provider.request && provider.send) {
+             // CASE: Ethereum provider
+        } else if (provider.request || provider.type === 'EthereumProvider') {
 
-            // THis is for older metamask
-            this.options.providerType = 'ethereum-deprecated'
-            this.provider = new EthereumSource(provider, 'deprecated')
-
-            // CASE: ETHEREUM PROVIDER EIP 1193
-
-        } else if (provider.request) {
-
+    
             this.options.providerType = 'ethereum'
-            this.provider = new EthereumSource(provider)
+            this.provider = new EthereumSource(givenProvider)
 
-            // CASE: Unknown or incorrect provider
+        
+        // CASE: Web3 or deprectaed ethereum provider
+        } else if ((!provider.request && provider.send) || provider.type === 'Web3Provider') {
 
-        } else {
+            this.options.providerType = 'web3'
+            this.provider = new Web3Source(givenProvider)
 
-            throw new Error('Incorrect or unsupported provider')
 
+        // CASE: Unknown provider
+        }  else {
+            throw new Error('Incorrect or unsupported provider', givenProvider)
         }
+        
+
+
+
+            // if (providerName === 'HttpProvider' || providerName === 'WebsocketProvider' || providerName === 'IpcProvider') {
+
+            //     this.options.providerType = 'web3'
+            //     this.provider = new Web3Source(provider)
+
+            //     // CASE: GRAPH PROVIDER
+
+            // } else if (providerName === 'ApolloClient') {
+
+            //     this.options.providerType = 'graph'
+            //     // TODO: Confirm better is to just use passed in provider
+            //     // this.provider = new GraphSource({uri:provider.uri})
+            //     this.provider = new GraphSource(provider)
+
+            //     // CASE: OLD WEB3 PROVIDER - no named provider only with a 'send' method
+
+            // } else if (!providerName && !provider.request && provider.send) {
+
+            //     // THis is for older metamask
+            //     this.options.providerType = 'ethereum-deprecated'
+            //     this.provider = new EthereumSource(provider, 'deprecated')
+
+            //     // CASE: ETHEREUM PROVIDER EIP 1193
+
+            // } else if (provider.request) {
+
+            //     this.options.providerType = 'ethereum'
+            //     this.provider = new EthereumSource(provider)
+
+            //     // CASE: Unknown or incorrect provider
+
+            // } else {
+
+            //     throw new Error('Incorrect or unsupported provider')
+
+            // }
+
 
     }
 

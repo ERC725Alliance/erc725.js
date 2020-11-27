@@ -49,8 +49,9 @@ export default class EthereumSource {
                 data
             }
         ]
-        const result = await this._callContract(params)
-        return web3Abi.decodeParameter('bytes', (this.deprecated ? result.result : result))
+        let result = await this._callContract(params)
+        result = this.deprecated ? result.result : result
+        return (result === '0x') ? null : web3Abi.decodeParameter('bytes', result)
 
     }
 

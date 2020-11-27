@@ -57,7 +57,7 @@ describe('Running erc725.js tests...', () => {
         it('with apollo client', async () => {
 
             const provider = new ApolloClient({ returnData: allGraphData, getAll: true })
-            const erc725 = new ERC725(mockSchema, address, provider)
+            const erc725 = new ERC725(mockSchema, address, { provider, type: 'ApolloClient' })
             const result = await erc725.getAllData()
             assert.deepStrictEqual(result, fullResults)
 
@@ -93,7 +93,7 @@ describe('Running erc725.js tests...', () => {
 
                 const returnData = generateAllData([schemaElement])
                 const provider = new ApolloClient({ returnData })
-                const erc725 = new ERC725(mockSchema, address, provider)
+                const erc725 = new ERC725(mockSchema, address, { provider, type: 'ApolloClient' })
                 const result = await erc725.getData(schemaElement.key)
                 assert.deepStrictEqual(result, schemaElement.expectedResult)
 

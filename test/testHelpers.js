@@ -63,17 +63,21 @@ export function generateAllData(schema) {
                 if (i === 0) {
 
                     // We need the new key, and to 'flatten the array as per expected from chain data
-                    results.push({
-                        key: element.key,
-                        value: e
-                    }) // we subtract one from length because this has the extra array length key in the array
+                    if (e) {
+
+                        results.push({
+                            key: element.key,
+                            value: e.toLowerCase()
+                        }) // we subtract one from length because this has the extra array length key in the array
+
+                    }
 
                 } else {
 
                     // This is array length key/value pair
                     results.push({
                         key: utils.encodeArrayKey(element.key, i - 1),
-                        value: e
+                        value: e.toLowerCase()
                     })
 
                 }
