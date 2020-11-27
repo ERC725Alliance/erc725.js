@@ -1,4 +1,4 @@
-import Web3Utils from 'web3-utils'
+import { utils } from '../src/lib/utils.js'
 
 export function generateAllRawData(schema) {
 
@@ -15,13 +15,18 @@ export function generateAllRawData(schema) {
                 // we assume always first element in the array in returnData array is the length
                 if (i === 0) {
 
-                    results.push({ key: element.key, value: e })
+                    results.push({
+                        key: element.key,
+                        value: e
+                    })
 
                 } else {
 
                     // This is array length key/value pair
-                    const newElementKey = '' + element.elementKey + Web3Utils.padLeft(Web3Utils.numberToHex(i - 1), 32).replace('0x', '')
-                    results.push({ key: newElementKey, value: e })
+                    results.push({
+                        key: utils.encodeArrayKey(element.key, i - 1),
+                        value: e
+                    })
 
                 }
 
@@ -29,7 +34,10 @@ export function generateAllRawData(schema) {
 
         } else {
 
-            results.push({ key: element.key, value: element.returnRawData })
+            results.push({
+                key: element.key,
+                value: element.returnRawData
+            })
 
         }
 
@@ -55,13 +63,18 @@ export function generateAllData(schema) {
                 if (i === 0) {
 
                     // We need the new key, and to 'flatten the array as per expected from chain data
-                    results.push({ key: element.key, value: e }) // we subtract one from length because this has the extra array length key in the array
+                    results.push({
+                        key: element.key,
+                        value: e
+                    }) // we subtract one from length because this has the extra array length key in the array
 
                 } else {
 
                     // This is array length key/value pair
-                    const newElementKey = '' + element.elementKey + Web3Utils.padLeft(Web3Utils.numberToHex(i - 1), 32).replace('0x', '')
-                    results.push({ key: newElementKey, value: e })
+                    results.push({
+                        key: utils.encodeArrayKey(element.key, i - 1),
+                        value: e
+                    })
 
                 }
 
@@ -69,7 +82,10 @@ export function generateAllData(schema) {
 
         } else {
 
-            results.push({ key: element.key, value: element.returnGraphData })
+            results.push({
+                key: element.key,
+                value: element.returnGraphData
+            })
 
         }
 

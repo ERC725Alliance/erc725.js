@@ -113,8 +113,6 @@ export const mockSchema = [
     "keyType": "Array",
     "valueContent": "Number",
     "valueType": "uint256",
-    "elementKey": "0x3a47ab5bd3a594c3a8995f8fa58d0876",
-    "elementKeyType": "ArrayElement",
     "elementValueContent": "Address",
     "elementValueType": "address",
     // testing data
@@ -141,8 +139,6 @@ export const mockSchema = [
     "keyType": "Array",
     "valueContent": "Number", // Array length
     "valueType": "uint256",
-    "elementKey": "0x9985edaf12cbacf5ac7d6ed54f0445cc",
-    "elementKeyType": "ArrayElement",
     "elementValueContent": "JSONURL",
     "elementValueType": "bytes",
     // testing data
@@ -323,8 +319,6 @@ export const mockSchema = [
   //   "keyType": "Array",
   //   "valueContent": "ArrayLength", // Array length
   //   "valueType": "uint256",
-  //   "elementKey": "0xe4d20147947de3d1b329a854199dbf93",
-  //   "elementKeyType": "ArrayElement",
   //   "elementValueContent": "String",
   //   "elementValueType": "string[]",
   //   // testing data
@@ -354,8 +348,6 @@ export const mockSchema = [
   //   "keyType": "Array",
   //   "valueContent": "ArrayLength", // Array length
   //   "valueType": "uint256",
-  //   "elementKey": "0xf9a149b854fc24a5b7c91cce364e1d83",
-  //   "elementKeyType": "ArrayElement",
   //   "elementValueContent": "JSONURL",
   //   "elementValueType": "bytes[]",
   //   // testing data

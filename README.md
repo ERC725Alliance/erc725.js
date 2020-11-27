@@ -22,6 +22,8 @@ erc725.....
 ```
 
 
+
+
 ## Schema
 
 *Example schema from a universal profile (LSP3)*
@@ -48,8 +50,6 @@ const schema = [
         "keyType": "Array",
         "valueContent": "ArrayLength",
         "valueType": "uint256",
-        "elementKey": "0xb8c4a0b76ed8454e098b20a987a980e6",
-        "elementKeyType": "ArrayElement",
         "elementValueContent": "Address",
         "elementValueType": "address"
     }
@@ -74,6 +74,8 @@ const erc725 = new ERC725(schema, '0x09098...', web3.currentProvider)
 
 - `provider`: one of either a Web3 provider, or a ethereumProvider EIP 1193, or a ERC725 compliant **subgraph**
 <!-- TODO: Show more examples & links for the providers -->
+
+Currently tested and supported providers include: web3.currentProvider, Metamask's and 
  
  - `address`: the ERC725(Y) contract address 
  

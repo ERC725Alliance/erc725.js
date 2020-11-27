@@ -181,7 +181,7 @@ export default class ERC725 {
             for (let index = 0; index < arrayLength; index++) {
 
                 // eslint-disable-next-line max-len
-                const elementKey = schemaElementDefinition.elementKey + Web3Utils.leftPad(Web3Utils.numberToHex(index), 32).replace('0x', '')
+                const elementKey = utils.encodeArrayKey(schemaElementDefinition.key, index)
                 const schemaElement = {
                     key: elementKey,
                     keyType: 'Singleton',

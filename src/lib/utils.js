@@ -31,8 +31,9 @@ export const utils = {
         for (let index = 0; index < schema.length; index++) {
 
             const schemaElement = schema[index]
-            let newSchemaElement = null
-            results[schemaElement.name] = '' // ensure empty field per schema element
+            let newSchemaElement
+            results[schemaElement.name] = null // ensure empty field per schema element
+
 
             // Looping through data
             for (let i = 0; i < allRawData.length; i++) {
@@ -44,9 +45,8 @@ export const utils = {
 
                     // Create appropriate schema element based on keyType and data element
                     // Set the assumed array elementKey based on potential match with data key
-                    const elementKey = schemaElement.elementKey + Web3Utils.leftPad(dataElement.key.substr(dataElement.key.length - 32), 32).replace('0x', '')
+                    const elementKey = schemaElement.key.substr(0, 34) + Web3Utils.leftPad(dataElement.key.substr(dataElement.key.length - 32), 32).replace('0x', '')
 
-                    // Form new schema schema to check data against
                     let newElementValueContent
                     try {
 
@@ -146,44 +146,38 @@ export const utils = {
             // Better to just test for schemaElement keyType 'Array'?
             if (schemaElement.keyType.toLowerCase() === 'array') {
 
-                // This is an array
                 // Create the 'sub' schema for array elements
-
-                // in the first element we put the length remember?
-                const elementKey = '' + schemaElement.elementKey + Web3Utils.leftPad(schemaElement.elementKey.substr(schemaElement.key.length - 32), 32).replace('0x', '')
-                // Form new singleton schema schema to check data array element against
-                const newSchemaElement = {
-                    key: elementKey,
-                    keyType: 'Singleton',
-                    valueContent: schemaElement.elementValueContent,
-                    valueType: schemaElement.elementValueType
-                }
+                const newSchemaElement = utils.transposeArraySchema(schemaElement, index)
 
                 // 3.a Loop through the array of data results
                 for (let i = 0; i < dataElement.length; i++) {
 
                     const e = dataElement[i]
 
-                    let newElementKey
-                    let newElementValue
-
                     if (i === 0) {
 
-                        newElementKey = schemaElement.key
-                        newElementValue = Web3Utils.padLeft(Web3Utils.numberToHex(dataElement.length), 64)
-                        // This is array length key/value pair
-                        results.push({ key: newElementKey, value: newElementValue })
+                        // This is the array length key/value pair
+                        results.push({
+                            key: schemaElement.key,
+                            value: Web3Utils.padLeft(Web3Utils.numberToHex(dataElement.length), 64)
+                        })
 
                     }
 
-                    results.push({ key: schemaElement.elementKey + Web3Utils.padLeft(i, 32).replace('0x', ''), value: utils.encodeKeyValue(newSchemaElement, e) })
+                    results.push({
+                        key: utils.encodeArrayKey(schemaElement.key, i),
+                        value: utils.encodeKeyValue(newSchemaElement, e)
+                    })
 
                 }
 
             } else {
 
                 // 3.b This is a singleton instance
-                results.push({ key: schemaElement.key, value: utils.encodeKeyValue(schemaElement, dataElement) })
+                results.push({
+                    key: schemaElement.key,
+                    value: utils.encodeKeyValue(schemaElement, dataElement)
+                })
 
             }
 
@@ -321,7 +315,25 @@ export const utils = {
             // otherwise just bytes32(hash)
             : Web3Utils.keccak256(name)
 
-    }
+    },
 
+    // eslint-disable-next-line arrow-body-style
+    encodeArrayKey: (key, index) => {
+
+        return key.substr(0, 34) + Web3Utils.padLeft(Web3Utils.numberToHex(index), 32).replace('0x', '')
+
+    },
+
+    // eslint-disable-next-line arrow-body-style
+    transposeArraySchema: (schema, index) => {
+
+        return {
+            key: utils.encodeArrayKey(schema.key, index),
+            keyType: 'Singleton',
+            valueContent: schema.elementValueContent,
+            valueType: schema.elementValueType
+        }
+
+    }
 
 }

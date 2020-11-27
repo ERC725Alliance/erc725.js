@@ -12,6 +12,8 @@ export class HttpProvider {
     send(payload, cb) {
 
         const keyParam = '0x' + payload.params[0].data.substr(10) // remove methodSig
+        
+
         setTimeout(() => cb(null, {
             result: (Array.isArray(this.returnData))
                 ? this.returnData.find(e => e.key === keyParam).value
