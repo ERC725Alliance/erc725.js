@@ -22,9 +22,36 @@ erc725.....
 ```
 
 
+## Instantiation
+
+```js
+import ERC725 from 'erc725.js'
+
+const schema = [{...}]
+const web3 = new Web3(...)
+
+const erc725 = new ERC725(schema, '0x09098...', web3.currentProvider)
+```
+
+**Parameters**
+
+- `schema`: a [ERC725Y JSON Schema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md)
+
+- `provider|Object`: Provider: one of either a Web3 provider, or an EIP 1193 compliant Ethereum provider, or a ERC725 compliant graphQL service. Will attempt to automatically detect the provider type, but can also handle an object of a `provider` and 'type' members.
+<!-- TODO: Show more examples & links for the providers -->
+
+Currently tested and supported providers include: 
+* web3.currentProvider: `type:'HttpProvider'`
+* Metamask Ethereum provider: `type:'EthereumProvider'`
+* ApploClient graphQL client: `type: 'ApolloClient'`
 
 
-## Schema
+
+
+ 
+ - `address`: the ERC725(Y) contract address 
+
+**Examples**
 
 *Example schema from a universal profile (LSP3)*
 
@@ -56,29 +83,30 @@ const schema = [
 ]
 ```
 
-
-## Instantiation
-
+*Web3 Provider*
 ```js
-import ERC725 from 'erc725.js'
-
-const schema = [{...}]
-const web3 = new Web3(...)
-
-const erc725 = new ERC725(schema, '0x09098...', web3.currentProvider)
+const web3 = new Web3(new Web3.providers.HttpProvider("https://rpc.l14.lukso.network"));
+erc725 = new ERC725(schema, profileId, { provider: web3.currentProvider, type: 'HttpProvider' })
 ```
 
-**Parameters**
+*Metamask Provider*
+```js
+erc725 = new ERC725(schema, '0x0adf8ce0fe...', { provider:window.ethereum, type:'EthereumProvider' })
+```
 
-- `schema`: a [ERC725Y JSON Schema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md)
+*Graph Provider*
+```js
+const graphProvider = new ApolloClient({
+  uri: 'http://183.23.0.2:8000/subgraphs/name/lukso/LS14', // Example only
+  cache: new InMemoryCache(),
+  fetchOptions: {
+    mode: 'no-cors'
+  }
+})
 
-- `provider`: one of either a Web3 provider, or a ethereumProvider EIP 1193, or a ERC725 compliant **subgraph**
-<!-- TODO: Show more examples & links for the providers -->
+erc725 = new ERC725(schema, '0x0adf8ce0fe...', { provider:graphProvider, type: 'ApolloClient' })
+```
 
-Currently tested and supported providers include: web3.currentProvider, Metamask's and 
- 
- - `address`: the ERC725(Y) contract address 
- 
 
 Creates a new instance of the ERC725 class with associated address, schema, and provider.
 
