@@ -93,10 +93,10 @@ export default class ERC725 {
             ? this.options.schema.find(f => keyHash === f.key)
             : customSchema
 
-        // Helpful error
+        // No schema matched the key
         if (!keySchema) { throw Error('There is no matching key in schema of hash: "' + keyHash + '".') }
 
-        // Get the raw data
+        // Get all the raw data possible.
         const rawData = await this.provider.getData(this.options.address, keySchema.key)
         // Decode and return the data
         return this._decodeByKeyType(keySchema, rawData)
@@ -114,14 +114,16 @@ export default class ERC725 {
         // Take out null data values, since data may not fulfill entire schema
         allRawData = await allRawData.filter(e => e.value !== null)
 
+        // If the provider type is a graphql client, we assume we can get ALL keys (including array keys)
         if (this.options.providerType === 'graph') {
 
             // expects all key/values returned from graph query as an array
-            // Change this to a return object
             return utils.decodeAllData(this.options.schema, allRawData)
 
         }
+
         const results = {}
+
         // Add a null value by default for each schema item
         this.options.schema.forEach(element => { results[element.name] = null })
 
@@ -158,18 +160,13 @@ export default class ERC725 {
             // Construct the schema for each element, and fetch
             for (let index = 0; index < arrayLength; index++) {
 
-                // eslint-disable-next-line max-len
-                const elementKey = utils.encodeArrayKey(schemaElementDefinition.key, index)
-                const schemaElement = {
-                    key: elementKey,
-                    keyType: 'Singleton',
-                    valueContent: schemaElementDefinition.elementValueContent,
-                    valueType: schemaElementDefinition.elementValueType
-                }
-                const res = await this.getData(elementKey, schemaElement)
+                const schemaElement = utils.transposeArraySchema(schemaElementDefinition, index)
+                const res = await this.getData(schemaElement.key, schemaElement)
+
+                // This will not push null values
                 if (res) {
 
-                    result.push(await this.getData(elementKey, schemaElement))
+                    result.push(await this.getData(schemaElement.key, schemaElement))
 
                 }
 

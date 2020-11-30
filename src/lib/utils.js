@@ -22,178 +22,152 @@ import { encoder, valueContentEncodingMap as valueContentMap } from './encoder.j
 
 export const utils = {
 
-    decodeAllData: (schema, allRawData) => {
+    decodeAllData: (schema, data) => {
 
-        // Requires allRawData to be in an array of key/value pairs: {key:'0x908vsd98...',value:'0x9fuuh...'}
+        // Data is an array of objects of key/value pairs
         const results = {}
-        // console.log('we are trying to decode all results...')
-        // console.log(allRawData)
 
-        // Loop throuch schema when provided all ERC725 keys from blockchain source of truth
         for (let index = 0; index < schema.length; index++) {
 
             const schemaElement = schema[index]
-            let newSchemaElement
-            results[schemaElement.name] = null // ensure empty field per schema element
 
+            const res = utils.decodeKey(schemaElement, data)
+            if (res) {
 
-            // Looping through data
-            for (let i = 0; i < allRawData.length; i++) {
-
-                const dataElement = allRawData[i] // TODO: Call a change to 'shift()' on data array to avoid more looping
-                // console.log('data element...')
-                // console.log(dataElement.value)
-                if (dataElement.value === '0x') {
-
-                    // console.log('skip decoding...')
-                    break
-
-                }
-
-                // MODIFY SCHEMA if we have keyType of array
-                if (schemaElement.keyType.toLowerCase() === 'array') {
-
-                    // Create appropriate schema element based on keyType and data element
-                    // Set the assumed array elementKey based on potential match with data key
-                    const elementKey = schemaElement.key.substr(0, 34) + Web3Utils.leftPad(dataElement.key.substr(dataElement.key.length - 32), 32).replace('0x', '')
-
-                    let newElementValueContent
-                    try {
-
-                        // TODO: QUESTION: what about an array of uints
-                        Web3Utils.hexToNumber(dataElement.value) // this will be uint if is type array
-                        newElementValueContent = schemaElement.valueContent // therefore we will use the 'top' schema
-
-                    } catch (error) {
-
-                        newElementValueContent = schemaElement.elementValueContent // otherwise we assume its no...
-
-                    }
-                    newSchemaElement = {
-                        key: elementKey,
-                        keyType: 'Singleton',
-                        valueContent: newElementValueContent, // value content on first element in the array is
-                        valueType: schemaElement.elementValueType
-                    }
-
-                } else {
-
-                    // Its not an array, so add the single element
-                    newSchemaElement = schemaElement
-
-                }
-
-                // CHECK FOR MATCH, we can't be sure data not in the schema is included
-                if (dataElement.key === newSchemaElement.key) {
-
-                    const decodedElement = utils.decodeKeyValue(newSchemaElement, dataElement.value) // this will fail being writting to results below becuase it is a number
-
-                    if (schemaElement.keyType.toLowerCase() === 'array') {
-
-                        // Handle arrays for original schemaElement (loop), since a match could also be an array length
-
-                        try {
-
-                            // This will fail when anything BUT the arrayLength key, and fail silently
-                            // since we don't need array length key-value in the final decoded results
-                            Web3Utils.hexToNumber(dataElement.value)
-
-                        } catch (error) {
-
-                            // Check if there is already an array at the results index
-                            if (Array.isArray(results[schemaElement.name])) {
-
-                                // If so, add to the existing results element array
-                                results[schemaElement.name].push(decodedElement)
-
-                            } else {
-
-                                // Otherwise reate the new results element array
-                                const obj = {}
-                                obj[schemaElement.name] = [decodedElement]
-                                results[schemaElement.name] = [decodedElement]
-
-                            }
-
-                        }
-
-                    } else {
-
-                        // Handle singleton decoded result
-                        results[newSchemaElement.name] = decodedElement
-
-                    }
-
-                } // end CHECK FOR MATCH
-
-                // null results/nothing happens with no match
-
-            } // end forEach data element
-
-        } // end forEach schema element
-
-        return results
-
-    },
-
-    encodeAllData: (schema, data) => {
-
-        // Data must come as key/value pairs, where keys are defined as per the schema
-        // 1. Define results array, and loop through data by keys in the object
-        const results = [] // results will be the flattened array of key/value pairs able to be deployed using ABI
-        // NOTE: This requires properly formatted input data as per the schema (as expected from dedoce)
-
-        // eslint-disable-next-line no-restricted-syntax
-        for (let index = 0; index < Object.keys(data).length; index++) {
-
-            const key = Object.keys(data)[index]
-            const dataElement = data[key]
-            // 2. Find schema for this data data
-            // NOTE: Each element should have an object with a single key, with that key being the schema field name
-            const schemaElement = schema.find(e => e.name === key)
-
-            // 2.1 test to see if matching with an array '[]' key
-            // Better to just test for schemaElement keyType 'Array'?
-            if (schemaElement.keyType.toLowerCase() === 'array') {
-
-                // Create the 'sub' schema for array elements
-                const newSchemaElement = utils.transposeArraySchema(schemaElement, index)
-
-                // 3.a Loop through the array of data results
-                for (let i = 0; i < dataElement.length; i++) {
-
-                    const e = dataElement[i]
-
-                    if (i === 0) {
-
-                        // This is the array length key/value pair
-                        results.push({
-                            key: schemaElement.key,
-                            value: Web3Utils.padLeft(Web3Utils.numberToHex(dataElement.length), 64)
-                        })
-
-                    }
-
-                    results.push({
-                        key: utils.encodeArrayKey(schemaElement.key, i),
-                        value: utils.encodeKeyValue(newSchemaElement, e)
-                    })
-
-                }
-
-            } else {
-
-                // 3.b This is a singleton instance
-                results.push({
-                    key: schemaElement.key,
-                    value: utils.encodeKeyValue(schemaElement, dataElement)
-                })
+                results[schemaElement.name] = res
 
             }
 
         }
 
         return results
+
+    },
+    encodeAllData: (schema, data) => {
+
+        // Data is an object of keys with associated values, as per schema
+        const results = []
+        for (let index = 0; index < schema.length; index++) {
+
+            const schemaElement = schema[index]
+
+            const filteredData = data[schemaElement.name]
+            const res = utils.encodeKey(schemaElement, filteredData)
+            if (res) {
+
+                if (schemaElement.keyType === 'Array') {
+
+                    results.push(...res)
+
+                } else {
+
+                    results.push({
+                        key: schemaElement.key,
+                        value: res
+                    })
+
+                }
+
+            }
+
+        }
+
+        return results
+
+    },
+
+    decodeKey: (schema, value) => {
+
+        // Value will be either key/value pairs for a key type of Array, or a single value for type Singleton
+        if (schema.keyType === 'Array') {
+
+            // Handle the array
+            const results = []
+            const valueElement = value.find(e => e.key === schema.key)
+            const arrayLength = utils.decodeKeyValue(schema, valueElement.value) || 0
+
+            // This should not run if no match or arrayLength
+            for (let index = 0; index < arrayLength; index++) {
+
+                const newSchema = utils.transposeArraySchema(schema, index)
+                const dataElement = value.find(e => e.key === newSchema.key)
+                // const element = array[index];
+                if (dataElement) {
+
+                    const res = utils.decodeKeyValue(newSchema, dataElement.value)
+                    if (res) {
+
+                        results.push(res)
+
+                    }
+
+                }
+
+            } // end for loop
+
+            return results
+
+        }
+
+        if (schema.keyType === 'Singleton') {
+
+            if (Array.isArray(value)) {
+
+                const newValue = value.find(e => e.key === schema.key)
+                return utils.decodeKeyValue(schema, newValue.value)
+
+            }
+
+            return utils.decodeKeyValue(schema, value)
+
+        }
+
+        console.error('Incorrect data match or keyType in schema from decodeKey(): "' + schema.keyType + '"')
+        return null
+
+    },
+
+    encodeKey: (schema, value) => {
+
+        // This will handle further encoding
+        // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
+        if (schema.keyType === 'Array' && Array.isArray(value)) {
+
+            const results = []
+
+            // const newSchema.transposeArraySchema(schema)
+            for (let index = 0; index < value.length; index++) {
+
+                const dataElement = value[index]
+                if (index === 0) {
+
+                    // this is the first element in the array (array length)
+                    results.push({
+                        key: schema.key,
+                        value: utils.encodeKeyValue(schema, value.length) // the array length
+                    })
+
+                }
+                const newSchema = utils.transposeArraySchema(schema, index)
+                results.push({
+                    key: newSchema.key,
+                    value: utils.encodeKeyValue(newSchema, dataElement)
+                })
+
+            }
+
+            return results
+
+        }
+
+        if (schema.keyType === 'Singleton') {
+
+            return utils.encodeKeyValue(schema, value)
+
+        }
+
+        console.error('Incorrect data match or keyType in schema from encodeKey(): "' + schema.keyType + '"')
+        return null
 
     },
 

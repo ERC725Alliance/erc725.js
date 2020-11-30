@@ -24,6 +24,7 @@ import ERC725, { utils } from '../src/index.js'
 import { mockSchema } from './mockSchema.js'
 import { HttpProvider, EthereumProvider, ApolloClient } from './mockProviders.js'
 import { generateAllRawData, generateAllData, generateAllResults } from './testHelpers.js'
+import { assertType } from 'graphql'
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
 
@@ -152,10 +153,13 @@ describe('Running erc725.js tests...', () => {
 
                         }
                         // Change the encoding on the schema....
-                        const arraySchema = schemaElement
+                        // const arraySchema = schemaElement
+                        const arraySchema = {}
+                        arraySchema.name = schemaElement.name
+                        arraySchema.key = schemaElement.key
+                        arraySchema.keyType = 'Singleton'
                         arraySchema.valueContent = schemaElement.elementValueContent
                         arraySchema.valueType = schemaElement.elementValueType
-                        arraySchema.keyType = 'Singleton'
                         results.push(utils.encodeKeyValue(arraySchema, schemaElement.expectedResult[i]))
 
                     } // end for loop
@@ -210,10 +214,28 @@ describe('Running erc725.js tests...', () => {
 
                 })
 
-                // SINGLETON type: This is not an array, assumed 'Singletoon
+                it('**NEW** Decode all data values for keyType "Array" in: ' + schemaElement.name, async () => {
+
+                    // we need all values for the array
+                    const values = allGraphData.filter(e => e.key.substr(0, 34) === schemaElement.key.substr(0, 34))
+                    const intendedResults = generateAllResults([schemaElement])[schemaElement.name]
+                    const results = utils.decodeKey(schemaElement, values)
+                    assert.deepStrictEqual(results, intendedResults)
+
+                })
+                it('**NEW** Encode all data values for keyType "Array" in:: ' + schemaElement.name, async () => {
+
+                    const data = generateAllResults([schemaElement])[schemaElement.name]
+                    // eslint-disable-next-line max-len
+                    const intendedResults = allGraphData.filter(e => e.key.substr(0, 34) === schemaElement.key.substr(0, 34))
+                    const results = utils.encodeKey(schemaElement, data)
+                    assert.deepStrictEqual(results, intendedResults)
+
+                })
 
             } else {
 
+                // SINGLETON type: This is not an array, assumed 'Singletoon
                 it('Encode data value for: ' + schemaElement.name, async () => {
 
                     const result = utils.encodeKeyValue(schemaElement, schemaElement.expectedResult)

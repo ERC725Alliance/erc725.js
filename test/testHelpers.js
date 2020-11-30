@@ -67,7 +67,7 @@ export function generateAllData(schema) {
 
                         results.push({
                             key: element.key,
-                            value: e.toLowerCase()
+                            value: e.toLowerCase() // force address to lowercase
                         }) // we subtract one from length because this has the extra array length key in the array
 
                     }
@@ -77,7 +77,7 @@ export function generateAllData(schema) {
                     // This is array length key/value pair
                     results.push({
                         key: utils.encodeArrayKey(element.key, i - 1),
-                        value: e.toLowerCase()
+                        value: e.toLowerCase() // force address to lowercase
                     })
 
                 }

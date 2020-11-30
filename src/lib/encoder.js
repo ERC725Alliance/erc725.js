@@ -174,7 +174,20 @@ export const valueContentEncodingMap = {
     },
     JSONURL: {
         type: 'custom',
-        encode: value => encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
+        // eslint-disable-next-line arrow-body-style
+        encode: value => {
+
+            // TODO: do json hashing here
+            // const hashFunction = CONSTANTS.hashFunctions.find(e => e.sig = value.hashFunction)
+            // need the json
+            // if (value.json) {
+
+            //     const hash = hashFunction(JSON.stringify(value.json))
+
+            // }
+            return encodeDataSourceWithHash(value.hashFunction, value.hash, value.url)
+
+        },
         decode: value => {
 
             const result = decodeDataSourceWithHash(value)
