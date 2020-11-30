@@ -46,7 +46,7 @@ const decodeDataSourceWithHash = value => {
     const encoodedData = value.replace('0x', '').substr(8) // Rest of data string after function hash
     const dataHash = '0x' + encoodedData.substr(0, 64) // Get jsonHash 32 bytes
     const dataSource = Web3Utils.hexToUtf8('0x' + encoodedData.substr(64)) // Get remainder as URI
-    return { hashFunction: hashFunction.name, dataHash, dataSource }
+    return hashFunction ? { hashFunction: hashFunction.name, dataHash, dataSource } : null
 
 }
 
@@ -162,11 +162,13 @@ export const valueContentEncodingMap = {
         decode: value => {
 
             const result = decodeDataSourceWithHash(value)
-            return {
-                hashFunction: result.hashFunction,
-                hash: result.dataHash,
-                url: result.dataSource
-            }
+            return result
+                ? {
+                    hashFunction: result.hashFunction,
+                    hash: result.dataHash,
+                    url: result.dataSource
+                }
+                : null
 
         }
     },
@@ -176,11 +178,13 @@ export const valueContentEncodingMap = {
         decode: value => {
 
             const result = decodeDataSourceWithHash(value)
-            return {
-                hashFunction: result.hashFunction,
-                hash: result.dataHash,
-                url: result.dataSource
-            }
+            return result
+                ? {
+                    hashFunction: result.hashFunction,
+                    hash: result.dataHash,
+                    url: result.dataSource
+                }
+                : null
 
         }
     }
