@@ -47,11 +47,12 @@ export const utils = {
 
         // Data is an object of keys with associated values, as per schema
         const results = []
+
         for (let index = 0; index < schema.length; index++) {
 
             const schemaElement = schema[index]
-
             const filteredData = data[schemaElement.name]
+
             const res = utils.encodeKey(schemaElement, filteredData)
             if (res) {
 

@@ -24,7 +24,6 @@ import ERC725, { utils } from '../src/index.js'
 import { mockSchema } from './mockSchema.js'
 import { HttpProvider, EthereumProvider, ApolloClient } from './mockProviders.js'
 import { generateAllRawData, generateAllData, generateAllResults } from './testHelpers.js'
-import { assertType } from 'graphql'
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
 
@@ -216,7 +215,6 @@ describe('Running erc725.js tests...', () => {
 
                 it('Decode all data values for keyType "Array" in: ' + schemaElement.name, async () => {
 
-                    // we need all values for the array
                     const values = allGraphData.filter(e => e.key.substr(0, 34) === schemaElement.key.substr(0, 34))
                     const intendedResults = generateAllResults([schemaElement])[schemaElement.name]
                     const results = utils.decodeKey(schemaElement, values)
@@ -246,8 +244,6 @@ describe('Running erc725.js tests...', () => {
                 it('Decode data value for: ' + schemaElement.name, async () => {
 
                     const result = utils.decodeKeyValue(schemaElement, schemaElement.returnGraphData)
-
-
                     assert.deepStrictEqual(result, schemaElement.expectedResult)
 
                 })
