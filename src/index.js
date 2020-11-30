@@ -45,7 +45,7 @@ export default class ERC725 {
         this.utils = Utils
 
 
-        let givenProvider = provider.provider || provider
+        const givenProvider = provider.provider || provider
 
         if (provider.type === 'ApolloClient') {
 
@@ -55,66 +55,30 @@ export default class ERC725 {
             this.provider = new GraphSource(givenProvider)
 
 
-             // CASE: Ethereum provider
+            // CASE: Ethereum provider
+
         } else if (provider.request || provider.type === 'EthereumProvider') {
 
-    
+
             this.options.providerType = 'ethereum'
             this.provider = new EthereumSource(givenProvider)
 
-        
-        // CASE: Web3 or deprectaed ethereum provider
+
+            // CASE: Web3 or deprectaed ethereum provider
+
         } else if ((!provider.request && provider.send) || provider.type === 'Web3Provider') {
 
             this.options.providerType = 'web3'
             this.provider = new Web3Source(givenProvider)
 
 
-        // CASE: Unknown provider
-        }  else {
+            // CASE: Unknown provider
+
+        } else {
+
             throw new Error('Incorrect or unsupported provider', givenProvider)
+
         }
-        
-
-
-
-            // if (providerName === 'HttpProvider' || providerName === 'WebsocketProvider' || providerName === 'IpcProvider') {
-
-            //     this.options.providerType = 'web3'
-            //     this.provider = new Web3Source(provider)
-
-            //     // CASE: GRAPH PROVIDER
-
-            // } else if (providerName === 'ApolloClient') {
-
-            //     this.options.providerType = 'graph'
-            //     // TODO: Confirm better is to just use passed in provider
-            //     // this.provider = new GraphSource({uri:provider.uri})
-            //     this.provider = new GraphSource(provider)
-
-            //     // CASE: OLD WEB3 PROVIDER - no named provider only with a 'send' method
-
-            // } else if (!providerName && !provider.request && provider.send) {
-
-            //     // THis is for older metamask
-            //     this.options.providerType = 'ethereum-deprecated'
-            //     this.provider = new EthereumSource(provider, 'deprecated')
-
-            //     // CASE: ETHEREUM PROVIDER EIP 1193
-
-            // } else if (provider.request) {
-
-            //     this.options.providerType = 'ethereum'
-            //     this.provider = new EthereumSource(provider)
-
-            //     // CASE: Unknown or incorrect provider
-
-            // } else {
-
-            //     throw new Error('Incorrect or unsupported provider')
-
-            // }
-
 
     }
 
@@ -130,7 +94,7 @@ export default class ERC725 {
             : customSchema
 
         // Helpful error
-        if (!keySchema) { throw Error('There is no matching key in schema of hash: "'+ keyHash +'".') }
+        if (!keySchema) { throw Error('There is no matching key in schema of hash: "' + keyHash + '".') }
 
         // Get the raw data
         const rawData = await this.provider.getData(this.options.address, keySchema.key)
@@ -159,7 +123,7 @@ export default class ERC725 {
         }
         const results = {}
         // Add a null value by default for each schema item
-        this.options.schema.forEach(element => { results[element.name] = '' })
+        this.options.schema.forEach(element => { results[element.name] = null })
 
         for (let i = 0; i < allRawData.length; i++) {
 
@@ -202,7 +166,12 @@ export default class ERC725 {
                     valueContent: schemaElementDefinition.elementValueContent,
                     valueType: schemaElementDefinition.elementValueType
                 }
-                result.push(await this.getData(elementKey, schemaElement))
+                const res = await this.getData(elementKey, schemaElement)
+                if (res) {
+
+                    result.push(await this.getData(elementKey, schemaElement))
+
+                }
 
             }
 
