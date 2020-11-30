@@ -214,7 +214,7 @@ describe('Running erc725.js tests...', () => {
 
                 })
 
-                it('**NEW** Decode all data values for keyType "Array" in: ' + schemaElement.name, async () => {
+                it('Decode all data values for keyType "Array" in: ' + schemaElement.name, async () => {
 
                     // we need all values for the array
                     const values = allGraphData.filter(e => e.key.substr(0, 34) === schemaElement.key.substr(0, 34))
@@ -223,7 +223,7 @@ describe('Running erc725.js tests...', () => {
                     assert.deepStrictEqual(results, intendedResults)
 
                 })
-                it('**NEW** Encode all data values for keyType "Array" in:: ' + schemaElement.name, async () => {
+                it('Encode all data values for keyType "Array" in:: ' + schemaElement.name, async () => {
 
                     const data = generateAllResults([schemaElement])[schemaElement.name]
                     // eslint-disable-next-line max-len
