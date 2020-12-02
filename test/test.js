@@ -128,6 +128,22 @@ describe('Running erc725.js tests...', () => {
 
         })
 
+        it('!!!Decode all data from class instance!', async () => {
+
+            const erc725 = new ERC725(mockSchema)
+            const result = erc725.decodeAllData(allGraphData)
+            assert.deepStrictEqual(result, fullResults)
+
+        })
+
+        it('!!!Encode all data from class instance!', async () => {
+
+            const erc725 = new ERC725(mockSchema)
+            const result = erc725.encodeAllData(fullResults)
+            assert.deepStrictEqual(result, allGraphData)
+
+        })
+
         /* **************************************** */
         /* Testing encoding/decoding field by field */
         for (let index = 0; index < mockSchema.length; index++) {
