@@ -27,15 +27,17 @@ import { CONSTANTS } from './constants.js'
 
 const encodeDataSourceWithHash = (hashType, dataHash, dataSource) => {
 
-    if (!CONSTANTS.hashFunctions.find(e => e.name === hashType || e.sig === hashType)) {
+    const lowerHashType = hashType.toLowerCase()
+    const hashFunction = CONSTANTS.hashFunctions.find(e => e.name === lowerHashType || e.sig === lowerHashType)
+
+    if (!hashFunction) {
 
         return Error('Unsupported hash type to encode hash and value: ' + hashType)
 
     }
-    // NOTE: QUESTION: Do we need 'toHex', incase future algorithms do not output hex as keccak does?
-    const hashFunction = CONSTANTS.hashFunctions.find(e => hashType === e.name || hashType === e.sig)
-    const hashData = Web3Utils.padLeft(dataHash, 32).replace('0x', '')
-    return '' + hashFunction.sig + hashData + Web3Utils.utf8ToHex(dataSource).replace('0x', '')
+
+    // NOTE: QUESTION: Do we need 'toHex', in case future algorithms do not output hex as keccak does?
+    return hashFunction.sig + dataHash.replace('0x', '') + Web3Utils.utf8ToHex(dataSource).replace('0x', '')
 
 }
 
