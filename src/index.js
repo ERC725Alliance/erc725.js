@@ -9,7 +9,7 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Lesser General Public License for more details.
     You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
+    along with ERC725.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
  * @file index.js
@@ -90,7 +90,7 @@ export default class ERC725 {
 
         // Get the correct schema key definition if its not passed as a parameter
         const keySchema = (!customSchema)
-            ? this.options.schema.find(f => keyHash === f.key)
+            ? this.options.schema.find(e => keyHash === e.key)
             : customSchema
 
         // No schema matched the key
@@ -99,14 +99,29 @@ export default class ERC725 {
         // Get all the raw data possible.
         const rawData = await this.provider.getData(this.options.address, keySchema.key)
         // Decode and return the data
-        return this._decodeByKeyType(keySchema, rawData)
+
+        if (keySchema.keyType === 'Array') {
+
+            const dat = [{ key: keySchema.key, value: rawData }]
+            const res = await this.getArrayValues(keySchema, dat)
+            if (res) {
+
+                res.push(dat[0]) // push the original array
+                return utils.decodeKey(keySchema, res)
+
+            }
+
+        }
+
+        return utils.decodeKey(keySchema, rawData)
 
     }
 
     async getAllData() {
 
+        const results = {}
+        let res
         // Get all the key hashes from the schema
-        // NOTE: Potentailly redundent, but cleaner
         const keyHashes = this.options.schema.map(e => e.key)
         // Get all the raw data from the provider based on schema key hashes
         let allRawData = await this.provider.getAllData(this.options.address, keyHashes)
@@ -114,32 +129,40 @@ export default class ERC725 {
         // Take out null data values, since data may not fulfill entire schema
         allRawData = await allRawData.filter(e => e.value !== null)
 
-        // If the provider type is a graphql client, we assume we can get ALL keys (including array keys)
         if (this.options.providerType === 'graph') {
 
-            // expects all key/values returned from graph query as an array
-            return utils.decodeAllData(this.options.schema, allRawData)
+            // If the provider type is a graphql client, we assume it can get ALL keys (including array keys)
+            res = utils.decodeAllData(this.options.schema, allRawData)
+
+        } else {
+
+            // Otherwise we assume the array element keys are not avaiable in raw results, so they must be fetched
+            const arraySchemas = this.options.schema.filter(e => e.keyType === 'Array')
+
+            // Get missing 'Array' fields, as necessary
+            for (let index = 0; index < arraySchemas.length; index++) {
+
+                const schemaElement = arraySchemas[index]
+                const arrayValues = await this.getArrayValues(schemaElement, allRawData)
+                arrayValues.forEach(e => allRawData.push(e))
+
+            }
+
+            this.options.schema.forEach(element => { results[element.name] = null })
+            res = utils.decodeAllData(this.options.schema, allRawData)
 
         }
 
-        const results = {}
+        // Now that we can safely assume we have all array values as well
 
-        // Add a null value by default for each schema item
+        // Assign values, or null, to all schema name elements on results object
         this.options.schema.forEach(element => { results[element.name] = null })
+        // Put the values in associated elements for return
+        for (let index = 0; index < Object.keys(res).length; index++) {
 
-        for (let i = 0; i < allRawData.length; i++) {
-
-            const e = allRawData[i]
-
-            // Array keys may not directly match with provided data, or vice-versa
-            const keySchema = this.options.schema.find(f => e.key === f.key)
-            // Nulls & mismatches ignored
-            if (keySchema) {
-
-                // Add decoded data to results object
-                results[keySchema.name] = await this._decodeByKeyType(keySchema, e.value)
-
-            }
+            const key = Object.keys(res)[index]
+            const element = res[key]
+            results[key] = element
 
         }
 
@@ -147,43 +170,51 @@ export default class ERC725 {
 
     }
 
-    // DetermineType
-    async _decodeByKeyType(schemaElementDefinition, value) {
+    // Accepts @schema = assodiated with the schema with keyType = 'Array'
+    // @data = array of key/value pairs, one of which is the length key for the schema array
+    // Returns an array of keys/values
+    async getArrayValues(schema, data) {
 
-        // TYPE: ARRAY
-        if (schemaElementDefinition.keyType.toLowerCase() === 'array') {
+        if (schema.keyType !== 'Array') { throw new Error('The "getArrayFields" method requires a schema definition with "keyType: Array"', schema) }
+        // Required: the data includes a length key/value pair for the array
+        // Data can hold other field data not relevant here
+        const results = []
 
-            // Handling a schema element of type Array Get the array length first
-            const arrayLength = utils.decodeKeyValue(schemaElementDefinition, value)
+        // 1. get the length
+        const value = data.find(e => e.key === schema.key) // get the length key/value pair
 
-            const result = []
-            // Construct the schema for each element, and fetch
-            for (let index = 0; index < arrayLength; index++) {
+        // Handle empty/non-existent array
+        if (!value) { return results }
+        const arrayLength = await utils.decodeKeyValue(schema, value.value) // get the int array length
 
-                const schemaElement = utils.transposeArraySchema(schemaElementDefinition, index)
-                const res = await this.getData(schemaElement.key, schemaElement)
+        // 2. Get the array values for the length of the array
+        for (let index = 0; index < arrayLength; index++) {
 
-                // This will not push null values
-                if (res) {
+            // 2.1 get the new schema key
+            const arrayElementKey = utils.encodeArrayKey(schema.key, index)
+            let arrayElement
 
-                    result.push(await this.getData(schemaElement.key, schemaElement))
+            // 2.2 Check the data first just in case.
+            arrayElement = data.find(e => e.key === arrayElementKey)
+            // We are done if it exists on this loop
+            if (!arrayElement) {
+
+                // 3. Otherwise we get the array key element value
+                arrayElement = await this.provider.getData(this.options.address, arrayElementKey)
+                if (arrayElement) {
+
+                    results.push({
+                        key: arrayElementKey,
+                        value: arrayElement
+                    })
 
                 }
 
             }
 
-            return result
-
-        }
-        // TYPE: SINGLETON
-        if (schemaElementDefinition.keyType.toLowerCase() === 'singleton') {
-
-            return utils.decodeKeyValue(schemaElementDefinition, value)
-
         }
 
-        // TYPE: UNKNOWN
-        return Error('There is no recognized keyType for this key.')
+        return results
 
     }
 

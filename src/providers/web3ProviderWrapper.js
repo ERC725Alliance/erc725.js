@@ -75,6 +75,7 @@ export default class Web3Source {
 
     }
 
+    // eslint-disable-next-line class-methods-use-this
     _constructJSONRPC(address, keyHash) {
 
         // eslint-disable-next-line no-return-assign
@@ -95,6 +96,7 @@ export default class Web3Source {
 
     }
 
+    // eslint-disable-next-line class-methods-use-this
     _decodeResult(result) {
 
         const rpcResult = result.result

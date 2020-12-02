@@ -208,6 +208,7 @@ export const encoder = {
 
     encodeValueType: (type, value) => {
 
+        if (!value) { console.error('Missing value for encodeValueType: "' + type + '".') }
         if (!valueTypeEncodingMap[type]) { throw new Error('Could not encode valueType: "' + type + '".') }
 
         return (value)
@@ -218,6 +219,7 @@ export const encoder = {
 
     decodeValueType: (type, value) => {
 
+        if (!value) { console.error('Missing value for encodeValueType: "' + type + '".') }
         if (!valueTypeEncodingMap[type]) { throw new Error('Could not decode valueType: "' + type + '".') }
 
         return (value)
@@ -229,6 +231,7 @@ export const encoder = {
 
     encodeValueContent: (type, value) => {
 
+        if (!value) { console.error('Missing value for encodeValueType: "' + type + '".') }
         if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
 
             throw new Error('Could not encode valueContent: "' + type + '".')
@@ -245,6 +248,7 @@ export const encoder = {
 
     decodeValueContent: (type, value) => {
 
+        if (!value) { console.error('Missing value for encodeValueType: "' + type + '".') }
         if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
 
             throw new Error('Could not decode valueContent: "' + type + '".')

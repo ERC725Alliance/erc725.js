@@ -226,6 +226,8 @@ describe('Running erc725.js tests...', () => {
                     const data = generateAllResults([schemaElement])[schemaElement.name]
                     // eslint-disable-next-line max-len
                     const intendedResults = allGraphData.filter(e => e.key.substr(0, 34) === schemaElement.key.substr(0, 34))
+                    // handle '0x'....
+                    // intendedResults = intendedResults.filter(e => e !== '0x' && e.value !== '0x')
                     const results = utils.encodeKey(schemaElement, data)
                     assert.deepStrictEqual(results, intendedResults)
 

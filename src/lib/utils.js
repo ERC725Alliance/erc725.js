@@ -85,6 +85,9 @@ export const utils = {
             // Handle the array
             const results = []
             const valueElement = value.find(e => e.key === schema.key)
+            // Handle empty/non-existent array
+            if (!valueElement) { return results }
+
             const arrayLength = utils.decodeKeyValue(schema, valueElement.value) || 0
 
             // This should not run if no match or arrayLength
@@ -115,6 +118,10 @@ export const utils = {
             if (Array.isArray(value)) {
 
                 const newValue = value.find(e => e.key === schema.key)
+
+                // Handle empty or non-values
+                if (!newValue) { return null }
+
                 return utils.decodeKeyValue(schema, newValue.value)
 
             }
@@ -243,9 +250,8 @@ export const utils = {
 
         // @param value: can contain single value, or obj as required by spec
         let result
-        const isArray = (schemaElementDefinition.valueType.substr(schemaElementDefinition.valueType.length - 2) === '[]')
-
         const sameEncoding = (valueContentMap[schemaElementDefinition.valueContent] && valueContentMap[schemaElementDefinition.valueContent].type === schemaElementDefinition.valueType.split('[]')[0])
+        const isArray = (schemaElementDefinition.valueType.substr(schemaElementDefinition.valueType.length - 2) === '[]')
 
         // We only loop if the valueType done by abi.encodeParameter can not handle it directly
         if (Array.isArray(value) && !sameEncoding) { // value type encoding will handle it?

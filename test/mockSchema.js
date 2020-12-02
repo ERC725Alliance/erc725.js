@@ -3,6 +3,8 @@
 /* eslint-disable */
 
 export const mockSchema = [
+
+  // Case 1
   {
     "name": "SupportedStandards:ERC725Account",
     "key": "0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6",
@@ -14,6 +16,8 @@ export const mockSchema = [
     "returnGraphData": "0xafdeb5d6",
     "expectedResult": '0xafdeb5d6'
   },
+
+  // Case 2
   {
     "name":"TestJSONURL",
     "key": "0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99",
@@ -29,6 +33,8 @@ export const mockSchema = [
       "url": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // same JSON url from LSP3Profile below
     }
   },
+
+  // Case 3
   {
     "name": "TestAssetURL",
     "key": "0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee",
@@ -45,6 +51,7 @@ export const mockSchema = [
     }
   },
 
+  // Case 4
   {
     "name": "TestKeccak256",
     "key": "0xd6c7198ea09a1d3357688e1dbdf0e07f6cfaf94359e0a4fc11e4f5f1d59d54f4",
@@ -58,6 +65,7 @@ export const mockSchema = [
 
   },
 
+  // Case 5
   {
     "name": "TestAddress",
     "key": "0x7bf6ecfbf659a88c662d7f099c14e468610f786f6e29f0d346e44f772ef0d187",
@@ -70,6 +78,7 @@ export const mockSchema = [
     "expectedResult": "0x0C03fBa782b07bCf810DEb3b7f0595024A444F4e" // a real address
   },
 
+  // Case 6
   {
     "name": "TestMarkdown",
     "key": "0x328f991bde3a9d8c548b7b2dbc303a362202dddbcd33219650d85bedcd75ac9b",
@@ -83,7 +92,7 @@ export const mockSchema = [
   },
 
 
-  // Real data from testnet
+  // Case 7
   {
     "name": "LSP3Name",
     "key": "0xa5f15b1fa920bbdbc28f5d785e5224e3a66eb5f7d4092dc9ba82d5e5ae3abc87",
@@ -96,6 +105,7 @@ export const mockSchema = [
     "expectedResult": "patrick-mcdowell"
   },
   
+  // Case 8
   {
     "name": "LSP3Profile",
     "key": "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
@@ -107,6 +117,8 @@ export const mockSchema = [
     "returnGraphData": "0x697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264",
     "expectedResult": "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd"
   },
+
+  // Case 9
   {
     "name": "LSP3IssuedAssets[]",
     "key": "0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0",
@@ -133,27 +145,8 @@ export const mockSchema = [
     ]
 
   },
-  // NOTE: This test can not be made to be symmetrical
-  // {
-  //   "name": "TestNotSetArray[]",
-  //   "key": "0xa90924b9b409ab609ed5136d82249ce17851a12b49bbb6f20fdedd6b3a2be61b",
-  //   "keyType": "Array",
-  //   "valueContent": "Number",
-  //   "valueType": "uint256",
-  //   "elementValueContent": "Address",
-  //   "elementValueType": "address",
-  //   // testing data
-  //   // the full array of values
-  //   "returnRawData": [
-  //     "0x", // array length
-  //   ],
-  //   "returnGraphData": [
-  //     "0x", // array length
-  //   ],
-  //   "expectedResult" :[
-  //   ]
 
-  // },
+  // Case 10
   {
     "name": "TestObjArray[]",
     "key": "0x9985edaf12cbacf5ac7d6ed54f0445cc0ea56075aee9b9942e4ab3bf4239f950",
@@ -190,7 +183,10 @@ export const mockSchema = [
     ]
 
   },
+
   // Testing other valueTypes (than bytes) 
+
+  // Case 11
   {
     "name": "TestStringValueType",
     "key": "0xc0929170bbaeb216f869c80a5c937f7a1c887a5a92262dac50313aef131f0c03",
@@ -202,6 +198,8 @@ export const mockSchema = [
     "returnGraphData": "0x47726561742d737472696e67",
     "expectedResult": "Great-string"
   },
+
+  // Case 12
   {
     "name": "TestUintValueType",
     "key": "0x61529294800f5739edc21a6cf8ba1bad3fd3e11d03d2ab5219ce9c0131b93f93",
@@ -213,6 +211,8 @@ export const mockSchema = [
     "returnGraphData":"0x0000000000000000000000000000000000000000000000000000000000000063",
     "expectedResult": "99" // TODO: BUG: This should not need to be string to work?
   },
+
+  // Case 13
   {
     "name": "TestNumberWithBytesValueType",
     "key": "0x64a44e72c25d95851b1d449428d8d27093b2ef3e0b36a2b3497ae17edf979e61",
@@ -224,6 +224,8 @@ export const mockSchema = [
     "returnGraphData":"0x0000000000000000000000000000000000000000000000000000000000000063",
     "expectedResult": "99"
   },
+
+  // Case 14
   {
     "name": "TestStringWithBytesValueType",
     "key": "0x3ef4d417afa66557c9e1463723b391a518eee0c61d29be4e10882999c7848041",
@@ -235,7 +237,9 @@ export const mockSchema = [
     "returnGraphData":"0x4f6b2074686973206973206120737472696e672073746f7265642061732062797465732e2e2e",
     "expectedResult": "Ok this is a string stored as bytes..."
   },
+
   // Testing array valueTypes
+  // Case 15
   {
     "name": "TestStringValueTypeArray",
     "key": "0xd7a8f1af4a0d9de8d17c177ff06f1689c0c3f1310edbbe53733da0b084ccff18",
@@ -250,6 +254,8 @@ export const mockSchema = [
       "butter chicken"
     ]
   },
+
+  // Case 16
   {
     "name": "TestBytesValueTypeArray",
     "key": "0xd6b3622ec62ae4459c0276bd5e2e26011201fada1cbc2b33283e9c20495c05fe",
@@ -264,6 +270,8 @@ export const mockSchema = [
       "butter chicken" // 0x62757474657220636869636b656e
     ]
   },
+
+  // Case 17
   {
     "name": "TestAddressValueTypeArray",
     "key": "0xe45f3de809830d5ac3aeab862200fc670391fcb99018dcd2522fee7cf07f93ee",
@@ -278,6 +286,8 @@ export const mockSchema = [
       "0xba61a0b24a228807f23B46064773D28Fe51dA81C" // {firefox metamask key}
     ]
   },
+
+  // Case 18
   {
     "name": "TestUintValueTypeArray",
     "key": "0xdaa41a5e1acc41087359e61588e80bf0b7f1d96063b98bdff73b4ce3a645b40b",
@@ -292,6 +302,8 @@ export const mockSchema = [
       "456" // {firefox metamask key}
     ]
   },
+
+  // Case 19
   {
     "name": "TestBytes32ValueTypeArray",
     "key": "0x7e2458b2b22ff4357510c3491b7c041df2ee4f11ba4d6f4f4e34101fc2645a97",
@@ -306,6 +318,8 @@ export const mockSchema = [
       "0x828e919feac2ec05939abd5d221692fbe6bac5667ba5af5d191df1f7ecb1ac21" // test02
     ]
   },
+
+  // Case 20
   {
     "name": "TestURLStringValueTypeArray",
     "key": "0x1a9818703b62d00000bd3e8c7499296d42966619cd735a92eac7488de8881bb8",
@@ -320,6 +334,8 @@ export const mockSchema = [
       "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd" // {firefox metamask key}
     ]
   },
+
+  // Case 21
   {
     "name": "TestHashKey",
     "key": "0xed579debad05d91a79b46589987171dfce1c8ffa8b1d8c1ddc851cc104ea6029",
@@ -332,8 +348,10 @@ export const mockSchema = [
     "expectedResult": "0x9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658", // 'mytestdata'
 
   },
+
   // Nested array tests
   // NOTE: The below are failing on decode all (no source loops, or individual) with data out-of-bounds
+  // Case 22
   // {
   //   "name": "TestNestedArrayStringArray[]",
   //   "key": "0xe4d20147947de3d1b329a854199dbf938a8f8c375c411fa86df1820d4cca043b",
@@ -363,6 +381,8 @@ export const mockSchema = [
   //   ]
 
   // },
+
+  // Case 23
   // {
   //   "name": "TestNestedArrayObjArray[]",
   //   "key": "0xf9a149b854fc24a5b7c91cce364e1d8306c7d78438a7fdc5c729c394320ebcbe",
@@ -434,6 +454,28 @@ export const mockSchema = [
   //       // encoded: 0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000396f357c6acadb1115f687654d9b8077b1c0b8553f294e54862cf17e6afc0cade73dc35c88697066733a2f2f51773039656a66646b6a6678787800000000000000
         
   //     ]
+  //   ]
+
+  // },
+  // Case xx
+  // NOTE: This test can not be made to be symmetrical
+  // {
+  //   "name": "TestNotSetArray[]",
+  //   "key": "0xa90924b9b409ab609ed5136d82249ce17851a12b49bbb6f20fdedd6b3a2be61b",
+  //   "keyType": "Array",
+  //   "valueContent": "Number",
+  //   "valueType": "uint256",
+  //   "elementValueContent": "Address",
+  //   "elementValueType": "address",
+  //   // testing data
+  //   // the full array of values
+  //   "returnRawData": [
+  //     "0x", // array length
+  //   ],
+  //   "returnGraphData": [
+  //     "0x", // array length
+  //   ],
+  //   "expectedResult" :[
   //   ]
 
   // },
