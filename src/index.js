@@ -23,8 +23,6 @@ import Web3Source from './providers/web3ProviderWrapper.js'
 import EthereumSource from './providers/ethereumProviderWrapper.js'
 import { utils } from './lib/utils.js'
 
-
-
 export default class ERC725 {
 
     constructor(schema, address, provider) {
