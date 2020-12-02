@@ -119,13 +119,11 @@ erc725.getData(schemaKey [, schemaElement])
 
 1. `schemaKey` - `string`: The name or the hash of the key name as defined in the schema.
 
-1. `schemaElement` - `Object`(optinal): An optional custom schema element to use for decoding the returned value. Overrides attached schema of instance on this call only.
-
-This will return the decoded value as defined by the associated schema element from the ERC725 contract.
+1. `schemaElement` - `Object`(optional): An optional custom schema element to use for decoding the returned value. Overrides attached schema of instance on this call only.
 
 **Returns**
 
-`Mixed`: Returns the decoded value.
+`Mixed`: Returns the decoded value as expected by the schema.
 
 **Example**
 
