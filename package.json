@@ -1,6 +1,6 @@
 {
   "name": "erc725.js",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Library to interact with ERC725 smart contracts",
   "main": "src/index.js",
   "type": "module",
