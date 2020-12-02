@@ -113,13 +113,6 @@ describe('Running erc725.js tests...', () => {
 
         /* ********************************************* */
         /* Testing encoding/decoding for all schema data */
-        it('Decode all data!', async () => {
-
-            const result = utils.decodeAllData(mockSchema, allGraphData)
-            assert.deepStrictEqual(result, fullResults)
-
-        })
-
 
         it('Encode all data!', async () => {
 
@@ -128,10 +121,9 @@ describe('Running erc725.js tests...', () => {
 
         })
 
-        it('!!!Decode all data from class instance!', async () => {
+        it('Decode all data!', async () => {
 
-            const erc725 = new ERC725(mockSchema)
-            const result = erc725.decodeAllData(allGraphData)
+            const result = utils.decodeAllData(mockSchema, allGraphData)
             assert.deepStrictEqual(result, fullResults)
 
         })
@@ -141,6 +133,14 @@ describe('Running erc725.js tests...', () => {
             const erc725 = new ERC725(mockSchema)
             const result = erc725.encodeAllData(fullResults)
             assert.deepStrictEqual(result, allGraphData)
+
+        })
+
+        it('!!!Decode all data from class instance!', async () => {
+
+            const erc725 = new ERC725(mockSchema)
+            const result = erc725.decodeAllData(allGraphData)
+            assert.deepStrictEqual(result, fullResults)
 
         })
 
@@ -230,14 +230,6 @@ describe('Running erc725.js tests...', () => {
 
                 })
 
-                it('Decode all data values for keyType "Array" in: ' + schemaElement.name, async () => {
-
-                    const values = allGraphData.filter(e => e.key.substr(0, 34) === schemaElement.key.substr(0, 34))
-                    const intendedResults = generateAllResults([schemaElement])[schemaElement.name]
-                    const results = utils.decodeKey(schemaElement, values)
-                    assert.deepStrictEqual(results, intendedResults)
-
-                })
                 it('Encode all data values for keyType "Array" in:: ' + schemaElement.name, async () => {
 
                     const data = generateAllResults([schemaElement])[schemaElement.name]
@@ -249,6 +241,40 @@ describe('Running erc725.js tests...', () => {
                     assert.deepStrictEqual(results, intendedResults)
 
                 })
+
+                it('Decode all data values for keyType "Array" in: ' + schemaElement.name, async () => {
+
+                    const values = allGraphData.filter(e => e.key.substr(0, 34) === schemaElement.key.substr(0, 34))
+                    const intendedResults = generateAllResults([schemaElement])[schemaElement.name]
+                    const results = utils.decodeKey(schemaElement, values)
+                    assert.deepStrictEqual(results, intendedResults)
+
+                })
+
+                it('Encode all data values for keyType "Array" in naked class instance: ' + schemaElement.name, async () => {
+
+                    const data = generateAllResults([schemaElement])[schemaElement.name]
+                    // eslint-disable-next-line max-len
+                    const intendedResults = allGraphData.filter(e => e.key.substr(0, 34) === schemaElement.key.substr(0, 34))
+                    const erc725 = new ERC725([schemaElement])
+                    // eslint-disable-next-line max-len
+                    // handle '0x'....
+                    // intendedResults = intendedResults.filter(e => e !== '0x' && e.value !== '0x')
+                    const results = erc725.encodeData(schemaElement.name, data)
+                    assert.deepStrictEqual(results, intendedResults)
+
+                })
+
+                it('Decode all data values for keyType "Array" in naked class instance: ' + schemaElement.name, async () => {
+
+                    const values = allGraphData.filter(e => e.key.substr(0, 34) === schemaElement.key.substr(0, 34))
+                    const intendedResults = generateAllResults([schemaElement])[schemaElement.name]
+                    const erc725 = new ERC725([schemaElement])
+                    const results = erc725.decodeData(schemaElement.name, values)
+                    assert.deepStrictEqual(results, intendedResults)
+
+                })
+
 
             } else {
 
@@ -263,6 +289,22 @@ describe('Running erc725.js tests...', () => {
                 it('Decode data value for: ' + schemaElement.name, async () => {
 
                     const result = utils.decodeKeyValue(schemaElement, schemaElement.returnGraphData)
+                    assert.deepStrictEqual(result, schemaElement.expectedResult)
+
+                })
+
+                it('Encode data value from naked class instance!', async () => {
+
+                    const erc725 = new ERC725([schemaElement])
+                    const result = erc725.encodeData(schemaElement.name, schemaElement.expectedResult)
+                    assert.deepStrictEqual(result, schemaElement.returnGraphData)
+
+                })
+
+                it('Decode data value from naked class instance!', async () => {
+
+                    const erc725 = new ERC725([schemaElement])
+                    const result = erc725.decodeData(schemaElement.name, schemaElement.returnGraphData)
                     assert.deepStrictEqual(result, schemaElement.expectedResult)
 
                 })
