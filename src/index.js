@@ -34,8 +34,6 @@ export default class ERC725 {
 
         // NOTE: These errors will never constiently happen this way without type/format checking
         if (!schema) { throw new Error('Missing schema.') } // TODO: Add check for schema format
-        if (!address) { throw new Error('Missing address.') } // TODO: check for proper address
-        if (!provider) { throw new Error('Missing provider.') }
 
         // Init options member
         this.options = {
@@ -44,6 +42,8 @@ export default class ERC725 {
         }
         this.utils = Utils
 
+        // do not fail on no-provider
+        if (!provider) return
 
         const givenProvider = provider.provider || provider
 
@@ -84,6 +84,9 @@ export default class ERC725 {
 
     async getData(key, customSchema) {
 
+        if (!web3.utils.isAddress(this.options.address)) { throw new Error('Missing ERC725 contract address.') }
+        if (!this.provider) { throw new Error('Missing provider.') }
+
         // Param key can be either the name or the key in the schema
         // NOTE: Assumes no plain text names starting with 0x aka zero byte
         const keyHash = (key.substr(0, 2) !== '0x') ? utils.encodeKeyName(key) : key
@@ -104,6 +107,9 @@ export default class ERC725 {
     }
 
     async getAllData() {
+
+        if (!web3.utils.isAddress(this.options.address)) { throw new Error('Missing ERC725 contract address.') }
+        if (!this.provider) { throw new Error('Missing provider.') }
 
         // Get all the key hashes from the schema
         // NOTE: Potentailly redundent, but cleaner
