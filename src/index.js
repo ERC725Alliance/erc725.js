@@ -17,12 +17,12 @@
  * @date 2020
  */
 
+import Web3Utils from 'web3-utils'
 import GraphSource from './providers/subgraphProviderWrapper.js'
 import Web3Source from './providers/web3ProviderWrapper.js'
 import EthereumSource from './providers/ethereumProviderWrapper.js'
-import { utils as Utils } from './lib/utils.js'
+import { utils } from './lib/utils.js'
 
-export const utils = Utils
 
 
 export default class ERC725 {
@@ -34,16 +34,15 @@ export default class ERC725 {
 
         // NOTE: These errors will never constiently happen this way without type/format checking
         if (!schema) { throw new Error('Missing schema.') } // TODO: Add check for schema format
-        if (!address) { throw new Error('Missing address.') } // TODO: check for proper address
-        if (!provider) { throw new Error('Missing provider.') }
 
         // Init options member
         this.options = {
             schema,
             address
         }
-        this.utils = Utils
 
+        // do not fail on no-provider
+        if (!provider) return
 
         const givenProvider = provider.provider || provider
 
@@ -84,23 +83,17 @@ export default class ERC725 {
 
     async getData(key, customSchema) {
 
-        // Param key can be either the name or the key in the schema
-        // NOTE: Assumes no plain text names starting with 0x aka zero byte
-        const keyHash = (key.substr(0, 2) !== '0x') ? utils.encodeKeyName(key) : key
+        if (!Web3Utils.isAddress(this.options.address)) { throw new Error('Missing ERC725 contract address.') }
+        if (!this.provider) { throw new Error('Missing provider.') }
 
-        // Get the correct schema key definition if its not passed as a parameter
-        const keySchema = (!customSchema)
-            ? this.options.schema.find(e => keyHash === e.key)
-            : customSchema
-
-        // No schema matched the key
-        if (!keySchema) { throw Error('There is no matching key in schema of hash: "' + keyHash + '".') }
+        const schema = customSchema ? [customSchema] : this.options.schema
+        const keySchema = utils.getSchemaElement(schema, key)
 
         // Get all the raw data possible.
         const rawData = await this.provider.getData(this.options.address, keySchema.key)
         // Decode and return the data
 
-        if (keySchema.keyType === 'Array') {
+        if (keySchema.keyType.toLowerCase() === 'array') {
 
             const dat = [{ key: keySchema.key, value: rawData }]
             const res = await this.getArrayValues(keySchema, dat)
@@ -121,6 +114,9 @@ export default class ERC725 {
 
         const results = {}
         let res
+        if (!Web3Utils.isAddress(this.options.address)) { throw new Error('Missing ERC725 contract address.') }
+        if (!this.provider) { throw new Error('Missing provider.') }
+
         // Get all the key hashes from the schema
         const keyHashes = this.options.schema.map(e => e.key)
         // Get all the raw data from the provider based on schema key hashes
@@ -137,7 +133,7 @@ export default class ERC725 {
         } else {
 
             // Otherwise we assume the array element keys are not avaiable in raw results, so they must be fetched
-            const arraySchemas = this.options.schema.filter(e => e.keyType === 'Array')
+            const arraySchemas = this.options.schema.filter(e => e.keyType.toLowerCase() === 'array')
 
             // Get missing 'Array' fields, as necessary
             for (let index = 0; index < arraySchemas.length; index++) {
@@ -217,5 +213,32 @@ export default class ERC725 {
         return results
 
     }
+
+    encodeAllData(data) {
+
+        return utils.encodeAllData(this.options.schema, data)
+
+    }
+
+    decodeAllData(data) {
+
+        return utils.decodeAllData(this.options.schema, data)
+
+    }
+
+    encodeData(key, data) {
+
+        const schema = utils.getSchemaElement(this.options.schema, key)
+        return utils.encodeKey(schema, data)
+
+    }
+
+    decodeData(key, data) {
+
+        const schema = utils.getSchemaElement(this.options.schema, key)
+        return utils.decodeKey(schema, data)
+
+    }
+
 
 }

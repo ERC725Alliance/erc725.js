@@ -20,7 +20,8 @@
 // Tests for the ERC725.js package
 import assert from 'assert'
 import Web3Utils from 'web3-utils'
-import ERC725, { utils } from '../src/index.js'
+import ERC725 from '../src/index.js'
+import { utils } from '../src/lib/utils.js'
 import { mockSchema } from './mockSchema.js'
 import { HttpProvider, EthereumProvider, ApolloClient } from './mockProviders.js'
 import { generateAllRawData, generateAllData, generateAllResults } from './testHelpers.js'

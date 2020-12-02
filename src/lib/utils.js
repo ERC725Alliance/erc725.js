@@ -80,7 +80,7 @@ export const utils = {
     decodeKey: (schema, value) => {
 
         // Value will be either key/value pairs for a key type of Array, or a single value for type Singleton
-        if (schema.keyType === 'Array') {
+        if (schema.keyType.toLowerCase() === 'array') {
 
             // Handle the array
             const results = []
@@ -113,7 +113,7 @@ export const utils = {
 
         }
 
-        if (schema.keyType === 'Singleton') {
+        if (schema.keyType.toLowerCase() === 'singleton' || schema.keyType.toLowerCase() === 'mapping') {
 
             if (Array.isArray(value)) {
 
@@ -139,7 +139,7 @@ export const utils = {
 
         // This will handle further encoding
         // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
-        if (schema.keyType === 'Array' && Array.isArray(value)) {
+        if (schema.keyType.toLowerCase() === 'array' && Array.isArray(value)) {
 
             const results = []
 
@@ -168,7 +168,7 @@ export const utils = {
 
         }
 
-        if (schema.keyType === 'Singleton') {
+        if (schema.keyType.toLowerCase() === 'singleton' || schema.keyType.toLowerCase() === 'mapping') {
 
             return utils.encodeKeyValue(schema, value)
 
@@ -312,6 +312,16 @@ export const utils = {
     encodeArrayKey: (key, index) => {
 
         return key.substr(0, 34) + Web3Utils.padLeft(Web3Utils.numberToHex(index), 32).replace('0x', '')
+
+    },
+
+    getSchemaElement: (schema, key) => {
+
+        const keyHash = (key.substr(0, 2) !== '0x') ? utils.encodeKeyName(key) : key
+        const schemaElement = schema.find(e => e.key === keyHash)
+        if (!schemaElement) { throw new Error('No matching schema found for key: ' + key + ' (' + keyHash + ').') }
+
+        return schemaElement
 
     },
 
