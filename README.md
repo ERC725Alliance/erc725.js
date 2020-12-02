@@ -15,10 +15,6 @@ $ npm install erc725.js
 
 ```js
 import ERC725 from 'erc725.js'
-
-const erc725 = new ERC725(schema, address, provider)
-
-erc725.....
 ```
 
 
@@ -35,10 +31,11 @@ const erc725 = new ERC725(schema, '0x09098...', web3.currentProvider)
 
 **Parameters**
 
-- `schema`: a [ERC725Y JSON Schema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md)
+1. `schema`: a [ERC725Y JSON Schema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md)
 
-- `provider|Object`: Provider: one of either a Web3 provider, or an EIP 1193 compliant Ethereum provider, or a ERC725 compliant graphQL service. Will attempt to automatically detect the provider type, but can also handle an object of a `provider` and 'type' members.
-<!-- TODO: Show more examples & links for the providers -->
+1. `provider|Object` - (optional) One of either a Web3 provider, or an EIP 1193 compliant Ethereum provider, or a ERC725 compliant graphQL service. Will attempt to automatically detect the provider type, but can also handle an object of a `provider` and 'type' members. If omitted the instance will not be able to fetch blockchain data, but be available for all utility `encode()` & `decode()` functions.
+
+1. `address`: the ERC725(Y) contract address 
 
 Currently tested and supported providers include: 
 * web3.currentProvider: `type:'HttpProvider'`
@@ -46,34 +43,29 @@ Currently tested and supported providers include:
 * ApploClient graphQL client: `type: 'ApolloClient'`
 
 
-
-
- 
- - `address`: the ERC725(Y) contract address 
-
 **Examples**
 
-*Example schema from a universal profile (LSP3)*
+*Example schema*
 
 ```js
 const schema = [
     {
-        "name": "LSP3Name",
-        "key": "0xf9e26448acc9f20625c059a95279675b8f58ba4f06d262f83a32b4dd35dee019",
+        "name": "Username",
+        "key": "0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da",
         "keyType": "Singleton",
         "valueContent": "String",
         "valueType": "string"
     },
     {
-        "name": "LSP3Links",
-        "key": "0xb95a64d66e66f5c0cd985e2c3cc93fbea7f9259eadbe81c3ab0ff4e68df564d6",
+        "name": "Link",
+        "key": "0x4eeb961b158da171122c794adc937981d3b441f1dc5b8f718a207667f992093d",
         "keyType": "Singleton",
-        "valueContent": "URI",
+        "valueContent": "URL",
         "valueType": "string"
     },
     {
-        "name": "LSP3IssuedAssets[]",
-        "key": "0xb8c4a0b76ed8454e098b20a987a980e69abe3b1a88567ae5472af5f863f8c8f9",
+        "name": "IssuedAssets[]",
+        "key": "0x1b0084c280dc983f326892fcc88f375797a50d4f792b20b5229caa857474e84e",
         "keyType": "Array",
         "valueContent": "ArrayLength",
         "valueType": "uint256",
@@ -82,6 +74,8 @@ const schema = [
     }
 ]
 ```
+
+Create a new instance of the ERC725 class with associated schema, contract address, and provider.
 
 *Web3 Provider*
 ```js
@@ -107,21 +101,25 @@ const graphProvider = new ApolloClient({
 erc725 = new ERC725(schema, '0x0adf8ce0fe...', { provider:graphProvider, type: 'ApolloClient' })
 ```
 
-
-Creates a new instance of the ERC725 class with associated address, schema, and provider.
+*No Provider (no network connection, only for utility methods)*
+```js
+erc725 = new ERC725(schema)
+```
 
 ## Methods
 
-#### getData
+These methods are available on the erc725 class when instantiated with a contract address, and provider.
+
+### getData
 ```js
-const keyData = erc725.getData(keyName [, schemaElement])
+erc725.getData(schemaKey [, schemaElement])
 ```
 
 **Parameters**
 
-`keyName` - `string`: The name or the hash of the key name as defined in the schema.
+1. `schemaKey` - `string`: The name or the hash of the key name as defined in the schema.
 
-`schemaElement` - `Object`(optinal): An optional custom schema element to use for decoding the returned value.
+1. `schemaElement` - `Object`(optinal): An optional custom schema element to use for decoding the returned value. Overrides attached schema of instance on this call only.
 
 This will return the decoded value as defined by the associated schema element from the ERC725 contract.
 
@@ -129,11 +127,19 @@ This will return the decoded value as defined by the associated schema element f
 
 `Mixed`: Returns the decoded value.
 
+**Example**
+
+```js
+erc725.getData('Username')
+
+> 'my-cool-username'
+```
+
 
 ### getAllData
 
 ```js
-const allData = erc725.getAllData()
+erc725.getAllData()
 ```
 
 Returns all key value pairs from the ERC725 contract as defined in the provided schema.
@@ -142,194 +148,134 @@ Returns all key value pairs from the ERC725 contract as defined in the provided 
 
 `Array`: An array of objects with schema element keys and the decoded data.
 
+**Example**
+
+```js
+erc725.getAllData()
+
+> { 'Username': 'my-cool-username', 'Description': 'A great description.', 'IssuedAssets[]': ['0x2309f...','0x0fe09...', ...] }
+```
 
 ## Utility Methods
 
-These methods are made available for data encoding and decoding.
+These methods are available on the erc725 class instance with or without a provider & contract address.
+
+### decodeData
 
 ```js
-// Direct import
-import { utils } from `erc725.js`
-
-// or
-erc725.utils
-```
-
-
-### decodeKeyValue()
-
-```js
-erc725.utils.decodeKeyValue(schemaKeyOrElement, hexValue)
+erc725.decodeData(schemaKey, data)
 ```
 
 **Parameters**
 
-`schemaKeyOrElement` - `string|Object`: An object containing keys and values as required and defined by the ER725 standards (see above).
+1. `schemaKey` - `string`: The name or the hash of the key name as defined in the schema.
 
-`hexValue` - `String`: A string of hex bytes as expected to be returned form a ABI call to a contract instance.
+1. `data` - `Mixed`: Either an array of key/value (`[{key:'0x04f9u0weuf...',value:'0x0f3209fj...', ...}]` pairs if the keyType of the schema is `Array`, or the single value `'0x0f3209fj...'` to be decoded for `Singleton` or `Mapping` keyTypes. 
 
 **Returns**
 
-`Mixed`: The decoded value.
+`Mixed`: Result will be as defined in the schema.
 
 **Example**
 
 ```js
-erc725.utils.decodeKeyValue(
-    // The schema definition
-    {
-      name: "LSP3Name",
-      key: "0xa5f15b1fa920bbdbc28f5d785e5224e3a66eb5f7d4092dc9ba82d5e5ae3abc87",
-      keyType: "Singleton",
-      valueContent: "String",
-      valueType: "string",
-    },
-    // The value to decode, returned as epected from smart contract
-    '0x6d792d636f6f6c2d6e616d65'
-)
->  'my-cool-name'
+erc725.decodeData('Username', '0x6d792d636f6f6c2d757365726e616d65')
+
+> 'my-cool-username'
 ```
 
-
-### encodeKeyValue()
+### encodeData
 
 ```js
-erc725.utils.encodeKeyValue(schemaKeyOrElement, value)
+erc725.encodeData(schemaKey, data)
 ```
 
 **Parameters**
 
-`schemaKeyOrElement` - `string|Object`: An object containing keys and values as required and defined by the ER725 standards (see above).
+1. `schemaKey` - `string`: The name or the hash of the key name as defined in the schema.
 
-`value` - `Mixed`: A value associated with type expected by the schema element definition.
+1. `data` - `Mixed`:  Data structured according to the corresponding to the schema defition.
 
 **Returns**
 
-`string`: Hex encoded bytes to be stored in a ERC725 contract (via `setData(bytes32, bytes)`)
+`Mixed`: Result will be as defined and expected by the schema.
 
 **Example**
 
 ```js
-erc725.utils.encodeKeyValue(
-    // The schema definition
-    {
-      name: "Username",
-      key: "0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da",
-      keyType: "Singleton",
-      valueContent: "String",
-      valueType: "string",
-    },
-    // the value to encode
-    'my-cool-name'
-)
-> '0x6d792d636f6f6c2d6e616d65'
+erc725.encodeData('Username', 'my-cool-username')
+
+> '0x6d792d636f6f6c2d757365726e616d65'
 ```
 
 
-
-### decodeAllData()
-
-This method will take an array of key/value pairs as would be expected to be returned from and ERC725 contract through and ABI using `web3.contract` (for instance).
+### decodeAllData
 
 ```js
-erc725.utils.decodeAllData(schema, data)
+erc725.decodeAllData(data)
 ```
 
 **Parameters**
 
-`schema` - `Array`: An array of schema definition objects `[{name:'fieldName',key: '0x49fwe...'},...]` as described above.
-
-`data` - `Array`: An array of {key,value} pairs. `[{key:'0x9df80s...',value:'some-value'},...]`, as would be expected to be returned form a ERC725 compliant smart contract through the contract ABI.
+1. `data` - `Array`: An array of key/value pairs, as epected to be returned from erc725 contract ABI.
 
 **Returns**
-
-`Array`: Array of decoded data under and element key and arranged as described by the schema
+`Object`: An object with keys matching the erc725 instance schema keys, with attached decoded data as expected by the schema.
 
 **Example**
 
 ```js
-erc725.decodeAllData(
-    // Array of schema keys
-    [
-        {
-            name: "Username",
-            key: "0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da",
-            keyType: "Singleton",
-            valueContent: "String",
-            valueType: "string",
-        },
-        {
-            name: "Description",
-            key: "0xfc5327884a7fb1912dcdd0d78d7e6753f03e61a8e0b845a4b62f5efde472d0a8",
-            keyType: "Singleton",
-            valueContent: "URL",
-            valueType: "string",
-        }
-    ],
-    // Array of data to decode
-    [
-        {
-            key: "0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da",
-            value: "0x6d792d636f6f6c2d6e616d65"
-        },
-        {
-            key: "0xfc5327884a7fb1912dcdd0d78d7e6753f03e61a8e0b845a4b62f5efde472d0a8",
-            value: "0x687474703a2f2f6d792d636f6f6c2d776562736974652e68746d6c"
-        }
+erc725.decodeAllData([
+    {key:'0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da', value:'0x6d792d636f6f6c2d757365726e616d65'},
+    {key:'0x4eeb961b158da171122c794adc937981d3b441f1dc5b8f718a207667f992093d', value:'0x41206772656174206465736372697074696f6e2e'},
+    {key:'0x1b0084c280dc983f326892fcc88f375797a50d4f792b20b5229caa857474e84e', value:'0x00000...02'} // The length of the array
+    {key:'0x1b0084c280dc983f326892fcc88f375700000000000000000000000000000000', value:'0x2309f...'} // The 0 element of the array
+    {key:'0x1b0084c280dc983f326892fcc88f375700000000000000000000000000000001', value:'0x0fe09...'} // The 1 element of the array
+])
+
+> {
+    'Username':'my-cool-username',
+    'Description': 'A great description.',
+    'IssuedAssets[]': [
+        '0x2309f...',
+        '0x0fe09...'
     ]
-)
+}
+```
 
-> { Username: 'my-cool-name', Description'http://my-cool-website.html' }
 
+### encodeAllData
+```js
+erc725.encodeAllData(data)
+```
+**Parameters**
+
+1. `data` - `Object`: An object of keys corresponding to the schema key names, with associated data as per schema definition
+
+**Returns**
+
+`Array`: An array of key/value pairs, as epected to be returned from erc725 contract ABI.
+
+**Example**
+
+```js
+erc725.encodeAllData({
+    'Username':'my-cool-username',
+    'Description': 'A great description.',
+    'IssuedAssets[]': [
+        '0x2309f...',
+        '0x0fe09...'
+    ]
+})
+
+> [
+    {key:'0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da', value:'0x6d792d636f6f6c2d757365726e616d65'},
+    {key:'0x4eeb961b158da171122c794adc937981d3b441f1dc5b8f718a207667f992093d', value:'0x41206772656174206465736372697074696f6e2e'},
+    {key:'0x1b0084c280dc983f326892fcc88f375797a50d4f792b20b5229caa857474e84e', value:'0x00000...02'} // The length of the array
+    {key:'0x1b0084c280dc983f326892fcc88f375700000000000000000000000000000000', value:'0x2309f...'} // The 0 element of the array
+    {key:'0x1b0084c280dc983f326892fcc88f375700000000000000000000000000000001', value:'0x0fe09...'} // The 1 element of the array
 ]
 ```
 
-
-### encodeAllData()
-
-```js
-erc725.utils.encodeAllData(schema, data)
-```
-
-**Parameters**
-
-`schema` - `Array`: An array of scheme definition elements (see above).
-
-`data` - `Array`: An array of objects with element keys as assumed to be delivered from decoded blockchain data. Ie `[{schemaElement1Name: data...},{schemaElement2Name: data...}]`
-
-**Returns**
-
-`Array`: An array of key-value pairs with keys being the schema definition key, and the value being the encoded value of the data as per the schema definitions.
-
-**Example**
-
-```js
-erc725.encodeAllData(
-    [
-        {
-            name: "Username",
-            key: "0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da",
-            keyType: "Singleton",
-            valueContent: "String",
-            valueType: "string",
-        },
-        {
-            name: "Description",
-            key: "0xfc5327884a7fb1912dcdd0d78d7e6753f03e61a8e0b845a4b62f5efde472d0a8",
-            keyType: "Singleton",
-            valueContent: "URL",
-            valueType: "string",
-        }
-    ],
-    {
-        Username: 'my-cool-name',
-        Description: 'http://my-cool-website.html
-    }
-)
-> [
-    {key: '0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da', value: '0x6d792d636f6f6c2d6e616d65' },
-    {key: '0xfc5327884a7fb1912dcdd0d78d7e6753f03e61a8e0b845a4b62f5efde472d0a8', value: '0x687474703a2f2f6d792d636f6f6c2d776562736974652e68746d6c' }
-  ]
-```
 
 
