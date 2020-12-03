@@ -95,12 +95,16 @@ export default class ERC725 {
 
             const dat = [{ key: keySchema.key, value: rawData }]
             const res = await this.getArrayValues(keySchema, dat)
-            if (res) {
 
-                res.push(dat[0]) // push the original array
+            // Handle empty arrays
+            if (res && res.length > 0) {
+
+                res.push(dat[0]) // add the raw data array length
                 return utils.decodeKey(keySchema, res)
 
             }
+
+            return [] // return empty array, as per linting
 
         }
 
@@ -178,7 +182,7 @@ export default class ERC725 {
         const value = data.find(e => e.key === schema.key) // get the length key/value pair
 
         // Handle empty/non-existent array
-        if (!value) { return results }
+        if (!value || !value.value) { return results }
         const arrayLength = await utils.decodeKeyValue(schema, value.value) // get the int array length
 
         // 2. Get the array values for the length of the array

@@ -184,7 +184,7 @@ export const utils = {
         // Check for the missing map.
         if (!valueContentMap[schemaElementDefinition.valueContent] && schemaElementDefinition.valueContent.substr(0, 2) !== '0x') {
 
-            throw new Error('The valueContent for "' + schemaElementDefinition.name + '" is not supported.')
+            throw new Error('The valueContent "' + schemaElementDefinition.valueContent + '" for "' + schemaElementDefinition.name + '" is not supported.')
 
         }
 
@@ -244,7 +244,7 @@ export const utils = {
         // Check for the missing map.
         if (!valueContentMap[schemaElementDefinition.valueContent] && schemaElementDefinition.valueContent.substr(0, 2) !== '0x') {
 
-            throw new Error('The valueContent for "' + schemaElementDefinition.name + '" is not supported.')
+            throw new Error('The valueContent "' + schemaElementDefinition.valueContent + '" for "' + schemaElementDefinition.name + '" is not supported.')
 
         }
 

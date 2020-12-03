@@ -109,6 +109,7 @@ export const valueContentEncodingMap = {
         encode: value => value,
         decode: value => value
     },
+    // NOTE: Deprecated. For reference/testing in future
     ArrayLength: {
         type: 'uint256',
         encode: value => Web3Utils.padLeft(Web3Utils.numberToHex(value), 64),
