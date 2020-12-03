@@ -36,22 +36,12 @@ export default class EthereumSource {
 
     }
 
-    async getData(address, key) {
+    async getData(address, keyHash) {
 
-        const data = CONSTANTS.methods.getData.sig + key.replace('0x', '')
-
-        const params = [
-            {
-                to: address,
-                gas: CONSTANTS.methods.getData.gas,
-                gasPrice: CONSTANTS.methods.getData.gasPrice,
-                value: CONSTANTS.methods.getData.value,
-                data
-            }
-        ]
+        const params = [this._constructJSONRPC(address, keyHash)]
         let result = await this._callContract(params)
         result = this.deprecated ? result.result : result
-        return (result === '0x') ? null : web3Abi.decodeParameter('bytes', result)
+        return this._decodeResult(result)
 
     }
 
@@ -77,6 +67,27 @@ export default class EthereumSource {
         return this.deprecated
             ? this.provider.send('eth_call', params)
             : this.provider.request({ method: 'eth_call', params })
+
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    _constructJSONRPC(address, keyHash) {
+
+        // eslint-disable-next-line no-return-assign
+        return {
+            to: address,
+            gas: CONSTANTS.methods.getData.gas,
+            gasPrice: CONSTANTS.methods.getData.gasPrice,
+            value: CONSTANTS.methods.getData.value,
+            data: CONSTANTS.methods.getData.sig + keyHash.replace('0x', '')
+        }
+
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    _decodeResult(result) {
+
+        return (result === '0x') ? null : web3Abi.decodeParameter('bytes', result)
 
     }
 
