@@ -7,25 +7,29 @@ export const CONSTANTS = {
             sig: '0x54f6127f',
             gas: Web3Utils.numberToHex(2000000),
             gasPrice: Web3Utils.numberToHex(100000000),
-            value: Web3Utils.numberToHex(0)
+            value: Web3Utils.numberToHex(0),
+            returnEncoding: 'bytes'
         },
         dataCount: {
             sig: '0x5da40c47',
             gas: Web3Utils.numberToHex(2000000),
             gasPrice: Web3Utils.numberToHex(100000000),
-            value: Web3Utils.numberToHex(0)
+            value: Web3Utils.numberToHex(0),
+            returnEncoding: 'uint256'
         },
         allData: {
             sig: '0xc559acef',
             gas: Web3Utils.numberToHex(2000000),
             gasPrice: Web3Utils.numberToHex(100000000),
-            value: Web3Utils.numberToHex(0)
+            value: Web3Utils.numberToHex(0),
+            returnEncoding: 'bytes32[]'
         },
         owner: {
             sig: '0x8da5cb5b',
             gas: Web3Utils.numberToHex(2000000),
             gasPrice: Web3Utils.numberToHex(100000000),
-            value: Web3Utils.numberToHex(0)
+            value: Web3Utils.numberToHex(0),
+            returnEncoding: 'address'
         }
 
     },

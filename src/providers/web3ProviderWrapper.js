@@ -23,7 +23,6 @@
 */
 
 import * as abi from 'web3-eth-abi'
-import Web3Utils from 'web3-utils'
 import { CONSTANTS } from '../lib/constants.js'
 
 const web3abi = abi.default
@@ -39,9 +38,10 @@ export default class Web3Source {
 
     async getOwner(address) {
 
-        return this._decodeResult(
-            this._callContract(this._constructJSONRPC('owner', address))
-        )
+        const result = await this._callContract(this._constructJSONRPC(address, 'owner'))
+        if (result.error) { throw result.error }
+
+        return this._decodeResult('owner', result)
 
     }
 
@@ -49,7 +49,8 @@ export default class Web3Source {
     async getData(address, keyHash) {
 
         return this._decodeResult(
-            await this._callContract(this._constructJSONRPC('getData', address, keyHash))
+            'getData',
+            await this._callContract(this._constructJSONRPC(address, 'getData', keyHash))
         )
 
     }
@@ -60,7 +61,7 @@ export default class Web3Source {
         const payload = []
         for (let index = 0; index < keys.length; index++) {
 
-            payload.push(this._constructJSONRPC('getData', address, keys[index]))
+            payload.push(this._constructJSONRPC(address, 'getData', keys[index]))
 
         }
 
@@ -75,6 +76,7 @@ export default class Web3Source {
             returnValues.push({
                 key: keys[index],
                 value: this._decodeResult(
+                    'getData',
                     results.find(element => payload[index].id === element.id)
                 )
             })
@@ -86,11 +88,12 @@ export default class Web3Source {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    _constructJSONRPC(method, address, methodParam) {
+    _constructJSONRPC(address, method, methodParam) {
 
         if (!CONSTANTS.methods[method]) { throw new Error('Contract method "' + method + '"not supported') }
 
         const data = methodParam ? CONSTANTS.methods[method].sig + methodParam.replace('0x', '') : CONSTANTS.methods[method].sig
+
         // eslint-disable-next-line no-return-assign
         return {
             jsonrpc: '2.0',
@@ -133,10 +136,11 @@ export default class Web3Source {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    _decodeResult(result) {
+    _decodeResult(method, result) {
 
+        if (!CONSTANTS.methods[method]) { console.error('Contract method: "' + method + '" is not supported.'); return null }
         const rpcResult = result.result
-        return (rpcResult === '0x') ? null : web3abi.decodeParameter('bytes', rpcResult)
+        return (rpcResult === '0x') ? null : web3abi.decodeParameter(CONSTANTS.methods[method].returnEncoding, rpcResult)
 
     }
 

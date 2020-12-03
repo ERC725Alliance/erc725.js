@@ -32,12 +32,16 @@ export default class GraphSource {
 
     }
 
+
+    // eslint-disable-next-line class-methods-use-this
+    getOwner() { throw new Error('We\'re sorry, getOwner() method not yet supported in graph provider type.') }
+
     async getData(id, keys) {
 
         if (!keys || Array.isArray(keys)) {
 
             // TODO: support array of keys
-            return new Error('Incorrect parameter \'keys\' in getData()')
+            throw new Error('Incorrect parameter \'keys\' in getData()', keys)
 
         }
         // Get the value for the specific single key

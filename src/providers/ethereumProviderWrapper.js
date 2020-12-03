@@ -36,11 +36,21 @@ export default class EthereumSource {
 
     }
 
+    async getOwner(address) {
+
+        const params = this._constructJSONRPC(address, 'owner')
+        const result = await this._callContract([params])
+        if (result.error) { throw result.error }
+
+        return this._decodeResult('owner', result)
+
+    }
+
     async getData(address, keyHash) {
 
-        let result = await this._callContract([this._constructJSONRPC('getData', address, keyHash)])
+        let result = await this._callContract([this._constructJSONRPC(address, 'getData', keyHash)])
         result = this.deprecated ? result.result : result
-        return this._decodeResult(result)
+        return this._decodeResult('getData', result)
 
     }
 
@@ -62,7 +72,7 @@ export default class EthereumSource {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    _constructJSONRPC(method, address, methodParam) {
+    _constructJSONRPC(address, method, methodParam) {
 
         const data = methodParam ? CONSTANTS.methods[method].sig + methodParam.replace('0x', '') : CONSTANTS.methods[method].sig
         // eslint-disable-next-line no-return-assign
@@ -85,9 +95,11 @@ export default class EthereumSource {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    _decodeResult(result) {
+    _decodeResult(method, result) {
 
-        return (result === '0x') ? null : web3Abi.decodeParameter('bytes', result)
+        if (!CONSTANTS.methods[method]) { console.error('Contract method: "' + method + '" is not supported.'); return null }
+
+        return (result === '0x') ? null : web3Abi.decodeParameter(CONSTANTS.methods[method].returnEncoding, result)
 
     }
 
