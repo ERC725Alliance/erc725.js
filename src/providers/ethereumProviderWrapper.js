@@ -38,8 +38,7 @@ export default class EthereumSource {
 
     async getData(address, keyHash) {
 
-        const params = [this._constructJSONRPC(address, keyHash)]
-        let result = await this._callContract(params)
+        let result = await this._callContract([this._constructJSONRPC('getData', address, keyHash)])
         result = this.deprecated ? result.result : result
         return this._decodeResult(result)
 
@@ -62,25 +61,26 @@ export default class EthereumSource {
 
     }
 
+    // eslint-disable-next-line class-methods-use-this
+    _constructJSONRPC(method, address, methodParam) {
+
+        const data = methodParam ? CONSTANTS.methods[method].sig + methodParam.replace('0x', '') : CONSTANTS.methods[method].sig
+        // eslint-disable-next-line no-return-assign
+        return {
+            to: address,
+            gas: CONSTANTS.methods[method].gas,
+            gasPrice: CONSTANTS.methods[method].gasPrice,
+            value: CONSTANTS.methods[method].value,
+            data
+        }
+
+    }
+
     async _callContract(params) {
 
         return this.deprecated
             ? this.provider.send('eth_call', params)
             : this.provider.request({ method: 'eth_call', params })
-
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    _constructJSONRPC(address, keyHash) {
-
-        // eslint-disable-next-line no-return-assign
-        return {
-            to: address,
-            gas: CONSTANTS.methods.getData.gas,
-            gasPrice: CONSTANTS.methods.getData.gasPrice,
-            value: CONSTANTS.methods.getData.value,
-            data: CONSTANTS.methods.getData.sig + keyHash.replace('0x', '')
-        }
 
     }
 

@@ -23,6 +23,7 @@
 */
 
 import * as abi from 'web3-eth-abi'
+import Web3Utils from 'web3-utils'
 import { CONSTANTS } from '../lib/constants.js'
 
 const web3abi = abi.default
@@ -36,10 +37,19 @@ export default class Web3Source {
 
     }
 
+    async getOwner(address) {
+
+        return this._decodeResult(
+            this._callContract(this._constructJSONRPC('owner', address))
+        )
+
+    }
+
+
     async getData(address, keyHash) {
 
         return this._decodeResult(
-            await this._callContract(this._constructJSONRPC(address, keyHash))
+            await this._callContract(this._constructJSONRPC('getData', address, keyHash))
         )
 
     }
@@ -50,7 +60,7 @@ export default class Web3Source {
         const payload = []
         for (let index = 0; index < keys.length; index++) {
 
-            payload.push(this._constructJSONRPC(address, keys[index]))
+            payload.push(this._constructJSONRPC('getData', address, keys[index]))
 
         }
 
@@ -76,8 +86,11 @@ export default class Web3Source {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    _constructJSONRPC(address, keyHash) {
+    _constructJSONRPC(method, address, methodParam) {
 
+        if (!CONSTANTS.methods[method]) { throw new Error('Contract method "' + method + '"not supported') }
+
+        const data = methodParam ? CONSTANTS.methods[method].sig + methodParam.replace('0x', '') : CONSTANTS.methods[method].sig
         // eslint-disable-next-line no-return-assign
         return {
             jsonrpc: '2.0',
@@ -85,22 +98,14 @@ export default class Web3Source {
             params: [
                 {
                     to: address,
-                    gas: CONSTANTS.methods.getData.gas,
-                    gasPrice: CONSTANTS.methods.getData.gasPrice,
-                    value: CONSTANTS.methods.getData.value,
-                    data: CONSTANTS.methods.getData.sig + keyHash.replace('0x', '')
+                    gas: CONSTANTS.methods[method].gas,
+                    gasPrice: CONSTANTS.methods[method].gasPrice,
+                    value: CONSTANTS.methods[method].value,
+                    data
                 }
             ],
             id: idCount += 1
         }
-
-    }
-
-    // eslint-disable-next-line class-methods-use-this
-    _decodeResult(result) {
-
-        const rpcResult = result.result
-        return (rpcResult === '0x') ? null : web3abi.decodeParameter('bytes', rpcResult)
 
     }
 
@@ -124,6 +129,14 @@ export default class Web3Source {
             })
 
         })
+
+    }
+
+    // eslint-disable-next-line class-methods-use-this
+    _decodeResult(result) {
+
+        const rpcResult = result.result
+        return (rpcResult === '0x') ? null : web3abi.decodeParameter('bytes', rpcResult)
 
     }
 

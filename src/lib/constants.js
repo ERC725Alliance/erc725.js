@@ -22,7 +22,7 @@ export const CONSTANTS = {
             value: Web3Utils.numberToHex(0)
         },
         owner: {
-            sig: '0x...',
+            sig: '0x8da5cb5b',
             gas: Web3Utils.numberToHex(2000000),
             gasPrice: Web3Utils.numberToHex(100000000),
             value: Web3Utils.numberToHex(0)

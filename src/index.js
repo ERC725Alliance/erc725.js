@@ -242,5 +242,10 @@ export default class ERC725 {
 
     }
 
+    getOwner(address) {
+
+        return this.provider.getOwner(address ? this.options.address : address)
+
+    }
 
 }
