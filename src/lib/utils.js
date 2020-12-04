@@ -24,7 +24,7 @@ export const utils = {
 
     decodeAllData: (schema, data) => {
 
-        // @param - schmea is an array of objects of schema definitions
+        // @param - schema is an array of objects of schema definitions
         // @param - data is an array of objects of key/value pairs
         // @return: all decoded data as per required by the schema and provided data
 
@@ -344,15 +344,15 @@ export const utils = {
 
     },
 
-    getSchemaElement: (schemas, key) => {
+    getSchemaElement: (schema, key) => {
 
         // @param - schema: an array of objects
         // @param - key: A string of either the schema element name, or key
         // @return: The requested schema element from the full array of schemas
 
         const keyHash = (key.substr(0, 2) !== '0x') ? utils.encodeKeyName(key) : key
-        const schemaElement = schemas.find(e => e.key === keyHash)
-        if (!schemaElement) { throw new Error('No matching schema found for key: ' + key + ' (' + keyHash + ').') }
+        const schemaElement = schema.find(e => e.key === keyHash)
+        if (!schemaElement) { throw new Error('No matching schema found for key: "' + key + '" (' + keyHash + ').') }
 
         return schemaElement
 

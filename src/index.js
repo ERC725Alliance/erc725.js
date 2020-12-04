@@ -47,7 +47,7 @@ export default class ERC725 {
         if (provider.type === 'ApolloClient') {
 
             this.options.providerType = 'graph'
-            this.provider = new GraphSource(givenProvider)
+            this.source = new GraphSource(givenProvider)
 
 
             // CASE: Ethereum provider
@@ -56,7 +56,7 @@ export default class ERC725 {
 
 
             this.options.providerType = 'ethereum'
-            this.provider = new EthereumSource(givenProvider)
+            this.source = new EthereumSource(givenProvider)
 
 
             // CASE: Web3 or deprectaed ethereum provider
@@ -64,7 +64,7 @@ export default class ERC725 {
         } else if ((!provider.request && provider.send) || provider.type === 'Web3Provider') {
 
             this.options.providerType = 'web3'
-            this.provider = new Web3Source(givenProvider)
+            this.source = new Web3Source(givenProvider)
 
 
             // CASE: Unknown provider
@@ -80,13 +80,13 @@ export default class ERC725 {
     async getData(key, customSchema) {
 
         if (!Web3Utils.isAddress(this.options.address)) { throw new Error('Missing ERC725 contract address.') }
-        if (!this.provider) { throw new Error('Missing provider.') }
+        if (!this.source) { throw new Error('Missing provider.') }
 
         const schema = customSchema ? [customSchema] : this.options.schema
         const keySchema = utils.getSchemaElement(schema, key)
 
         // Get all the raw data possible.
-        const rawData = await this.provider.getData(this.options.address, keySchema.key)
+        const rawData = await this.source.getData(this.options.address, keySchema.key)
         // Decode and return the data
 
         if (keySchema.keyType.toLowerCase() === 'array') {
@@ -102,7 +102,7 @@ export default class ERC725 {
 
             }
 
-            return [] // return empty array, as per linting
+            return [] // return empty array if no results
 
         }
 
@@ -115,12 +115,12 @@ export default class ERC725 {
         const results = {}
         let res
         if (!Web3Utils.isAddress(this.options.address)) { throw new Error('Missing ERC725 contract address.') }
-        if (!this.provider) { throw new Error('Missing provider.') }
+        if (!this.source) { throw new Error('Missing provider.') }
 
         // Get all the key hashes from the schema
         const keyHashes = this.options.schema.map(e => e.key)
         // Get all the raw data from the provider based on schema key hashes
-        let allRawData = await this.provider.getAllData(this.options.address, keyHashes)
+        let allRawData = await this.source.getAllData(this.options.address, keyHashes)
 
         // Take out null data values, since data may not fulfill entire schema
         allRawData = await allRawData.filter(e => e.value !== null)
@@ -197,7 +197,7 @@ export default class ERC725 {
             if (!arrayElement) {
 
                 // 3. Otherwise we get the array key element value
-                arrayElement = await this.provider.getData(this.options.address, arrayElementKey)
+                arrayElement = await this.source.getData(this.options.address, arrayElementKey)
                 if (arrayElement) {
 
                     results.push({
@@ -243,7 +243,7 @@ export default class ERC725 {
 
     getOwner(address) {
 
-        return this.provider.getOwner(address || this.options.address)
+        return this.source.getOwner(address || this.options.address)
 
     }
 

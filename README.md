@@ -1,6 +1,6 @@
 # ERC725.js
 
-This library allows for interfacing with ERC725 compliant contracts instances on Ethereum type blockchains supporting the EVM.
+This library allows for interfacing with ERC725(Y) compliant contract instances on Ethereum type blockchains supporting the EVM.
 
 **This package is currently in early stages of development, use only for testing or experimentation purposes**
 
@@ -28,20 +28,19 @@ new ERC725(schema[, address, provider])
 
 1. `schema` - `Array`: An array of objects of schema definitions compliant with [ERC725Y JSON Schema specifications](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md).
 
-1. `address` - `String`: (optional) The ERC725(Y) contract address 
+1. `address` - `String`: (optional) The ERC725 contract address 
 
-1. `provider` - `Object`: (optional) One of either a Web3 provider, or an EIP 1193 compliant Ethereum provider, or a ERC725 compliant graphQL service. The library will attempt to automatically detect the provider type, but can also handle an object of a `{provider: providerObj, type: 'Web3Provider | EthereumProvider | ApolloClient'` to avoid issues with code minification or uglification. If the provider is omitted the, instance will not be able to fetch blockchain data, but will be available for all utility encoding and decoding functions.
+2. `provider` - `Object`: (optional) One of either a Web3 provider, an EIP 1193 compliant Ethereum provider, or a ERC725 compliant graphQL service. The library will attempt to automatically detect the provider type, but can also handle an object of a `{provider: <Object>, type: <String>` to avoid issues with code minification or uglification. If the provider is omitted the, instance will not be able to fetch blockchain data, but will be available for all utility encoding and decoding functions.
 
 Currently tested and supported providers include: 
 * Web3: `web3.currentProvider`
-* Metamask Ethereum provider: `window.ethereum`
-* ApploClient graphQL client: `ApolloClient`
+* Ethereum provider (Metamask): `window.ethereum`
+* ApploClient graphQL client: `ApolloClient` (experimental)
 
 **Examples**
 
-*Example schema*
-
 ```js
+// The schema
 const schema = [
     {
         "name": "Username",
@@ -68,25 +67,31 @@ const schema = [
     }
 ]
 
+// The contract address
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
 
 ```
 
-**Create a provider object**
+**Creating a provider object**
 
 *With Web3 Provider*
 ```js
-const web3 = new Web3(new Web3.providers.HttpProvider("https://rpc.l14.lukso.network"));
-erc725 = new ERC725(schema, profileId, { provider: web3.currentProvider, type: 'HttpProvider' })
+import Web3 from 'web3'
+
+const web3 = new Web3(new Web3.providers.HttpProvider("https://rpc.l14.lukso.network"))
+
+erc725 = new ERC725(schema, address, { provider: web3.currentProvider, type: 'HttpProvider' })
 ```
 
-*With Metamask Provider*
+*With Ethereum/Metamask Provider*
 ```js
-erc725 = new ERC725(schema, '0x0adf8ce0fe...', { provider:window.ethereum, type:'EthereumProvider' })
+erc725 = new ERC725(schema, address, { provider:window.ethereum, type:'EthereumProvider' })
 ```
 
 *With Graph Provider*
 ```js
+import { ApolloClient, InMemoryCache } from '@apollo/client';
+
 const graphProvider = new ApolloClient({
   uri: 'http://183.23.0.2:8000/subgraphs/name/lukso/LS14', // Example only
   cache: new InMemoryCache(),
@@ -98,7 +103,7 @@ const graphProvider = new ApolloClient({
 erc725 = new ERC725(schema, '0x0adf8ce0fe...', { provider:graphProvider, type: 'ApolloClient' })
 ```
 
-**Now create a new instance of the ERC725 class with associated schema, contract address, and provider.**
+**Create a new instance of the ERC725 class with associated schema, contract address, and provider.**
 
 *With provider as described above*
 ```js
@@ -121,7 +126,7 @@ erc725.getData(schemaKey [, schemaElement])
 
 **Parameters**
 
-1. `schemaKey` - `String`: The name or the key hash of the key name as defined in the schema.
+1. `schemaKey` - `String`: The name (or the encoded name as the schema 'key') of the schema element in the class instance's schema.
 
 1. `schemaElement` - `Object`: (optional) An optional custom schema element to use for decoding the returned value. Overrides attached schema of instance on this call only.
 
@@ -144,7 +149,7 @@ erc725.getData('Username')
 erc725.getAllData()
 ```
 
-Returns all key value pairs from the ERC725 contract as defined in the provided schema.
+Returns all available data from the ERC725 contract as defined in class's schema.
 
 **Returns**
 
@@ -160,7 +165,7 @@ erc725.getAllData()
 
 ## Utility Methods
 
-These methods are available on the erc725 class instance with or without a provider & contract address.
+These methods are available on the erc725 class instance wether or not a provider and contract address was provided.
 
 ### decodeData
 
@@ -170,13 +175,13 @@ erc725.decodeData(schemaKey, data)
 
 **Parameters**
 
-1. `schemaKey` - `String`: The name or the hash of the key name as defined in the schema on instatiation of the ERC725 class.
+1. `schemaKey` - `String`: The name (or the encoded name as the schema 'key') of the schema element in the class instance's schema.
 
-1. `data` - `Mixed`: Either an array of key/value (`[{key:'0x04f9u0weuf...',value:'0x0f3209fj...'}]` pairs if the schema `keyType` is 'Array', or the single value to be decoded for 'Singleton' or 'Mapping' keyTypes. 
+1. `data` - `Mixed`: Either the single value to be decoded for 'Singleton' or 'Mapping' keyTypes, or an array of key/value (`[{key:'0x04f9u0weuf...',value:'0x0f3209fj...'}]` pairs if the schema `keyType` is 'Array'.
 
 **Returns**
 
-`Mixed`: Result will be as defined in the schema.
+`Mixed`: Returns decoded data as defined and expected in the schema (single value for keyTypes 'Singleton' & 'Mapping', or an array of values keyType 'Array).
 
 **Example**
 
@@ -194,13 +199,13 @@ erc725.encodeData(schemaKey, data)
 
 **Parameters**
 
-1. `schemaKey` - `String`: The name or the hash of the key name as defined in the schema on instatiation of the ERC725 class.
+1. `schemaKey` - `String`: The name (or the encoded name as the schema 'key') of the schema element in the class instance's schema.
 
 1. `data` - `Mixed`:  Data structured according to the corresponding to the schema defition.
 
 **Returns**
 
-`Mixed`: Result will be as defined and expected by the schema.
+`Mixed`: Returns decoded data as defined and expected in the schema (single value for keyTypes 'Singleton' & 'Mapping', or an array of encoded key/value objects for keyType 'Array).
 
 **Example**
 
@@ -219,7 +224,7 @@ erc725.decodeAllData(data)
 
 **Parameters**
 
-1. `data` - `Array`: An array of key/value pairs, as epected to be returned from erc725 contract ABI.
+1. `data` - `Array`: An array of encoded key/value object pairs.
 
 **Returns**
 `Object`: An object with keys matching the erc725 instance schema keys, with attached decoded data as expected by the schema.
@@ -247,16 +252,17 @@ erc725.decodeAllData([
 
 
 ### encodeAllData
+
 ```js
 erc725.encodeAllData(data)
 ```
 **Parameters**
 
-1. `data` - `Object`: An object of keys corresponding to the schema key names, with associated data as per schema definition
+1. `data` - `Object`: An object of keys matching to corresponding to the schema element names, with associated data as per schema definition attached.
 
 **Returns**
 
-`Array`: An array of key/value pairs, as epected to be returned from erc725 contract ABI.
+`Array`: An array of key/value pair objects.
 
 **Example**
 
@@ -285,11 +291,11 @@ erc725.encodeAllData({
 erc725.getOwner()
 ```
 
-Returns the owner address for the ERC725 compliant contract (as per OpenZeppelin 'Ownable' standard) at the address supplied on instantiation (given that an address and provider be provided).
+Returns the owner address for the ERC725(Y) compliant contract (as per OpenZeppelin 'Ownable' standard) at the address supplied on instantiation (given that an address and provider parameters are supplied).
 
 **Returns**
 
-`Address`: An Ethereum address
+`Address`: An Ethereum address (checksummed).
 
 **Example**
 ```js
