@@ -27,10 +27,8 @@ export default class ERC725 {
 
     constructor(schema, address, provider) {
 
-        // provider param can be either the provider, or and object with {provider: ,type:}
-        // we first check if they sent a provider type with
+        // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
 
-        // NOTE: These errors will never constiently happen this way without type/format checking
         if (!schema) { throw new Error('Missing schema.') } // TODO: Add check for schema format
 
         // Init options member
@@ -44,11 +42,11 @@ export default class ERC725 {
 
         const givenProvider = provider.provider || provider
 
+        // CASE: GraphQL provider
+
         if (provider.type === 'ApolloClient') {
 
             this.options.providerType = 'graph'
-            // TODO: Confirm better is to just use passed in provider
-            // this.provider = new GraphSource({uri:provider.uri})
             this.provider = new GraphSource(givenProvider)
 
 
@@ -94,7 +92,7 @@ export default class ERC725 {
         if (keySchema.keyType.toLowerCase() === 'array') {
 
             const dat = [{ key: keySchema.key, value: rawData }]
-            const res = await this.getArrayValues(keySchema, dat)
+            const res = await this._getArrayValues(keySchema, dat)
 
             // Handle empty arrays
             if (res && res.length > 0) {
@@ -137,11 +135,11 @@ export default class ERC725 {
             // Otherwise we assume the array element keys are not avaiable in raw results, so they must be fetched
             const arraySchemas = this.options.schema.filter(e => e.keyType.toLowerCase() === 'array')
 
-            // Get missing 'Array' fields, as necessary
+            // Get missing 'Array' fields for all arrays, as necessary
             for (let index = 0; index < arraySchemas.length; index++) {
 
                 const schemaElement = arraySchemas[index]
-                const arrayValues = await this.getArrayValues(schemaElement, allRawData)
+                const arrayValues = await this._getArrayValues(schemaElement, allRawData)
                 arrayValues.forEach(e => allRawData.push(e))
 
             }
@@ -151,11 +149,12 @@ export default class ERC725 {
 
         }
 
-        // Now that we can safely assume we have all array values as well
+        // Now that we can safely assume we have all array values
 
-        // Assign values, or null, to all schema name elements on results object
+        // initialize values as null, to all schema name elements on results object
         this.options.schema.forEach(element => { results[element.name] = null })
-        // Put the values in associated elements for return
+
+        // Put the values in associated elements for return object
         for (let index = 0; index < Object.keys(res).length; index++) {
 
             const key = Object.keys(res)[index]
@@ -168,21 +167,21 @@ export default class ERC725 {
 
     }
 
-    // Accepts @schema = assodiated with the schema with keyType = 'Array'
-    // @data = array of key/value pairs, one of which is the length key for the schema array
-    // Returns an array of keys/values
-    async getArrayValues(schema, data) {
+    async _getArrayValues(schema, data) {
 
-        if (schema.keyType !== 'Array') { throw new Error('The "getArrayFields" method requires a schema definition with "keyType: Array"', schema) }
-        // Required: the data includes a length key/value pair for the array
-        // Data can hold other field data not relevant here
+        // @param - schema: assodiated with the schema with keyType = 'Array'
+        // Required: the data includes the raw (encoded) length key/value pair for the array
+        // @param - data: array of key/value pairs, one of which is the length key for the schema array
+        // Data can hold other field data not relevant here, and will be ignored
+        // @return - an array of keys/values
+
+        if (schema.keyType !== 'Array') { throw new Error('The "_getArrayFields" method requires a schema definition with "keyType: Array"', schema) }
         const results = []
 
-        // 1. get the length
+        // 1. get the array length
         const value = data.find(e => e.key === schema.key) // get the length key/value pair
 
-        // Handle empty/non-existent array
-        if (!value || !value.value) { return results }
+        if (!value || !value.value) { return results } // Handle empty/non-existent array
         const arrayLength = await utils.decodeKeyValue(schema, value.value) // get the int array length
 
         // 2. Get the array values for the length of the array
@@ -194,7 +193,7 @@ export default class ERC725 {
 
             // 2.2 Check the data first just in case.
             arrayElement = data.find(e => e.key === arrayElementKey)
-            // We are done if it exists on this loop
+
             if (!arrayElement) {
 
                 // 3. Otherwise we get the array key element value

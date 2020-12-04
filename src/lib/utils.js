@@ -24,7 +24,10 @@ export const utils = {
 
     decodeAllData: (schema, data) => {
 
-        // Data is an array of objects of key/value pairs
+        // @param - schmea is an array of objects of schema definitions
+        // @param - data is an array of objects of key/value pairs
+        // @return: all decoded data as per required by the schema and provided data
+
         const results = {}
 
         for (let index = 0; index < schema.length; index++) {
@@ -43,9 +46,13 @@ export const utils = {
         return results
 
     },
+
     encodeAllData: (schema, data) => {
 
-        // Data is an object of keys with associated values, as per schema
+        // @param - schema is an array of objects of schema definitions
+        // @param - data is an object of keys with associated values, as per schema
+        // @return: all encoded data as per required by the schema and provided data
+
         const results = []
 
         for (let index = 0; index < schema.length; index++) {
@@ -58,10 +65,12 @@ export const utils = {
 
                 if (schemaElement.keyType === 'Array') {
 
+                    // Encoded array element returns as key/value pairs
                     results.push(...res)
 
                 } else {
 
+                    // Singleton encoding returns just the value, so we add the key for key/value pair
                     results.push({
                         key: schemaElement.key,
                         value: res
@@ -79,10 +88,12 @@ export const utils = {
 
     decodeKey: (schema, value) => {
 
-        // Value will be either key/value pairs for a key type of Array, or a single value for type Singleton
+        // @param - schema: is an object of a schema definitions
+        // @param - value: will be either key/value pairs for a key type of Array, or a single value for type Singleton
+        // @return: the decoded value/values as per the schema definition
+
         if (schema.keyType.toLowerCase() === 'array') {
 
-            // Handle the array
             const results = []
             const valueElement = value.find(e => e.key === schema.key)
             // Handle empty/non-existent array
@@ -90,7 +101,7 @@ export const utils = {
 
             const arrayLength = utils.decodeKeyValue(schema, valueElement.value) || 0
 
-            // This should not run if no match or arrayLength
+            // This will not run if no match or arrayLength
             for (let index = 0; index < arrayLength; index++) {
 
                 const newSchema = utils.transposeArraySchema(schema, index)
@@ -137,25 +148,28 @@ export const utils = {
 
     encodeKey: (schema, value) => {
 
-        // This will handle further encoding
+        // @param - schema: is an object of a schema definitions
+        // @param - value: will be either key/value pairs for a key type of Array, or a single value for type Singleton
+        // @return: the encoded value for the key as per the supplied schema
+
         // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
         if (schema.keyType.toLowerCase() === 'array' && Array.isArray(value)) {
 
             const results = []
 
-            // const newSchema.transposeArraySchema(schema)
             for (let index = 0; index < value.length; index++) {
 
                 const dataElement = value[index]
                 if (index === 0) {
 
-                    // this is the first element in the array (array length)
+                    // This is arrayLength as the first element in the raw array
                     results.push({
                         key: schema.key,
                         value: utils.encodeKeyValue(schema, value.length) // the array length
                     })
 
                 }
+
                 const newSchema = utils.transposeArraySchema(schema, index)
                 results.push({
                     key: newSchema.key,
@@ -180,6 +194,10 @@ export const utils = {
     },
 
     decodeKeyValue: (schemaElementDefinition, value) => {
+
+        // @param - schemaElementDefinition: An object of the schema for this key
+        // @param - value: the value to decode
+        // @return: the decoded value as per the schema
 
         // Check for the missing map.
         if (!valueContentMap[schemaElementDefinition.valueContent] && schemaElementDefinition.valueContent.substr(0, 2) !== '0x') {
@@ -241,14 +259,17 @@ export const utils = {
 
     encodeKeyValue: (schemaElementDefinition, value) => {
 
-        // Check for the missing map.
+        // @param - schemaElementDefinition: An object of the schema for this key
+        // @param - value: can contain single value, or an object as required by schema (JSONURL, or ASSETURL)
+        // @return: the encoded value as per the schema
+
+        // Check if existing in the supported valueContent mapping.
         if (!valueContentMap[schemaElementDefinition.valueContent] && schemaElementDefinition.valueContent.substr(0, 2) !== '0x') {
 
             throw new Error('The valueContent "' + schemaElementDefinition.valueContent + '" for "' + schemaElementDefinition.name + '" is not supported.')
 
         }
 
-        // @param value: can contain single value, or obj as required by spec
         let result
         const sameEncoding = (valueContentMap[schemaElementDefinition.valueContent] && valueContentMap[schemaElementDefinition.valueContent].type === schemaElementDefinition.valueType.split('[]')[0])
         const isArray = (schemaElementDefinition.valueType.substr(schemaElementDefinition.valueType.length - 2) === '[]')
@@ -298,6 +319,10 @@ export const utils = {
 
     encodeKeyName: name => {
 
+        // @param - name: the schema element name
+        // @return: the name of the key encoded as per specifications
+        // @return: a string of the encoded schema name
+
         const colon = name.indexOf(':')
         return (colon !== -1)
             // if name:subname, then construct using bytes16(hashFirstWord) + bytes12(0) + bytes4(hashLastWord)
@@ -311,14 +336,22 @@ export const utils = {
     // eslint-disable-next-line arrow-body-style
     encodeArrayKey: (key, index) => {
 
+        // @param - key: The schema key of a schema with keyType = 'Array'
+        // @param - index: An integer repredenting the inteded array index
+        // @return -  The raw bytes key for the array element
+
         return key.substr(0, 34) + Web3Utils.padLeft(Web3Utils.numberToHex(index), 32).replace('0x', '')
 
     },
 
-    getSchemaElement: (schema, key) => {
+    getSchemaElement: (schemas, key) => {
+
+        // @param - schema: an array of objects
+        // @param - key: A string of either the schema element name, or key
+        // @return: The requested schema element from the full array of schemas
 
         const keyHash = (key.substr(0, 2) !== '0x') ? utils.encodeKeyName(key) : key
-        const schemaElement = schema.find(e => e.key === keyHash)
+        const schemaElement = schemas.find(e => e.key === keyHash)
         if (!schemaElement) { throw new Error('No matching schema found for key: ' + key + ' (' + keyHash + ').') }
 
         return schemaElement
@@ -327,6 +360,12 @@ export const utils = {
 
     // eslint-disable-next-line arrow-body-style
     transposeArraySchema: (schema, index) => {
+
+        // @param - schema: An object of a schema defnition that must hvae a keyType of 'Array'
+        // @param - index: The index of the array element to transpose the schema to
+        // @return: Modified schema element of keyType 'Singleton' for fetching or decoding/encoding the array element
+
+        if (schema.keyType.toLowerCase() !== 'array') { console.error('Schema is not of keyType "Array" for schema: "' + schema.name + '".') }
 
         return {
             key: utils.encodeArrayKey(schema.key, index),

@@ -184,7 +184,7 @@ export const mockSchema = [
 
   },
 
-  // Testing other valueTypes (than bytes) 
+  // Testing other valueTypes 
 
   // Case 11
   {
