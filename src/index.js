@@ -167,6 +167,38 @@ export default class ERC725 {
 
     }
 
+    encodeAllData(data) {
+
+        return utils.encodeAllData(this.options.schema, data)
+
+    }
+
+    decodeAllData(data) {
+
+        return utils.decodeAllData(this.options.schema, data)
+
+    }
+
+    encodeData(key, data) {
+
+        const schema = utils.getSchemaElement(this.options.schema, key)
+        return utils.encodeKey(schema, data)
+
+    }
+
+    decodeData(key, data) {
+
+        const schema = utils.getSchemaElement(this.options.schema, key)
+        return utils.decodeKey(schema, data)
+
+    }
+
+    getOwner(address) {
+
+        return this.source.getOwner(address || this.options.address)
+
+    }
+
     async _getArrayValues(schema, data) {
 
         // @param - schema: assodiated with the schema with keyType = 'Array'
@@ -212,38 +244,6 @@ export default class ERC725 {
         }
 
         return results
-
-    }
-
-    encodeAllData(data) {
-
-        return utils.encodeAllData(this.options.schema, data)
-
-    }
-
-    decodeAllData(data) {
-
-        return utils.decodeAllData(this.options.schema, data)
-
-    }
-
-    encodeData(key, data) {
-
-        const schema = utils.getSchemaElement(this.options.schema, key)
-        return utils.encodeKey(schema, data)
-
-    }
-
-    decodeData(key, data) {
-
-        const schema = utils.getSchemaElement(this.options.schema, key)
-        return utils.decodeKey(schema, data)
-
-    }
-
-    getOwner(address) {
-
-        return this.source.getOwner(address || this.options.address)
 
     }
 

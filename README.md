@@ -291,7 +291,7 @@ erc725.encodeAllData({
 erc725.getOwner()
 ```
 
-Returns the owner address for the ERC725(Y) compliant contract (as per OpenZeppelin 'Ownable' standard) at the address supplied on instantiation (given that an address and provider parameters are supplied).
+Returns the owner address for the ERC725(Y) compliant contract (as per [ERC173](https://eips.ethereum.org/EIPS/eip-173))).
 
 **Returns**
 
