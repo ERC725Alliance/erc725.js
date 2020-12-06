@@ -167,6 +167,29 @@ export default class ERC725 {
 
     }
 
+    async fetchData(key, customSchema) {
+
+        const schema = customSchema ? [customSchema] : this.options.schema
+        const keySchema = utils.getSchemaElement(schema, key)
+
+        const result = this.getData(key, customSchema)
+
+        switch (keySchema.valueContent.toLowerCase()) {
+
+        case 'jsonurl':
+
+            break
+        case 'asseturl':
+
+            break
+        default:
+            return result
+            break
+
+        }
+
+    }
+
     encodeAllData(data) {
 
         return utils.encodeAllData(this.options.schema, data)
