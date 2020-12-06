@@ -140,6 +140,15 @@ erc725.getData(schemaKey [, schemaElement])
 erc725.getData('Username')
 
 > 'my-cool-username'
+
+
+erc725.getData('KeyWithJsonURL')
+
+> {
+    url: 'ipfs://QmXybv2LdJWscy1C6yRKUjvnaj6aqKktZX4g4xmz2nyYj2',
+    hash: '0xb4f9d72e83bbe7e250ed9ec80332c493b7b3d73e0d72f7b2c7ab01c39216eb1a',
+    hashFunction: 'keccak256(utf8)'
+}
 ```
 
 
@@ -162,6 +171,39 @@ erc725.getAllData()
 
 > { 'Username': 'my-cool-username', 'Description': 'A great description.', 'IssuedAssets[]': ['0x2309f...','0x0fe09...', ...] }
 ```
+
+
+### fetchData
+```js
+erc725.fetchData(schemaKey [, schemaElement])
+```
+
+**Parameters**
+
+1. `schemaKey` - `String`: The name (or the encoded name as the schema 'key') of the schema element in the class instance's schema.
+
+1. `schemaElement` - `Object`: (optional) An optional custom schema element to use for decoding the returned value. Overrides attached schema of instance on this call only.
+
+**Returns**
+
+`Mixed`: Returns the fetched and decoded value, if valueContent is `JSONURL`, or `AssetURL`, otherwise works like `getData(key)`.
+Throws if hashes of fetched data is not matching.
+
+**Example**
+
+```js
+erc725.fetchData('KeyWithJSONURL')
+
+> {
+    someProperties: 'In My  returned JSON file',
+    ...
+}
+
+erc725.fetchData('KeyWithAssetURL')
+
+> Uint8Array([...])
+```
+
 
 ## Utility Methods
 

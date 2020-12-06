@@ -65,6 +65,62 @@ describe('Running erc725.js tests...', () => {
 
         })
 
+        it('fetchData JSONURL', async () => {
+
+            // this test does a real request, TODO replace with mock?
+
+            const provider = new HttpProvider({
+                returnData: [{
+                    key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+                    value: '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000596f357c6a733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a626400000000000000'
+                }]
+            })
+            const erc725 = new ERC725([{
+                name: 'TestJSONURL',
+                key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+                keyType: 'Singleton',
+                valueContent: 'JSONURL',
+                valueType: 'bytes'
+            }], address, provider)
+            const result = await erc725.fetchData('TestJSONURL')
+            assert.deepStrictEqual(result, {
+                LSP3Profile: {
+                    backgroundImage: 'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
+                    description: "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
+                    profileImage: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf'
+                }
+            })
+
+        })
+
+        it('fetchData AssetURL', async () => {
+
+            // this test does a real request, TODO replace with mock?
+
+            const provider = new HttpProvider({
+                returnData: [{
+                    key: '0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee',
+                    value: '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000598019f9b1ea67779f76db55facacfe81114abcd56b36fe15d63223aba7e5fc8251f68139f697066733a2f2f516d596f387967347a7a6d647532364e537674736f4b6555356f56523668326f686d6f61324378356939316d506600000000000000'
+                }]
+            })
+            const erc725 = new ERC725([{
+                name: 'TestAssetURL',
+                key: '0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee',
+                keyType: 'Singleton',
+                valueContent: 'AssetURL',
+                valueType: 'bytes',
+                // Testing data
+                expectedResult: {
+                    hashFunction: 'keccak256(utf8)', // 0x8019f9b1
+                    hash: '0xea67779f76db55facacfe81114abcd56b36fe15d63223aba7e5fc8251f68139f', // hash of address '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
+                    url: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf' // FAKE. just used from above
+                }
+            }], address, provider)
+            const result = await erc725.fetchData('TestAssetURL')
+            assert.equal(Object.prototype.toString.call(result), '[object Uint8Array]')
+
+        })
+
     })
 
     describe('Getting data by schema element by provider', () => {
