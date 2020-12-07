@@ -18,6 +18,7 @@
  */
 
 import Web3Utils from 'web3-utils'
+import axios from 'axios'
 import GraphSource from './providers/subgraphProviderWrapper.js'
 import Web3Source from './providers/web3ProviderWrapper.js'
 import EthereumSource from './providers/ethereumProviderWrapper.js'
@@ -167,6 +168,112 @@ export default class ERC725 {
 
     }
 
+    async fetchData(key, customSchema) {
+
+        const schema = customSchema ? [customSchema] : this.options.schema
+        const keySchema = utils.getSchemaElement(schema, key)
+
+        const result = await this.getData(key, customSchema)
+
+        // change ipfs urls
+        if (result && result.url && result.url.indexOf('ipfs://') !== -1) {
+
+            const ipfsGateway = 'https://cloudflare-ipfs.com/ipfs/' // 'https://ipfs.infura-ipfs.io/ipfs/'
+            result.url = result.url.replace('ipfs://', ipfsGateway)
+
+        }
+
+        switch (keySchema.valueContent.toLowerCase()) {
+
+        case 'jsonurl': case 'asseturl':
+            let responseType
+            let dataToHash
+            const lowerCaseHashFunction = result.hashFunction.toLowerCase()
+
+            // determine the decoding
+            // options: 'arraybuffer', 'document', 'json', 'text', 'stream', Browser: 'blob'
+            if (lowerCaseHashFunction === 'keccak256(utf8)') responseType = 'json'
+            if (lowerCaseHashFunction === 'keccak256(bytes)') responseType = 'arraybuffer'
+
+            // console.log(result)
+
+            const response = await axios({
+                method: 'get',
+                url: result.url,
+                responseType
+            })
+
+            // console.log(response.data)
+
+            // determine the transformation of the data, before hashing
+            if (lowerCaseHashFunction === 'keccak256(utf8)') dataToHash = JSON.stringify(response.data)
+            if (lowerCaseHashFunction === 'keccak256(bytes)') dataToHash = response.data
+
+            return (response && response.data && this._hashAndCompare(dataToHash, result.hash))
+                ? response.data
+                : null
+
+        default:
+            return result
+
+        }
+
+    }
+
+    encodeAllData(data) {
+
+        return utils.encodeAllData(this.options.schema, data)
+
+    }
+
+    decodeAllData(data) {
+
+        return utils.decodeAllData(this.options.schema, data)
+
+    }
+
+    encodeData(key, data) {
+
+        const schema = utils.getSchemaElement(this.options.schema, key)
+        return utils.encodeKey(schema, data)
+
+    }
+
+    decodeData(key, data) {
+
+        const schema = utils.getSchemaElement(this.options.schema, key)
+        return utils.decodeKey(schema, data)
+
+    }
+
+    getOwner(address) {
+
+        return this.source.getOwner(address || this.options.address)
+
+    }
+
+    _hashAndCompare(data, hash) {
+
+        const jsonHash = Web3Utils.keccak256(data)
+
+        // throw error if hash mismatch
+        if (jsonHash !== hash) throw new Error('Hash mismatch, returned JSON ("' + jsonHash + '") is different than the one linked from the ERC725Y Smart contract: "' + hash + '"')
+
+        return true
+
+    }
+
+    _hashAndCompareBytes(data, hash) {
+
+        const jsonHash = Web3Utils.keccak256(JSON.stringify(data))
+
+        // throw error if hash mismatch
+        if (jsonHash !== hash) throw new Error('Hash mismatch, returned JSON ("' + jsonHash + '") is different than the one linked from the ERC725Y Smart contract: "' + hash + '"')
+
+        return data
+
+    }
+
     async _getArrayValues(schema, data) {
 
         // @param - schema: assodiated with the schema with keyType = 'Array'
@@ -212,38 +319,6 @@ export default class ERC725 {
         }
 
         return results
-
-    }
-
-    encodeAllData(data) {
-
-        return utils.encodeAllData(this.options.schema, data)
-
-    }
-
-    decodeAllData(data) {
-
-        return utils.decodeAllData(this.options.schema, data)
-
-    }
-
-    encodeData(key, data) {
-
-        const schema = utils.getSchemaElement(this.options.schema, key)
-        return utils.encodeKey(schema, data)
-
-    }
-
-    decodeData(key, data) {
-
-        const schema = utils.getSchemaElement(this.options.schema, key)
-        return utils.decodeKey(schema, data)
-
-    }
-
-    getOwner(address) {
-
-        return this.source.getOwner(address || this.options.address)
 
     }
 
