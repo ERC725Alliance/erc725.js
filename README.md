@@ -21,7 +21,13 @@ import ERC725 from 'erc725.js'
 ## Instantiation
 
 ```js
-new ERC725(schema[, address, provider])
+let myERC725 = new ERC725(schema[, address, provider])
+
+// change options
+myERC725.options.ipfsGateway = 'https://ipfs.infura-ipfs.io/ipfs/' // used for fetchData(), default: 'https://cloudflare-ipfs.com/ipfs/'
+myERC725.options.schema // change schema
+myERC725.options.address // change address
+myERC725.options.provider // change the provider
 ```
 
 **Parameters**
@@ -176,6 +182,9 @@ erc725.getAllData()
 ### fetchData
 ```js
 erc725.fetchData(schemaKey [, schemaElement])
+
+// you could change the ipfsGateway
+erc725.options.ipfsGateway = 'https://ipfs.infura-ipfs.io/ipfs/'
 ```
 
 **Parameters**
@@ -330,19 +339,24 @@ erc725.encodeAllData({
 ### getOwner
 
 ```js
-erc725.getOwner()
+erc725.getOwner([address])
 ```
 
 Returns the owner address for the ERC725(Y) compliant contract (as per [ERC173](https://eips.ethereum.org/EIPS/eip-173))).
 
+**Parameters**
+
+1. `address` - `String`: (optional), Address to fetch the owner of another ER725n smart contract, otherwise it uses `this.options.address`
+
+
 **Returns**
 
-`Address`: An Ethereum address (checksummed).
+`Address`: An Ethereum address.
 
 **Example**
 ```js
 const owner = erc725.getOwner()
 
-> '0x30fc23....'
+> '0x28D25E70819140daF65b724158D00c373D1a18ee'
 ```
 
