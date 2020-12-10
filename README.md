@@ -80,12 +80,12 @@ import Web3 from 'web3'
 
 const web3 = new Web3(new Web3.providers.HttpProvider("https://rpc.l14.lukso.network"))
 
-erc725 = new ERC725(schema, address, { provider: web3.currentProvider, type: 'HttpProvider' })
+erc725 = new ERC725(schema, address, web3.currentProvider)
 ```
 
 *With Ethereum/Metamask Provider*
 ```js
-erc725 = new ERC725(schema, address, { provider:window.ethereum, type:'EthereumProvider' })
+erc725 = new ERC725(schema, address, window.ethereum)
 ```
 
 *With Graph Provider*
