@@ -43,24 +43,31 @@ Currently tested and supported providers include:
 // The schema
 const schema = [
     {
-        "name": "Username",
-        "key": "0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da",
-        "keyType": "Singleton",
-        "valueContent": "String",
-        "valueType": "string"
+        "name": "SupportedStandards:ERC725Account",
+        "key": "0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6",
+        "keyType": "Mapping",
+        "valueContent": "0xafdeb5d6",
+        "valueType": "bytes"
     },
     {
-        "name": "Link",
-        "key": "0x4eeb961b158da171122c794adc937981d3b441f1dc5b8f718a207667f992093d",
+        "name": "LSP3Profile",
+        "key": "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
         "keyType": "Singleton",
-        "valueContent": "URL",
-        "valueType": "string"
+        "valueContent": "JSONURL",
+        "valueType": "bytes"
     },
     {
-        "name": "IssuedAssets[]",
-        "key": "0x1b0084c280dc983f326892fcc88f375797a50d4f792b20b5229caa857474e84e",
+        "name": "LSP1UniversalReceiverDelegate",
+        "key": "0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47",
+        "keyType": "Singleton",
+        "valueContent": "Address",
+        "valueType": "address"
+    },
+    {
+        "name": "LSP3IssuedAssets[]",
+        "key": "0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0",
         "keyType": "Array",
-        "valueContent": "ArrayLength",
+        "valueContent": "Number",
         "valueType": "uint256",
         "elementValueContent": "Address",
         "elementValueType": "address"
@@ -137,12 +144,12 @@ erc725.getData(schemaKey [, schemaElement])
 **Example**
 
 ```js
-erc725.getData('Username')
+erc725.getData('SupportedStandards:ERC725Account')
 
-> 'my-cool-username'
+> '0xafdeb5d6'
 
 
-erc725.getData('KeyWithJsonURL')
+erc725.getData('LSP3Profile')
 
 > {
     url: 'ipfs://QmXybv2LdJWscy1C6yRKUjvnaj6aqKktZX4g4xmz2nyYj2',
@@ -169,7 +176,16 @@ Returns all available data from the ERC725 contract as defined in class's schema
 ```js
 erc725.getAllData()
 
-> { 'Username': 'my-cool-username', 'Description': 'A great description.', 'IssuedAssets[]': ['0x2309f...','0x0fe09...', ...] }
+> {
+    "SupportedStandards:ERC725Account": "0xafdeb5d6",
+    "LSP3Profile": '{
+        url: 'ipfs://QmXybv2LdJWscy1C6yRKUjvnaj6aqKktZX4g4xmz2nyYj2',
+        hash: '0xb4f9d72e83bbe7e250ed9ec80332c493b7b3d73e0d72f7b2c7ab01c39216eb1a',
+        hashFunction: 'keccak256(utf8)'
+    },
+    "LSP1UniversalReceiverDelegate": "0xF42227dd9E12B11C003de32D5241822Ec47f3674",
+    "LSP3IssuedAssets[]": ['0x2309f...','0x0fe09...', ...]
+}
 ```
 
 
@@ -192,11 +208,31 @@ Throws if hashes of fetched data is not matching.
 **Example**
 
 ```js
-erc725.fetchData('KeyWithJSONURL')
+erc725.fetchData('LSP3Profile')
 
 > {
-    someProperties: 'In My  returned JSON file',
-    ...
+    LSP3Profile: {
+        name: 'frozeman',
+        description: 'The inventor of ERC725 and ERC20...',
+        links: [
+            { title: 'Twitter', url: 'https://twitter.com/feindura' },
+            { title: 'lukso.network', url: 'https://lukso.network' }
+        ],
+        profileImage: [
+            {
+                width: 1024,
+                height: 974,
+                hashFunction: 'keccak256(bytes)',
+                hash: '0xa9399df007997de92a820c6c2ec1cb2d3f5aa5fc1adf294157de563eba39bb6e',
+                url: 'ifps://QmW4wM4r9yWeY1gUCtt7c6v3ve7Fzdg8CKvTS96NU9Uiwr'
+            }
+        ],
+        backgroundImage: [
+            {
+                ...
+            }
+        ]
+    }
 }
 
 erc725.fetchData('KeyWithAssetURL')
@@ -228,7 +264,7 @@ erc725.decodeData(schemaKey, data)
 **Example**
 
 ```js
-erc725.decodeData('Username', '0x6d792d636f6f6c2d757365726e616d65')
+erc725.decodeData('UsernameKey', '0x6d792d636f6f6c2d757365726e616d65')
 
 > 'my-cool-username'
 ```
