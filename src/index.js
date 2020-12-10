@@ -177,6 +177,8 @@ export default class ERC725 {
 
         const result = await this.getData(key, customSchema)
 
+        if (!result) return null
+
         // change ipfs urls
         if (result && result.url && result.url.indexOf('ipfs://') !== -1) {
 
