@@ -80,12 +80,12 @@ import Web3 from 'web3'
 
 const web3 = new Web3(new Web3.providers.HttpProvider("https://rpc.l14.lukso.network"))
 
-erc725 = new ERC725(schema, address, web3.currentProvider)
+const erc725 = new ERC725(schema, address, web3.currentProvider)
 ```
 
 *With Ethereum/Metamask Provider*
 ```js
-erc725 = new ERC725(schema, address, window.ethereum)
+const erc725 = new ERC725(schema, address, window.ethereum)
 ```
 
 *With Graph Provider*
@@ -100,7 +100,7 @@ const graphProvider = new ApolloClient({
   }
 })
 
-erc725 = new ERC725(schema, '0x0adf8ce0fe...', { provider:graphProvider, type: 'ApolloClient' })
+const erc725 = new ERC725(schema, '0x0adf8ce0fe...', { provider:graphProvider, type: 'ApolloClient' })
 ```
 
 **Create a new instance of the ERC725 class with associated schema, contract address, and provider.**
