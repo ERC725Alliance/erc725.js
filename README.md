@@ -40,7 +40,8 @@ Currently tested and supported providers include:
 **Examples**
 
 ```js
-// The schema
+// The LSP3-UniversalProfile Schema
+// https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
 const schema = [
     {
         "name": "SupportedStandards:ERC725Account",
