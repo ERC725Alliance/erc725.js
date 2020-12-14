@@ -35,7 +35,9 @@ export default class ERC725 {
         // Init options member
         this.options = {
             schema,
-            address
+            address,
+            providerType: null,
+            ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/' // 'https://ipfs.infura-ipfs.io/ipfs/'
         }
 
         // do not fail on no-provider
@@ -48,7 +50,7 @@ export default class ERC725 {
         if (provider.type === 'ApolloClient') {
 
             this.options.providerType = 'graph'
-            this.source = new GraphSource(givenProvider)
+            this.options.provider = new GraphSource(givenProvider)
 
 
             // CASE: Ethereum provider
@@ -57,7 +59,7 @@ export default class ERC725 {
 
 
             this.options.providerType = 'ethereum'
-            this.source = new EthereumSource(givenProvider)
+            this.options.provider = new EthereumSource(givenProvider)
 
 
             // CASE: Web3 or deprectaed ethereum provider
@@ -65,7 +67,7 @@ export default class ERC725 {
         } else if ((!provider.request && provider.send) || provider.type === 'Web3Provider') {
 
             this.options.providerType = 'web3'
-            this.source = new Web3Source(givenProvider)
+            this.options.provider = new Web3Source(givenProvider)
 
 
             // CASE: Unknown provider
@@ -81,13 +83,13 @@ export default class ERC725 {
     async getData(key, customSchema) {
 
         if (!Web3Utils.isAddress(this.options.address)) { throw new Error('Missing ERC725 contract address.') }
-        if (!this.source) { throw new Error('Missing provider.') }
+        if (!this.options.provider) { throw new Error('Missing provider.') }
 
         const schema = customSchema ? [customSchema] : this.options.schema
         const keySchema = utils.getSchemaElement(schema, key)
 
         // Get all the raw data possible.
-        const rawData = await this.source.getData(this.options.address, keySchema.key)
+        const rawData = await this.options.provider.getData(this.options.address, keySchema.key)
         // Decode and return the data
 
         if (keySchema.keyType.toLowerCase() === 'array') {
@@ -116,12 +118,12 @@ export default class ERC725 {
         const results = {}
         let res
         if (!Web3Utils.isAddress(this.options.address)) { throw new Error('Missing ERC725 contract address.') }
-        if (!this.source) { throw new Error('Missing provider.') }
+        if (!this.options.provider) { throw new Error('Missing provider.') }
 
         // Get all the key hashes from the schema
         const keyHashes = this.options.schema.map(e => e.key)
         // Get all the raw data from the provider based on schema key hashes
-        let allRawData = await this.source.getAllData(this.options.address, keyHashes)
+        let allRawData = await this.options.provider.getAllData(this.options.address, keyHashes)
 
         // Take out null data values, since data may not fulfill entire schema
         allRawData = await allRawData.filter(e => e.value !== null)
@@ -175,11 +177,12 @@ export default class ERC725 {
 
         const result = await this.getData(key, customSchema)
 
+        if (!result) return null
+
         // change ipfs urls
         if (result && result.url && result.url.indexOf('ipfs://') !== -1) {
 
-            const ipfsGateway = 'https://cloudflare-ipfs.com/ipfs/' // 'https://ipfs.infura-ipfs.io/ipfs/'
-            result.url = result.url.replace('ipfs://', ipfsGateway)
+            result.url = result.url.replace('ipfs://', this.options.ipfsGateway)
 
         }
 
@@ -248,7 +251,7 @@ export default class ERC725 {
 
     getOwner(address) {
 
-        return this.source.getOwner(address || this.options.address)
+        return this.options.provider.getOwner(address || this.options.address)
 
     }
 
@@ -260,17 +263,6 @@ export default class ERC725 {
         if (jsonHash !== hash) throw new Error('Hash mismatch, returned JSON ("' + jsonHash + '") is different than the one linked from the ERC725Y Smart contract: "' + hash + '"')
 
         return true
-
-    }
-
-    _hashAndCompareBytes(data, hash) {
-
-        const jsonHash = Web3Utils.keccak256(JSON.stringify(data))
-
-        // throw error if hash mismatch
-        if (jsonHash !== hash) throw new Error('Hash mismatch, returned JSON ("' + jsonHash + '") is different than the one linked from the ERC725Y Smart contract: "' + hash + '"')
-
-        return data
 
     }
 
@@ -304,7 +296,7 @@ export default class ERC725 {
             if (!arrayElement) {
 
                 // 3. Otherwise we get the array key element value
-                arrayElement = await this.source.getData(this.options.address, arrayElementKey)
+                arrayElement = await this.options.provider.getData(this.options.address, arrayElementKey)
                 if (arrayElement) {
 
                     results.push({
