@@ -198,15 +198,11 @@ export default class ERC725 {
             if (lowerCaseHashFunction === 'keccak256(utf8)') responseType = 'json'
             if (lowerCaseHashFunction === 'keccak256(bytes)') responseType = 'arraybuffer'
 
-            // console.log(result)
-
             const response = await axios({
                 method: 'get',
                 url: result.url,
                 responseType
             })
-
-            // console.log(response.data)
 
             // determine the transformation of the data, before hashing
             if (lowerCaseHashFunction === 'keccak256(utf8)') dataToHash = JSON.stringify(response.data)
@@ -255,6 +251,7 @@ export default class ERC725 {
 
     }
 
+    // eslint-disable-next-line class-methods-use-this
     _hashAndCompare(data, hash) {
 
         const jsonHash = Web3Utils.keccak256(data)

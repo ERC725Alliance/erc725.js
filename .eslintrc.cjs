@@ -43,7 +43,8 @@ module.exports = {
             functions: 'never'
         }],
         'no-await-in-loop': 0, // NOTE: This should be removed?
-        'import/prefer-default-export': 0
+        'import/prefer-default-export': 0,
+        'no-case-declarations': 0
     },
     ignorePatterns: ['node_modules/**/*']
 }
