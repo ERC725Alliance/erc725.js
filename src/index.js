@@ -297,14 +297,11 @@ export default class ERC725 {
 
                 // 3. Otherwise we get the array key element value
                 arrayElement = await this.options.provider.getData(this.options.address, arrayElementKey)
-                if (arrayElement) {
 
-                    results.push({
-                        key: arrayElementKey,
-                        value: arrayElement
-                    })
-
-                }
+                results.push({
+                    key: arrayElementKey,
+                    value: arrayElement
+                })
 
             }
 

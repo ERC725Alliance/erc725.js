@@ -258,7 +258,7 @@ describe('Running erc725.js tests...', () => {
                             const result = utils.decodeKeyValue(schemaElement, element)
 
                             // Handle object types
-                            if (typeof result === 'object' && Object.keys(result).length > 0) {
+                            if (result && typeof result === 'object' && Object.keys(result).length > 0) {
 
                                 const objResult = {}
 

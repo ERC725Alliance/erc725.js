@@ -106,15 +106,10 @@ export const utils = {
 
                 const newSchema = utils.transposeArraySchema(schema, index)
                 const dataElement = value.find(e => e.key === newSchema.key)
-                // const element = array[index];
+
                 if (dataElement) {
 
-                    const res = utils.decodeKeyValue(newSchema, dataElement.value)
-                    if (res) {
-
-                        results.push(res)
-
-                    }
+                    results.push(utils.decodeKeyValue(newSchema, dataElement.value))
 
                 }
 

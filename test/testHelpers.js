@@ -96,7 +96,7 @@ export function generateAllData(schema) {
                     // This is array length key/value pair
                     results.push({
                         key: utils.encodeArrayKey(element.key, i - 1),
-                        value: e.toLowerCase() // force address to lowercase
+                        value: e ? e.toLowerCase() : e // force address to lowercase
                     })
 
                 }
