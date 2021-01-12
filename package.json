@@ -1,15 +1,14 @@
 {
   "name": "erc725.js",
-  "version": "0.4.0",
+  "version": "0.5.2",
   "description": "Library to interact with ERC725 smart contracts",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'test/**/*.ts'",
+    "test": "npm run lint && env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'test/**/*.ts'",
     "lint": "eslint . --ext .ts",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm test && npm run lint"
+    "build-publish": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
