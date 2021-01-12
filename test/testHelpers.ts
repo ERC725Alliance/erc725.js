@@ -12,17 +12,17 @@
     along with ERC725.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * @file test/testHelpers.js
+ * @file test/testHelpers.ts
  * @author Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
  * @date 2020
  */
 
-import { utils } from '../src/lib/utils.js'
+import { utils } from '../src/lib/utils'
 
 export function generateAllRawData(schema) {
 
     // takes the schema object and builds a full dataset as per expected from provider
-    const results = []
+    const results: any[] = []
     for (let index = 0; index < schema.length; index++) {
 
         const element = schema[index]
@@ -69,7 +69,7 @@ export function generateAllRawData(schema) {
 export function generateAllData(schema) {
 
     // takes the schema object and builds a full dataset as per expected from provider
-    const results = []
+    const results: any[] = []
     for (let index = 0; index < schema.length; index++) {
 
         const element = schema[index]
@@ -122,7 +122,11 @@ export function generateAllResults(schema) {
 
     // Take the test schema/cases and builds full expected results
     const results = {}
-    schema.forEach(e => { results[e.name] = e.expectedResult })
+    schema.forEach(e => {
+
+        results[e.name] = e.expectedResult
+
+    })
     return results
 
 }

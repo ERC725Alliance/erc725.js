@@ -12,51 +12,67 @@
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * @file providers/ethereumProviderWrapper.js
+ * @file providers/ethereumProviderWrapper.ts
  * @author Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
  * @date 2020
  */
 
 /*
-  This file will handle querying the Ethereum proivder api in accordance with
+  This file will handle querying the Ethereum provider api in accordance with
   implementation of smart contract interfaces of ERC725
 */
 
 import * as abi from 'web3-eth-abi'
-import { CONSTANTS } from '../lib/constants.js'
 
+import { CONSTANTS } from '../lib/constants'
+import { Method } from '../types/Method'
+
+// @ts-ignore
 const web3Abi = abi.default
 
 export default class EthereumSource {
 
-    constructor(provider, deprecated) {
+    public provider: any;
+
+    public deprecated: boolean;
+
+    constructor(provider: any, deprecated?: 'deprecated') {
 
         this.provider = provider
-        this.deprecated = (deprecated === 'deprecated')
+        this.deprecated = deprecated === 'deprecated'
 
     }
 
-    async getOwner(address) {
+    async getOwner(address: string) {
 
-        const params = this._constructJSONRPC(address, 'owner')
+        const params = this._constructJSONRPC(address, Method.OWNER)
         const result = await this._callContract([params])
-        if (result.error) { throw result.error }
+        if (result.error) {
 
-        return this._decodeResult('owner', result)
+            throw result.error
+
+        }
+
+        return this._decodeResult(Method.OWNER, result)
 
     }
 
-    async getData(address, keyHash) {
+    async getData(address: string, keyHash: string) {
 
-        let result = await this._callContract([this._constructJSONRPC(address, 'getData', keyHash)])
+        let result = await this._callContract([
+            this._constructJSONRPC(address, Method.GET_DATA, keyHash)
+        ])
         result = this.deprecated ? result.result : result
-        return this._decodeResult('getData', result)
+        return this._decodeResult(Method.GET_DATA, result)
 
     }
 
-    async getAllData(address, keys) {
+    async getAllData(address: string, keys: string[]) {
 
-        const results = []
+        const results: {
+            key: string;
+            value: Record<string, any> | null;
+        }[] = []
 
         for (let index = 0; index < keys.length; index++) {
 
@@ -72,9 +88,11 @@ export default class EthereumSource {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    _constructJSONRPC(address, method, methodParam) {
+    _constructJSONRPC(address: string, method: Method, methodParam?: string) {
 
-        const data = methodParam ? CONSTANTS.methods[method].sig + methodParam.replace('0x', '') : CONSTANTS.methods[method].sig
+        const data = methodParam
+            ? CONSTANTS.methods[method].sig + methodParam.replace('0x', '')
+            : CONSTANTS.methods[method].sig
         // eslint-disable-next-line no-return-assign
         return {
             to: address,
@@ -86,7 +104,7 @@ export default class EthereumSource {
 
     }
 
-    async _callContract(params) {
+    async _callContract(params: any) {
 
         return this.deprecated
             ? this.provider.send('eth_call', params)
@@ -95,11 +113,25 @@ export default class EthereumSource {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    _decodeResult(method, result) {
+    _decodeResult(method: Method, result: string) {
 
-        if (!CONSTANTS.methods[method]) { console.error('Contract method: "' + method + '" is not supported.'); return null }
+        if (!CONSTANTS.methods[method]) {
 
-        return (result === '0x') ? null : web3Abi.decodeParameter(CONSTANTS.methods[method].returnEncoding, result)
+            console.error(
+                'Contract method: "' + method + '" is not supported.'
+            )
+            return null
+
+        }
+
+        return result === '0x'
+            ? null
+            // eslint-disable-next-line operator-linebreak
+            : // @ts-ignore
+            web3Abi.decodeParameter(
+                CONSTANTS.methods[method].returnEncoding,
+                result
+            )
 
     }
 

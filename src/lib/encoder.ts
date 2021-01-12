@@ -12,7 +12,7 @@
     along with ERC725.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * @file lib/encoder.js
+ * @file lib/encoder.ts
  * @author Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
  * @date 2020
  */
@@ -22,82 +22,121 @@
 */
 
 import Web3Abi from 'web3-eth-abi'
-import Web3Utils from 'web3-utils'
-import { CONSTANTS } from './constants.js'
+import * as Web3Utils from 'web3-utils'
 
-const encodeDataSourceWithHash = (hashType, dataHash, dataSource) => {
+import { CONSTANTS } from './constants'
+
+const encodeDataSourceWithHash = (
+    hashType: string,
+    dataHash: string,
+    dataSource: string
+): string => {
 
     const lowerHashType = hashType.toLowerCase()
-    const hashFunction = CONSTANTS.hashFunctions.find(e => e.name === lowerHashType || e.sig === lowerHashType)
+    const hashFunction = CONSTANTS.hashFunctions.find(
+        e => e.name === lowerHashType || e.sig === lowerHashType
+    )
 
     if (!hashFunction) {
 
-        return Error('Unsupported hash type to encode hash and value: ' + hashType)
+        throw new Error(
+            'Unsupported hash type to encode hash and value: ' + hashType
+        )
 
     }
 
     // NOTE: QUESTION: Do we need 'toHex', in case future algorithms do not output hex as keccak does?
-    return hashFunction.sig + dataHash.replace('0x', '') + Web3Utils.utf8ToHex(dataSource).replace('0x', '')
+    return (
+        hashFunction.sig
+        + dataHash.replace('0x', '')
+        + Web3Utils.utf8ToHex(dataSource).replace('0x', '')
+    )
 
 }
 
-const decodeDataSourceWithHash = value => {
+const decodeDataSourceWithHash = (
+    value: string
+): { hashFunction: string; dataHash: string; dataSource: string } | null => {
 
     const hashFunctionSig = value.substr(0, 10)
-    const hashFunction = CONSTANTS.hashFunctions.find(e => e.sig === hashFunctionSig)
+    const hashFunction = CONSTANTS.hashFunctions.find(
+        e => e.sig === hashFunctionSig
+    )
     const encoodedData = value.replace('0x', '').substr(8) // Rest of data string after function hash
     const dataHash = '0x' + encoodedData.substr(0, 64) // Get jsonHash 32 bytes
     const dataSource = Web3Utils.hexToUtf8('0x' + encoodedData.substr(64)) // Get remainder as URI
-    return hashFunction ? { hashFunction: hashFunction.name, dataHash, dataSource } : null
+    return hashFunction
+        ? { hashFunction: hashFunction.name, dataHash, dataSource }
+        : null
 
 }
 
-
 const valueTypeEncodingMap = {
     string: {
+        // @ts-ignore
         encode: value => Web3Abi.encodeParameter('string', value),
+        // @ts-ignore
         decode: value => Web3Abi.decodeParameter('string', value)
     },
     address: {
+        // @ts-ignore
         encode: value => Web3Abi.encodeParameter('address', value),
+        // @ts-ignore
         decode: value => Web3Abi.decodeParameter('address', value)
     },
     // NOTE: We could add conditional handling of numeric values here...
     uint256: {
+        // @ts-ignore
         encode: value => Web3Abi.encodeParameter('uint256', value),
+        // @ts-ignore
         decode: value => Web3Abi.decodeParameter('uint256', value)
     },
     bytes32: {
+        // @ts-ignore
         encode: value => Web3Abi.encodeParameter('bytes32', value),
+        // @ts-ignore
         decode: value => Web3Abi.decodeParameter('bytes32', value)
     },
     bytes: {
+        // @ts-ignore
         encode: value => Web3Abi.encodeParameter('bytes', value),
+        // @ts-ignore
         decode: value => Web3Abi.decodeParameter('bytes', value)
     },
     'string[]': {
+        // @ts-ignore
         encode: value => Web3Abi.encodeParameter('string[]', value),
+        // @ts-ignore
         decode: value => Web3Abi.decodeParameter('string[]', value)
     },
     'address[]': {
+        // @ts-ignore
         encode: value => Web3Abi.encodeParameter('address[]', value),
+        // @ts-ignore
         decode: value => Web3Abi.decodeParameter('address[]', value)
     },
     'uint256[]': {
+        // @ts-ignore
         encode: value => Web3Abi.encodeParameter('uint256[]', value),
+        // @ts-ignore
         decode: value => Web3Abi.decodeParameter('uint256[]', value)
     },
     'bytes32[]': {
+        // @ts-ignore
         encode: value => Web3Abi.encodeParameter('bytes32[]', value),
+        // @ts-ignore
         decode: value => Web3Abi.decodeParameter('bytes32[]', value)
     },
     'bytes[]': {
+        // @ts-ignore
         encode: value => Web3Abi.encodeParameter('bytes[]', value),
+        // @ts-ignore
         decode: value => Web3Abi.decodeParameter('bytes[]', value)
     }
 }
 
-
+// Use enum for type bellow
+// Is it this enum Erc725SchemaValueType? (If so, custom is missing fron enum)
 export const valueContentEncodingMap = {
     Keccak256: {
         type: 'bytes32',
@@ -108,7 +147,7 @@ export const valueContentEncodingMap = {
     ArrayLength: {
         type: 'uint256',
         encode: value => Web3Utils.padLeft(Web3Utils.numberToHex(value), 64),
-        decode: value => parseInt(Web3Utils.hexToNumber(value), 10)
+        decode: value => Web3Utils.hexToNumber(value)
     },
     Number: {
         type: 'uint256',
@@ -116,12 +155,21 @@ export const valueContentEncodingMap = {
         encode: value => {
 
             // eslint-disable-next-line no-param-reassign
-            try { value = parseInt(value, 10) } catch (error) { throw new Error(error) }
+            try {
+
+                // eslint-disable-next-line no-param-reassign
+                value = parseInt(value, 10)
+
+            } catch (error) {
+
+                throw new Error(error)
+
+            }
 
             return Web3Utils.padLeft(Web3Utils.numberToHex(value), 64)
 
         },
-        decode: value => '' + parseInt(Web3Utils.hexToNumber(value), 10)
+        decode: value => '' + Web3Utils.hexToNumber(value)
     },
     // NOTE: This is not symmetrical, and always returns a checksummed address
     Address: {
@@ -183,7 +231,11 @@ export const valueContentEncodingMap = {
             //     const hash = hashFunction(JSON.stringify(value.json))
 
             // }
-            return encodeDataSourceWithHash(value.hashFunction, value.hash, value.url)
+            return encodeDataSourceWithHash(
+                value.hashFunction,
+                value.hash,
+                value.url
+            )
 
         },
         decode: value => {
@@ -201,33 +253,34 @@ export const valueContentEncodingMap = {
     }
 }
 
-
 export const encoder = {
+    encodeValueType: (type: string, value: string): string => {
 
-    encodeValueType: (type, value) => {
+        if (!valueTypeEncodingMap[type]) {
 
-        if (!valueTypeEncodingMap[type]) { throw new Error('Could not encode valueType: "' + type + '".') }
+            throw new Error('Could not encode valueType: "' + type + '".')
 
-        return (value)
-            ? valueTypeEncodingMap[type].encode(value)
-            : value
+        }
+
+        return value ? valueTypeEncodingMap[type].encode(value) : value
 
     },
 
-    decodeValueType: (type, value) => {
+    decodeValueType: (type: string, value: string) => {
 
-        if (!valueTypeEncodingMap[type]) { throw new Error('Could not decode valueType: "' + type + '".') }
+        if (!valueTypeEncodingMap[type]) {
+
+            throw new Error('Could not decode valueType: "' + type + '".')
+
+        }
 
         if (value === '0x') return null
 
-        return (value)
-            ? valueTypeEncodingMap[type].decode(value)
-            : value
+        return value ? valueTypeEncodingMap[type].decode(value) : value
 
     },
 
-
-    encodeValueContent: (type, value) => {
+    encodeValueContent: (type: string, value: string): string | false => {
 
         if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
 
@@ -235,7 +288,7 @@ export const encoder = {
 
         } else if (type.substr(0, 2) === '0x') {
 
-            return (type === value) ? value : false
+            return type === value ? value : false
 
         }
 
@@ -243,7 +296,7 @@ export const encoder = {
 
     },
 
-    decodeValueContent: (type, value) => {
+    decodeValueContent: (type: string, value: string): string | false => {
 
         if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
 
@@ -251,12 +304,11 @@ export const encoder = {
 
         } else if (type.substr(0, 2) === '0x') {
 
-            return (type === value) ? value : false
+            return type === value ? value : false
 
         }
 
         return value ? valueContentEncodingMap[type].decode(value) : value
 
     }
-
 }

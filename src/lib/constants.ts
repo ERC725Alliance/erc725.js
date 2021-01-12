@@ -1,37 +1,47 @@
 // put all constants here
-import Web3Utils from 'web3-utils'
+import * as Web3Utils from 'web3-utils'
 
-export const CONSTANTS = {
+import { MethodData, Encoding, Method } from '../types/Method'
+
+interface Constants {
+    methods: Record<Method, MethodData>;
+    hashFunctions: {
+        name: string;
+        sig: string;
+        method: (value: any) => string;
+    }[];
+}
+
+export const CONSTANTS: Constants = {
     methods: {
-        getData: {
+        [Method.GET_DATA]: {
             sig: '0x54f6127f',
             gas: Web3Utils.numberToHex(2000000),
             gasPrice: Web3Utils.numberToHex(100000000),
             value: Web3Utils.numberToHex(0),
-            returnEncoding: 'bytes'
+            returnEncoding: Encoding.BYTES
         },
-        dataCount: {
+        [Method.DATA_COUNT]: {
             sig: '0x5da40c47',
             gas: Web3Utils.numberToHex(2000000),
             gasPrice: Web3Utils.numberToHex(100000000),
             value: Web3Utils.numberToHex(0),
-            returnEncoding: 'uint256'
+            returnEncoding: Encoding.UINT256
         },
-        allData: {
+        [Method.ALL_DATA]: {
             sig: '0xc559acef',
             gas: Web3Utils.numberToHex(2000000),
             gasPrice: Web3Utils.numberToHex(100000000),
             value: Web3Utils.numberToHex(0),
-            returnEncoding: 'bytes32[]'
+            returnEncoding: Encoding.BYTES32_ARRAY
         },
-        owner: {
+        [Method.OWNER]: {
             sig: '0x8da5cb5b',
             gas: Web3Utils.numberToHex(2000000),
             gasPrice: Web3Utils.numberToHex(100000000),
             value: Web3Utils.numberToHex(0),
-            returnEncoding: 'address'
+            returnEncoding: Encoding.ADDRESS
         }
-
     },
     hashFunctions: [
         {
@@ -45,5 +55,4 @@ export const CONSTANTS = {
             method: Web3Utils.keccak256
         }
     ]
-
 }
