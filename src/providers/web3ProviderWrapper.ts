@@ -12,7 +12,7 @@
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * @file dataSrouce/web3ProviderWrapper.js
+ * @file dataSrouce/web3ProviderWrapper.ts
  * @author Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
  * @date 2020
  */
@@ -23,12 +23,18 @@
 */
 
 import * as abi from 'web3-eth-abi'
-import { CONSTANTS } from '../lib/constants.js'
 
+import { CONSTANTS } from '../lib/constants'
+import { JsonRpc } from '../types/JsonRpc'
+import { Method } from '../types/Method'
+
+// @ts-ignore
 const web3abi = abi.default
 let idCount = 1
 
 export default class Web3Source {
+
+    public provider: any;
 
     constructor(provider) {
 
@@ -36,47 +42,60 @@ export default class Web3Source {
 
     }
 
-    async getOwner(address) {
+    async getOwner(address: string) {
 
-        const result = await this._callContract(this._constructJSONRPC(address, 'owner'))
-        if (result.error) { throw result.error }
+        const result = await this._callContract(
+            this._constructJSONRPC(address, Method.OWNER)
+        )
+        // @ts-ignore
+        if (result.error) {
 
-        return this._decodeResult('owner', result)
+            // @ts-ignore
+            throw result.error
+
+        }
+
+        return this._decodeResult(Method.OWNER, result)
 
     }
 
-
-    async getData(address, keyHash) {
+    async getData(address: string, keyHash: string) {
 
         return this._decodeResult(
-            'getData',
-            await this._callContract(this._constructJSONRPC(address, 'getData', keyHash))
+            Method.GET_DATA,
+            await this._callContract(
+                this._constructJSONRPC(address, Method.GET_DATA, keyHash)
+            )
         )
 
     }
 
-    async getAllData(address, keys) {
+    async getAllData(address: string, keys) {
 
         // generate payload
-        const payload = []
+        const payload: JsonRpc[] = []
         for (let index = 0; index < keys.length; index++) {
 
-            payload.push(this._constructJSONRPC(address, 'getData', keys[index]))
+            payload.push(
+                this._constructJSONRPC(address, Method.GET_DATA, keys[index])
+            )
 
         }
 
         // call node
-        const results = await this._callContract(payload)
-
+        const results: any = await this._callContract(payload)
 
         // map results to keys
-        const returnValues = []
+        const returnValues: {
+            key: string;
+            value: Record<string, any> | null;
+        }[] = []
         for (let index = 0; index < payload.length; index++) {
 
             returnValues.push({
                 key: keys[index],
                 value: this._decodeResult(
-                    'getData',
+                    Method.GET_DATA,
                     results.find(element => payload[index].id === element.id)
                 )
             })
@@ -88,11 +107,21 @@ export default class Web3Source {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    _constructJSONRPC(address, method, methodParam) {
+    _constructJSONRPC(
+        address: string,
+        method: Method,
+        methodParam?: string
+    ): JsonRpc {
 
-        if (!CONSTANTS.methods[method]) { throw new Error('Contract method "' + method + '"not supported') }
+        if (!CONSTANTS.methods[method]) {
 
-        const data = methodParam ? CONSTANTS.methods[method].sig + methodParam.replace('0x', '') : CONSTANTS.methods[method].sig
+            throw new Error('Contract method "' + method + '"not supported')
+
+        }
+
+        const data = methodParam
+            ? CONSTANTS.methods[method].sig + methodParam.replace('0x', '')
+            : CONSTANTS.methods[method].sig
 
         // eslint-disable-next-line no-return-assign
         return {
@@ -107,7 +136,7 @@ export default class Web3Source {
                     data
                 }
             ],
-            id: idCount += 1
+            id: (idCount += 1)
         }
 
     }
@@ -136,11 +165,25 @@ export default class Web3Source {
     }
 
     // eslint-disable-next-line class-methods-use-this
-    _decodeResult(method, result) {
+    _decodeResult(method: Method, result) {
 
-        if (!CONSTANTS.methods[method]) { console.error('Contract method: "' + method + '" is not supported.'); return null }
+        if (!CONSTANTS.methods[method]) {
+
+            console.error(
+                'Contract method: "' + method + '" is not supported.'
+            )
+            return null
+
+        }
         const rpcResult = result.result
-        return (rpcResult === '0x') ? null : web3abi.decodeParameter(CONSTANTS.methods[method].returnEncoding, rpcResult)
+        return rpcResult === '0x'
+            ? null
+            // eslint-disable-next-line operator-linebreak
+            : // @ts-ignore
+            web3abi.decodeParameter(
+                CONSTANTS.methods[method].returnEncoding,
+                rpcResult
+            )
 
     }
 

@@ -12,7 +12,7 @@
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 /**
- * @file providers/subgraphProviderWrapper.js
+ * @file providers/subgraphProviderWrapper.ts
  * @author Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
  * @date 2020
  */
@@ -22,26 +22,34 @@
   in accordance with implementation of datastore in subgraph definition
 */
 
-import { queries } from '../lib/queries.js'
+import { queries } from '../lib/queries'
 
 export default class GraphSource {
 
-    constructor(provider) {
+    // TODO: provide correct interface for provider
+    public provider: any = {};
+
+    constructor(provider: any) {
 
         this.provider = provider
 
     }
 
-
     // eslint-disable-next-line class-methods-use-this
-    getOwner() { throw new Error('We\'re sorry, getOwner() method not yet supported in graph provider type.') }
+    getOwner() {
+
+        throw new Error(
+            "We're sorry, getOwner() method not yet supported in graph provider type."
+        )
+
+    }
 
     async getData(id, keys) {
 
         if (!keys || Array.isArray(keys)) {
 
             // TODO: support array of keys
-            throw new Error('Incorrect parameter \'keys\' in getData()', keys)
+            throw new Error(`Incorrect parameter 'keys' in getData() ${keys}`)
 
         }
         // Get the value for the specific single key
@@ -50,7 +58,7 @@ export default class GraphSource {
         // Single out the first result as expected
         const ret = result.data[Object.keys(result.data)[0]][0]
             && result.data[Object.keys(result.data)[0]][0].value
-        return (!ret || ret === '0x') ? null : ret // Reemove 0x values
+        return !ret ? null : ret
 
     }
 
@@ -59,9 +67,7 @@ export default class GraphSource {
         const query = queries.getAllData(id)
         const result = await this.provider.query({ query })
         // Return the data query array
-        const ret = result.data[Object.keys(result.data)[0]]
-        // we need to remove 0x values
-        return ret.filter(e => e && e.value !== '0x')
+        return result.data[Object.keys(result.data)[0]]
 
     }
 

@@ -24,7 +24,7 @@ import ERC725 from 'erc725.js'
 let myERC725 = new ERC725(schema[, address, provider])
 
 // change options
-myERC725.options.ipfsGateway = 'https://ipfs.infura-ipfs.io/ipfs/' // used for fetchData(), default: 'https://cloudflare-ipfs.com/ipfs/'
+myERC725.options.ipfsGateway = 'https://ipfs.lukso.network/ipfs/' // used for fetchData(), default: 'https://cloudflare-ipfs.com/ipfs/'
 myERC725.options.schema // change schema
 myERC725.options.address // change address
 myERC725.options.provider // change the provider
@@ -133,9 +133,33 @@ const erc725 = new ERC725(schema)
 
 These methods are available on the erc725 class when instantiated with a contract address, and provider.
 
+### getOwner
+
+```js
+await erc725.getOwner([address])
+```
+
+Returns the owner address for the ERC725(Y) compliant contract (as per [ERC173](https://eips.ethereum.org/EIPS/eip-173))).
+
+**Parameters**
+
+1. `address` - `String`: (optional), Address to fetch the owner of another ER725n smart contract, otherwise it uses `this.options.address`
+
+
+**Returns**
+
+`Promise(Address)`: An Ethereum address.
+
+**Example**
+```js
+const owner = await erc725.getOwner()
+> '0x28D25E70819140daF65b724158D00c373D1a18ee'
+```
+
+
 ### getData
 ```js
-erc725.getData(schemaKey [, schemaElement])
+await erc725.getData(schemaKey [, schemaElement])
 ```
 
 **Parameters**
@@ -146,17 +170,17 @@ erc725.getData(schemaKey [, schemaElement])
 
 **Returns**
 
-`Mixed`: Returns the decoded value as expected by the schema.
+`Promise(Mixed)`: Returns the decoded value as expected by the schema.
 
 **Example**
 
 ```js
-erc725.getData('SupportedStandards:ERC725Account')
+await erc725.getData('SupportedStandards:ERC725Account')
 
 > '0xafdeb5d6'
 
 
-erc725.getData('LSP3Profile')
+await erc725.getData('LSP3Profile')
 
 > {
     url: 'ipfs://QmXybv2LdJWscy1C6yRKUjvnaj6aqKktZX4g4xmz2nyYj2',
@@ -176,12 +200,12 @@ Returns all available data from the ERC725 contract as defined in class's schema
 
 **Returns**
 
-`Object`: An object with schema element key names as members, with the associated decoded data.
+`Promise(Object)`: An object with schema element key names as members, with the associated decoded data.
 
 **Example**
 
 ```js
-erc725.getAllData()
+await erc725.getAllData()
 
 > {
     "SupportedStandards:ERC725Account": "0xafdeb5d6",
@@ -198,10 +222,10 @@ erc725.getAllData()
 
 ### fetchData
 ```js
-erc725.fetchData(schemaKey [, schemaElement])
+await erc725.fetchData(schemaKey [, schemaElement])
 
-// you could change the ipfsGateway
-erc725.options.ipfsGateway = 'https://ipfs.infura-ipfs.io/ipfs/'
+// you could change the ipfsGateway before
+// erc725.options.ipfsGateway = 'https://ipfs.infura-ipfs.io/ipfs/'
 ```
 
 **Parameters**
@@ -212,13 +236,13 @@ erc725.options.ipfsGateway = 'https://ipfs.infura-ipfs.io/ipfs/'
 
 **Returns**
 
-`Mixed`: Returns the fetched and decoded value, if valueContent is `JSONURL`, or `AssetURL`, otherwise works like `getData(key)`.
+`Promise(Mixed)`: Returns the fetched and decoded value, if valueContent is `JSONURL`, or `AssetURL`, otherwise works like `getData(key)`.
 Throws if hashes of fetched data is not matching.
 
 **Example**
 
 ```js
-erc725.fetchData('LSP3Profile')
+await erc725.fetchData('LSP3Profile')
 
 > {
     LSP3Profile: {
@@ -245,7 +269,7 @@ erc725.fetchData('LSP3Profile')
     }
 }
 
-erc725.fetchData('KeyWithAssetURL')
+await erc725.fetchData('KeyWithAssetURL')
 
 > Uint8Array([...])
 ```
@@ -301,6 +325,30 @@ erc725.encodeData(schemaKey, data)
 erc725.encodeData('Username', 'my-cool-username')
 
 > '0x6d792d636f6f6c2d757365726e616d65'
+```
+
+*Example of how to replace a single item in an array*
+
+```js
+// get address array from profile
+let myAssets = await erc725Account.getData('LSP3IssuedAssets[]');
+
+// encode same address array, to get keys
+let encodedAssets = erc725Account.encodeData('LSP3IssuedAssets[]', myAssets);
+
+// returns you e.g.
+// [
+//   {key: "0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0", value: "0x0000000000000000000000000000000000000000000000000000000000000001"}
+//   {key: "0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000", value: "0x109ddf325bda390617f43388287b86da2869a360"}
+// ]
+
+// find the index of the address
+let index = _.findIndex(myAssets, (asset) => { return asset === assetAddressToReplace; });
+
+await Account.methods.setData(
+    encodedAssets[index + 1].key, // + 1 as encodedAssets[0] is the key for the array length 
+    newAssetAddress // to remove set to "0x"
+).send({...});
 ```
 
 
@@ -372,28 +420,3 @@ erc725.encodeAllData({
     {key:'0x1b0084c280dc983f326892fcc88f375700000000000000000000000000000001', value:'0x0fe09...'} // The element of the array at index 1
 ]
 ```
-
-### getOwner
-
-```js
-erc725.getOwner([address])
-```
-
-Returns the owner address for the ERC725(Y) compliant contract (as per [ERC173](https://eips.ethereum.org/EIPS/eip-173))).
-
-**Parameters**
-
-1. `address` - `String`: (optional), Address to fetch the owner of another ER725n smart contract, otherwise it uses `this.options.address`
-
-
-**Returns**
-
-`Address`: An Ethereum address.
-
-**Example**
-```js
-const owner = erc725.getOwner()
-
-> '0x28D25E70819140daF65b724158D00c373D1a18ee'
-```
-

@@ -1,12 +1,14 @@
 {
   "name": "erc725.js",
-  "version": "0.3.2",
+  "version": "0.5.2",
   "description": "Library to interact with ERC725 smart contracts",
-  "main": "src/index.js",
-  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "build": "babel src --out-dir=lib",
-    "test": "mocha"
+    "build": "tsc",
+    "test": "npm run lint && env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'test/**/*.ts'",
+    "lint": "eslint . --ext .ts",
+    "build-publish": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
@@ -35,12 +37,19 @@
   },
   "homepage": "https://github.com/ERC725Alliance/erc725.js#readme",
   "devDependencies": {
+    "@types/mocha": "^8.2.0",
+    "@types/node": "^14.14.20",
+    "@typescript-eslint/eslint-plugin": "^4.12.0",
+    "@typescript-eslint/parser": "^4.12.0",
+    "assert": "^2.0.0",
     "babel-cli": "^6.24.1",
     "babel-preset-es2015": "^6.24.1",
-    "eslint": "^7.14.0",
+    "eslint": "^7.17.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
-    "mocha": "^8.2.1"
+    "mocha": "^8.2.1",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
   },
   "dependencies": {
     "@apollo/client": "^3.2.5",
