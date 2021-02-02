@@ -16,8 +16,8 @@ export const queries = {
     getDataByKey(id: string, key: string) {
         return gql`
     {
-      ERC725DataStores (where:{erc725id:"${id}",key:"${key}"}) {
-        erc725id
+      ERC725DataStores (where:{ERC725_address:"${id}",key:"${key}"}) {
+        ERC725_address
         key
         value
         id
@@ -32,8 +32,8 @@ export const queries = {
     getAllData(id: string) {
         return gql`
     {
-      ERC725DataStores (where:{erc725id:"${id}"}) {
-        erc725id
+      ERC725DataStores (where:{ERC725_address:"${id}"}) {
+        ERC725_address
         key
         value
         id
