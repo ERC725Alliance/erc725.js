@@ -46,7 +46,7 @@ export {
     Erc725SchemaValueType
 }
 
-export default class ERC725 {
+export class ERC725 {
 
   options: {
     schema;
@@ -428,3 +428,5 @@ export default class ERC725 {
   }
 
 }
+
+exports.default = ERC725
