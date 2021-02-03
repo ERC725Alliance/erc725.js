@@ -11,16 +11,16 @@ interface Options {
 
 export const queries = {
     /**
-     * Get ERC725 instance data by single key
+     * Get data for single key from ERC725 instance
      */
     getDataByKey(id: string, key: string) {
         return gql`
     {
       ERC725DataStores (where:{ERC725_address:"${id}",key:"${key}"}) {
+        id
         ERC725_address
         key
         value
-        id
       }
     }
     `;
@@ -33,6 +33,7 @@ export const queries = {
         return gql`
     {
       ERC725DataStores (where:{ERC725_address:"${id}"}) {
+        id
         ERC725_address
         key
         value
@@ -50,8 +51,8 @@ export const queries = {
 
         return gql`
     {
-      erc725DataStores (where:{key:"${key}",skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}}) {
-        erc725id
+      ERC725DataStores (where:{key:"${key}",skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}}) {
+        ERC725_address
         key
         value
         id
@@ -66,9 +67,9 @@ export const queries = {
     getDataKeys(id: string) {
         return gql`
     {
-      erc725(id:"${id}") {
+      ERC725(id:"${id}") {
         id
-        dataStore
+        # dataStore
       }
     }
     `;
@@ -87,7 +88,7 @@ export const queries = {
         });
         return gql`
     {
-      erc725S(where:{id_in:[${arrayStr}]},skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}) {
+      ERC725S(where:{id_in:[${arrayStr}]},skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}) {
         id
         dataStore
       }
@@ -102,7 +103,7 @@ export const queries = {
         const opts = this._cleanOptions(options);
         return gql`
       {
-        erc725S(skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}) {
+        ERC725S(skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}) {
           id
           dataStore
         }
