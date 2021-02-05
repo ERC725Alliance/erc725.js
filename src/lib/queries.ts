@@ -11,16 +11,16 @@ interface Options {
 
 export const queries = {
     /**
-     * Get ERC725 instance data by single key
+     * Get data for single key from ERC725 instance
      */
-    getDataByKey(id: string, key: string) {
+    getDataByKey(address: string, key: string) {
         return gql`
     {
-      erc725DataStores (where:{erc725id:"${id}",key:"${key}"}) {
-        erc725id
+      erc725DataStores (where:{ERC725_address:"${address}",key:"${key}"}) {
+        id
+        ERC725_address
         key
         value
-        id
       }
     }
     `;
@@ -32,8 +32,9 @@ export const queries = {
     getAllData(id: string) {
         return gql`
     {
-      erc725DataStores (where:{erc725id:"${id}"}) {
-        erc725id
+      erc725DataStores (where:{ERC725_address:"${id}"}) {
+        id
+        ERC725_address
         key
         value
         id
@@ -51,7 +52,7 @@ export const queries = {
         return gql`
     {
       erc725DataStores (where:{key:"${key}",skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}}) {
-        erc725id
+        ERC725_address
         key
         value
         id
@@ -68,7 +69,7 @@ export const queries = {
     {
       erc725(id:"${id}") {
         id
-        dataStore
+        # dataStore
       }
     }
     `;
@@ -89,7 +90,7 @@ export const queries = {
     {
       erc725S(where:{id_in:[${arrayStr}]},skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}) {
         id
-        dataStore
+        dataStores
       }
     }
     `;
@@ -104,7 +105,7 @@ export const queries = {
       {
         erc725S(skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}) {
           id
-          dataStore
+          dataStores
         }
       }
     `;
