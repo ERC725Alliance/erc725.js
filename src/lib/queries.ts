@@ -13,10 +13,10 @@ export const queries = {
     /**
      * Get data for single key from ERC725 instance
      */
-    getDataByKey(id: string, key: string) {
+    getDataByKey(address: string, key: string) {
         return gql`
     {
-      ERC725DataStores (where:{ERC725_address:"${id}",key:"${key}"}) {
+      erc725DataStores (where:{ERC725_address:"${address}",key:"${key}"}) {
         id
         ERC725_address
         key
@@ -32,7 +32,7 @@ export const queries = {
     getAllData(id: string) {
         return gql`
     {
-      ERC725DataStores (where:{ERC725_address:"${id}"}) {
+      erc725DataStores (where:{ERC725_address:"${id}"}) {
         id
         ERC725_address
         key
@@ -51,7 +51,7 @@ export const queries = {
 
         return gql`
     {
-      ERC725DataStores (where:{key:"${key}",skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}}) {
+      erc725DataStores (where:{key:"${key}",skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}}) {
         ERC725_address
         key
         value
@@ -67,7 +67,7 @@ export const queries = {
     getDataKeys(id: string) {
         return gql`
     {
-      ERC725(id:"${id}") {
+      erc725(id:"${id}") {
         id
         # dataStore
       }
@@ -88,9 +88,9 @@ export const queries = {
         });
         return gql`
     {
-      ERC725S(where:{id_in:[${arrayStr}]},skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}) {
+      erc725S(where:{id_in:[${arrayStr}]},skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}) {
         id
-        dataStore
+        dataStores
       }
     }
     `;
@@ -103,9 +103,9 @@ export const queries = {
         const opts = this._cleanOptions(options);
         return gql`
       {
-        ERC725S(skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}) {
+        erc725S(skip:${opts.skip},first:${opts.first},orderBy:${opts.orderBy},orderDirection:${opts.orderDirection}) {
           id
-          dataStore
+          dataStores
         }
       }
     `;
