@@ -50,28 +50,29 @@ export class ERC725 {
 
   options: {
     schema;
-    address;
-    providerType: ProviderType | null;
+    address?;
+    providerType?: ProviderType | null;
     provider?;
     ipfsGateway: string;
   };
 
-  constructor(schema: Erc725Schema[], address?: string, provider?: any) {
+  constructor(schema: Erc725Schema[], address?: string, provider?: any, ipfsGateway?: string) {
 
       // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
 
+      // TODO: Add check for schema format?
       if (!schema) {
 
           throw new Error('Missing schema.')
 
-      } // TODO: Add check for schema format
+      }
 
       // Init options member
       this.options = {
           schema,
           address,
           providerType: null,
-          ipfsGateway: 'https://ipfs.lukso.network/ipfs/' // 'https://cloudflare-ipfs.com/ipfs/' // 'https://ipfs.infura-ipfs.io/ipfs/'
+          ipfsGateway: ipfsGateway || 'https://ipfs.lukso.network/ipfs/' // 'https://cloudflare-ipfs.com/ipfs/' // 'https://ipfs.infura-ipfs.io/ipfs/'
       }
 
       // do not fail on no-provider
