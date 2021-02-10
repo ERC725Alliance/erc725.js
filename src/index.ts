@@ -439,3 +439,4 @@ export class ERC725 {
 }
 
 export default ERC725
+module.exports.utils = utils
