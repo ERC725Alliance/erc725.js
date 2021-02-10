@@ -72,7 +72,7 @@ export class ERC725 {
           schema,
           address,
           providerType: null,
-          ipfsGateway: ipfsGateway || 'https://ipfs.lukso.network/ipfs/' // 'https://cloudflare-ipfs.com/ipfs/' // 'https://ipfs.infura-ipfs.io/ipfs/'
+          ipfsGateway: ipfsGateway || 'https://cloudflare-ipfs.com/ipfs/' // 'https://ipfs.lukso.network/ipfs/' // 'https://ipfs.infura-ipfs.io/ipfs/'
       }
 
       // do not fail on no-provider

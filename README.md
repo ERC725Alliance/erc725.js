@@ -15,13 +15,16 @@ $ npm install erc725.js
 
 ```js
 import ERC725 from 'erc725.js'
+// Or alternately the named export in cases where it
+// assists with integration into node modules or commonjs.
+import { ERC725 } from 'erc725.js'
 ```
 
 
 ## Instantiation
 
 ```js
-let myERC725 = new ERC725(schema[, address, provider])
+let myERC725 = new ERC725(schema[, address, provider, ipfsGateway])
 
 // change options
 myERC725.options.ipfsGateway = 'https://ipfs.lukso.network/ipfs/' // used for fetchData(), default: 'https://cloudflare-ipfs.com/ipfs/'
