@@ -66,12 +66,13 @@ export class ERC725 {
 
       } // TODO: Add check for schema format
 
+      const checkedAddress = address ? Web3Utils.toChecksumAddress(address) : null
       // Init options member
       this.options = {
           schema,
-          address,
+          address: checkedAddress,
           providerType: null,
-          ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/' // 'https://ipfs.infura-ipfs.io/ipfs/'
+          ipfsGateway: 'https://ipfs.lukso.network/ipfs/' // 'https://cloudflare-ipfs.com/ipfs/' // 'https://ipfs.infura-ipfs.io/ipfs/'
       }
 
       // do not fail on no-provider
