@@ -44,7 +44,7 @@ export default class GraphSource {
 
     }
 
-    async getData(id, keys) {
+    async getData(address, keys) {
 
         if (!keys || Array.isArray(keys)) {
 
@@ -53,7 +53,7 @@ export default class GraphSource {
 
         }
         // Get the value for the specific single key
-        const query = queries.getDataByKey(id, keys)
+        const query = queries.getDataByKey(address, keys)
         const result = await this.provider.query({ query })
         // Single out the first result as expected
         const ret = result.data[Object.keys(result.data)[0]][0]
@@ -62,9 +62,9 @@ export default class GraphSource {
 
     }
 
-    async getAllData(id) {
+    async getAllData(address) {
 
-        const query = queries.getAllData(id)
+        const query = queries.getAllData(address)
         const result = await this.provider.query({ query })
         // Return the data query array
         return result.data[Object.keys(result.data)[0]]
