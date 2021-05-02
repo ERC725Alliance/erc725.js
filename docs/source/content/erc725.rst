@@ -1,0 +1,11 @@
+***************
+ERC725 Standard
+***************
+
+Talk about thte erc725 standard... mostly references here...
+
+ERC725.js
+=========
+
+
+This library allows for interfacing with ERC725(Y) compliant contract instances on Ethereum type blockchains supporting the EVM.

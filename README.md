@@ -44,7 +44,7 @@ myERC725.options.provider // change the provider
 Currently tested and supported providers include: 
 * Web3: `web3.currentProvider`
 * Ethereum provider (Metamask): `window.ethereum`
-* ApploClient graphQL client: `ApolloClient` (experimental)
+* ApolloClient graphQL client: `ApolloClient` (experimental)
 
 **Examples**
 
@@ -316,7 +316,7 @@ erc725.encodeData(schemaKey, data)
 
 1. `schemaKey` - `String`: The name (or the encoded name as the schema 'key') of the schema element in the class instance's schema.
 
-1. `data` - `Mixed`:  Data structured according to the corresponding to the schema defition.
+1. `data` - `Mixed`:  Data structured according to the corresponding to the schema definition.
 
 **Returns**
 
