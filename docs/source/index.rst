@@ -11,29 +11,23 @@ erc725.js documentation
    :caption: User Documentation
 
    content/getting-started
-   content/erc725
    content/providers
    content/erc725-schema
-   content/decoding-data
-   content/encoding-data
    content/writing-data
-   content/glossary
 
 .. toctree::
    :maxdepth: 2
    :caption: API Reference
 
-   content/api/index
-
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   content/api/api-common
+   content/api/api-get-data
+   content/api/api-get-all-data
+   content/api/api-fetch-data
+   content/api/api-get-owner
+   content/api/api-decode-data
+   content/api/api-decode-all-data
+   content/api/api-encode-data
+   content/api/api-encode-all-data
 
 .. highlight:: javascript
     :linenothreshold: 5

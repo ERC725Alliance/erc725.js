@@ -1,8 +1,20 @@
-*********
-Get Owner
-*********
+.. _api-get-owner:
 
-Describe what get owner is
+getOwner
+##################################################
 
+An added utility method which simply returns the owner of the contract. Not directly related to ERC725 specifications.
 
-The only method returns data not associated with the contract KV store.
+--------------------------------------------------
+Example
+--------------------------------------------------
+
+.. code-block:: javascript
+
+  erc725.getOwner();
+
+--------------------------------------------------
+Returns
+--------------------------------------------------
+
+``String``: The address of the contract owner as stored in the contract.

@@ -1,12 +1,14 @@
+.. _schemas:
+
+**************************************************
 Schemas
-##################################################
+**************************************************
 
-The erc725.js library supports a range of ERC725 specification schemas.
+The erc725.js library supports a range of ERC725 specification schemas. 
 
+The below are the schema element definitions supported by and tested with erc725.js. There are certainly more possibilities, and even several non-sensicle or redudent possibilities which will not or may not be supported.
 
-The below are the schemas supported by and testing with erc725.js. There are certainly more possibilities, and even several non-sensicle or redudent possibilities which will not or may not be supported.
-
-**Quick note: Keys used below (see docs for spec...)**
+*Quick reference for keys used in schema definitions below see* `official documentation <https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md>`_.
 
 * ``name``: An arbitrary name
 * ``key``: The sha3 hash of the name
@@ -14,9 +16,11 @@ The below are the schemas supported by and testing with erc725.js. There are cer
 * ``valueContent``: The described content type for parsing
 * ``valueType``: The type of the content data in store for decoding
 
-Supported Schemas
-**************************************************
+==================================================
+Supported Schema Elements
+==================================================
 
+--------------------------------------------------
 Mapping:<custom>:bytes
 --------------------------------------------------
 
@@ -34,6 +38,7 @@ Mapping:<custom>:bytes
   decodedData: "0xafdeb5d6",
   parsedData: "0xafdeb5d6",
 
+--------------------------------------------------
 Singleton:JSONURL:bytes
 --------------------------------------------------
 
@@ -57,6 +62,7 @@ Singleton:JSONURL:bytes
     url: "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd",
   }
 
+--------------------------------------------------
 Singleton:AssetURL:bytes
 --------------------------------------------------
 
@@ -80,6 +86,7 @@ Singleton:AssetURL:bytes
     url: "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd", // FAKE. just used from above
   }
 
+--------------------------------------------------
 Singleton:Keccak256:bytes32
 --------------------------------------------------
 
@@ -98,6 +105,7 @@ Singleton:Keccak256:bytes32
   decodedData: "0x4d75a97aff0964309140e9821514861e5ddcc827113b70a2b69db16dde0695dc",
   parsedData: "0x4d75a97aff0964309140e9821514861e5ddcc827113b70a2b69db16dde0695dc", // 'mytestdata'
 
+--------------------------------------------------
 Singleton:Address:bytes
 --------------------------------------------------
 
@@ -116,6 +124,7 @@ Singleton:Address:bytes
   decodedData: "0x0c03fba782b07bcf810deb3b7f0595024a444f4e",
   parsedData: "0x0C03fBa782b07bCf810DEb3b7f0595024A444F4e", // a real address
 
+--------------------------------------------------
 Singleton:Markdown:bytes
 --------------------------------------------------
 
@@ -134,6 +143,7 @@ Singleton:Markdown:bytes
   decodedData: "0x232054657374696e67206d61726b646f776e2e200a2057656c636f6d6520746f206d61726b646f776e202a2a746573742a2a2e",
   parsedData: "# Testing markdown. \n Welcome to markdown **test**.",
 
+--------------------------------------------------
 Singleton:String:string
 --------------------------------------------------
 
@@ -152,6 +162,7 @@ Singleton:String:string
   decodedData: "0x7061747269636b2d6d63646f77656c6c",
   parsedData: "patrick-mcdowell",
 
+--------------------------------------------------
 Singleton:URL:bytes
 --------------------------------------------------
 
@@ -170,6 +181,7 @@ Singleton:URL:bytes
   decodedData: "0x697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264",
   parsedData: "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd",
 
+--------------------------------------------------
 Array:Number:uint256
 --------------------------------------------------
 
@@ -199,6 +211,7 @@ Array:Number:uint256
     "0x4fEbC3491230571F6e1829E46602e3b110215A2E",
   ]
 
+--------------------------------------------------
 Array:JSONURL:bytes
 --------------------------------------------------
 
@@ -243,6 +256,7 @@ Array:JSONURL:bytes
 
   // Example other valueTypes
 
+--------------------------------------------------
 Singleton:String:string
 --------------------------------------------------
 
@@ -261,6 +275,7 @@ Singleton:String:string
     parsedData: "Great-string",
   },
 
+--------------------------------------------------
 Singleton:Number:uint256
 --------------------------------------------------
 
@@ -279,6 +294,7 @@ Singleton:Number:uint256
   decodedData: "0x0000000000000000000000000000000000000000000000000000000000000063",
   parsedData: "99", // NOTE: This is a string result because web3 utils returns string.
 
+--------------------------------------------------
 Singleton:Number:bytes
 --------------------------------------------------
 
@@ -299,6 +315,7 @@ Singleton:Number:bytes
     "0x0000000000000000000000000000000000000000000000000000000000000063",
   parsedData: "99",
 
+--------------------------------------------------
 Singleton:String:bytes
 --------------------------------------------------
 
@@ -322,6 +339,7 @@ Singleton:String:bytes
 
   Below, the on chain ``valueType`` of the data is of an array of that type.
 
+--------------------------------------------------
 Singleton:String:string[]
 --------------------------------------------------
 
@@ -340,6 +358,7 @@ Singleton:String:string[]
   decodedData: "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b6170706c65207361756365000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e62757474657220636869636b656e000000000000000000000000000000000000",
   parsedData: ["apple sauce", "butter chicken"],
 
+--------------------------------------------------
 Singleton:String:bytes
 --------------------------------------------------
 
@@ -361,6 +380,7 @@ Singleton:String:bytes
     "butter chicken", // 0x62757474657220636869636b656e
   ],
 
+--------------------------------------------------
 Singleton:Address:address[]
 --------------------------------------------------
 
@@ -382,6 +402,7 @@ Singleton:Address:address[]
     "0xba61a0b24a228807f23B46064773D28Fe51dA81C",
   ]
 
+--------------------------------------------------
 Singleton:Number:uint256[]
 --------------------------------------------------
 
@@ -404,6 +425,7 @@ Singleton:Number:uint256[]
     "456",
   ]
 
+--------------------------------------------------
 Singleton:Keccak256:bytes32[]
 --------------------------------------------------
 
@@ -425,6 +447,7 @@ Singleton:Keccak256:bytes32[]
     "0x828e919feac2ec05939abd5d221692fbe6bac5667ba5af5d191df1f7ecb1ac21", // test02
   ]
 
+--------------------------------------------------
 Singleton:URL:string[]
 --------------------------------------------------
 
@@ -446,6 +469,7 @@ Singleton:URL:string[]
     "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd", // {firefox metamask key}
   ]
 
+--------------------------------------------------
 Singleton:<custom>:bytes32
 --------------------------------------------------
 

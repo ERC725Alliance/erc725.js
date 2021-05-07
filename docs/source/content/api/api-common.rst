@@ -1,13 +1,20 @@
+.. _api-common:
+
+==================================================
 Common assumptions
-##################################################
+==================================================
 
-The API documentation will generally assume the following schema for examples unless otherwise specified.
+The API documentation will generally assume the following code for examples where referenced.
 
-Reference Schema
+--------------------------------------------------
+Reference Code
 --------------------------------------------------
 
 .. code-block:: javascript
 
+    import ERC725, { utils } from 'erc725.js'
+
+    // In these documentation each 'field' defintiion is referred to as a 'schema element'
     const schema = [
         {
             name: 'Username',
@@ -24,6 +31,13 @@ Reference Schema
             valueType: 'string'
         },
         {
+            name: 'Nicknames[]',
+            key: '0x9cbb604dc999607e6b9fcae1affc083f71909d3a5ca3bcf37e75c79c7178adc5'
+            keyType: 'Array',
+            valueContent: 'String',
+            valueType: 'string'
+        },
+        {
             name: 'IssuedAssets[]',
             key: '0x1b0084c280dc983f326892fcc88f375797a50d4f792b20b5229caa857474e84e'
             keyType: 'Array',
@@ -32,10 +46,10 @@ Reference Schema
         }
     ]
 
-include:: ./api/api-encode-data.rst
-include:: ./api/api-decode-all-data
-include:: ./api/api-decode-data
-include:: ./api/api-encode-all-data
-include:: ./api/api-encode-data
-include:: ./api/api-fetch-data
-include:: ./api/api-get-owner
+    // const provider = ...
+
+    // const address = ...
+
+    const ERC725 = new ERC725(schema, address, provider);
+
+For information about undefined above see :ref:`providers <providers>`.

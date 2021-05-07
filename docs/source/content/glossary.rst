@@ -1,6 +1,0 @@
-********
-Glossary
-********
-
-
-Terminology goes here...

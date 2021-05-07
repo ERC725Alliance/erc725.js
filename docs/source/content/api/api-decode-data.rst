@@ -1,31 +1,53 @@
-Decode Data
-##################################################
-
-This will talk about decoding a single field of data
-
+.. _api-decode-data:
 
 decodeData
-**************************************************
+==================================================
+
+Decode data from contract store.
 
 .. code-block:: javascript
 
-  erc725.decodeData(schemaKey, data)
+  ERC725.decodeData(schemaKey, data);
 
+Parameters
+--------------------------------------------------
 
-**Parameters**
+* ``schemaKey`` - ``String``: Either the schema element name or key.
+* ``data`` - ``Ojbect`` or ``Object[]``: Either a single object, or an array of objects of key: value: pairs.
+* ``customSchema`` - ``Object`` (optional): An optional schema to override default schema of ERC725 class instance.
 
-* ``schemaKey`` - ``String``: The name (or the encoded name as the schema 'key') of the schema element in the class instance's schema.
+Returns
+--------------------------------------------------
 
-* ``data`` - ``Mixed``: Either the single value to be decoded for 'Singleton' or 'Mapping' keyTypes, or an array of key/value (``[{key:'0x04f9u0weuf...',value:'0x0f3209fj...'}]`` pairs if the schema ``keyType`` is 'Array'.
+``Mixed``: Returns decoded data as defined and expected in the schema:
 
-**Returns**
+* A single value (``String`` or ``Object``) for schema keyTypes 'Singleton' & 'Mapping'.
+* An array of values (``String`` or ``Object``) for schema keyType 'Array'.
 
-* ``Mixed``: Returns decoded data as defined and expected in the schema (single value for keyTypes 'Singleton' & 'Mapping', or an array of values keyType 'Array).
-
-**Example**
+Singleton Example
+--------------------------------------------------
 
 .. code-block:: javascript
 
-  erc725.decodeData('UsernameKey', '0x6d792d636f6f6c2d757365726e616d65')
+  ERC725.decodeData('Username', {key:'key value pair object', value:''});
 
-  // returns > 'my-cool-username'
+  // > 'my-cool-username'
+
+Array Example
+--------------------------------------------------
+
+.. code-block:: javascript
+
+  ERC725.decodeData('Nicknames[]', [
+    {key:'0x9cbb604dc999607e6b9fcae1affc083f71909d3a5ca3bcf37e75c79c7178adc5', value:'0x0000000000000000000000000000000000000000000000000000000000000002'}, // Array length
+    {key:'0x9cbb604dc999607e6b9fcae1affc083f00000000000000000000000000000000', value:'0x636f6f6c2d6e69636b'},
+    {key:'0x9cbb604dc999607e6b9fcae1affc083f00000000000000000000000000000001', value:'0x636f6f6c2d6e61636b'},
+  ]);
+
+  /* > 
+    [
+      'cool-nick',
+      'cool-nack'
+    ]
+  */
+
