@@ -50,28 +50,29 @@ export class ERC725 {
 
   options: {
     schema;
-    address;
-    providerType: ProviderType | null;
+    address?;
+    providerType?: ProviderType | null;
     provider?;
     ipfsGateway: string;
   };
 
-  constructor(schema: Erc725Schema[], address?: string, provider?: any) {
+  constructor(schema: Erc725Schema[], address?: string, provider?: any, ipfsGateway?: string) {
 
       // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
 
+      // TODO: Add check for schema format?
       if (!schema) {
 
           throw new Error('Missing schema.')
 
-      } // TODO: Add check for schema format
+      }
 
       // Init options member
       this.options = {
           schema,
           address,
           providerType: null,
-          ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/' // 'https://ipfs.infura-ipfs.io/ipfs/'
+          ipfsGateway: ipfsGateway || 'https://cloudflare-ipfs.com/ipfs/' // 'https://ipfs.lukso.network/ipfs/' // 'https://ipfs.infura-ipfs.io/ipfs/'
       }
 
       // do not fail on no-provider
@@ -85,6 +86,15 @@ export class ERC725 {
 
           this.options.providerType = ProviderType.GRAPH
           this.options.provider = new GraphSource(givenProvider)
+
+          // This checks to see if its a subgraph, since TheGraph subgraphs cannot checksum addresses to store
+          const isSubgraph = givenProvider.link?.options?.uri.includes('/subgraph')
+          if (!isSubgraph && address) {
+
+              this.options.address = Web3Utils.toChecksumAddress(address)
+
+          }
+
 
           // CASE: Ethereum provider
 
@@ -429,4 +439,4 @@ export class ERC725 {
 
 }
 
-exports.default = ERC725
+export default ERC725
