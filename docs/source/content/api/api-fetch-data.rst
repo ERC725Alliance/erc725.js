@@ -26,7 +26,7 @@ Returns
 * ``Object`` if 'valueContent' of schema element is 'JSONURL'
 * ``Uint8Array`` if the 'valueContent' of the schema element is 'ASSETURL'
 
-Examples below use schemas from the `LUSKO Network LSP schemas <https://github.com/lukso-network/LIPs/>`_.
+Examples below use schemas from the `LUSKO Network LSP schemas <https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md>`_.
 
 --------------------------------------------------
 Example: JSONURL
