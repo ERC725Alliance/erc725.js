@@ -3,7 +3,7 @@
 fetchData
 ##################################################
 
-This method will fetch data from IPFS if correctly decoded blockchain data is correct as described `ERC725 schema 'valueContent' <http://google.com>`_ types as either 'JSONURL', or 'ASSETURL'.
+This method will fetch data from IPFS or an HTTP(s) endpoint stored as `'JSONURL', or 'ASSETURL' <https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#asseturl>`_ valueContent type.
 
 .. code-block:: javascript
 
@@ -26,7 +26,6 @@ Returns
 * ``Object`` if 'valueContent' of schema element is 'JSONURL'
 * ``Uint8Array`` if the 'valueContent' of the schema element is 'ASSETURL'
 
-Examples below use schemas from the `LUSKO Network LSP schemas <https://github.com/lukso-network/LIPs/>`_.
 
 --------------------------------------------------
 Example: JSONURL
