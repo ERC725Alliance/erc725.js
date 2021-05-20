@@ -18,8 +18,7 @@ This will use the web3 provider available at web3.providers
 
   import Web3 from 'web3'
 
-  const web3provider = new Web3(new Web3.providers.HttpProvider("https://rpc.l14.lukso.network"));
-
+  const web3provider = new Web3(new Web3.providers.HttpProvider('https://rpc.l14.lukso.network'));
 
 --------------------------------------------------
 Ethereum (Metamask)

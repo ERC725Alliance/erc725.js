@@ -8,7 +8,7 @@ Encode data according to schema.
 
 .. code-block:: javascript
 
-  utils.encodeData(schemaKey, data);
+  ERC725.encodeData(schemaKey, data);
 
 --------------------------------------------------
 Parameters
@@ -29,7 +29,7 @@ Example: Singleton
 
 .. code-block:: javascript
 
-    utils.encodeData('Username', 'my-cool-username');
+    ERC725.encodeData('Username', 'my-cool-username');
 
 
     // > "0x6d792d636f6f6c2d757365726e616d65"
@@ -40,7 +40,7 @@ Example: Array
 
 .. code-block:: javascript
 
-    utils.encodeData('IssuedAssets[]',
+    ERC725.encodeData('IssuedAssets[]',
         [
             '0xCC8c556EE154151d0A67b6e7F871fa8C6B263A8D'
         ]
