@@ -19,7 +19,7 @@ Installation
 Usage
 --------------------------------------------------
 
-In your code...
+Import `erc725.js`
 
 .. code-block:: javascript
 
@@ -33,7 +33,7 @@ Or alternately the named export in cases where it assists with integration betwe
 
 
 --------------------------------------------------
-Schema
+Example Schema
 --------------------------------------------------
 .. code-block:: javascript
 

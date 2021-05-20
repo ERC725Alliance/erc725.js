@@ -1,8 +1,10 @@
 # ERC725.js
 
-This library allows for interfacing with ERC725(Y) compliant contract instances on Ethereum type blockchains supporting the EVM.
+This library allows for interfacing with ERC725Y compliant contract on an EVM using the [ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md).
 
-**This package is currently in early stages of development, use only for testing or experimentation purposes**
+For more information see [Documentation](https://erc725js.readthedocs.io/en/latest/).
+
+*This package is currently in early stages of development, use only for testing or experimentation purposes*
 
 ## Installation
 
@@ -88,4 +90,9 @@ await erc725.fetchData("LSP3Profile"); // downloads and verifies the linked JSON
 */
 ```
 
-For more information see [official documentation](https://erc725js.readthedocs.io/en/latest/).
+## Testing
+
+
+```shell script
+$ npm test
+```
