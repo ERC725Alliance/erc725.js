@@ -5,7 +5,7 @@
     "declaration": true,
     "outDir": "./lib",
     "strict": true,
-    "noImplicitAny": false,
+    "noImplicitAny": false, //TODO: this should be removed
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true
   },
