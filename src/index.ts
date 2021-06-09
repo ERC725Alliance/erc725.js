@@ -123,6 +123,12 @@ export class ERC725 {
 
   }
 
+  /**
+   * Get decoded data from the contract key value store.
+   * @param {string} key Either the schema name or key of a schema element on the class instance.
+   * @param {*} [customSchema] An optional schema to override attached schema of ERC725 class instance.
+   * @returns Returns decoded data as defined and expected in the schema
+   */
   async getData(key: string, customSchema?: Erc725Schema) {
 
       if (!Web3Utils.isAddress(this.options.address)) {
@@ -167,6 +173,10 @@ export class ERC725 {
 
   }
 
+  /**
+   * Get all available data from the contract as per the class schema definition.
+   * @returns An object with schema element key names as members, with correspoinding associated decoded data as values.
+   */
   async getAllData() {
 
       const results = {}
@@ -248,6 +258,13 @@ export class ERC725 {
 
   }
 
+  /**
+   * Fetch data from IPFS or an HTTP(s) endpoint stored as ‘JSONURL’, or ‘ASSETURL’ valueContent type.
+   * @param {string} key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
+   * @param {*} [customSchema] An optional custom schema element to use for decoding the returned value.
+   *                     Overrides attached schema of instance on this call only.
+   * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData
+   */
   async fetchData(key: string, customSchema?: Erc725Schema) {
 
       const schema = customSchema ? [customSchema] : this.options.schema
@@ -322,33 +339,59 @@ export class ERC725 {
 
   }
 
+  /**
+   * @param data An object of keys matching to corresponding schema element names, with associated data.
+   * @returns all encoded data as per required by the schema and provided data
+   */
   encodeAllData(data) {
 
       return utils.encodeAllData(this.options.schema, data)
 
   }
 
-  decodeAllData(data) {
+  /**
+   * Decode all data available, as per the schema definition, in the contract.
+   * @param data An array of encoded key:value pairs.
+   * @returns An object with keys matching the erc725 instance schema keys, with attached decoded data as expected by the schema.
+   */
+  decodeAllData(data: {key: string, value: string}[]) {
 
       return utils.decodeAllData(this.options.schema, data)
 
   }
 
-  encodeData(key, data) {
+  /**
+   * Encode data according to schema.
+   * @param key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
+   * @param data Data structured according to the corresponding schema defition.
+   * @returns Returns decoded data as defined and expected in the schema (single value for keyTypes ‘Singleton’ & ‘Mapping’, or an array of encoded key/value objects for keyType ‘Array).
+   */
+  encodeData(key: string, data) {
 
       const schema = utils.getSchemaElement(this.options.schema, key)
       return utils.encodeKey(schema, data)
 
   }
 
-  decodeData(key, data) {
+  /**
+   * Decode data from contract store.
+   * @param {string} key Either the schema element name or key.
+   * @param data Either a single object, or an array of objects of key: value: pairs.
+   * @returns Returns decoded data as defined and expected in the schema:
+   */
+  decodeData(key: string, data) {
 
       const schema = utils.getSchemaElement(this.options.schema, key)
       return utils.decodeKey(schema, data)
 
   }
 
-  getOwner(address: string) {
+  /**
+   * An added utility method which simply returns the owner of the contract. Not directly related to ERC725 specifications.
+   * @param {string} [address]
+   * @returns The address of the contract owner as stored in the contract.
+   */
+  getOwner(address?: string): string {
 
       return this.options.provider.getOwner(address || this.options.address)
 

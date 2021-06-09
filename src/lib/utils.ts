@@ -63,7 +63,7 @@ export const utils = {
      */
     encodeAllData: (schemas: Erc725Schema[], data) => {
 
-        const results: any[] = []
+        const results: {key: string, value: string}[] = []
 
         for (let index = 0; index < schemas.length; index++) {
 
