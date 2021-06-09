@@ -15,7 +15,7 @@ Parameters
 --------------------------------------------------
 
 * ``schemaKey`` - ``String``: The name (or the encoded name as the schema 'key') of the schema element in the class instance's schema.
-* ``data`` - ``Mixed``:  Data structured according to the corresponding schema defition.
+* ``data`` - ``Mixed``:  Data structured according to the corresponding schema definition.
 
 --------------------------------------------------
 Returns
