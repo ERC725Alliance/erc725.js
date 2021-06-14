@@ -22,7 +22,9 @@
 */
 
 import Web3Abi from 'web3-eth-abi'
-import * as Web3Utils from 'web3-utils'
+import {
+    hexToNumber, hexToUtf8, isAddress, numberToHex, padLeft, toChecksumAddress, utf8ToHex
+} from 'web3-utils'
 
 import { CONSTANTS } from './constants'
 
@@ -49,7 +51,7 @@ const encodeDataSourceWithHash = (
     return (
         hashFunction.sig
         + dataHash.replace('0x', '')
-        + Web3Utils.utf8ToHex(dataSource).replace('0x', '')
+        + utf8ToHex(dataSource).replace('0x', '')
     )
 
 }
@@ -64,7 +66,7 @@ const decodeDataSourceWithHash = (
     )
     const encoodedData = value.replace('0x', '').substr(8) // Rest of data string after function hash
     const dataHash = '0x' + encoodedData.substr(0, 64) // Get jsonHash 32 bytes
-    const dataSource = Web3Utils.hexToUtf8('0x' + encoodedData.substr(64)) // Get remainder as URI
+    const dataSource = hexToUtf8('0x' + encoodedData.substr(64)) // Get remainder as URI
     return hashFunction
         ? { hashFunction: hashFunction.name, dataHash, dataSource }
         : null
@@ -146,8 +148,8 @@ export const valueContentEncodingMap = {
     // NOTE: Deprecated. For reference/testing in future
     ArrayLength: {
         type: 'uint256',
-        encode: value => Web3Utils.padLeft(Web3Utils.numberToHex(value), 64),
-        decode: value => Web3Utils.hexToNumber(value)
+        encode: value => padLeft(numberToHex(value), 64),
+        decode: value => hexToNumber(value)
     },
     Number: {
         type: 'uint256',
@@ -166,17 +168,17 @@ export const valueContentEncodingMap = {
 
             }
 
-            return Web3Utils.padLeft(Web3Utils.numberToHex(value), 64)
+            return padLeft(numberToHex(value), 64)
 
         },
-        decode: value => '' + Web3Utils.hexToNumber(value)
+        decode: value => '' + hexToNumber(value)
     },
     // NOTE: This is not symmetrical, and always returns a checksummed address
     Address: {
         type: 'address',
         encode: value => {
 
-            if (Web3Utils.isAddress(value)) {
+            if (isAddress(value)) {
 
                 return value.toLowerCase()
 
@@ -185,22 +187,22 @@ export const valueContentEncodingMap = {
             throw new Error('Address: "' + value + '" is an invalid address.')
 
         },
-        decode: value => Web3Utils.toChecksumAddress(value)
+        decode: value => toChecksumAddress(value)
     },
     String: {
         type: 'string',
-        encode: value => Web3Utils.utf8ToHex(value),
-        decode: value => Web3Utils.hexToUtf8(value)
+        encode: value => utf8ToHex(value),
+        decode: value => hexToUtf8(value)
     },
     Markdown: {
         type: 'string',
-        encode: value => Web3Utils.utf8ToHex(value),
-        decode: value => Web3Utils.hexToUtf8(value)
+        encode: value => utf8ToHex(value),
+        decode: value => hexToUtf8(value)
     },
     URL: {
         type: 'string',
-        encode: value => Web3Utils.utf8ToHex(value),
-        decode: value => Web3Utils.hexToUtf8(value)
+        encode: value => utf8ToHex(value),
+        decode: value => hexToUtf8(value)
     },
     AssetURL: {
         type: 'custom',
