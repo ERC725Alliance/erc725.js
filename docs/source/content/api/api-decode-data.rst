@@ -13,7 +13,7 @@ Parameters
 --------------------------------------------------
 
 * ``schemaKey`` - ``String``: Either the schema element name or key.
-* ``data`` - ``Ojbect`` or ``Object[]``: Either a single object, or an array of objects of key: value: pairs.
+* ``data`` - ``Object`` or ``Object[]``: Either a single object, or an array of objects of key: value: pairs.
 * ``customSchema`` - ``Object`` (optional): An optional schema to override default schema of ERC725 class instance.
 
 Returns
