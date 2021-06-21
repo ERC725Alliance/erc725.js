@@ -83,5 +83,5 @@
         "no-await-in-loop": 0, // NOTE: This should be removed?
         "import/prefer-default-export": 0
     },
-    "ignorePatterns": ["node_modules/**/*", "lib/**/*"]
+    "ignorePatterns": ["node_modules/**/*", "build/**/*"]
 }

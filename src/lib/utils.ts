@@ -17,7 +17,9 @@
  * @date 2020
  */
 
-import * as Web3Utils from 'web3-utils'
+import {
+    checkAddressChecksum, isAddress, keccak256, leftPad, numberToHex, padLeft
+} from 'web3-utils'
 import { Erc725Schema } from '../types/Erc725Schema'
 
 import { encoder, valueContentEncodingMap as valueContentMap } from './encoder'
@@ -262,7 +264,7 @@ export const utils = {
         if (
             schemaElementDefinition.valueType !== 'bytes' // we ignore becuase all is decoded by bytes to start with (abi)
             && schemaElementDefinition.valueType !== 'string'
-            && !Web3Utils.isAddress(value) // checks for addresses, since technically an address is bytes?
+            && !isAddress(value) // checks for addresses, since technically an address is bytes?
         ) {
 
             // eslint-disable-next-line no-param-reassign
@@ -276,8 +278,8 @@ export const utils = {
         // As per exception above, if address and sameEncoding, then the address still needs to be handled
         if (
             sameEncoding
-            && Web3Utils.isAddress(value)
-            && !Web3Utils.checkAddressChecksum(value)
+            && isAddress(value)
+            && !checkAddressChecksum(value)
         ) {
 
             sameEncoding = !sameEncoding
@@ -426,12 +428,12 @@ export const utils = {
         const colon = name.indexOf(':')
         // if name:subname, then construct using bytes16(hashFirstWord) + bytes12(0) + bytes4(hashLastWord)
         return colon !== -1
-            ? Web3Utils.keccak256(name.substr(0, colon)).substr(0, 34)
-                  + Web3Utils.leftPad(
-                      Web3Utils.keccak256(name.substr(colon + 1)).substr(2, 8),
+            ? keccak256(name.substr(0, colon)).substr(0, 34)
+                  + leftPad(
+                      keccak256(name.substr(colon + 1)).substr(2, 8),
                       32
                   )
-            : Web3Utils.keccak256(name) // otherwise just bytes32(hash)
+            : keccak256(name) // otherwise just bytes32(hash)
 
     },
 
@@ -446,7 +448,7 @@ export const utils = {
 
         return (
             key.substr(0, 34)
-            + Web3Utils.padLeft(Web3Utils.numberToHex(index), 32).replace(
+            + padLeft(numberToHex(index), 32).replace(
                 '0x',
                 ''
             )
@@ -486,7 +488,6 @@ export const utils = {
      * @param index The index of the array element to transpose the schema to
      * @return Modified schema element of keyType 'Singleton' for fetching or decoding/encoding the array element
      */
-    // eslint-disable-next-line arrow-body-style
     transposeArraySchema: (
         schema: Erc725Schema,
         index: number
@@ -504,6 +505,7 @@ export const utils = {
         }
 
         return {
+            name: schema.name,
             key: utils.encodeArrayKey(schema.key, index),
             keyType: 'Singleton',
             // TODO: This can be solved by defining an extra "Erc725ArraySchema" for array

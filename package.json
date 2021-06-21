@@ -2,11 +2,14 @@
   "name": "erc725.js",
   "version": "0.5.4",
   "description": "Library to interact with ERC725 smart contracts",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "build/main/index.js",
+  "typings": "build/main/index.d.ts",
+  "module": "build/module/index.js",
   "scripts": {
-    "build": "tsc",
-    "test": "npm run lint && env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'test/**/*.ts'",
+    "build": "run-p build:*",
+    "build:main": "tsc -p tsconfig.json",
+    "build:module": "tsc -p tsconfig.module.json",
+    "test": "npm run lint && env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha",
     "lint": "eslint . --ext .ts",
     "build-publish": "npm run build && npm publish"
   },
@@ -37,26 +40,25 @@
   },
   "homepage": "https://github.com/ERC725Alliance/erc725.js#readme",
   "devDependencies": {
-    "@types/mocha": "^8.2.0",
-    "@types/node": "^14.14.22",
-    "@typescript-eslint/eslint-plugin": "^4.14.2",
-    "@typescript-eslint/parser": "^4.14.2",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "^15.12.2",
+    "@typescript-eslint/eslint-plugin": "^4.26.1",
+    "@typescript-eslint/parser": "^4.26.1",
     "assert": "^2.0.0",
-    "babel-cli": "^6.24.1",
-    "babel-preset-es2015": "^6.24.1",
-    "eslint": "^7.19.0",
+    "eslint": "^7.28.0",
     "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.22.1",
-    "mocha": "^8.2.1",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.1.3"
+    "eslint-plugin-import": "^2.23.4",
+    "mocha": "^9.0.0",
+    "npm-run-all": "^4.1.5",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.2"
   },
   "dependencies": {
-    "@apollo/client": "^3.3.7",
     "axios": "^0.21.1",
     "graphql": "^15.5.0",
-    "react": "^17.0.1",
-    "web3-eth-abi": "^1.3.3",
-    "web3-utils": "^1.3.3"
+    "graphql-tag": "2.12.4",
+    "tslib": "^2.3.0",
+    "web3-eth-abi": "^1.3.6",
+    "web3-utils": "^1.3.6"
   }
 }

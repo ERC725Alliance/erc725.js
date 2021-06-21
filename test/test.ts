@@ -19,18 +19,15 @@
 
 // Tests for the ERC725.js package
 import assert from 'assert'
-import * as Web3Utils from 'web3-utils'
-
+import { hexToNumber, leftPad, numberToHex } from 'web3-utils'
 import ERC725 from '../src'
 import { utils } from '../src/lib/utils'
-import { mockSchema } from './mockSchema'
-import { HttpProvider, EthereumProvider, ApolloClient } from './mockProviders'
-import {
-    generateAllRawData,
-    generateAllData,
-    generateAllResults
-} from './testHelpers'
 import { Erc725Schema } from '../src/types/Erc725Schema'
+import { ApolloClient, EthereumProvider, HttpProvider } from './mockProviders'
+import { mockSchema } from './mockSchema'
+import {
+    generateAllData, generateAllRawData, generateAllResults
+} from './testHelpers'
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
 
@@ -262,8 +259,8 @@ describe('Running erc725.js tests...', () => {
 
                             // Push the array length into the first element of results array
                             results.push(
-                                Web3Utils.leftPad(
-                                    Web3Utils.numberToHex(schemaElement.expectedResult.length),
+                                leftPad(
+                                    numberToHex(schemaElement.expectedResult.length),
                                     64
                                 )
                             )
@@ -302,7 +299,7 @@ describe('Running erc725.js tests...', () => {
                         try {
 
                             // Fail silently with anything BUT the arrayLength key
-                            Web3Utils.hexToNumber(element.value)
+                            hexToNumber(element.value)
 
                         } catch (error) {
 
