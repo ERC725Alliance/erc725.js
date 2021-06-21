@@ -18,7 +18,7 @@
  * @date 2020
  */
 
-import * as Web3Utils from 'web3-utils'
+import { isAddress, keccak256, toChecksumAddress } from 'web3-utils'
 import axios from 'axios'
 
 import GraphSource from './providers/subgraphProviderWrapper'
@@ -91,7 +91,7 @@ export class ERC725 {
           const isSubgraph = givenProvider.link?.options?.uri.includes('/subgraph')
           if (!isSubgraph && address) {
 
-              this.options.address = Web3Utils.toChecksumAddress(address)
+              this.options.address = toChecksumAddress(address)
 
           }
 
@@ -131,7 +131,7 @@ export class ERC725 {
    */
   async getData(key: string, customSchema?: Erc725Schema) {
 
-      if (!Web3Utils.isAddress(this.options.address)) {
+      if (!isAddress(this.options.address)) {
 
           throw new Error('Missing ERC725 contract address.')
 
@@ -181,7 +181,7 @@ export class ERC725 {
 
       const results = {}
       let res
-      if (!Web3Utils.isAddress(this.options.address)) {
+      if (!isAddress(this.options.address)) {
 
           throw new Error('Missing ERC725 contract address.')
 
@@ -304,12 +304,22 @@ export class ERC725 {
           }
 
           // console.log(result)
+          let response
+          try {
 
-          const response = await axios({
-              method: 'get',
-              url: result.url,
-              responseType
-          })
+              response = await axios({
+                  method: 'get',
+                  url: result.url,
+                  responseType
+              })
+
+          } catch (error) {
+
+              console.error(error, `GET request to ${result.url} failed`)
+              throw (error)
+
+          }
+
 
           // console.log(response.data)
 
@@ -400,7 +410,7 @@ export class ERC725 {
   // eslint-disable-next-line class-methods-use-this
   _hashAndCompare(data, hash: string) {
 
-      const jsonHash = Web3Utils.keccak256(data)
+      const jsonHash = keccak256(data)
 
       // throw error if hash mismatch
       if (jsonHash !== hash) {

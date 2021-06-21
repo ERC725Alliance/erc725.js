@@ -8,7 +8,7 @@
     "module": "commonjs",
     "declaration": true,
     "strict": true,
-    "noImplicitAny": false,
+    "noImplicitAny": false, //TODO: this should be removed
     "esModuleInterop": true,
     "inlineSourceMap": true,
     "resolveJsonModule": true /* Include modules imported with .json extension. */,
