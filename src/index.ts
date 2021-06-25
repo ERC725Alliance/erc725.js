@@ -33,6 +33,8 @@ import {
     Erc725SchemaValueType
 } from './types/Erc725Schema'
 
+import { ERC725Config } from './types/Config'
+
 enum ProviderType {
   GRAPH = 'graph',
   ETHEREUM = 'ethereum',
@@ -53,10 +55,10 @@ export class ERC725 {
     address?;
     providerType?: ProviderType | null;
     provider?;
-    ipfsGateway: string;
+    config: ERC725Config;
   };
 
-  constructor(schema: Erc725Schema[], address?: string, provider?: any, ipfsGateway?: string) {
+  constructor(schema: Erc725Schema[], address?: string, provider?: any, config?: ERC725Config) {
 
       // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
 
@@ -67,12 +69,19 @@ export class ERC725 {
 
       }
 
+      const defaultConfig = {
+          ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/'
+      }
+
       // Init options member
       this.options = {
           schema,
           address,
           providerType: null,
-          ipfsGateway: ipfsGateway || 'https://cloudflare-ipfs.com/ipfs/' // 'https://ipfs.lukso.network/ipfs/' // 'https://ipfs.infura-ipfs.io/ipfs/'
+          config: {
+              ...defaultConfig,
+              ...config
+          }
       }
 
       // do not fail on no-provider
@@ -277,7 +286,7 @@ export class ERC725 {
       // change ipfs urls
       if (result && result.url && result.url.indexOf('ipfs://') !== -1) {
 
-          result.url = result.url.replace('ipfs://', this.options.ipfsGateway)
+          result.url = result.url.replace('ipfs://', this.options.config.ipfsGateway)
 
       }
 
