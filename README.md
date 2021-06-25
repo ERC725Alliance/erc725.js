@@ -24,12 +24,10 @@ import { ERC725 } from "erc725.js";
 ## Example Instantiation
 
 ```js
-let myERC725Address = "0x0c03fba782b07bcf810deb3b7f0595024a444f4e";
-let myProvider = new Web3.providers.HttpProvider("https://rpc.l14.lukso.network");
 
 // Part of LSP3-UniversalProfile Schema
 // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
-const mySchema = [
+const schema = [
   {
     name: "SupportedStandards:ERC725Account",
     key: "0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6",
@@ -53,7 +51,13 @@ const mySchema = [
   },
 ];
 
-let myERC725 = new ERC725(schema[, address, provider, ipfsGateway])
+const addresss = "0x0c03fba782b07bcf810deb3b7f0595024a444f4e";
+const provider = new Web3.providers.HttpProvider("https://rpc.l14.lukso.network");
+const config = {
+  ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
+}
+
+let myERC725 = new ERC725(schema[, address, provider, config])
 ```
 
 ## Usage

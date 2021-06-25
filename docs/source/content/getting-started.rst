@@ -73,7 +73,9 @@ Provider
   let myERC725Address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
   let myProvider = new Web3.providers.HttpProvider('https://rpc.l14.lukso.network');
   // optionally you can specifiy your own IPFS gateway
-  let myIPFSGateway = 'https://ipfs.lukso.network/ipfs/'
+  let myERC725Config = {
+    ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
+  }
 
 --------------------------------------------------
 Instantiation
@@ -81,7 +83,7 @@ Instantiation
 
 .. code-block:: javascript
 
-    let myERC725 = new ERC725(mySchema, myAddress, myProvider[, myIPFSGateway]);
+    let myERC725 = new ERC725(mySchema, myAddress, myProvider[, myERC725Config]);
 
 
 Parameters descriptions:
@@ -93,7 +95,8 @@ After the instance has been created is is still possible to change settings thro
 
 .. code-block:: javascript 
 
-    ERC725.options.ipfsGateway = '<url>' // used for fetchData(), default: 'https://cloudflare-ipfs.com/ipfs/'
     ERC725.options.schema = '<schema>' // change schema
     ERC725.options.address '<address>' // change address
+    ERC725.options.config.ipfsGateway = '<url>' // used for fetchData(), default: 'https://cloudflare-ipfs.com/ipfs/'
+    
     // NOTE: ERC725.provider can not be changed
