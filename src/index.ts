@@ -24,7 +24,9 @@ import axios from 'axios'
 import GraphSource from './providers/subgraphProviderWrapper'
 import Web3Source from './providers/web3ProviderWrapper'
 import EthereumSource from './providers/ethereumProviderWrapper'
-import { utils } from './lib/utils'
+import {
+    decodeAllData, decodeKey, decodeKeyValue, encodeAllData, encodeArrayKey, encodeKey, getSchemaElement
+} from './lib/utils'
 
 import {
     Erc725Schema,
@@ -152,7 +154,7 @@ export class ERC725 {
       }
 
       const schema = customSchema ? [customSchema] : this.options.schema
-      const keySchema = utils.getSchemaElement(schema, key)
+      const keySchema = getSchemaElement(schema, key)
 
       // Get all the raw data possible.
       const rawData = await this.options.provider.getData(
@@ -170,7 +172,7 @@ export class ERC725 {
           if (res && res.length > 0) {
 
               res.push(dat[0]) // add the raw data array length
-              return utils.decodeKey(keySchema, res)
+              return decodeKey(keySchema, res)
 
           }
 
@@ -178,7 +180,7 @@ export class ERC725 {
 
       }
 
-      return utils.decodeKey(keySchema, rawData)
+      return decodeKey(keySchema, rawData)
 
   }
 
@@ -215,7 +217,7 @@ export class ERC725 {
       if (this.options.providerType === ProviderType.GRAPH) {
 
           // If the provider type is a graphql client, we assume it can get ALL keys (including array keys)
-          res = utils.decodeAllData(this.options.schema, allRawData)
+          res = decodeAllData(this.options.schema, allRawData)
 
       } else {
 
@@ -241,7 +243,7 @@ export class ERC725 {
               results[element.name] = null
 
           })
-          res = utils.decodeAllData(this.options.schema, allRawData)
+          res = decodeAllData(this.options.schema, allRawData)
 
       }
 
@@ -277,7 +279,7 @@ export class ERC725 {
   async fetchData(key: string, customSchema?: Erc725Schema) {
 
       const schema = customSchema ? [customSchema] : this.options.schema
-      const keySchema = utils.getSchemaElement(schema, key)
+      const keySchema = getSchemaElement(schema, key)
 
       const result = await this.getData(key, customSchema)
 
@@ -364,7 +366,7 @@ export class ERC725 {
    */
   encodeAllData(data) {
 
-      return utils.encodeAllData(this.options.schema, data)
+      return encodeAllData(this.options.schema, data)
 
   }
 
@@ -375,7 +377,7 @@ export class ERC725 {
    */
   decodeAllData(data: {key: string, value: string}[]) {
 
-      return utils.decodeAllData(this.options.schema, data)
+      return decodeAllData(this.options.schema, data)
 
   }
 
@@ -387,8 +389,8 @@ export class ERC725 {
    */
   encodeData(key: string, data) {
 
-      const schema = utils.getSchemaElement(this.options.schema, key)
-      return utils.encodeKey(schema, data)
+      const schema = getSchemaElement(this.options.schema, key)
+      return encodeKey(schema, data)
 
   }
 
@@ -400,8 +402,8 @@ export class ERC725 {
    */
   decodeData(key: string, data) {
 
-      const schema = utils.getSchemaElement(this.options.schema, key)
-      return utils.decodeKey(schema, data)
+      const schema = getSchemaElement(this.options.schema, key)
+      return decodeKey(schema, data)
 
   }
 
@@ -466,13 +468,13 @@ export class ERC725 {
           return results
 
       } // Handle empty/non-existent array
-      const arrayLength = await utils.decodeKeyValue(schema, value.value) // get the int array length
+      const arrayLength = await decodeKeyValue(schema, value.value) // get the int array length
 
       // 2. Get the array values for the length of the array
       for (let index = 0; index < arrayLength; index++) {
 
           // 2.1 get the new schema key
-          const arrayElementKey = utils.encodeArrayKey(schema.key, index)
+          const arrayElementKey = encodeArrayKey(schema.key, index)
           let arrayElement
 
           // 2.2 Check the data first just in case.

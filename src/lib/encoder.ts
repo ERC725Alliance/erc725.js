@@ -255,62 +255,60 @@ export const valueContentEncodingMap = {
     }
 }
 
-export const encoder = {
-    encodeValueType: (type: string, value: string): string => {
+export function encodeValueType(type: string, value: string): string {
 
-        if (!valueTypeEncodingMap[type]) {
+    if (!valueTypeEncodingMap[type]) {
 
-            throw new Error('Could not encode valueType: "' + type + '".')
-
-        }
-
-        return value ? valueTypeEncodingMap[type].encode(value) : value
-
-    },
-
-    decodeValueType: (type: string, value: string) => {
-
-        if (!valueTypeEncodingMap[type]) {
-
-            throw new Error('Could not decode valueType: "' + type + '".')
-
-        }
-
-        if (value === '0x') return null
-
-        return value ? valueTypeEncodingMap[type].decode(value) : value
-
-    },
-
-    encodeValueContent: (type: string, value: string): string | false => {
-
-        if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
-
-            throw new Error('Could not encode valueContent: "' + type + '".')
-
-        } else if (type.substr(0, 2) === '0x') {
-
-            return type === value ? value : false
-
-        }
-
-        return value ? valueContentEncodingMap[type].encode(value) : '0x'
-
-    },
-
-    decodeValueContent: (type: string, value: string): string | false => {
-
-        if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
-
-            throw new Error('Could not decode valueContent: "' + type + '".')
-
-        } else if (type.substr(0, 2) === '0x') {
-
-            return type === value ? value : false
-
-        }
-
-        return value ? valueContentEncodingMap[type].decode(value) : value
+        throw new Error('Could not encode valueType: "' + type + '".')
 
     }
+
+    return value ? valueTypeEncodingMap[type].encode(value) : value
+
+}
+
+export function decodeValueType(type: string, value: string) {
+
+    if (!valueTypeEncodingMap[type]) {
+
+        throw new Error('Could not decode valueType: "' + type + '".')
+
+    }
+
+    if (value === '0x') return null
+
+    return value ? valueTypeEncodingMap[type].decode(value) : value
+
+}
+
+export function encodeValueContent(type: string, value: string): string | false {
+
+    if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
+
+        throw new Error('Could not encode valueContent: "' + type + '".')
+
+    } else if (type.substr(0, 2) === '0x') {
+
+        return type === value ? value : false
+
+    }
+
+    return value ? valueContentEncodingMap[type].encode(value) : '0x'
+
+}
+
+export function decodeValueContent(type: string, value: string): string | false {
+
+    if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
+
+        throw new Error('Could not decode valueContent: "' + type + '".')
+
+    } else if (type.substr(0, 2) === '0x') {
+
+        return type === value ? value : false
+
+    }
+
+    return value ? valueContentEncodingMap[type].decode(value) : value
+
 }

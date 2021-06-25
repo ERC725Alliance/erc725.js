@@ -17,7 +17,7 @@
  * @date 2020
  */
 
-import { utils } from '../src/lib/utils'
+import { encodeArrayKey } from '../src/lib/utils'
 
 export function generateAllRawData(schema) {
 
@@ -43,7 +43,7 @@ export function generateAllRawData(schema) {
 
                     // This is array length key/value pair
                     results.push({
-                        key: utils.encodeArrayKey(element.key, i - 1),
+                        key: encodeArrayKey(element.key, i - 1),
                         value: e
                     })
 
@@ -95,7 +95,7 @@ export function generateAllData(schema) {
 
                     // This is array length key/value pair
                     results.push({
-                        key: utils.encodeArrayKey(element.key, i - 1),
+                        key: encodeArrayKey(element.key, i - 1),
                         value: e ? e.toLowerCase() : e // force address to lowercase
                     })
 

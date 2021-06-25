@@ -21,7 +21,9 @@
 import assert from 'assert'
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils'
 import ERC725 from '../src'
-import { utils } from '../src/lib/utils'
+import {
+    decodeAllData, decodeKey, decodeKeyValue, encodeAllData, encodeKey, encodeKeyValue
+} from '../src/lib/utils'
 import { Erc725Schema } from '../src/types/Erc725Schema'
 import { ApolloClient, EthereumProvider, HttpProvider } from './mockProviders'
 import { mockSchema } from './mockSchema'
@@ -211,14 +213,14 @@ describe('Running erc725.js tests...', () => {
 
         it('Encode all data!', async () => {
 
-            const result = utils.encodeAllData(mockSchema, fullResults)
+            const result = encodeAllData(mockSchema, fullResults)
             assert.deepStrictEqual(result, allGraphData)
 
         })
 
         it('Decode all data!', async () => {
 
-            const result = utils.decodeAllData(mockSchema, allGraphData)
+            const result = decodeAllData(mockSchema, allGraphData)
             assert.deepStrictEqual(result, fullResults)
 
         })
@@ -279,7 +281,7 @@ describe('Running erc725.js tests...', () => {
                         }
 
                         results.push(
-                            utils.encodeKeyValue(arraySchema, schemaElement.expectedResult[i])
+                            encodeKeyValue(arraySchema, schemaElement.expectedResult[i])
                         )
 
                     } // end for loop
@@ -303,7 +305,7 @@ describe('Running erc725.js tests...', () => {
 
                         } catch (error) {
 
-                            const result = utils.decodeKeyValue(schemaElement, element)
+                            const result = decodeKeyValue(schemaElement, element)
 
                             // Handle object types
                             if (
@@ -351,7 +353,7 @@ describe('Running erc725.js tests...', () => {
                         )
                         // handle '0x'....
                         // intendedResults = intendedResults.filter(e => e !== '0x' && e.value !== '0x')
-                        const results = utils.encodeKey(schemaElement, data)
+                        const results = encodeKey(schemaElement, data)
                         assert.deepStrictEqual(results, intendedResults)
 
                     }
@@ -368,7 +370,7 @@ describe('Running erc725.js tests...', () => {
                         const intendedResults = generateAllResults([schemaElement])[
                             schemaElement.name
                         ]
-                        const results = utils.decodeKey(schemaElement, values)
+                        const results = decodeKey(schemaElement, values)
                         assert.deepStrictEqual(results, intendedResults)
 
                     }
@@ -419,7 +421,7 @@ describe('Running erc725.js tests...', () => {
                 // SINGLETON type: This is not an array, assumed 'Singletoon
                 it('Encode data value for: ' + schemaElement.name, async () => {
 
-                    const result = utils.encodeKeyValue(
+                    const result = encodeKeyValue(
                         schemaElement,
                         schemaElement.expectedResult
                     )
@@ -429,7 +431,7 @@ describe('Running erc725.js tests...', () => {
 
                 it('Decode data value for: ' + schemaElement.name, async () => {
 
-                    const result = utils.decodeKeyValue(
+                    const result = decodeKeyValue(
                         schemaElement,
                         schemaElement.returnGraphData
                     )
