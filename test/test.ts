@@ -116,6 +116,50 @@ describe('Running erc725.js tests...', () => {
 
         })
 
+        it('fetchData JSONURL with custom config.ipfsGateway', async () => {
+
+            // this test does a real request, TODO replace with mock?
+
+            const provider = new HttpProvider({
+                returnData: [
+                    {
+                        key:
+              '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+                        value:
+              '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000596f357c6a733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a626400000000000000'
+                    }
+                ]
+            })
+            const erc725 = new ERC725(
+                [
+                    {
+                        name: 'TestJSONURL',
+                        key:
+              '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+                        keyType: 'Singleton',
+                        valueContent: 'JSONURL',
+                        valueType: 'bytes'
+                    }
+                ],
+                address,
+                provider,
+                {
+                    ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
+                }
+            )
+            const result = await erc725.fetchData('TestJSONURL')
+            assert.deepStrictEqual(result, {
+                LSP3Profile: {
+                    backgroundImage:
+            'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
+                    description:
+            "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
+                    profileImage: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf'
+                }
+            })
+
+        })
+
         it('fetchData AssetURL', async () => {
 
             // this test does a real request, TODO replace with mock?

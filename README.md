@@ -53,7 +53,7 @@ const mySchema = [
   },
 ];
 
-let myERC725 = new ERC725(schema, address, provider[, config])
+let myERC725 = new ERC725(schema[, address, provider, config])
 ```
 
 ## Usage
