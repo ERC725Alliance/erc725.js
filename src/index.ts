@@ -18,13 +18,14 @@
  * @date 2020
  */
 
-import * as Web3Utils from 'web3-utils'
-import axios from 'axios'
+import { isAddress, keccak256, toChecksumAddress } from 'web3-utils'
 
 import GraphSource from './providers/subgraphProviderWrapper'
 import Web3Source from './providers/web3ProviderWrapper'
 import EthereumSource from './providers/ethereumProviderWrapper'
-import { utils } from './lib/utils'
+import {
+    decodeAllData, decodeKey, decodeKeyValue, encodeAllData, encodeArrayKey, encodeKey, getSchemaElement
+} from './lib/utils'
 
 import {
     Erc725Schema,
@@ -32,6 +33,8 @@ import {
     Erc725SchemaValueContent,
     Erc725SchemaValueType
 } from './types/Erc725Schema'
+
+import { ERC725Config } from './types/Config'
 
 enum ProviderType {
   GRAPH = 'graph',
@@ -53,10 +56,10 @@ export class ERC725 {
     address?;
     providerType?: ProviderType | null;
     provider?;
-    ipfsGateway: string;
+    config: ERC725Config;
   };
 
-  constructor(schema: Erc725Schema[], address?: string, provider?: any, ipfsGateway?: string) {
+  constructor(schema: Erc725Schema[], address?: string, provider?: any, config?: ERC725Config) {
 
       // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
 
@@ -67,12 +70,19 @@ export class ERC725 {
 
       }
 
+      const defaultConfig = {
+          ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/'
+      }
+
       // Init options member
       this.options = {
           schema,
           address,
           providerType: null,
-          ipfsGateway: ipfsGateway || 'https://cloudflare-ipfs.com/ipfs/' // 'https://ipfs.lukso.network/ipfs/' // 'https://ipfs.infura-ipfs.io/ipfs/'
+          config: {
+              ...defaultConfig,
+              ...config
+          }
       }
 
       // do not fail on no-provider
@@ -91,7 +101,7 @@ export class ERC725 {
           const isSubgraph = givenProvider.link?.options?.uri.includes('/subgraph')
           if (!isSubgraph && address) {
 
-              this.options.address = Web3Utils.toChecksumAddress(address)
+              this.options.address = toChecksumAddress(address)
 
           }
 
@@ -123,9 +133,15 @@ export class ERC725 {
 
   }
 
+  /**
+   * Get decoded data from the contract key value store.
+   * @param {string} key Either the schema name or key of a schema element on the class instance.
+   * @param {*} [customSchema] An optional schema to override attached schema of ERC725 class instance.
+   * @returns Returns decoded data as defined and expected in the schema
+   */
   async getData(key: string, customSchema?: Erc725Schema) {
 
-      if (!Web3Utils.isAddress(this.options.address)) {
+      if (!isAddress(this.options.address)) {
 
           throw new Error('Missing ERC725 contract address.')
 
@@ -137,7 +153,7 @@ export class ERC725 {
       }
 
       const schema = customSchema ? [customSchema] : this.options.schema
-      const keySchema = utils.getSchemaElement(schema, key)
+      const keySchema = getSchemaElement(schema, key)
 
       // Get all the raw data possible.
       const rawData = await this.options.provider.getData(
@@ -155,7 +171,7 @@ export class ERC725 {
           if (res && res.length > 0) {
 
               res.push(dat[0]) // add the raw data array length
-              return utils.decodeKey(keySchema, res)
+              return decodeKey(keySchema, res)
 
           }
 
@@ -163,15 +179,19 @@ export class ERC725 {
 
       }
 
-      return utils.decodeKey(keySchema, rawData)
+      return decodeKey(keySchema, rawData)
 
   }
 
+  /**
+   * Get all available data from the contract as per the class schema definition.
+   * @returns An object with schema element key names as members, with correspoinding associated decoded data as values.
+   */
   async getAllData() {
 
       const results = {}
       let res
-      if (!Web3Utils.isAddress(this.options.address)) {
+      if (!isAddress(this.options.address)) {
 
           throw new Error('Missing ERC725 contract address.')
 
@@ -196,7 +216,7 @@ export class ERC725 {
       if (this.options.providerType === ProviderType.GRAPH) {
 
           // If the provider type is a graphql client, we assume it can get ALL keys (including array keys)
-          res = utils.decodeAllData(this.options.schema, allRawData)
+          res = decodeAllData(this.options.schema, allRawData)
 
       } else {
 
@@ -222,7 +242,7 @@ export class ERC725 {
               results[element.name] = null
 
           })
-          res = utils.decodeAllData(this.options.schema, allRawData)
+          res = decodeAllData(this.options.schema, allRawData)
 
       }
 
@@ -248,10 +268,17 @@ export class ERC725 {
 
   }
 
+  /**
+   * Fetch data from IPFS or an HTTP(s) endpoint stored as ‘JSONURL’, or ‘ASSETURL’ valueContent type.
+   * @param {string} key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
+   * @param {*} [customSchema] An optional custom schema element to use for decoding the returned value.
+   *                     Overrides attached schema of instance on this call only.
+   * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData
+   */
   async fetchData(key: string, customSchema?: Erc725Schema) {
 
       const schema = customSchema ? [customSchema] : this.options.schema
-      const keySchema = utils.getSchemaElement(schema, key)
+      const keySchema = getSchemaElement(schema, key)
 
       const result = await this.getData(key, customSchema)
 
@@ -260,7 +287,7 @@ export class ERC725 {
       // change ipfs urls
       if (result && result.url && result.url.indexOf('ipfs://') !== -1) {
 
-          result.url = result.url.replace('ipfs://', this.options.ipfsGateway)
+          result.url = result.url.replace('ipfs://', this.options.config.ipfsGateway)
 
       }
 
@@ -269,49 +296,32 @@ export class ERC725 {
       case 'jsonurl':
       case 'asseturl': {
 
-          let responseType
-          let dataToHash
           const lowerCaseHashFunction = result.hashFunction.toLowerCase()
 
-          // determine the decoding
-          // options: 'arraybuffer', 'document', 'json', 'text', 'stream', Browser: 'blob'
-          if (lowerCaseHashFunction === 'keccak256(utf8)') {
+          let response
+          try {
 
-              responseType = 'json'
+              response = await fetch(result.url).then(a => {
 
-          }
-          if (lowerCaseHashFunction === 'keccak256(bytes)') {
+                  if (lowerCaseHashFunction === 'keccak256(bytes)') {
 
-              responseType = 'arraybuffer'
+                      return a.arrayBuffer().then(buffer => new Uint8Array(buffer))
 
-          }
+                  }
 
-          // console.log(result)
+                  return a.json()
 
-          const response = await axios({
-              method: 'get',
-              url: result.url,
-              responseType
-          })
+              })
 
-          // console.log(response.data)
+          } catch (error) {
 
-          // determine the transformation of the data, before hashing
-          if (lowerCaseHashFunction === 'keccak256(utf8)') {
-
-              dataToHash = JSON.stringify(response.data)
-
-          }
-          if (lowerCaseHashFunction === 'keccak256(bytes)') {
-
-              dataToHash = response.data
+              console.error(error, `GET request to ${result.url} failed`)
+              throw (error)
 
           }
 
-          return response
-          && response.data
-          && this._hashAndCompare(dataToHash, result.hash)
-              ? response.data
+          return response && this._hashAndCompare(response, result.hash, lowerCaseHashFunction)
+              ? response
               : null
 
       }
@@ -322,53 +332,88 @@ export class ERC725 {
 
   }
 
+  /**
+   * @param data An object of keys matching to corresponding schema element names, with associated data.
+   * @returns all encoded data as per required by the schema and provided data
+   */
   encodeAllData(data) {
 
-      return utils.encodeAllData(this.options.schema, data)
+      return encodeAllData(this.options.schema, data)
 
   }
 
-  decodeAllData(data) {
+  /**
+   * Decode all data available, as per the schema definition, in the contract.
+   * @param data An array of encoded key:value pairs.
+   * @returns An object with keys matching the erc725 instance schema keys, with attached decoded data as expected by the schema.
+   */
+  decodeAllData(data: {key: string, value: string}[]) {
 
-      return utils.decodeAllData(this.options.schema, data)
-
-  }
-
-  encodeData(key, data) {
-
-      const schema = utils.getSchemaElement(this.options.schema, key)
-      return utils.encodeKey(schema, data)
+      return decodeAllData(this.options.schema, data)
 
   }
 
-  decodeData(key, data) {
+  /**
+   * Encode data according to schema.
+   * @param key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
+   * @param data Data structured according to the corresponding schema defition.
+   * @returns Returns decoded data as defined and expected in the schema (single value for keyTypes ‘Singleton’ & ‘Mapping’, or an array of encoded key/value objects for keyType ‘Array).
+   */
+  encodeData(key: string, data) {
 
-      const schema = utils.getSchemaElement(this.options.schema, key)
-      return utils.decodeKey(schema, data)
+      const schema = getSchemaElement(this.options.schema, key)
+      return encodeKey(schema, data)
 
   }
 
-  getOwner(address: string) {
+  /**
+   * Decode data from contract store.
+   * @param {string} key Either the schema element name or key.
+   * @param data Either a single object, or an array of objects of key: value: pairs.
+   * @returns Returns decoded data as defined and expected in the schema:
+   */
+  decodeData(key: string, data) {
+
+      const schema = getSchemaElement(this.options.schema, key)
+      return decodeKey(schema, data)
+
+  }
+
+  /**
+   * An added utility method which simply returns the owner of the contract. Not directly related to ERC725 specifications.
+   * @param {string} [address]
+   * @returns The address of the contract owner as stored in the contract.
+   */
+  getOwner(address?: string): string {
 
       return this.options.provider.getOwner(address || this.options.address)
 
   }
 
   // eslint-disable-next-line class-methods-use-this
-  _hashAndCompare(data, hash: string) {
+  _hashAndCompare(data, hash: string, lowerCaseHashFunction: string) {
 
-      const jsonHash = Web3Utils.keccak256(data)
+      let dataToHash
+      if (lowerCaseHashFunction === 'keccak256(utf8)') {
+
+          dataToHash = JSON.stringify(data)
+
+      }
+      if (lowerCaseHashFunction === 'keccak256(bytes)') {
+
+          dataToHash = data
+
+      }
+
+      const jsonHash = keccak256(dataToHash)
 
       // throw error if hash mismatch
       if (jsonHash !== hash) {
 
-          throw new Error(
-              'Hash mismatch, returned JSON ("'
-          + jsonHash
-          + '") is different than the one linked from the ERC725Y Smart contract: "'
-          + hash
-          + '"'
-          )
+          throw new Error(`
+              Hash mismatch, returned JSON ("${jsonHash}") is different than the one 
+              linked from the ERC725Y Smart contract: "${hash}"
+          `)
 
       }
 
@@ -404,13 +449,13 @@ export class ERC725 {
           return results
 
       } // Handle empty/non-existent array
-      const arrayLength = await utils.decodeKeyValue(schema, value.value) // get the int array length
+      const arrayLength = await decodeKeyValue(schema, value.value) // get the int array length
 
       // 2. Get the array values for the length of the array
       for (let index = 0; index < arrayLength; index++) {
 
           // 2.1 get the new schema key
-          const arrayElementKey = utils.encodeArrayKey(schema.key, index)
+          const arrayElementKey = encodeArrayKey(schema.key, index)
           let arrayElement
 
           // 2.2 Check the data first just in case.

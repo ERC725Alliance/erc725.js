@@ -1,13 +1,6 @@
 // Queries for ERC725 subgraph
 /* eslint-disable */
-import { gql } from '@apollo/client/core';
-
-interface Options {
-    offset?: number;
-    limit?: number;
-    orderBy?: string;
-    orderDirection?: 'asc' | 'desc';
-}
+import { gql } from 'graphql-tag';
 
 export const queries = {
     /**

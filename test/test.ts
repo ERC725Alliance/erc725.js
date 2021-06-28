@@ -19,18 +19,19 @@
 
 // Tests for the ERC725.js package
 import assert from 'assert'
-import * as Web3Utils from 'web3-utils'
-
+import { hexToNumber, leftPad, numberToHex } from 'web3-utils'
 import ERC725 from '../src'
-import { utils } from '../src/lib/utils'
-import { mockSchema } from './mockSchema'
-import { HttpProvider, EthereumProvider, ApolloClient } from './mockProviders'
 import {
-    generateAllRawData,
-    generateAllData,
-    generateAllResults
-} from './testHelpers'
+    decodeAllData, decodeKey, decodeKeyValue, encodeAllData, encodeKey, encodeKeyValue
+} from '../src/lib/utils'
 import { Erc725Schema } from '../src/types/Erc725Schema'
+import { ApolloClient, EthereumProvider, HttpProvider } from './mockProviders'
+import { mockSchema } from './mockSchema'
+import {
+    generateAllData, generateAllRawData, generateAllResults
+} from './testHelpers'
+
+import 'isomorphic-fetch'
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
 
@@ -103,6 +104,50 @@ describe('Running erc725.js tests...', () => {
                 ],
                 address,
                 provider
+            )
+            const result = await erc725.fetchData('TestJSONURL')
+            assert.deepStrictEqual(result, {
+                LSP3Profile: {
+                    backgroundImage:
+            'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
+                    description:
+            "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
+                    profileImage: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf'
+                }
+            })
+
+        })
+
+        it('fetchData JSONURL with custom config.ipfsGateway', async () => {
+
+            // this test does a real request, TODO replace with mock?
+
+            const provider = new HttpProvider({
+                returnData: [
+                    {
+                        key:
+              '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+                        value:
+              '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000596f357c6a733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a626400000000000000'
+                    }
+                ]
+            })
+            const erc725 = new ERC725(
+                [
+                    {
+                        name: 'TestJSONURL',
+                        key:
+              '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+                        keyType: 'Singleton',
+                        valueContent: 'JSONURL',
+                        valueType: 'bytes'
+                    }
+                ],
+                address,
+                provider,
+                {
+                    ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
+                }
             )
             const result = await erc725.fetchData('TestJSONURL')
             assert.deepStrictEqual(result, {
@@ -214,14 +259,14 @@ describe('Running erc725.js tests...', () => {
 
         it('Encode all data!', async () => {
 
-            const result = utils.encodeAllData(mockSchema, fullResults)
+            const result = encodeAllData(mockSchema, fullResults)
             assert.deepStrictEqual(result, allGraphData)
 
         })
 
         it('Decode all data!', async () => {
 
-            const result = utils.decodeAllData(mockSchema, allGraphData)
+            const result = decodeAllData(mockSchema, allGraphData)
             assert.deepStrictEqual(result, fullResults)
 
         })
@@ -262,8 +307,8 @@ describe('Running erc725.js tests...', () => {
 
                             // Push the array length into the first element of results array
                             results.push(
-                                Web3Utils.leftPad(
-                                    Web3Utils.numberToHex(schemaElement.expectedResult.length),
+                                leftPad(
+                                    numberToHex(schemaElement.expectedResult.length),
                                     64
                                 )
                             )
@@ -282,7 +327,7 @@ describe('Running erc725.js tests...', () => {
                         }
 
                         results.push(
-                            utils.encodeKeyValue(arraySchema, schemaElement.expectedResult[i])
+                            encodeKeyValue(arraySchema, schemaElement.expectedResult[i])
                         )
 
                     } // end for loop
@@ -302,11 +347,11 @@ describe('Running erc725.js tests...', () => {
                         try {
 
                             // Fail silently with anything BUT the arrayLength key
-                            Web3Utils.hexToNumber(element.value)
+                            hexToNumber(element.value)
 
                         } catch (error) {
 
-                            const result = utils.decodeKeyValue(schemaElement, element)
+                            const result = decodeKeyValue(schemaElement, element)
 
                             // Handle object types
                             if (
@@ -354,7 +399,7 @@ describe('Running erc725.js tests...', () => {
                         )
                         // handle '0x'....
                         // intendedResults = intendedResults.filter(e => e !== '0x' && e.value !== '0x')
-                        const results = utils.encodeKey(schemaElement, data)
+                        const results = encodeKey(schemaElement, data)
                         assert.deepStrictEqual(results, intendedResults)
 
                     }
@@ -371,7 +416,7 @@ describe('Running erc725.js tests...', () => {
                         const intendedResults = generateAllResults([schemaElement])[
                             schemaElement.name
                         ]
-                        const results = utils.decodeKey(schemaElement, values)
+                        const results = decodeKey(schemaElement, values)
                         assert.deepStrictEqual(results, intendedResults)
 
                     }
@@ -422,7 +467,7 @@ describe('Running erc725.js tests...', () => {
                 // SINGLETON type: This is not an array, assumed 'Singletoon
                 it('Encode data value for: ' + schemaElement.name, async () => {
 
-                    const result = utils.encodeKeyValue(
+                    const result = encodeKeyValue(
                         schemaElement,
                         schemaElement.expectedResult
                     )
@@ -432,7 +477,7 @@ describe('Running erc725.js tests...', () => {
 
                 it('Decode data value for: ' + schemaElement.name, async () => {
 
-                    const result = utils.decodeKeyValue(
+                    const result = decodeKeyValue(
                         schemaElement,
                         schemaElement.returnGraphData
                     )

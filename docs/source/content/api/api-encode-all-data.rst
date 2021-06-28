@@ -1,7 +1,7 @@
 .. _api-encode-all-data:
 
 ==================================================
-encodeAll Data
+encodeAllData
 ==================================================
 
 This will talk about encoding all data
