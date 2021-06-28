@@ -1,6 +1,11 @@
 tsconfig.json
+tsconfig.module.json
+tsconfig.tsbuildinfo
+tsconfig.module.tsbuildinfo
+requirements.txt
 src
 test
+docs
 .idea
 .vscode
 .github
