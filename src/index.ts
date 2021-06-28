@@ -19,7 +19,6 @@
  */
 
 import { isAddress, keccak256, toChecksumAddress } from 'web3-utils'
-import axios from 'axios'
 
 import GraphSource from './providers/subgraphProviderWrapper'
 import Web3Source from './providers/web3ProviderWrapper'
@@ -297,31 +296,21 @@ export class ERC725 {
       case 'jsonurl':
       case 'asseturl': {
 
-          let responseType
-          let dataToHash
           const lowerCaseHashFunction = result.hashFunction.toLowerCase()
 
-          // determine the decoding
-          // options: 'arraybuffer', 'document', 'json', 'text', 'stream', Browser: 'blob'
-          if (lowerCaseHashFunction === 'keccak256(utf8)') {
-
-              responseType = 'json'
-
-          }
-          if (lowerCaseHashFunction === 'keccak256(bytes)') {
-
-              responseType = 'arraybuffer'
-
-          }
-
-          // console.log(result)
           let response
           try {
 
-              response = await axios({
-                  method: 'get',
-                  url: result.url,
-                  responseType
+              response = await fetch(result.url).then(a => {
+
+                  if (lowerCaseHashFunction === 'keccak256(bytes)') {
+
+                      return a.arrayBuffer().then(buffer => new Uint8Array(buffer))
+
+                  }
+
+                  return a.json()
+
               })
 
           } catch (error) {
@@ -331,25 +320,8 @@ export class ERC725 {
 
           }
 
-
-          // console.log(response.data)
-
-          // determine the transformation of the data, before hashing
-          if (lowerCaseHashFunction === 'keccak256(utf8)') {
-
-              dataToHash = JSON.stringify(response.data)
-
-          }
-          if (lowerCaseHashFunction === 'keccak256(bytes)') {
-
-              dataToHash = response.data
-
-          }
-
-          return response
-          && response.data
-          && this._hashAndCompare(dataToHash, result.hash)
-              ? response.data
+          return response && this._hashAndCompare(response, result.hash, lowerCaseHashFunction)
+              ? response
               : null
 
       }
@@ -419,20 +391,29 @@ export class ERC725 {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  _hashAndCompare(data, hash: string) {
+  _hashAndCompare(data, hash: string, lowerCaseHashFunction: string) {
 
-      const jsonHash = keccak256(data)
+      let dataToHash
+      if (lowerCaseHashFunction === 'keccak256(utf8)') {
+
+          dataToHash = JSON.stringify(data)
+
+      }
+      if (lowerCaseHashFunction === 'keccak256(bytes)') {
+
+          dataToHash = data
+
+      }
+
+      const jsonHash = keccak256(dataToHash)
 
       // throw error if hash mismatch
       if (jsonHash !== hash) {
 
-          throw new Error(
-              'Hash mismatch, returned JSON ("'
-          + jsonHash
-          + '") is different than the one linked from the ERC725Y Smart contract: "'
-          + hash
-          + '"'
-          )
+          throw new Error(`
+              Hash mismatch, returned JSON ("${jsonHash}") is different than the one 
+              linked from the ERC725Y Smart contract: "${hash}"
+          `)
 
       }
 

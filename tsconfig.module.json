@@ -1,8 +1,8 @@
 {
     "extends": "./tsconfig",
     "compilerOptions": {
-      "target": "es2017",
+      "target": "es2015",
       "outDir": "build/module",
-      "module": "es2017"
+      "module": "es2015"
     },
   }
