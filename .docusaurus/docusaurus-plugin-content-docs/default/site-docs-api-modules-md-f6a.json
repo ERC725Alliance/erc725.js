@@ -1,0 +1,30 @@
+{
+  "unversionedId": "api/modules",
+  "id": "api/modules",
+  "isDocsHomePage": false,
+  "title": "erc725.js",
+  "description": "Classes",
+  "source": "@site/docs/api/modules.md",
+  "sourceDirName": "api",
+  "slug": "/api/modules",
+  "permalink": "/api/modules",
+  "editUrl": null,
+  "version": "current",
+  "sidebarPosition": 0.5,
+  "frontMatter": {
+    "id": "modules",
+    "title": "erc725.js",
+    "sidebar_label": "Exports",
+    "sidebar_position": 0.5,
+    "custom_edit_url": null
+  },
+  "sidebar": "defaultSidebar",
+  "previous": {
+    "title": "Readme",
+    "permalink": "/api"
+  },
+  "next": {
+    "title": "ERC725",
+    "permalink": "/api/classes/erc725"
+  }
+}

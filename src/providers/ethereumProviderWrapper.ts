@@ -25,7 +25,7 @@
 import * as abi from 'web3-eth-abi'
 
 import { CONSTANTS } from '../lib/constants'
-import { Method } from '../types/Method'
+import { Method } from '../types/method'
 
 // @ts-ignore
 const web3Abi = abi.default

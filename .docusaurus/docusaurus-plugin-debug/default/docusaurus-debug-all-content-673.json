@@ -1,0 +1,243 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "loadedVersions": [
+        {
+          "versionName": "current",
+          "versionLabel": "Next",
+          "versionPath": "/",
+          "versionEditUrl": "https://github.com/lukso-network/docs-website/tree/main/docs",
+          "versionEditUrlLocalized": "https://github.com/lukso-network/docs-website/tree/main/i18n/en/docusaurus-plugin-content-docs/current",
+          "versionBanner": "none",
+          "isLast": true,
+          "routePriority": -1,
+          "contentPath": "/home/rryter/Projects/erc725.js/docs",
+          "contentPathLocalized": "/home/rryter/Projects/erc725.js/i18n/en/docusaurus-plugin-content-docs/current",
+          "mainDocId": "api/index",
+          "sidebars": {
+            "defaultSidebar": [
+              {
+                "type": "category",
+                "label": "API",
+                "items": [
+                  {
+                    "type": "doc",
+                    "id": "api/index",
+                    "label": "Readme"
+                  },
+                  {
+                    "type": "doc",
+                    "id": "api/modules",
+                    "label": "Exports"
+                  },
+                  {
+                    "type": "category",
+                    "label": "Classes",
+                    "items": [
+                      {
+                        "type": "doc",
+                        "id": "api/classes/erc725",
+                        "label": "ERC725"
+                      }
+                    ],
+                    "collapsed": true
+                  },
+                  {
+                    "type": "category",
+                    "label": "Interfaces",
+                    "items": [
+                      {
+                        "type": "doc",
+                        "id": "api/interfaces/erc725config",
+                        "label": "ERC725Config"
+                      },
+                      {
+                        "type": "doc",
+                        "id": "api/interfaces/erc725schema",
+                        "label": "ERC725Schema"
+                      }
+                    ],
+                    "collapsed": true
+                  }
+                ],
+                "collapsed": true
+              }
+            ]
+          },
+          "permalinkToSidebar": {
+            "/api/classes/erc725": "defaultSidebar",
+            "/api": "defaultSidebar",
+            "/api/interfaces/erc725config": "defaultSidebar",
+            "/api/interfaces/erc725schema": "defaultSidebar",
+            "/api/modules": "defaultSidebar"
+          },
+          "docs": [
+            {
+              "unversionedId": "api/classes/erc725",
+              "id": "api/classes/erc725",
+              "isDocsHomePage": false,
+              "title": "Class: ERC725",
+              "description": "This package is currently in early stages of development, use only for testing or experimentation purposes.",
+              "source": "@site/docs/api/classes/erc725.md",
+              "sourceDirName": "api/classes",
+              "slug": "/api/classes/erc725",
+              "permalink": "/api/classes/erc725",
+              "editUrl": null,
+              "version": "current",
+              "sidebarPosition": 0,
+              "frontMatter": {
+                "id": "erc725",
+                "title": "Class: ERC725",
+                "sidebar_label": "ERC725",
+                "sidebar_position": 0,
+                "custom_edit_url": null
+              },
+              "sidebar": "defaultSidebar",
+              "previous": {
+                "title": "Exports",
+                "permalink": "/api/modules"
+              },
+              "next": {
+                "title": "ERC725Config",
+                "permalink": "/api/interfaces/erc725config"
+              }
+            },
+            {
+              "unversionedId": "api/index",
+              "id": "api/index",
+              "isDocsHomePage": false,
+              "title": "erc725.js",
+              "description": "This library allows for interfacing with ERC725Y compliant contract on an EVM using the ERC725YJSONSchema.",
+              "source": "@site/docs/api/index.md",
+              "sourceDirName": "api",
+              "slug": "/api",
+              "permalink": "/api",
+              "editUrl": null,
+              "version": "current",
+              "sidebarPosition": 0,
+              "frontMatter": {
+                "id": "index",
+                "title": "erc725.js",
+                "slug": "/api",
+                "sidebar_label": "Readme",
+                "sidebar_position": 0,
+                "custom_edit_url": null
+              },
+              "sidebar": "defaultSidebar",
+              "next": {
+                "title": "Exports",
+                "permalink": "/api/modules"
+              }
+            },
+            {
+              "unversionedId": "api/interfaces/erc725config",
+              "id": "api/interfaces/erc725config",
+              "isDocsHomePage": false,
+              "title": "Interface: ERC725Config",
+              "description": "Properties",
+              "source": "@site/docs/api/interfaces/erc725config.md",
+              "sourceDirName": "api/interfaces",
+              "slug": "/api/interfaces/erc725config",
+              "permalink": "/api/interfaces/erc725config",
+              "editUrl": null,
+              "version": "current",
+              "sidebarPosition": 0,
+              "frontMatter": {
+                "id": "erc725config",
+                "title": "Interface: ERC725Config",
+                "sidebar_label": "ERC725Config",
+                "sidebar_position": 0,
+                "custom_edit_url": null
+              },
+              "sidebar": "defaultSidebar",
+              "previous": {
+                "title": "ERC725",
+                "permalink": "/api/classes/erc725"
+              },
+              "next": {
+                "title": "ERC725Schema",
+                "permalink": "/api/interfaces/erc725schema"
+              }
+            },
+            {
+              "unversionedId": "api/interfaces/erc725schema",
+              "id": "api/interfaces/erc725schema",
+              "isDocsHomePage": false,
+              "title": "Interface: ERC725Schema",
+              "description": "Properties",
+              "source": "@site/docs/api/interfaces/erc725schema.md",
+              "sourceDirName": "api/interfaces",
+              "slug": "/api/interfaces/erc725schema",
+              "permalink": "/api/interfaces/erc725schema",
+              "editUrl": null,
+              "version": "current",
+              "sidebarPosition": 0,
+              "frontMatter": {
+                "id": "erc725schema",
+                "title": "Interface: ERC725Schema",
+                "sidebar_label": "ERC725Schema",
+                "sidebar_position": 0,
+                "custom_edit_url": null
+              },
+              "sidebar": "defaultSidebar",
+              "previous": {
+                "title": "ERC725Config",
+                "permalink": "/api/interfaces/erc725config"
+              }
+            },
+            {
+              "unversionedId": "api/modules",
+              "id": "api/modules",
+              "isDocsHomePage": false,
+              "title": "erc725.js",
+              "description": "Classes",
+              "source": "@site/docs/api/modules.md",
+              "sourceDirName": "api",
+              "slug": "/api/modules",
+              "permalink": "/api/modules",
+              "editUrl": null,
+              "version": "current",
+              "sidebarPosition": 0.5,
+              "frontMatter": {
+                "id": "modules",
+                "title": "erc725.js",
+                "sidebar_label": "Exports",
+                "sidebar_position": 0.5,
+                "custom_edit_url": null
+              },
+              "sidebar": "defaultSidebar",
+              "previous": {
+                "title": "Readme",
+                "permalink": "/api"
+              },
+              "next": {
+                "title": "ERC725",
+                "permalink": "/api/classes/erc725"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "docusaurus-plugin-content-blog": {
+    "default": {
+      "blogPosts": [],
+      "blogListPaginated": [],
+      "blogTags": {},
+      "blogTagsListPath": null
+    }
+  },
+  "docusaurus-plugin-content-pages": {
+    "default": null
+  },
+  "docusaurus-plugin-debug": {
+    "default": null
+  },
+  "docusaurus-theme-classic": {
+    "default": null
+  },
+  "undefined": {
+    "default": null
+  }
+}

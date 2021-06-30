@@ -1,5 +1,5 @@
 import { numberToHex, keccak256 } from 'web3-utils'
-import { MethodData, Encoding, Method } from '../types/Method'
+import { MethodData, Encoding, Method } from '../types/method'
 
 interface Constants {
     methods: Record<Method, MethodData>;

@@ -20,14 +20,14 @@
 import {
     checkAddressChecksum, isAddress, keccak256, leftPad, numberToHex, padLeft
 } from 'web3-utils'
-import { Erc725Schema } from '../types/Erc725Schema'
+import { ERC725Schema } from '../types/erc725-schema'
 
 import {
     decodeValueContent, decodeValueType, encodeValueContent, encodeValueType, valueContentEncodingMap as valueContentMap
 } from './encoder'
 
 type Erc725ObjectSchema = Pick<
-    Erc725Schema,
+    ERC725Schema,
     'key' | 'keyType' | 'valueContent' | 'valueType' | 'name'
 >;
 
@@ -172,7 +172,7 @@ export function encodeKeyName(name: string) {
  * @return Modified schema element of keyType 'Singleton' for fetching or decoding/encoding the array element
  */
 export function transposeArraySchema(
-    schema: Erc725Schema,
+    schema: ERC725Schema,
     index: number
 ): Erc725ObjectSchema {
 
@@ -207,7 +207,7 @@ export function transposeArraySchema(
  * @param value will be either key/value pairs for a key type of Array, or a single value for type Singleton
  * @return the encoded value for the key as per the supplied schema
  */
-export function encodeKey(schema: Erc725Schema, value) {
+export function encodeKey(schema: ERC725Schema, value) {
 
     // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
     if (schema.keyType.toLowerCase() === 'array' && Array.isArray(value)) {
@@ -264,7 +264,7 @@ export function encodeKey(schema: Erc725Schema, value) {
  * @param data data is an array of objects of key/value pairs
  * @return: all encoded data as per required by the schema and provided data
  */
-export function encodeAllData(schemas: Erc725Schema[], data) {
+export function encodeAllData(schemas: ERC725Schema[], data) {
 
     const results: {key: string, value: string}[] = []
 
@@ -401,7 +401,7 @@ export function decodeKeyValue(schemaElementDefinition, value) {
  * @param value will be either key/value pairs for a key type of Array, or a single value for type Singleton
  * @return the decoded value/values as per the schema definition
  */
-export function decodeKey(schema: Erc725Schema, value) {
+export function decodeKey(schema: ERC725Schema, value) {
 
     if (schema.keyType.toLowerCase() === 'array') {
 
@@ -475,7 +475,7 @@ export function decodeKey(schema: Erc725Schema, value) {
  * @param data data is an array of objects of key/value pairs
  * @return: all decoded data as per required by the schema and provided data
  */
-export function decodeAllData(schemas: Erc725Schema[], data) {
+export function decodeAllData(schemas: ERC725Schema[], data) {
 
     const results = {}
 
@@ -502,7 +502,7 @@ export function decodeAllData(schemas: Erc725Schema[], data) {
  * @param {string} key A string of either the schema element name, or key
  * @return The requested schema element from the full array of schemas
  */
-export function getSchemaElement(schemas: Erc725Schema[], key: string) {
+export function getSchemaElement(schemas: ERC725Schema[], key: string) {
 
     const keyHash = key.substr(0, 2) !== '0x' ? encodeKeyName(key) : key
     const schemaElement = schemas.find(e => e.key === keyHash)

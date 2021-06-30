@@ -1,0 +1,64 @@
+{
+  "pluginId": "default",
+  "version": "current",
+  "label": "Next",
+  "banner": "none",
+  "isLast": true,
+  "docsSidebars": {
+    "defaultSidebar": [
+      {
+        "type": "category",
+        "label": "API",
+        "items": [
+          {
+            "type": "link",
+            "label": "Readme",
+            "href": "/api"
+          },
+          {
+            "type": "link",
+            "label": "Exports",
+            "href": "/api/modules"
+          },
+          {
+            "type": "category",
+            "label": "Classes",
+            "items": [
+              {
+                "type": "link",
+                "label": "ERC725",
+                "href": "/api/classes/erc725"
+              }
+            ],
+            "collapsed": true
+          },
+          {
+            "type": "category",
+            "label": "Interfaces",
+            "items": [
+              {
+                "type": "link",
+                "label": "ERC725Config",
+                "href": "/api/interfaces/erc725config"
+              },
+              {
+                "type": "link",
+                "label": "ERC725Schema",
+                "href": "/api/interfaces/erc725schema"
+              }
+            ],
+            "collapsed": true
+          }
+        ],
+        "collapsed": true
+      }
+    ]
+  },
+  "permalinkToSidebar": {
+    "/api/classes/erc725": "defaultSidebar",
+    "/api": "defaultSidebar",
+    "/api/interfaces/erc725config": "defaultSidebar",
+    "/api/interfaces/erc725schema": "defaultSidebar",
+    "/api/modules": "defaultSidebar"
+  }
+}

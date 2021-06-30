@@ -1,0 +1,23 @@
+{
+  "unversionedId": "classes/erc725",
+  "id": "classes/erc725",
+  "isDocsHomePage": false,
+  "title": "erc725",
+  "description": "erc725.js / Exports / ERC725",
+  "source": "@site/docs/classes/erc725.md",
+  "sourceDirName": "classes",
+  "slug": "/classes/erc725",
+  "permalink": "/classes/erc725",
+  "editUrl": "https://github.com/lukso-network/docs-website/tree/main/docs/classes/erc725.md",
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "defaultSidebar",
+  "previous": {
+    "title": "Erc725Schema",
+    "permalink": "/api/interfaces/erc725schema"
+  },
+  "next": {
+    "title": "erc725schema",
+    "permalink": "/interfaces/erc725schema"
+  }
+}

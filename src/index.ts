@@ -28,13 +28,13 @@ import {
 } from './lib/utils'
 
 import {
-    Erc725Schema,
-    Erc725SchemaKeyType,
-    Erc725SchemaValueContent,
-    Erc725SchemaValueType
-} from './types/Erc725Schema'
+    ERC725Schema,
+    ERC725SchemaKeyType,
+    ERC725SchemaValueContent,
+    ERC725SchemaValueType
+} from './types/erc725-schema'
 
-import { ERC725Config } from './types/Config'
+import { ERC725Config } from './types/erc725-config'
 
 enum ProviderType {
   GRAPH = 'graph',
@@ -43,12 +43,59 @@ enum ProviderType {
 }
 
 export {
-    Erc725Schema,
-    Erc725SchemaKeyType,
-    Erc725SchemaValueContent,
-    Erc725SchemaValueType
+    ERC725Schema,
+    ERC725SchemaKeyType,
+    ERC725SchemaValueContent,
+    ERC725SchemaValueType,
+    ERC725Config
 }
 
+/**
+ * :::caution
+ *
+ * This package is currently in early stages of development, use only for testing or experimentation purposes.
+ *
+ * :::
+ *
+ * ## Usage
+ *
+ * ```js
+ *
+ * // Part of LSP3-UniversalProfile Schema
+ * // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
+ * const schemas = [
+ *   {
+ *     name: "SupportedStandards:ERC725Account",
+ *     key: "0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6",
+ *     keyType: "Mapping",
+ *     valueContent: "0xafdeb5d6",
+ *     valueType: "bytes",
+ *   },
+ *   {
+ *     name: "LSP3Profile",
+ *     key: "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
+ *     keyType: "Singleton",
+ *     valueContent: "JSONURL",
+ *     valueType: "bytes",
+ *   },
+ *   {
+ *     name: "LSP1UniversalReceiverDelegate",
+ *     key: "0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47",
+ *     keyType: "Singleton",
+ *     valueContent: "Address",
+ *     valueType: "address",
+ *   },
+ * ];
+ *
+ * const addresss = "0x0c03fba782b07bcf810deb3b7f0595024a444f4e";
+ * const provider = new Web3.providers.HttpProvider("https://rpc.l14.lukso.network");
+ * const config = {
+ *   ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
+ * };
+ *
+ * let myERC725 = new ERC725(schemas, address, provider, config)
+ * ```
+ */
 export class ERC725 {
 
   options: {
@@ -59,7 +106,7 @@ export class ERC725 {
     config: ERC725Config;
   };
 
-  constructor(schema: Erc725Schema[], address?: string, provider?: any, config?: ERC725Config) {
+  constructor(schema: ERC725Schema[], address?: string, provider?: any, config?: ERC725Config) {
 
       // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
 
@@ -139,7 +186,7 @@ export class ERC725 {
    * @param {*} [customSchema] An optional schema to override attached schema of ERC725 class instance.
    * @returns Returns decoded data as defined and expected in the schema
    */
-  async getData(key: string, customSchema?: Erc725Schema) {
+  async getData(key: string, customSchema?: ERC725Schema) {
 
       if (!isAddress(this.options.address)) {
 
@@ -165,7 +212,7 @@ export class ERC725 {
       if (keySchema.keyType.toLowerCase() === 'array') {
 
           const dat = [{ key: keySchema.key, value: rawData }]
-          const res = await this._getArrayValues(keySchema, dat)
+          const res = await this.getArrayValues(keySchema, dat)
 
           // Handle empty arrays
           if (res && res.length > 0) {
@@ -229,7 +276,7 @@ export class ERC725 {
           for (let index = 0; index < arraySchemas.length; index++) {
 
               const schemaElement = arraySchemas[index]
-              const arrayValues = await this._getArrayValues(
+              const arrayValues = await this.getArrayValues(
                   schemaElement,
                   allRawData
               )
@@ -275,7 +322,7 @@ export class ERC725 {
    *                     Overrides attached schema of instance on this call only.
    * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData
    */
-  async fetchData(key: string, customSchema?: Erc725Schema) {
+  async fetchData(key: string, customSchema?: ERC725Schema) {
 
       const schema = customSchema ? [customSchema] : this.options.schema
       const keySchema = getSchemaElement(schema, key)
@@ -320,7 +367,7 @@ export class ERC725 {
 
           }
 
-          return response && this._hashAndCompare(response, result.hash, lowerCaseHashFunction)
+          return response && ERC725.hashAndCompare(response, result.hash, lowerCaseHashFunction)
               ? response
               : null
 
@@ -390,8 +437,12 @@ export class ERC725 {
 
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  _hashAndCompare(data, hash: string, lowerCaseHashFunction: string) {
+
+  /**
+   * Hashes the data received with the specified hashing function,
+   * and compares the result with the provided hash.
+   */
+  private static hashAndCompare(data: unknown, hash: string, lowerCaseHashFunction: string) {
 
       let dataToHash
       if (lowerCaseHashFunction === 'keccak256(utf8)') {
@@ -422,19 +473,19 @@ export class ERC725 {
   }
 
   /**
-   *
+   * @internal
    * @param schema assodiated with the schema with keyType = 'Array'
    *               the data includes the raw (encoded) length key/value pair for the array
    * @param data array of key/value pairs, one of which is the length key for the schema array
    *             Data can hold other field data not relevant here, and will be ignored
    * @return an array of keys/values
    */
-  async _getArrayValues(schema: Erc725Schema, data: Record<string, any>) {
+  private async getArrayValues(schema: ERC725Schema, data: Record<string, any>) {
 
       if (schema.keyType !== 'Array') {
 
           throw new Error(
-              `The "_getArrayFields" method requires a schema definition with "keyType: Array",
+              `The "getArrayFields" method requires a schema definition with "keyType: Array",
         ${schema}`
           )
 
@@ -483,5 +534,3 @@ export class ERC725 {
   }
 
 }
-
-export default ERC725

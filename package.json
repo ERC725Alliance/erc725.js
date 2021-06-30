@@ -11,7 +11,8 @@
     "build:module": "tsc -p tsconfig.module.json",
     "test": "npm run lint && env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha",
     "lint": "eslint . --ext .ts",
-    "build-publish": "rm -rf build && npm run build && npm publish"
+    "build-publish": "rm -rf build && npm run build && npm publish",
+    "docs:dev": "TYPEDOC_WATCH=true ./node_modules/.bin/docusaurus start"
   },
   "repository": {
     "type": "git",
@@ -47,6 +48,7 @@
     "@typescript-eslint/eslint-plugin": "^4.26.1",
     "@typescript-eslint/parser": "^4.26.1",
     "assert": "^2.0.0",
+    "docusaurus-plugin-typedoc": "^0.15.0",
     "eslint": "^7.28.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.23.4",
@@ -54,7 +56,11 @@
     "mocha": "^9.0.0",
     "npm-run-all": "^4.1.5",
     "ts-node": "^10.0.0",
-    "typescript": "^4.3.2"
+    "typedoc": "^0.21.2",
+    "typedoc-plugin-markdown": "^3.10.2",
+    "typescript": "^4.3.2",
+    "@docusaurus/core": "2.0.0-beta.2",
+    "@docusaurus/preset-classic": "2.0.0-beta.2"
   },
   "dependencies": {
     "graphql-tag": "2.12.4",

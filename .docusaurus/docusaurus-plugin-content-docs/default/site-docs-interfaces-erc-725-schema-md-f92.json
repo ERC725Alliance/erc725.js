@@ -1,0 +1,23 @@
+{
+  "unversionedId": "interfaces/erc725schema",
+  "id": "interfaces/erc725schema",
+  "isDocsHomePage": false,
+  "title": "erc725schema",
+  "description": "erc725.js / Exports / Erc725Schema",
+  "source": "@site/docs/interfaces/erc725schema.md",
+  "sourceDirName": "interfaces",
+  "slug": "/interfaces/erc725schema",
+  "permalink": "/interfaces/erc725schema",
+  "editUrl": "https://github.com/lukso-network/docs-website/tree/main/docs/interfaces/erc725schema.md",
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "defaultSidebar",
+  "previous": {
+    "title": "erc725",
+    "permalink": "/classes/erc725"
+  },
+  "next": {
+    "title": "modules",
+    "permalink": "/modules"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/",
+          "mainDocId": "api/index",
+          "docs": [
+            {
+              "id": "api/classes/erc725",
+              "path": "/api/classes/erc725",
+              "sidebar": "defaultSidebar"
+            },
+            {
+              "id": "api/index",
+              "path": "/api",
+              "sidebar": "defaultSidebar"
+            },
+            {
+              "id": "api/interfaces/erc725config",
+              "path": "/api/interfaces/erc725config",
+              "sidebar": "defaultSidebar"
+            },
+            {
+              "id": "api/interfaces/erc725schema",
+              "path": "/api/interfaces/erc725schema",
+              "sidebar": "defaultSidebar"
+            },
+            {
+              "id": "api/modules",
+              "path": "/api/modules",
+              "sidebar": "defaultSidebar"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
