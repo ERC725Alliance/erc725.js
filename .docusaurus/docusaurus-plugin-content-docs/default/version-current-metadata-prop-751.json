@@ -12,13 +12,8 @@
         "items": [
           {
             "type": "link",
-            "label": "Readme",
-            "href": "/api"
-          },
-          {
-            "type": "link",
             "label": "Exports",
-            "href": "/api/modules"
+            "href": "/api"
           },
           {
             "type": "category",
@@ -58,7 +53,6 @@
     "/api/classes/erc725": "defaultSidebar",
     "/api": "defaultSidebar",
     "/api/interfaces/erc725config": "defaultSidebar",
-    "/api/interfaces/erc725schema": "defaultSidebar",
-    "/api/modules": "defaultSidebar"
+    "/api/interfaces/erc725schema": "defaultSidebar"
   }
 }

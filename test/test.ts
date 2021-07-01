@@ -20,11 +20,10 @@
 // Tests for the ERC725.js package
 import assert from 'assert'
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils'
-import ERC725 from '../src'
+import { ERC725, ERC725Schema } from '../src'
 import {
     decodeAllData, decodeKey, decodeKeyValue, encodeAllData, encodeKey, encodeKeyValue
 } from '../src/lib/utils'
-import { Erc725Schema } from '../src/types/Erc725Schema'
 import { ApolloClient, EthereumProvider, HttpProvider } from './mockProviders'
 import { mockSchema } from './mockSchema'
 import {
@@ -316,7 +315,7 @@ describe('Running erc725.js tests...', () => {
                         }
                         // Change the encoding on the schema....
                         // const arraySchema = schemaElement
-                        const arraySchema: Erc725Schema = {
+                        const arraySchema: ERC725Schema = {
                             name: schemaElement.name,
                             key: schemaElement.key,
                             keyType: 'Singleton',

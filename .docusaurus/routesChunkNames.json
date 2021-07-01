@@ -1,48 +1,22 @@
 {
-  "/__docusaurus/debug-3d6": {
-    "component": "component---theme-debug-config-23-a-2ff"
-  },
-  "/__docusaurus/debug/config-914": {
-    "component": "component---theme-debug-config-23-a-2ff"
-  },
-  "/__docusaurus/debug/content-c28": {
-    "component": "component---theme-debug-contentba-8-ce7",
-    "allContent": "allContent---docusaurus-debug-content-246-9aa"
-  },
-  "/__docusaurus/debug/globalData-3cf": {
-    "component": "component---theme-debug-global-dataede-0fa"
-  },
-  "/__docusaurus/debug/metadata-31b": {
-    "component": "component---theme-debug-site-metadata-68-e-3d4"
-  },
-  "/__docusaurus/debug/registry-0da": {
-    "component": "component---theme-debug-registry-679-501"
-  },
-  "/__docusaurus/debug/routes-244": {
-    "component": "component---theme-debug-routes-946-699"
-  },
-  "/-6f5": {
-    "component": "component---theme-doc-page-1-be-9be",
-    "versionMetadata": "versionMetadata---935-fcf"
+  "/-8be": {
+    "component": "1be78505",
+    "versionMetadata": "935f2afb"
   },
   "/api-f68": {
-    "component": "component---theme-doc-item-178-a40",
-    "content": "content---api-5-e-8-80e"
+    "component": "17896441",
+    "content": "5e8c322a"
   },
   "/api/classes/erc725-ce7": {
-    "component": "component---theme-doc-item-178-a40",
-    "content": "content---api-classes-erc-725873-f30"
+    "component": "17896441",
+    "content": "873eb1bf"
   },
   "/api/interfaces/erc725config-136": {
-    "component": "component---theme-doc-item-178-a40",
-    "content": "content---api-interfaces-erc-725-config-5-f-9-a13"
+    "component": "17896441",
+    "content": "5f9db386"
   },
   "/api/interfaces/erc725schema-0cb": {
-    "component": "component---theme-doc-item-178-a40",
-    "content": "content---api-interfaces-erc-725-schema-948-0b3"
-  },
-  "/api/modules-5c3": {
-    "component": "component---theme-doc-item-178-a40",
-    "content": "content---api-modulesf-6-a-a5a"
+    "component": "17896441",
+    "content": "948e9295"
   }
 }

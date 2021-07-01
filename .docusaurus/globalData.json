@@ -29,11 +29,6 @@
               "id": "api/interfaces/erc725schema",
               "path": "/api/interfaces/erc725schema",
               "sidebar": "defaultSidebar"
-            },
-            {
-              "id": "api/modules",
-              "path": "/api/modules",
-              "sidebar": "defaultSidebar"
             }
           ]
         }

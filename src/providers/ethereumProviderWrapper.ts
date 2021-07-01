@@ -45,25 +45,25 @@ export default class EthereumSource {
 
     async getOwner(address: string) {
 
-        const params = this._constructJSONRPC(address, Method.OWNER)
-        const result = await this._callContract([params])
+        const params = EthereumSource.constructJSONRPC(address, Method.OWNER)
+        const result = await this.callContract([params])
         if (result.error) {
 
             throw result.error
 
         }
 
-        return this._decodeResult(Method.OWNER, result)
+        return EthereumSource.decodeResult(Method.OWNER, result)
 
     }
 
     async getData(address: string, keyHash: string) {
 
-        let result = await this._callContract([
-            this._constructJSONRPC(address, Method.GET_DATA, keyHash)
+        let result = await this.callContract([
+            EthereumSource.constructJSONRPC(address, Method.GET_DATA, keyHash)
         ])
         result = this.deprecated ? result.result : result
-        return this._decodeResult(Method.GET_DATA, result)
+        return EthereumSource.decodeResult(Method.GET_DATA, result)
 
     }
 
@@ -87,8 +87,7 @@ export default class EthereumSource {
 
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    _constructJSONRPC(address: string, method: Method, methodParam?: string) {
+    private static constructJSONRPC(address: string, method: Method, methodParam?: string) {
 
         const data = methodParam
             ? CONSTANTS.methods[method].sig + methodParam.replace('0x', '')
@@ -104,7 +103,7 @@ export default class EthereumSource {
 
     }
 
-    async _callContract(params: any) {
+    private async callContract(params: any) {
 
         return this.deprecated
             ? this.provider.send('eth_call', params)
@@ -112,8 +111,7 @@ export default class EthereumSource {
 
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    _decodeResult(method: Method, result: string) {
+    private static decodeResult(method: Method, result: string) {
 
         if (!CONSTANTS.methods[method]) {
 
@@ -127,7 +125,7 @@ export default class EthereumSource {
         return result === '0x'
             ? null
             // eslint-disable-next-line operator-linebreak
-            : // @ts-ignore
+            :
             web3Abi.decodeParameter(
                 CONSTANTS.methods[method].returnEncoding,
                 result

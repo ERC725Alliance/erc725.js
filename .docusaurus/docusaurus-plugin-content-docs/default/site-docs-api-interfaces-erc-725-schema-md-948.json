@@ -3,7 +3,7 @@
   "id": "api/interfaces/erc725schema",
   "isDocsHomePage": false,
   "title": "Interface: ERC725Schema",
-  "description": "Properties",
+  "description": "`javascript title=Example",
   "source": "@site/docs/api/interfaces/erc725schema.md",
   "sourceDirName": "api/interfaces",
   "slug": "/api/interfaces/erc725schema",

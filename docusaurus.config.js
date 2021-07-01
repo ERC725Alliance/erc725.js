@@ -2,6 +2,7 @@ module.exports = {
     title: 'erc725.js',
     baseUrl: '/',
     url: 'http://docs.lukso.network',
+    onBrokenLinks: 'log',
     plugins: [
         [
             'docusaurus-plugin-typedoc',
@@ -9,7 +10,10 @@ module.exports = {
             // Plugin / TypeDoc options
             {
                 entryPoints: ['./src/index.ts'],
-                tsconfig: './tsconfig.json'
+                tsconfig: './tsconfig.json',
+                watch: process.env.TYPEDOC_WATCH,
+                excludeInternal: true,
+                readme: 'none'
             }
         ]
     ],
@@ -20,8 +24,7 @@ module.exports = {
                 readme: 'none',
                 docs: {
                     routeBasePath: '/',
-                    editUrl:
-                'https://github.com/lukso-network/docs-website/tree/main/'
+                    editUrl: 'https://github.com/lukso-network/docs-website/tree/main/'
                 }
             }
         ]

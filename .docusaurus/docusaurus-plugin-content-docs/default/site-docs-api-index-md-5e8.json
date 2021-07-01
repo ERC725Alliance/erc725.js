@@ -3,25 +3,25 @@
   "id": "api/index",
   "isDocsHomePage": false,
   "title": "erc725.js",
-  "description": "This library allows for interfacing with ERC725Y compliant contract on an EVM using the ERC725YJSONSchema.",
+  "description": "Classes",
   "source": "@site/docs/api/index.md",
   "sourceDirName": "api",
   "slug": "/api",
   "permalink": "/api",
   "editUrl": null,
   "version": "current",
-  "sidebarPosition": 0,
+  "sidebarPosition": 0.5,
   "frontMatter": {
     "id": "index",
     "title": "erc725.js",
     "slug": "/api",
-    "sidebar_label": "Readme",
-    "sidebar_position": 0,
+    "sidebar_label": "Exports",
+    "sidebar_position": 0.5,
     "custom_edit_url": null
   },
   "sidebar": "defaultSidebar",
   "next": {
-    "title": "Exports",
-    "permalink": "/api/modules"
+    "title": "ERC725",
+    "permalink": "/api/classes/erc725"
   }
 }

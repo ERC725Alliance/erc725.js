@@ -44,8 +44,8 @@ export default class Web3Source {
 
     async getOwner(address: string) {
 
-        const result = await this._callContract(
-            this._constructJSONRPC(address, Method.OWNER)
+        const result = await this.callContract(
+            Web3Source.constructJSONRPC(address, Method.OWNER)
         )
         // @ts-ignore
         if (result.error) {
@@ -55,16 +55,16 @@ export default class Web3Source {
 
         }
 
-        return this._decodeResult(Method.OWNER, result)
+        return Web3Source.decodeResult(Method.OWNER, result)
 
     }
 
     async getData(address: string, keyHash: string) {
 
-        return this._decodeResult(
+        return Web3Source.decodeResult(
             Method.GET_DATA,
-            await this._callContract(
-                this._constructJSONRPC(address, Method.GET_DATA, keyHash)
+            await this.callContract(
+                Web3Source.constructJSONRPC(address, Method.GET_DATA, keyHash)
             )
         )
 
@@ -77,13 +77,13 @@ export default class Web3Source {
         for (let index = 0; index < keys.length; index++) {
 
             payload.push(
-                this._constructJSONRPC(address, Method.GET_DATA, keys[index])
+                Web3Source.constructJSONRPC(address, Method.GET_DATA, keys[index])
             )
 
         }
 
         // call node
-        const results: any = await this._callContract(payload)
+        const results: any = await this.callContract(payload)
 
         // map results to keys
         const returnValues: {
@@ -94,7 +94,7 @@ export default class Web3Source {
 
             returnValues.push({
                 key: keys[index],
-                value: this._decodeResult(
+                value: Web3Source.decodeResult(
                     Method.GET_DATA,
                     results.find(element => payload[index].id === element.id)
                 )
@@ -106,8 +106,7 @@ export default class Web3Source {
 
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    _constructJSONRPC(
+    private static constructJSONRPC(
         address: string,
         method: Method,
         methodParam?: string
@@ -141,20 +140,20 @@ export default class Web3Source {
 
     }
 
-    async _callContract(payload) {
+    private async callContract(payload) {
 
         return new Promise((resolve, reject) => {
 
             // Send old web3 method with callback to resolve promise
-            this.provider.send(payload, (e, r) => {
+            this.provider.send(payload, (error, response) => {
 
-                if (e) {
+                if (error) {
 
-                    reject(e)
+                    reject(error)
 
                 } else {
 
-                    resolve(r)
+                    resolve(response)
 
                 }
 
@@ -164,8 +163,7 @@ export default class Web3Source {
 
     }
 
-    // eslint-disable-next-line class-methods-use-this
-    _decodeResult(method: Method, result) {
+    private static decodeResult(method: Method, result) {
 
         if (!CONSTANTS.methods[method]) {
 
@@ -178,9 +176,7 @@ export default class Web3Source {
         const rpcResult = result.result
         return rpcResult === '0x'
             ? null
-            // eslint-disable-next-line operator-linebreak
-            : // @ts-ignore
-            web3abi.decodeParameter(
+            : web3abi.decodeParameter(
                 CONSTANTS.methods[method].returnEncoding,
                 rpcResult
             )

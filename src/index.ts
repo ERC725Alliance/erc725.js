@@ -85,9 +85,18 @@ export {
  *     valueContent: "Address",
  *     valueType: "address",
  *   },
+ *   {
+ *     name: 'LSP3IssuedAssets[]',
+ *     key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+ *     keyType: 'Array',
+ *     valueContent: 'Number',
+ *     valueType: 'uint256',
+ *     elementValueContent: 'Address',
+ *     elementValueType: 'address'
+ *   }
  * ];
  *
- * const addresss = "0x0c03fba782b07bcf810deb3b7f0595024a444f4e";
+ * const addresss = "0x3000783905Cc7170cCCe49a4112Deda952DDBe24";
  * const provider = new Web3.providers.HttpProvider("https://rpc.l14.lukso.network");
  * const config = {
  *   ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
@@ -99,13 +108,18 @@ export {
 export class ERC725 {
 
   options: {
-    schema;
-    address?;
+    schema: ERC725Schema[];
+    address?: string;
     providerType?: ProviderType | null;
     provider?;
     config: ERC725Config;
   };
 
+
+  /**
+   * Creates an instance of ERC725.
+   * @param {ERC725Schema[]} schema More information available here: https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md
+   */
   constructor(schema: ERC725Schema[], address?: string, provider?: any, config?: ERC725Config) {
 
       // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
@@ -132,13 +146,11 @@ export class ERC725 {
           }
       }
 
-      // do not fail on no-provider
       if (!provider) return
 
       const givenProvider = provider.provider || provider
 
       // CASE: GraphQL provider
-
       if (provider.type === 'ApolloClient') {
 
           this.options.providerType = ProviderType.GRAPH
@@ -151,7 +163,6 @@ export class ERC725 {
               this.options.address = toChecksumAddress(address)
 
           }
-
 
           // CASE: Ethereum provider
 
@@ -183,12 +194,24 @@ export class ERC725 {
   /**
    * Get decoded data from the contract key value store.
    * @param {string} key Either the schema name or key of a schema element on the class instance.
-   * @param {*} [customSchema] An optional schema to override attached schema of ERC725 class instance.
-   * @returns Returns decoded data as defined and expected in the schema
+   * @param {ERC725Schema} customSchema An optional schema to override attached schema of ERC725 class instance.
+   * @returns Returns decoded data as defined and expected in the schema.
+   *
+   * ```javascript
+   * await myERC725.getData("SupportedStandards:ERC725Account");
+   * // > '0xafdeb5d6'
+   *
+   * await myERC725.getData('LSP3Profile')
+   * // > {
+   * //   hashFunction: 'keccak256(utf8)',
+   * //   hash: '0xd96ff7776660095f661d16010c4349aa7478a9129ce0670f771596a6ff2d864a',
+   * //   url: 'ipfs://QmbTmcbp8ZW23vkQrqkasMFqNg2z1iP4e3BCUMz9PKDsSV'
+   * // }
+   * ```
    */
   async getData(key: string, customSchema?: ERC725Schema) {
 
-      if (!isAddress(this.options.address)) {
+      if (!isAddress(`${this.options.address}`)) {
 
           throw new Error('Missing ERC725 contract address.')
 
@@ -233,12 +256,31 @@ export class ERC725 {
   /**
    * Get all available data from the contract as per the class schema definition.
    * @returns An object with schema element key names as members, with correspoinding associated decoded data as values.
+   *
+   * ```javascript
+   * await myERC725.getAllData();
+   * // >
+   * // {
+   * //     'SupportedStandards:ERC725Account': '0xafdeb5d6',
+   * //     LSP3Profile: {
+   * //       hashFunction: 'keccak256(utf8)',
+   * //       hash: '0x8700cccf72722106436cbc5309a8ebb308224d5f601990c070ea751a6bed4fc0',
+   * //       url: 'ipfs://QmV8K2ZPZHErvVzjSE7vewgEzvfLnhdea8RLJRqZGNu9Je'
+   * //     },
+   * //     LSP1UniversalReceiverDelegate: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+   * //     'LSP3IssuedAssets[]': [
+   * //       '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
+   * //       '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826',
+   * //       ...
+   * //     ]
+   * // }
+   * ```
    */
   async getAllData() {
 
       const results = {}
       let res
-      if (!isAddress(this.options.address)) {
+      if (!isAddress(`${this.options.address}`)) {
 
           throw new Error('Missing ERC725 contract address.')
 
@@ -258,7 +300,7 @@ export class ERC725 {
       )
 
       // Take out null data values, since data may not fulfill entire schema
-      allRawData = await allRawData.filter(e => e.value !== null)
+      allRawData = await allRawData.filter(rawData => rawData.value !== null)
 
       if (this.options.providerType === ProviderType.GRAPH) {
 
@@ -316,11 +358,31 @@ export class ERC725 {
   }
 
   /**
-   * Fetch data from IPFS or an HTTP(s) endpoint stored as ‘JSONURL’, or ‘ASSETURL’ valueContent type.
+   * Fetches data from IPFS or an HTTP(s) endpoint stored as `JSONURL`, or `ASSETURL` valueContent type and
+   * compares the hash of the downloaded JSON with the hash stored on the blockchain. More details available here:
+   * https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
+   *
    * @param {string} key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
-   * @param {*} [customSchema] An optional custom schema element to use for decoding the returned value.
-   *                     Overrides attached schema of instance on this call only.
+   * @param {ERC725Schema} customSchema An optional custom schema element to use for decoding the returned value. Overrides attached schema of the class instance on this call only.
    * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData
+   *
+   * ```javascript
+   * await myERC725.fetchData('LSP3Profile')
+   * // > {
+   * //   LSP3Profile: {
+   * //     name: 'the-dematerialised',
+   * //     description: 'The Destination for Digital Fashion. We are a Web 3.0 Marketplace, Authenticated on the LUKSO Blockchain. The Future is Dematerialised.\n' +
+   * //       '-\n' +
+   * //       '\n' +
+   * //       'Founded by Marjorie Hernandez and Karinna Nobbs\n' +
+   * //       '👗',
+   * //     profileImage: [ [Object], [Object], [Object], [Object], [Object] ],
+   * //     backgroundImage: [ [Object], [Object], [Object], [Object], [Object] ],
+   * //     tags: [ 'marketplace' ],
+   * //     links: [ [Object], [Object], [Object], [Object] ]
+   * //   }
+   * // }
+   * ```
    */
   async fetchData(key: string, customSchema?: ERC725Schema) {
 
@@ -348,15 +410,15 @@ export class ERC725 {
           let response
           try {
 
-              response = await fetch(result.url).then(a => {
+              response = await fetch(result.url).then(fetchResponse => {
 
                   if (lowerCaseHashFunction === 'keccak256(bytes)') {
 
-                      return a.arrayBuffer().then(buffer => new Uint8Array(buffer))
+                      return fetchResponse.arrayBuffer().then(buffer => new Uint8Array(buffer))
 
                   }
 
-                  return a.json()
+                  return fetchResponse.json()
 
               })
 
@@ -382,6 +444,26 @@ export class ERC725 {
   /**
    * @param data An object of keys matching to corresponding schema element names, with associated data.
    * @returns all encoded data as per required by the schema and provided data
+   *
+   * ```javascript
+   * ERC725.encodeAllData({
+   *     'Username':'my-cool-username',
+   *     'Description': 'A great description.',
+   *     'IssuedAssets[]': [
+   *         '0x2309f...',
+   *         '0x0fe09...'
+   *     ]
+   * });
+   *
+   * /* >
+   * //
+   * //    {key:'0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da', value:'0x6d792d636f6f6c2d757365726e616d65'},
+   * //    {key:'0x4eeb961b158da171122c794adc937981d3b441f1dc5b8f718a207667f992093d', value:'0x41206772656174206465736372697074696f6e2e'},
+   * //    {key:'0x1b0084c280dc983f326892fcc88f375797a50d4f792b20b5229caa857474e84e', value:'0x00000...02'} // The length of the array
+   * //    {key:'0x1b0084c280dc983f326892fcc88f375700000000000000000000000000000000', value:'0x2309f...'} // The element of the array at index 0
+   * //    {key:'0x1b0084c280dc983f326892fcc88f375700000000000000000000000000000001', value:'0x0fe09...'} // The element of the array at index 1
+   * // ]
+   * ```
    */
   encodeAllData(data) {
 
@@ -392,7 +474,39 @@ export class ERC725 {
   /**
    * Decode all data available, as per the schema definition, in the contract.
    * @param data An array of encoded key:value pairs.
-   * @returns An object with keys matching the erc725 instance schema keys, with attached decoded data as expected by the schema.
+   * @returns An object with keys matching the ERC725 instance schema keys, with attached decoded data as expected by the schema.
+   *
+   * ```javascript
+   * await myERC725.decodeAllData([
+   *    {
+   *        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+   *        value: '0x0000000000000000000000000000000000000000000000000000000000000002'
+   *    },
+   *    {
+   *        key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
+   *        value: '0xd94353d9b005b3c0a9da169b768a31c57844e490'
+   *    },
+   *    {
+   *        key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
+   *        value: '0xdaea594e385fc724449e3118b2db7e86dfba1826'
+   *    },
+   *    {
+   *        key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+   *        value: '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178'
+   *    }
+   * ])
+   * // > {
+   * //   LSP3Profile: {
+   * //     hashFunction: 'keccak256(utf8)',
+   * //     hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+   * //     url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx'
+   * //   },
+   * //   'LSP3IssuedAssets[]': [
+   * //     '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
+   * //     '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826'
+   * //   ]
+   * // }
+   * ```
    */
   decodeAllData(data: {key: string, value: string}[]) {
 
@@ -404,7 +518,28 @@ export class ERC725 {
    * Encode data according to schema.
    * @param key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
    * @param data Data structured according to the corresponding schema defition.
-   * @returns Returns decoded data as defined and expected in the schema (single value for keyTypes ‘Singleton’ & ‘Mapping’, or an array of encoded key/value objects for keyType ‘Array).
+   * @returns Returns encoded data as defined and expected in the schema (single value for keyTypes ‘Singleton’ & ‘Mapping’, or an array of encoded key-value objects for keyType ‘Array).
+   *
+   * ```javascript
+   * await myERC725.encodeData('LSP3IssuedAssets[]', [
+   *     '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
+   *     '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826'
+   * ])
+   * // > [
+   * //     {
+   * //         key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+   * //         value: '0x0000000000000000000000000000000000000000000000000000000000000002'
+   * //     },
+   * //     {
+   * //         key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
+   * //         value: '0xd94353d9b005b3c0a9da169b768a31c57844e490'
+   * //     },
+   * //     {
+   * //         key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
+   * //         value: '0xdaea594e385fc724449e3118b2db7e86dfba1826'
+   * //     }
+   * // ]
+   * ```
    */
   encodeData(key: string, data) {
 
@@ -418,6 +553,27 @@ export class ERC725 {
    * @param {string} key Either the schema element name or key.
    * @param data Either a single object, or an array of objects of key: value: pairs.
    * @returns Returns decoded data as defined and expected in the schema:
+   *
+   * ```javascript
+   * await myERC725.decodeData('LSP3IssuedAssets[]', [
+   *    {
+   *        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+   *        value: '0x0000000000000000000000000000000000000000000000000000000000000002'
+   *    },
+   *    {
+   *        key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
+   *        value: '0xd94353d9b005b3c0a9da169b768a31c57844e490'
+   *    },
+   *    {
+   *        key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
+   *        value: '0xdaea594e385fc724449e3118b2db7e86dfba1826'
+   *    }
+   * ])
+   * // > [
+   * //   '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
+   * //   '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826'
+   * // ]
+   * ```
    */
   decodeData(key: string, data) {
 
@@ -427,9 +583,25 @@ export class ERC725 {
   }
 
   /**
-   * An added utility method which simply returns the owner of the contract. Not directly related to ERC725 specifications.
+   * An added utility method which simply returns the owner of the contract.
+   * Not directly related to ERC725 specifications.
+   *
    * @param {string} [address]
    * @returns The address of the contract owner as stored in the contract.
+   *
+   * :::caution
+   *
+   *    This method is not yet supported when using the `graph` provider type.
+   *
+   * :::
+   *
+   * ```javascript
+   * await myERC725.getOwner();
+   * // > '0x94933413384997F9402cc07a650e8A34d60F437A'
+   *
+   * await myERC725.getOwner("0x3000783905Cc7170cCCe49a4112Deda952DDBe24");
+   * // > '0x7f1b797b2Ba023Da2482654b50724e92EB5a7091'
+   * ```
    */
   getOwner(address?: string): string {
 
@@ -440,9 +612,12 @@ export class ERC725 {
 
   /**
    * Hashes the data received with the specified hashing function,
-   * and compares the result with the provided hash.
+   * and compares tshe result with the provided hash.
+   *
+   * @throws *Error* in case of a missmatch of the hashes.
+   * @Internal
    */
-  private static hashAndCompare(data: unknown, hash: string, lowerCaseHashFunction: string) {
+  private static hashAndCompare(data: unknown, hash: string, lowerCaseHashFunction: string): true {
 
       let dataToHash
       if (lowerCaseHashFunction === 'keccak256(utf8)') {
@@ -475,8 +650,8 @@ export class ERC725 {
   /**
    * @internal
    * @param schema assodiated with the schema with keyType = 'Array'
-   *               the data includes the raw (encoded) length key/value pair for the array
-   * @param data array of key/value pairs, one of which is the length key for the schema array
+   *               the data includes the raw (encoded) length key-value pair for the array
+   * @param data array of key-value pairs, one of which is the length key for the schema array
    *             Data can hold other field data not relevant here, and will be ignored
    * @return an array of keys/values
    */
@@ -493,7 +668,7 @@ export class ERC725 {
       const results: { key: string; value }[] = []
 
       // 1. get the array length
-      const value = data.find(e => e.key === schema.key) // get the length key/value pair
+      const value = data.find(e => e.key === schema.key) // get the length key-value pair
 
       if (!value || !value.value) {
 

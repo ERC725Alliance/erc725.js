@@ -23,11 +23,6 @@
                   {
                     "type": "doc",
                     "id": "api/index",
-                    "label": "Readme"
-                  },
-                  {
-                    "type": "doc",
-                    "id": "api/modules",
                     "label": "Exports"
                   },
                   {
@@ -68,8 +63,7 @@
             "/api/classes/erc725": "defaultSidebar",
             "/api": "defaultSidebar",
             "/api/interfaces/erc725config": "defaultSidebar",
-            "/api/interfaces/erc725schema": "defaultSidebar",
-            "/api/modules": "defaultSidebar"
+            "/api/interfaces/erc725schema": "defaultSidebar"
           },
           "docs": [
             {
@@ -95,7 +89,7 @@
               "sidebar": "defaultSidebar",
               "previous": {
                 "title": "Exports",
-                "permalink": "/api/modules"
+                "permalink": "/api"
               },
               "next": {
                 "title": "ERC725Config",
@@ -107,26 +101,26 @@
               "id": "api/index",
               "isDocsHomePage": false,
               "title": "erc725.js",
-              "description": "This library allows for interfacing with ERC725Y compliant contract on an EVM using the ERC725YJSONSchema.",
+              "description": "Classes",
               "source": "@site/docs/api/index.md",
               "sourceDirName": "api",
               "slug": "/api",
               "permalink": "/api",
               "editUrl": null,
               "version": "current",
-              "sidebarPosition": 0,
+              "sidebarPosition": 0.5,
               "frontMatter": {
                 "id": "index",
                 "title": "erc725.js",
                 "slug": "/api",
-                "sidebar_label": "Readme",
-                "sidebar_position": 0,
+                "sidebar_label": "Exports",
+                "sidebar_position": 0.5,
                 "custom_edit_url": null
               },
               "sidebar": "defaultSidebar",
               "next": {
-                "title": "Exports",
-                "permalink": "/api/modules"
+                "title": "ERC725",
+                "permalink": "/api/classes/erc725"
               }
             },
             {
@@ -164,7 +158,7 @@
               "id": "api/interfaces/erc725schema",
               "isDocsHomePage": false,
               "title": "Interface: ERC725Schema",
-              "description": "Properties",
+              "description": "`javascript title=Example",
               "source": "@site/docs/api/interfaces/erc725schema.md",
               "sourceDirName": "api/interfaces",
               "slug": "/api/interfaces/erc725schema",
@@ -183,36 +177,6 @@
               "previous": {
                 "title": "ERC725Config",
                 "permalink": "/api/interfaces/erc725config"
-              }
-            },
-            {
-              "unversionedId": "api/modules",
-              "id": "api/modules",
-              "isDocsHomePage": false,
-              "title": "erc725.js",
-              "description": "Classes",
-              "source": "@site/docs/api/modules.md",
-              "sourceDirName": "api",
-              "slug": "/api/modules",
-              "permalink": "/api/modules",
-              "editUrl": null,
-              "version": "current",
-              "sidebarPosition": 0.5,
-              "frontMatter": {
-                "id": "modules",
-                "title": "erc725.js",
-                "sidebar_label": "Exports",
-                "sidebar_position": 0.5,
-                "custom_edit_url": null
-              },
-              "sidebar": "defaultSidebar",
-              "previous": {
-                "title": "Readme",
-                "permalink": "/api"
-              },
-              "next": {
-                "title": "ERC725",
-                "permalink": "/api/classes/erc725"
               }
             }
           ]

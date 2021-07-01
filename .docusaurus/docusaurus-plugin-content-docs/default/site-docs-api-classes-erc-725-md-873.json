@@ -21,7 +21,7 @@
   "sidebar": "defaultSidebar",
   "previous": {
     "title": "Exports",
-    "permalink": "/api/modules"
+    "permalink": "/api"
   },
   "next": {
     "title": "ERC725Config",

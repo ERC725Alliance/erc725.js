@@ -2,6 +2,7 @@ export default {
   "title": "erc725.js",
   "baseUrl": "/",
   "url": "http://docs.lukso.network",
+  "onBrokenLinks": "log",
   "plugins": [
     [
       "docusaurus-plugin-typedoc",
@@ -9,7 +10,10 @@ export default {
         "entryPoints": [
           "./src/index.ts"
         ],
-        "tsconfig": "./tsconfig.json"
+        "tsconfig": "./tsconfig.json",
+        "watch": "false",
+        "excludeInternal": true,
+        "readme": "none"
       }
     ]
   ],
@@ -33,7 +37,6 @@ export default {
     ],
     "localeConfigs": {}
   },
-  "onBrokenLinks": "throw",
   "onBrokenMarkdownLinks": "warn",
   "onDuplicateRoutes": "warn",
   "customFields": {},

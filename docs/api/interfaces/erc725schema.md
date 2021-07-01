@@ -6,6 +6,18 @@ sidebar_position: 0
 custom_edit_url: null
 ---
 
+```javascript title=Example
+  {
+    name: "LSP3Profile",
+    key: "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
+    keyType: "Singleton",
+    valueContent: "JSONURL",
+    valueType: "bytes",
+  },
+```
+
+Detailed information available here: https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md
+
 ## Properties
 
 ### elementKey
@@ -14,7 +26,7 @@ custom_edit_url: null
 
 #### Defined in
 
-types/erc725-schema.ts:33
+[types/erc725-schema.ts:46](https://github.com/rryter/erc725.js/blob/49ae9c6/src/types/erc725-schema.ts#L46)
 
 ___
 
@@ -24,27 +36,27 @@ ___
 
 #### Defined in
 
-types/erc725-schema.ts:34
+[types/erc725-schema.ts:47](https://github.com/rryter/erc725.js/blob/49ae9c6/src/types/erc725-schema.ts#L47)
 
 ___
 
 ### elementValueContent
 
-• `Optional` **elementValueContent**: [`ERC725SchemaValueContent`](../modules.md#erc725schemavaluecontent)
+• `Optional` **elementValueContent**: [`ERC725SchemaValueContent`](../index.md#erc725schemavaluecontent)
 
 #### Defined in
 
-types/erc725-schema.ts:35
+[types/erc725-schema.ts:48](https://github.com/rryter/erc725.js/blob/49ae9c6/src/types/erc725-schema.ts#L48)
 
 ___
 
 ### elementValueType
 
-• `Optional` **elementValueType**: [`ERC725SchemaValueType`](../modules.md#erc725schemavaluetype)
+• `Optional` **elementValueType**: [`ERC725SchemaValueType`](../index.md#erc725schemavaluetype)
 
 #### Defined in
 
-types/erc725-schema.ts:36
+[types/erc725-schema.ts:49](https://github.com/rryter/erc725.js/blob/49ae9c6/src/types/erc725-schema.ts#L49)
 
 ___
 
@@ -54,17 +66,17 @@ ___
 
 #### Defined in
 
-types/erc725-schema.ts:29
+[types/erc725-schema.ts:42](https://github.com/rryter/erc725.js/blob/49ae9c6/src/types/erc725-schema.ts#L42)
 
 ___
 
 ### keyType
 
-• **keyType**: [`ERC725SchemaKeyType`](../modules.md#erc725schemakeytype)
+• **keyType**: [`ERC725SchemaKeyType`](../index.md#erc725schemakeytype)
 
 #### Defined in
 
-types/erc725-schema.ts:30
+[types/erc725-schema.ts:43](https://github.com/rryter/erc725.js/blob/49ae9c6/src/types/erc725-schema.ts#L43)
 
 ___
 
@@ -74,7 +86,7 @@ ___
 
 #### Defined in
 
-types/erc725-schema.ts:28
+[types/erc725-schema.ts:41](https://github.com/rryter/erc725.js/blob/49ae9c6/src/types/erc725-schema.ts#L41)
 
 ___
 
@@ -84,14 +96,14 @@ ___
 
 #### Defined in
 
-types/erc725-schema.ts:31
+[types/erc725-schema.ts:44](https://github.com/rryter/erc725.js/blob/49ae9c6/src/types/erc725-schema.ts#L44)
 
 ___
 
 ### valueType
 
-• **valueType**: [`ERC725SchemaValueType`](../modules.md#erc725schemavaluetype)
+• **valueType**: [`ERC725SchemaValueType`](../index.md#erc725schemavaluetype)
 
 #### Defined in
 
-types/erc725-schema.ts:32
+[types/erc725-schema.ts:45](https://github.com/rryter/erc725.js/blob/49ae9c6/src/types/erc725-schema.ts#L45)

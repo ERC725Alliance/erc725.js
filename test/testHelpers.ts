@@ -41,7 +41,7 @@ export function generateAllRawData(schema) {
 
                 } else {
 
-                    // This is array length key/value pair
+                    // This is array length key-value pair
                     results.push({
                         key: encodeArrayKey(element.key, i - 1),
                         value: e
@@ -93,7 +93,7 @@ export function generateAllData(schema) {
 
                 } else {
 
-                    // This is array length key/value pair
+                    // This is array length key-value pair
                     results.push({
                         key: encodeArrayKey(element.key, i - 1),
                         value: e ? e.toLowerCase() : e // force address to lowercase
