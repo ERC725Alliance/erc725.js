@@ -1,13 +1,13 @@
 {
-  "unversionedId": "api/classes/erc725",
-  "id": "api/classes/erc725",
+  "unversionedId": "erc725js/classes/erc725",
+  "id": "erc725js/classes/erc725",
   "isDocsHomePage": false,
   "title": "Class: ERC725",
   "description": "This package is currently in early stages of development, use only for testing or experimentation purposes.",
-  "source": "@site/docs/api/classes/erc725.md",
-  "sourceDirName": "api/classes",
-  "slug": "/api/classes/erc725",
-  "permalink": "/api/classes/erc725",
+  "source": "@site/docs/erc725js/classes/erc725.md",
+  "sourceDirName": "erc725js/classes",
+  "slug": "/erc725js/classes/erc725",
+  "permalink": "/erc725js/classes/erc725",
   "editUrl": null,
   "version": "current",
   "sidebarPosition": 0,
@@ -21,10 +21,10 @@
   "sidebar": "defaultSidebar",
   "previous": {
     "title": "Exports",
-    "permalink": "/api"
+    "permalink": "/erc725js"
   },
   "next": {
     "title": "ERC725Config",
-    "permalink": "/api/interfaces/erc725config"
+    "permalink": "/erc725js/interfaces/erc725config"
   }
 }

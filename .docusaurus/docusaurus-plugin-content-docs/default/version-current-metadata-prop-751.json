@@ -8,12 +8,12 @@
     "defaultSidebar": [
       {
         "type": "category",
-        "label": "API",
+        "label": "erc725.js",
         "items": [
           {
             "type": "link",
             "label": "Exports",
-            "href": "/api"
+            "href": "/erc725js"
           },
           {
             "type": "category",
@@ -22,7 +22,7 @@
               {
                 "type": "link",
                 "label": "ERC725",
-                "href": "/api/classes/erc725"
+                "href": "/erc725js/classes/erc725"
               }
             ],
             "collapsed": true
@@ -34,12 +34,12 @@
               {
                 "type": "link",
                 "label": "ERC725Config",
-                "href": "/api/interfaces/erc725config"
+                "href": "/erc725js/interfaces/erc725config"
               },
               {
                 "type": "link",
                 "label": "ERC725Schema",
-                "href": "/api/interfaces/erc725schema"
+                "href": "/erc725js/interfaces/erc725schema"
               }
             ],
             "collapsed": true
@@ -50,9 +50,9 @@
     ]
   },
   "permalinkToSidebar": {
-    "/api/classes/erc725": "defaultSidebar",
-    "/api": "defaultSidebar",
-    "/api/interfaces/erc725config": "defaultSidebar",
-    "/api/interfaces/erc725schema": "defaultSidebar"
+    "/erc725js/classes/erc725": "defaultSidebar",
+    "/erc725js": "defaultSidebar",
+    "/erc725js/interfaces/erc725config": "defaultSidebar",
+    "/erc725js/interfaces/erc725schema": "defaultSidebar"
   }
 }

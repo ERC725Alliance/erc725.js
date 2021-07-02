@@ -13,7 +13,13 @@ module.exports = {
                 tsconfig: './tsconfig.json',
                 watch: process.env.TYPEDOC_WATCH,
                 excludeInternal: true,
-                readme: 'none'
+                readme: 'none',
+                out: 'erc725js',
+                includeVersion: true,
+                sort: 'source-order',
+                sidebar: {
+                    categoryLabel: 'erc725.js'
+                }
             }
         ]
     ],

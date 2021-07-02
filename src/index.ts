@@ -57,13 +57,13 @@ export {
  *
  * :::
  *
- * ## Usage
+ * ## Instantiation
  *
  * ```js
  *
  * // Part of LSP3-UniversalProfile Schema
  * // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
- * const schemas = [
+ * const schema = [
  *   {
  *     name: "SupportedStandards:ERC725Account",
  *     key: "0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6",
@@ -96,13 +96,13 @@ export {
  *   }
  * ];
  *
- * const addresss = "0x3000783905Cc7170cCCe49a4112Deda952DDBe24";
+ * const address = "0x3000783905Cc7170cCCe49a4112Deda952DDBe24";
  * const provider = new Web3.providers.HttpProvider("https://rpc.l14.lukso.network");
  * const config = {
  *   ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
  * };
  *
- * let myERC725 = new ERC725(schemas, address, provider, config)
+ * const myERC725 = new ERC725(schema, address, provider, config)
  * ```
  */
 export class ERC725 {
@@ -115,10 +115,12 @@ export class ERC725 {
     config: ERC725Config;
   };
 
-
   /**
    * Creates an instance of ERC725.
    * @param {ERC725Schema[]} schema More information available here: https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md
+   * @param {string} address Address of the ERC725 contract you want to interact with
+   * @param {any} provider
+   * @param {ERC725Config} config Configuration object
    */
   constructor(schema: ERC725Schema[], address?: string, provider?: any, config?: ERC725Config) {
 
@@ -208,6 +210,9 @@ export class ERC725 {
    * //   url: 'ipfs://QmbTmcbp8ZW23vkQrqkasMFqNg2z1iP4e3BCUMz9PKDsSV'
    * // }
    * ```
+   * :::note Try it
+   * https://stackblitz.com/edit/erc725js-get-data?devtoolsheight=66&file=index.js
+   * :::
    */
   async getData(key: string, customSchema?: ERC725Schema) {
 
@@ -275,6 +280,9 @@ export class ERC725 {
    * //     ]
    * // }
    * ```
+   * :::note Try it
+   * https://stackblitz.com/edit/erc725js-get-all-data?devtoolsheight=33&file=index.js
+   * :::
    */
   async getAllData() {
 
@@ -383,6 +391,11 @@ export class ERC725 {
    * //   }
    * // }
    * ```
+   *
+   * :::note Try it
+   * https://stackblitz.com/edit/erc725js-fetch-data?devtoolsheight=66&file=index.js
+   * :::
+   *
    */
   async fetchData(key: string, customSchema?: ERC725Schema) {
 
@@ -446,24 +459,45 @@ export class ERC725 {
    * @returns all encoded data as per required by the schema and provided data
    *
    * ```javascript
-   * ERC725.encodeAllData({
-   *     'Username':'my-cool-username',
-   *     'Description': 'A great description.',
-   *     'IssuedAssets[]': [
-   *         '0x2309f...',
-   *         '0x0fe09...'
-   *     ]
+   * myERC725.encodeAllData({
+   *   LSP3Profile: {
+   *     hashFunction: 'keccak256(utf8)',
+   *     hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+   *     url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx'
+   *   },
+   *   'LSP3IssuedAssets[]': [
+   *     '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
+   *     '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826'
+   *   ],
+   *   LSP1UniversalReceiverDelegate: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb'
    * });
    *
-   * /* >
-   * //
-   * //    {key:'0xc55da378b3897c7aeec303b4fa7eceb3005a395160399831e4be123082c760da', value:'0x6d792d636f6f6c2d757365726e616d65'},
-   * //    {key:'0x4eeb961b158da171122c794adc937981d3b441f1dc5b8f718a207667f992093d', value:'0x41206772656174206465736372697074696f6e2e'},
-   * //    {key:'0x1b0084c280dc983f326892fcc88f375797a50d4f792b20b5229caa857474e84e', value:'0x00000...02'} // The length of the array
-   * //    {key:'0x1b0084c280dc983f326892fcc88f375700000000000000000000000000000000', value:'0x2309f...'} // The element of the array at index 0
-   * //    {key:'0x1b0084c280dc983f326892fcc88f375700000000000000000000000000000001', value:'0x0fe09...'} // The element of the array at index 1
+   * // > [
+   * //  {
+   * //      "key": "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
+   * //      "value": "0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178"
+   * //  },
+   * //  {
+   * //      "key": "0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47",
+   * //      "value": "0x1183790f29be3cdfd0a102862fea1a4a30b3adab"
+   * //  },
+   * //  {
+   * //      "key": "0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0",
+   * //      "value": "0x0000000000000000000000000000000000000000000000000000000000000002"
+   * //  },
+   * //  {
+   * //      "key": "0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000",
+   * //      "value": "0xd94353d9b005b3c0a9da169b768a31c57844e490"
+   * //  },
+   * //  {
+   * //      "key": "0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001",
+   * //      "value": "0xdaea594e385fc724449e3118b2db7e86dfba1826"
+   * //  }
    * // ]
    * ```
+   * :::note Try it
+   * https://stackblitz.com/edit/erc725js-encode-all-data?devtoolsheight=66&file=index.js
+   * :::
    */
   encodeAllData(data) {
 
@@ -479,18 +513,22 @@ export class ERC725 {
    * ```javascript
    * await myERC725.decodeAllData([
    *    {
+   *        // Array length of LSP3IssuedAssets[]
    *        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
    *        value: '0x0000000000000000000000000000000000000000000000000000000000000002'
    *    },
    *    {
+   *        // First LSP3IssuedAssets[] array element
    *        key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
    *        value: '0xd94353d9b005b3c0a9da169b768a31c57844e490'
    *    },
    *    {
+   *        // Second LSP3IssuedAssets[] array element
    *        key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
    *        value: '0xdaea594e385fc724449e3118b2db7e86dfba1826'
    *    },
    *    {
+   *        // LSP3Profile
    *        key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
    *        value: '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178'
    *    }
@@ -507,6 +545,9 @@ export class ERC725 {
    * //   ]
    * // }
    * ```
+   * :::note Try it
+   * https://stackblitz.com/edit/erc725js-decode-all-data?devtoolsheight=33&file=index.js
+   * :::
    */
   decodeAllData(data: {key: string, value: string}[]) {
 
@@ -540,6 +581,9 @@ export class ERC725 {
    * //     }
    * // ]
    * ```
+   * :::note Try it
+   * https://stackblitz.com/edit/erc725js-encode-data?devtoolsheight=66&file=index.js
+   * :::
    */
   encodeData(key: string, data) {
 
@@ -574,6 +618,9 @@ export class ERC725 {
    * //   '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826'
    * // ]
    * ```
+   * :::note Try it
+   * https://stackblitz.com/edit/erc725js-decode-data?devtoolsheight=33&file=index.js
+   * :::
    */
   decodeData(key: string, data) {
 

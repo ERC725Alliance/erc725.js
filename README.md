@@ -57,7 +57,7 @@ const config = {
   ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
 }
 
-let myERC725 = new ERC725(schema[, address, provider, config])
+const myERC725 = new ERC725(schema[, address, provider, config])
 ```
 
 ## Usage

@@ -11,9 +11,15 @@ export default {
           "./src/index.ts"
         ],
         "tsconfig": "./tsconfig.json",
-        "watch": "false",
+        "watch": "true",
         "excludeInternal": true,
-        "readme": "none"
+        "readme": "none",
+        "out": "erc725js",
+        "includeVersion": true,
+        "sort": "source-order",
+        "sidebar": {
+          "categoryLabel": "erc725.js"
+        }
       }
     ]
   ],

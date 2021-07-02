@@ -1,13 +1,13 @@
 {
-  "unversionedId": "api/interfaces/erc725schema",
-  "id": "api/interfaces/erc725schema",
+  "unversionedId": "erc725js/interfaces/erc725schema",
+  "id": "erc725js/interfaces/erc725schema",
   "isDocsHomePage": false,
   "title": "Interface: ERC725Schema",
   "description": "`javascript title=Example",
-  "source": "@site/docs/api/interfaces/erc725schema.md",
-  "sourceDirName": "api/interfaces",
-  "slug": "/api/interfaces/erc725schema",
-  "permalink": "/api/interfaces/erc725schema",
+  "source": "@site/docs/erc725js/interfaces/erc725schema.md",
+  "sourceDirName": "erc725js/interfaces",
+  "slug": "/erc725js/interfaces/erc725schema",
+  "permalink": "/erc725js/interfaces/erc725schema",
   "editUrl": null,
   "version": "current",
   "sidebarPosition": 0,
@@ -21,6 +21,6 @@
   "sidebar": "defaultSidebar",
   "previous": {
     "title": "ERC725Config",
-    "permalink": "/api/interfaces/erc725config"
+    "permalink": "/erc725js/interfaces/erc725config"
   }
 }

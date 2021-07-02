@@ -1,7 +1,7 @@
 ---
 id: "index"
-title: "erc725.js"
-slug: "/api"
+title: "erc725.js - v0.5.6"
+slug: "/erc725js"
 sidebar_label: "Exports"
 sidebar_position: 0.5
 custom_edit_url: null
@@ -24,7 +24,7 @@ custom_edit_url: null
 
 #### Defined in
 
-[types/erc725-schema.ts:3](https://github.com/rryter/erc725.js/blob/49ae9c6/src/types/erc725-schema.ts#L3)
+[types/erc725-schema.ts:3](https://github.com/rryter/erc725.js/blob/39e6f95/src/types/erc725-schema.ts#L3)
 
 ___
 
@@ -34,7 +34,7 @@ ___
 
 #### Defined in
 
-[types/erc725-schema.ts:5](https://github.com/rryter/erc725.js/blob/49ae9c6/src/types/erc725-schema.ts#L5)
+[types/erc725-schema.ts:5](https://github.com/rryter/erc725.js/blob/39e6f95/src/types/erc725-schema.ts#L5)
 
 ___
 
@@ -44,4 +44,4 @@ ___
 
 #### Defined in
 
-[types/erc725-schema.ts:15](https://github.com/rryter/erc725.js/blob/49ae9c6/src/types/erc725-schema.ts#L15)
+[types/erc725-schema.ts:15](https://github.com/rryter/erc725.js/blob/39e6f95/src/types/erc725-schema.ts#L15)
