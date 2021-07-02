@@ -511,7 +511,7 @@ export class ERC725 {
    * @returns An object with keys matching the ERC725 instance schema keys, with attached decoded data as expected by the schema.
    *
    * ```javascript
-   * await myERC725.decodeAllData([
+   * myERC725.decodeAllData([
    *    {
    *        // Array length of LSP3IssuedAssets[]
    *        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
@@ -562,7 +562,7 @@ export class ERC725 {
    * @returns Returns encoded data as defined and expected in the schema (single value for keyTypes ‘Singleton’ & ‘Mapping’, or an array of encoded key-value objects for keyType ‘Array).
    *
    * ```javascript
-   * await myERC725.encodeData('LSP3IssuedAssets[]', [
+   * myERC725.encodeData('LSP3IssuedAssets[]', [
    *     '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
    *     '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826'
    * ])
@@ -599,7 +599,7 @@ export class ERC725 {
    * @returns Returns decoded data as defined and expected in the schema:
    *
    * ```javascript
-   * await myERC725.decodeData('LSP3IssuedAssets[]', [
+   * myERC725.decodeData('LSP3IssuedAssets[]', [
    *    {
    *        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
    *        value: '0x0000000000000000000000000000000000000000000000000000000000000002'

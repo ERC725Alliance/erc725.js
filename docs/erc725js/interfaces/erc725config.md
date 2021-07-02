@@ -22,4 +22,4 @@ Another example: `https://cloudflare-ipfs.com/ipfs/`
 
 #### Defined in
 
-[types/erc725-config.ts:11](https://github.com/rryter/erc725.js/blob/39e6f95/src/types/erc725-config.ts#L11)
+[types/erc725-config.ts:11](https://github.com/rryter/erc725.js/blob/e066e49/src/types/erc725-config.ts#L11)
