@@ -8,22 +8,14 @@ For more information see [Documentation](https://erc725js.readthedocs.io/en/late
 
 ## Installation
 
-npm
-
-```shell script
-$ npm install erc725.js
+```bash
+  npm install erc725.js
 ```
 
+## Instantiation
 ```js
-import ERC725 from "erc725.js";
-// Or alternately the named export in cases where it
-// assists with integration into node modules or commonjs.
-import { ERC725 } from "erc725.js";
-```
-
-## Example Instantiation
-
-```js
+import { ERC725 } from 'erc725.js';
+import * as Web3 from "web3";
 
 // Part of LSP3-UniversalProfile Schema
 // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
@@ -49,15 +41,24 @@ const schema = [
     valueContent: "Address",
     valueType: "address",
   },
+  {
+    name: 'LSP3IssuedAssets[]',
+    key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+    keyType: 'Array',
+    valueContent: 'Number',
+    valueType: 'uint256',
+    elementValueContent: 'Address',
+    elementValueType: 'address'
+  }
 ];
 
-const addresss = "0x0c03fba782b07bcf810deb3b7f0595024a444f4e";
+const address = "0x3000783905Cc7170cCCe49a4112Deda952DDBe24";
 const provider = new Web3.providers.HttpProvider("https://rpc.l14.lukso.network");
 const config = {
   ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
-}
+};
 
-const myERC725 = new ERC725(schema[, address, provider, config])
+const myERC725 = new ERC725(schema, address, provider, config)
 ```
 
 ## Usage
