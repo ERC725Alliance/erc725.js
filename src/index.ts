@@ -57,53 +57,7 @@ export {
  *
  * :::
  *
- * ## Instantiation
- *
- * ```js
- *
- * // Part of LSP3-UniversalProfile Schema
- * // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
- * const schema = [
- *   {
- *     name: "SupportedStandards:ERC725Account",
- *     key: "0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6",
- *     keyType: "Mapping",
- *     valueContent: "0xafdeb5d6",
- *     valueType: "bytes",
- *   },
- *   {
- *     name: "LSP3Profile",
- *     key: "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
- *     keyType: "Singleton",
- *     valueContent: "JSONURL",
- *     valueType: "bytes",
- *   },
- *   {
- *     name: "LSP1UniversalReceiverDelegate",
- *     key: "0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47",
- *     keyType: "Singleton",
- *     valueContent: "Address",
- *     valueType: "address",
- *   },
- *   {
- *     name: 'LSP3IssuedAssets[]',
- *     key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
- *     keyType: 'Array',
- *     valueContent: 'Number',
- *     valueType: 'uint256',
- *     elementValueContent: 'Address',
- *     elementValueType: 'address'
- *   }
- * ];
- *
- * const address = "0x3000783905Cc7170cCCe49a4112Deda952DDBe24";
- * const provider = new Web3.providers.HttpProvider("https://rpc.l14.lukso.network");
- * const config = {
- *   ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
- * };
- *
- * const myERC725 = new ERC725(schema, address, provider, config)
- * ```
+
  */
 export class ERC725 {
 
@@ -137,7 +91,7 @@ export class ERC725 {
           ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/'
       }
 
-      // Init options member
+      // Init options property
       this.options = {
           schema,
           address,
@@ -173,7 +127,7 @@ export class ERC725 {
           this.options.providerType = ProviderType.ETHEREUM
           this.options.provider = new EthereumSource(givenProvider)
 
-          // CASE: Web3 or deprectaed ethereum provider
+          // CASE: Web3 or deprecated ethereum provider
 
       } else if (
           (!provider.request && provider.send)
@@ -260,7 +214,7 @@ export class ERC725 {
 
   /**
    * Get all available data from the contract as per the class schema definition.
-   * @returns An object with schema element key names as members, with correspoinding associated decoded data as values.
+   * @returns An object with schema element key names as properties, with corresponding associated decoded data as values.
    *
    * ```javascript
    * await myERC725.getAllData();
@@ -317,7 +271,7 @@ export class ERC725 {
 
       } else {
 
-          // Otherwise we assume the array element keys are not avaiable in raw results, so they must be fetched
+          // Otherwise we assume the array element keys are not available in raw results, so they must be fetched
           const arraySchemas = this.options.schema.filter(
               e => e.keyType.toLowerCase() === 'array'
           )
@@ -506,6 +460,43 @@ export class ERC725 {
   }
 
   /**
+   * Encode data according to schema.
+   * @param key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
+   * @param data Data structured according to the corresponding schema definition.
+   * @returns Returns encoded data as defined and expected in the schema (single value for keyTypes ‘Singleton’ & ‘Mapping’, or an array of encoded key-value objects for keyType ‘Array).
+   *
+   * ```javascript
+   * myERC725.encodeData('LSP3IssuedAssets[]', [
+   *     '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
+   *     '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826'
+   * ])
+   * // > [
+   * //     {
+   * //         key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+   * //         value: '0x0000000000000000000000000000000000000000000000000000000000000002'
+   * //     },
+   * //     {
+   * //         key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
+   * //         value: '0xd94353d9b005b3c0a9da169b768a31c57844e490'
+   * //     },
+   * //     {
+   * //         key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
+   * //         value: '0xdaea594e385fc724449e3118b2db7e86dfba1826'
+   * //     }
+   * // ]
+   * ```
+   * :::note Try it
+   * https://stackblitz.com/edit/erc725js-encode-data?devtoolsheight=66&file=index.js
+   * :::
+   */
+  encodeData(key: string, data) {
+
+      const schema = getSchemaElement(this.options.schema, key)
+      return encodeKey(schema, data)
+
+  }
+
+  /**
    * Decode all data available, as per the schema definition, in the contract.
    * @param data An array of encoded key:value pairs.
    * @returns An object with keys matching the ERC725 instance schema keys, with attached decoded data as expected by the schema.
@@ -552,43 +543,6 @@ export class ERC725 {
   decodeAllData(data: {key: string, value: string}[]) {
 
       return decodeAllData(this.options.schema, data)
-
-  }
-
-  /**
-   * Encode data according to schema.
-   * @param key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
-   * @param data Data structured according to the corresponding schema defition.
-   * @returns Returns encoded data as defined and expected in the schema (single value for keyTypes ‘Singleton’ & ‘Mapping’, or an array of encoded key-value objects for keyType ‘Array).
-   *
-   * ```javascript
-   * myERC725.encodeData('LSP3IssuedAssets[]', [
-   *     '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
-   *     '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826'
-   * ])
-   * // > [
-   * //     {
-   * //         key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
-   * //         value: '0x0000000000000000000000000000000000000000000000000000000000000002'
-   * //     },
-   * //     {
-   * //         key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
-   * //         value: '0xd94353d9b005b3c0a9da169b768a31c57844e490'
-   * //     },
-   * //     {
-   * //         key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
-   * //         value: '0xdaea594e385fc724449e3118b2db7e86dfba1826'
-   * //     }
-   * // ]
-   * ```
-   * :::note Try it
-   * https://stackblitz.com/edit/erc725js-encode-data?devtoolsheight=66&file=index.js
-   * :::
-   */
-  encodeData(key: string, data) {
-
-      const schema = getSchemaElement(this.options.schema, key)
-      return encodeKey(schema, data)
 
   }
 
@@ -659,9 +613,9 @@ export class ERC725 {
 
   /**
    * Hashes the data received with the specified hashing function,
-   * and compares tshe result with the provided hash.
+   * and compares the result with the provided hash.
    *
-   * @throws *Error* in case of a missmatch of the hashes.
+   * @throws *Error* in case of a mismatch of the hashes.
    * @Internal
    */
   private static hashAndCompare(data: unknown, hash: string, lowerCaseHashFunction: string): true {
@@ -696,7 +650,7 @@ export class ERC725 {
 
   /**
    * @internal
-   * @param schema assodiated with the schema with keyType = 'Array'
+   * @param schema associated with the schema with keyType = 'Array'
    *               the data includes the raw (encoded) length key-value pair for the array
    * @param data array of key-value pairs, one of which is the length key for the schema array
    *             Data can hold other field data not relevant here, and will be ignored

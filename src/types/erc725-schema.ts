@@ -34,8 +34,9 @@ export type ERC725SchemaValueType =
  *     valueType: "bytes",
  *   },
  * ```
- *
- * Detailed information available here: https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md
+ * :::info
+ * Detailed information available here: __https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md__
+ * :::
  */
 export interface ERC725Schema {
     name: string; // Describes the name of the key, SHOULD compromise of the Standards name + sub type. e.g: LSP2Name

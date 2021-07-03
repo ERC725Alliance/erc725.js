@@ -15,8 +15,9 @@ custom_edit_url: null
     valueType: "bytes",
   },
 ```
-
-Detailed information available here: https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md
+:::info
+Detailed information available here: __https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md__
+:::
 
 ## Properties
 
@@ -26,7 +27,7 @@ Detailed information available here: https://github.com/lukso-network/LIPs/blob/
 
 #### Defined in
 
-[types/erc725-schema.ts:41](https://github.com/rryter/erc725.js/blob/e066e49/src/types/erc725-schema.ts#L41)
+[types/erc725-schema.ts:42](https://github.com/rryter/erc725.js/blob/66c9ecb/src/types/erc725-schema.ts#L42)
 
 ___
 
@@ -36,7 +37,7 @@ ___
 
 #### Defined in
 
-[types/erc725-schema.ts:42](https://github.com/rryter/erc725.js/blob/e066e49/src/types/erc725-schema.ts#L42)
+[types/erc725-schema.ts:43](https://github.com/rryter/erc725.js/blob/66c9ecb/src/types/erc725-schema.ts#L43)
 
 ___
 
@@ -46,7 +47,7 @@ ___
 
 #### Defined in
 
-[types/erc725-schema.ts:43](https://github.com/rryter/erc725.js/blob/e066e49/src/types/erc725-schema.ts#L43)
+[types/erc725-schema.ts:44](https://github.com/rryter/erc725.js/blob/66c9ecb/src/types/erc725-schema.ts#L44)
 
 ___
 
@@ -56,7 +57,7 @@ ___
 
 #### Defined in
 
-[types/erc725-schema.ts:44](https://github.com/rryter/erc725.js/blob/e066e49/src/types/erc725-schema.ts#L44)
+[types/erc725-schema.ts:45](https://github.com/rryter/erc725.js/blob/66c9ecb/src/types/erc725-schema.ts#L45)
 
 ___
 
@@ -66,7 +67,7 @@ ___
 
 #### Defined in
 
-[types/erc725-schema.ts:45](https://github.com/rryter/erc725.js/blob/e066e49/src/types/erc725-schema.ts#L45)
+[types/erc725-schema.ts:46](https://github.com/rryter/erc725.js/blob/66c9ecb/src/types/erc725-schema.ts#L46)
 
 ___
 
@@ -76,7 +77,7 @@ ___
 
 #### Defined in
 
-[types/erc725-schema.ts:46](https://github.com/rryter/erc725.js/blob/e066e49/src/types/erc725-schema.ts#L46)
+[types/erc725-schema.ts:47](https://github.com/rryter/erc725.js/blob/66c9ecb/src/types/erc725-schema.ts#L47)
 
 ___
 
@@ -86,7 +87,7 @@ ___
 
 #### Defined in
 
-[types/erc725-schema.ts:47](https://github.com/rryter/erc725.js/blob/e066e49/src/types/erc725-schema.ts#L47)
+[types/erc725-schema.ts:48](https://github.com/rryter/erc725.js/blob/66c9ecb/src/types/erc725-schema.ts#L48)
 
 ___
 
@@ -96,7 +97,7 @@ ___
 
 #### Defined in
 
-[types/erc725-schema.ts:48](https://github.com/rryter/erc725.js/blob/e066e49/src/types/erc725-schema.ts#L48)
+[types/erc725-schema.ts:49](https://github.com/rryter/erc725.js/blob/66c9ecb/src/types/erc725-schema.ts#L49)
 
 ___
 
@@ -106,4 +107,4 @@ ___
 
 #### Defined in
 
-[types/erc725-schema.ts:49](https://github.com/rryter/erc725.js/blob/e066e49/src/types/erc725-schema.ts#L49)
+[types/erc725-schema.ts:50](https://github.com/rryter/erc725.js/blob/66c9ecb/src/types/erc725-schema.ts#L50)

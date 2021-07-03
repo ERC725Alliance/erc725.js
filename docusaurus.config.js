@@ -14,12 +14,7 @@ module.exports = {
                 watch: process.env.TYPEDOC_WATCH,
                 excludeInternal: true,
                 readme: 'none',
-                out: 'erc725js',
-                includeVersion: true,
-                sort: 'source-order',
-                sidebar: {
-                    categoryLabel: 'erc725.js'
-                }
+                sort: 'source-order'
             }
         ]
     ],
@@ -30,7 +25,7 @@ module.exports = {
                 readme: 'none',
                 docs: {
                     routeBasePath: '/',
-                    editUrl: 'https://github.com/lukso-network/docs-website/tree/main/'
+                    editUrl: 'https://github.com/ERC725Alliance/erc725.js/tree/main/'
                 }
             }
         ]
