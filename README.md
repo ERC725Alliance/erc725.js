@@ -96,13 +96,13 @@ await erc725.fetchData("LSP3Profile"); // downloads and verifies the linked JSON
 ```
 ## Stackblitz Examples
 
-* [getData](https://stackblitz.com/edit/erc725js-get-data?devtoolsheight=66&file=index.js)
-* [getAllData](https://stackblitz.com/edit/erc725js-get-all-data?devtoolsheight=66&file=index.js)
-* [fetchData](https://stackblitz.com/edit/erc725js-fetch-data?devtoolsheight=66&file=index.js)
-* [encodeData](https://stackblitz.com/edit/erc725js-encode-data?devtoolsheight=66&file=index.js)
-* [encodeAllData](https://stackblitz.com/edit/erc725js-encode-all-data?devtoolsheight=66&file=index.js)
-* [decodeData](https://stackblitz.com/edit/erc725js-decode-data?devtoolsheight=66&file=index.js)
-* [decodeAllData](https://stackblitz.com/edit/erc725js-decode-all-data?devtoolsheight=66&file=index.js)
+* <a href="https://stackblitz.com/edit/erc725js-get-data?devtoolsheight=66&file=index.js" target="_blank">getData</a>
+* <a href="https://stackblitz.com/edit/erc725js-get-all-data?devtoolsheight=66&file=index.js" target="_blank">getAllData</a>
+* <a href="https://stackblitz.com/edit/erc725js-fetch-data?devtoolsheight=66&file=index.js" target="_blank">fetchData</a>
+* <a href="https://stackblitz.com/edit/erc725js-encode-data?devtoolsheight=66&file=index.js" target="_blank">encodeData</a>
+* <a href="https://stackblitz.com/edit/erc725js-encode-all-data?devtoolsheight=66&file=index.js" target="_blank">encodeAllData</a>
+* <a href="https://stackblitz.com/edit/erc725js-decode-data?devtoolsheight=66&file=index.js" target="_blank">decodeData</a>
+* <a href="https://stackblitz.com/edit/erc725js-decode-all-data?devtoolsheight=66&file=index.js" target="_blank">decodeAllData</a>
 
 ## Testing
 
