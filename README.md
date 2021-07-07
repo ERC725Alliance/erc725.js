@@ -22,6 +22,8 @@ import { ERC725 } from "erc725.js";
 ## Example Instantiation
 
 ```js
+import ERC725 from 'erc725.js';
+import Web3 from 'web3';
 
 // Part of LSP3-UniversalProfile Schema
 // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
@@ -55,7 +57,7 @@ const config = {
   ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
 }
 
-let myERC725 = new ERC725(schema[, address, provider, config])
+const erc725 = new ERC725(schema, address, provider, config);
 ```
 
 ## Usage
