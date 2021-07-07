@@ -49,11 +49,8 @@ export function encodeKeyValue(
     ) {
 
         throw new Error(
-            'The valueContent "'
-                + schemaElementDefinition.valueContent
-                + '" for "'
-                + schemaElementDefinition.name
-                + '" is not supported.'
+            `The valueContent '${schemaElementDefinition.valueContent} 
+            for ${schemaElementDefinition.name} is not supported.`
         )
 
     }
@@ -204,7 +201,7 @@ export function transposeArraySchema(
 /**
  *
  * @param schema is an object of a schema definitions
- * @param value will be either key/value pairs for a key type of Array, or a single value for type Singleton
+ * @param value will be either key-value pairs for a key type of Array, or a single value for type Singleton
  * @return the encoded value for the key as per the supplied schema
  */
 export function encodeKey(schema: Erc725Schema, value) {
@@ -261,7 +258,7 @@ export function encodeKey(schema: Erc725Schema, value) {
 /**
  *
  * @param schemas schemas is an array of objects of schema definitions
- * @param data data is an array of objects of key/value pairs
+ * @param data data is an array of objects of key-value pairs
  * @return: all encoded data as per required by the schema and provided data
  */
 export function encodeAllData(schemas: Erc725Schema[], data) {
@@ -278,12 +275,12 @@ export function encodeAllData(schemas: Erc725Schema[], data) {
 
             if (schemaElement.keyType === 'Array') {
 
-                // Encoded array element returns as key/value pairs
+                // Encoded array element returns as key-value pairs
                 results.push(...res)
 
             } else {
 
-                // Singleton encoding returns just the value, so we add the key for key/value pair
+                // Singleton encoding returns just the value, so we add the key for key-value pair
                 results.push({
                     key: schemaElement.key,
                     value: res
@@ -398,7 +395,7 @@ export function decodeKeyValue(schemaElementDefinition, value) {
 /**
  *
  * @param schema is an object of a schema definitions
- * @param value will be either key/value pairs for a key type of Array, or a single value for type Singleton
+ * @param value will be either key-value pairs for a key type of Array, or a single value for type Singleton
  * @return the decoded value/values as per the schema definition
  */
 export function decodeKey(schema: Erc725Schema, value) {
@@ -472,7 +469,7 @@ export function decodeKey(schema: Erc725Schema, value) {
 /**
  *
  * @param schemas schemas is an array of objects of schema definitions
- * @param data data is an array of objects of key/value pairs
+ * @param data data is an array of objects of key-value pairs
  * @return: all decoded data as per required by the schema and provided data
  */
 export function decodeAllData(schemas: Erc725Schema[], data) {
