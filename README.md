@@ -1,4 +1,4 @@
-# ERC725.js
+# erc725.js
 
 This library allows for interfacing with ERC725Y compliant contract on an EVM using the [ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md).
 
