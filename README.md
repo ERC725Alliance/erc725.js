@@ -2,13 +2,11 @@
 
 This library allows for interfacing with ERC725Y compliant contract on an EVM using the [ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md).
 
-For more information see [Documentation](https://erc725js.readthedocs.io/en/latest/).
+For more information see [Documentation](https://docs.lukso.tech/).
 
 *This package is currently in early stages of development, use only for testing or experimentation purposes*
 
 ## Installation
-
-npm
 
 ```shell script
 $ npm install erc725.js
@@ -24,6 +22,8 @@ import { ERC725 } from "erc725.js";
 ## Example Instantiation
 
 ```js
+import ERC725 from 'erc725.js';
+import Web3 from 'web3';
 
 // Part of LSP3-UniversalProfile Schema
 // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
@@ -57,7 +57,7 @@ const config = {
   ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
 }
 
-let myERC725 = new ERC725(schema[, address, provider, config])
+const erc725 = new ERC725(schema, address, provider, config);
 ```
 
 ## Usage
