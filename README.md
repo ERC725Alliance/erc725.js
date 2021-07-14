@@ -2,7 +2,7 @@
 
 This library allows for interfacing with ERC725Y compliant contract on an EVM using the [ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md).
 
-For more information see [Documentation](https://docs.lukso.tech/).
+For more information see [Documentation](https://docs.lukso.tech/tools/erc725js/getting-started).
 
 *This package is currently in early stages of development, use only for testing or experimentation purposes*
 
