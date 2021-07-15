@@ -1,3 +1,4 @@
+/* eslint-disable lines-between-class-members */
 /*
     This file is part of ERC725.js.
     ERC725.js is free software: you can redistribute it and/or modify
@@ -51,12 +52,9 @@ export {
 
 /**
  * :::caution
- *
  * This package is currently in early stages of development, use only for testing or experimentation purposes.
- *
  * :::
  *
-
  */
 export class ERC725 {
 
@@ -87,7 +85,7 @@ export class ERC725 {
    *     },
    * ];
    *
-   * const addresss = "0x0c03fba782b07bcf810deb3b7f0595024a444f4e";
+   * const address = "0x0c03fba782b07bcf810deb3b7f0595024a444f4e";
    * const provider = new Web3.providers.HttpProvider("https://rpc.l14.lukso.network");
    * const config = {
    *    ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
@@ -102,7 +100,12 @@ export class ERC725 {
    * @param {ERC725Config} config Configuration object.
    *
    */
-  constructor(schema: Erc725Schema[], address?: string, provider?: any, config?: ERC725Config) {
+  constructor(
+      schema: Erc725Schema[],
+      address?: string,
+      provider?: any,
+      config?: ERC725Config
+  ) {
 
       // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
 
@@ -147,7 +150,6 @@ export class ERC725 {
               this.options.address = toChecksumAddress(address)
 
           }
-
 
           // CASE: Ethereum provider
 
@@ -394,7 +396,10 @@ export class ERC725 {
       // change ipfs urls
       if (result && result.url && result.url.indexOf('ipfs://') !== -1) {
 
-          result.url = result.url.replace('ipfs://', this.options.config.ipfsGateway)
+          result.url = result.url.replace(
+              'ipfs://',
+              this.options.config.ipfsGateway
+          )
 
       }
 
@@ -423,11 +428,12 @@ export class ERC725 {
           } catch (error) {
 
               console.error(error, `GET request to ${result.url} failed`)
-              throw (error)
+              throw error
 
           }
 
-          return response && this._hashAndCompare(response, result.hash, lowerCaseHashFunction)
+          return response
+          && this._hashAndCompare(response, result.hash, lowerCaseHashFunction)
               ? response
               : null
 
@@ -524,6 +530,7 @@ export class ERC725 {
    * https://stackblitz.com/edit/erc725js-encode-data?devtoolsheight=66&file=index.js
    * :::
    */
+  encodeData(key: string, data: { json: unknown; url: string, hashFunction: string }): string;
   encodeData(key: string, data) {
 
       const schema = getSchemaElement(this.options.schema, key)
@@ -577,7 +584,7 @@ export class ERC725 {
    * https://stackblitz.com/edit/erc725js-decode-all-data?devtoolsheight=33&file=index.js
    * :::
    */
-  decodeAllData(data: {key: string, value: string}[]) {
+  decodeAllData(data: { key: string; value: string }[]) {
 
       return decodeAllData(this.options.schema, data)
 

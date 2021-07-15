@@ -27,6 +27,7 @@ import {
 } from 'web3-utils'
 
 import { CONSTANTS } from './constants'
+import { hashData } from './utils'
 
 const encodeDataSourceWithHash = (
     hashType: string,
@@ -64,9 +65,9 @@ const decodeDataSourceWithHash = (
     const hashFunction = CONSTANTS.hashFunctions.find(
         e => e.sig === hashFunctionSig
     )
-    const encoodedData = value.replace('0x', '').substr(8) // Rest of data string after function hash
-    const dataHash = '0x' + encoodedData.substr(0, 64) // Get jsonHash 32 bytes
-    const dataSource = hexToUtf8('0x' + encoodedData.substr(64)) // Get remainder as URI
+    const encodedData = value.replace('0x', '').substr(8) // Rest of data string after function hash
+    const dataHash = '0x' + encodedData.substr(0, 64) // Get jsonHash 32 bytes
+    const dataSource = hexToUtf8('0x' + encodedData.substr(64)) // Get remainder as URI
     return hashFunction
         ? { hashFunction: hashFunction.name, dataHash, dataSource }
         : null
@@ -223,20 +224,30 @@ export const valueContentEncodingMap = {
     JSONURL: {
         type: 'custom',
         // eslint-disable-next-line arrow-body-style
-        encode: value => {
+        encode: (value: {hash?: string; json?: unknown, hashFunction: string, url: string}) => {
 
-            // TODO: do json hashing here
-            // const hashFunction = CONSTANTS.hashFunctions.find(e => e.sig = value.hashFunction)
-            // need the json
-            // if (value.json) {
+            const {
+                hash, json, hashFunction, url
+            } = value
 
-            //     const hash = hashFunction(JSON.stringify(value.json))
+            let hashedJson = hash
 
-            // }
+            if (json) {
+
+                hashedJson = hashData(json, hashFunction)
+
+            }
+
+            if (!hashedJson) {
+
+                throw new Error('You have to provider either the hash or the json via the respective properties')
+
+            }
+
             return encodeDataSourceWithHash(
-                value.hashFunction,
-                value.hash,
-                value.url
+                hashFunction,
+                hashedJson,
+                url
             )
 
         },

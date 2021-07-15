@@ -300,7 +300,7 @@ describe('Running erc725.js tests...', () => {
 
                     const results: string[] = []
 
-                    // Endcode array loop
+                    // Encode array loop
                     for (let i = 0; i < schemaElement.expectedResult.length; i++) {
 
                         if (i === 0) {
@@ -464,7 +464,7 @@ describe('Running erc725.js tests...', () => {
 
             } else {
 
-                // SINGLETON type: This is not an array, assumed 'Singletoon
+                // SINGLETON type: This is not an array, assumed 'Singleton
                 it('Encode data value for: ' + schemaElement.name, async () => {
 
                     const result = encodeKeyValue(
