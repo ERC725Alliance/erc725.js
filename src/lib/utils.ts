@@ -126,7 +126,7 @@ export function encodeKeyValue(
 /**
  *
  * @param key The schema key of a schema with keyType = 'Array'
- * @param index An integer repredenting the inteded array index
+ * @param index An integer representing the intended array index
  * @return The raw bytes key for the array element
  */
 // eslint-disable-next-line arrow-body-style
@@ -164,7 +164,7 @@ export function encodeKeyName(name: string) {
 
 /**
  *
- * @param schema An object of a schema defnition that must have a keyType of 'Array'
+ * @param schema An object of a schema definition that must have a keyType of 'Array'
  * @param index The index of the array element to transpose the schema to
  * @return Modified schema element of keyType 'Singleton' for fetching or decoding/encoding the array element
  */
@@ -330,7 +330,7 @@ export function decodeKeyValue(schemaElementDefinition, value) {
 
     // VALUE TYPE
     if (
-        schemaElementDefinition.valueType !== 'bytes' // we ignore becuase all is decoded by bytes to start with (abi)
+        schemaElementDefinition.valueType !== 'bytes' // we ignore because all is decoded by bytes to start with (abi)
         && schemaElementDefinition.valueType !== 'string'
         && !isAddress(value) // checks for addresses, since technically an address is bytes?
     ) {
