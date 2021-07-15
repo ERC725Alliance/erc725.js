@@ -402,25 +402,19 @@ export function getSchemaElement(schemas: Erc725Schema[], key: string) {
   return schemaElement;
 }
 
-/**
- * Hash data depending on chosen hashFunction
- *
- * @export
- * @param {*} data
- * @param {*} hashFunction
- * @return {*}  {string}
- */
-export function hashData(data, hashFunction): string {
+export function hashData(data: unknown, hashFunction: string): string {
   switch (hashFunction.toLowerCase()) {
     case 'keccak256(utf8)':
+    case '0x6f357c6a':
       return keccak256(JSON.stringify(data));
 
     case 'keccak256(bytes)':
+    case '0x8019f9b1':
       return keccak256(data);
 
     default:
       throw new Error(
-        `Chosen hashFunction ${hashFunction.toLowerCase()} is not supported`,
+        `Chosen hashFunction '${hashFunction.toLowerCase()}' is not supported`,
       );
   }
 }

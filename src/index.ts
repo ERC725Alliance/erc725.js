@@ -19,7 +19,7 @@
  * @date 2020
  */
 
-import { isAddress, keccak256, toChecksumAddress } from 'web3-utils';
+import { isAddress, toChecksumAddress } from 'web3-utils';
 
 import GraphSource from './providers/subgraphProviderWrapper';
 import Web3Source from './providers/web3ProviderWrapper';
@@ -32,6 +32,7 @@ import {
   encodeArrayKey,
   encodeKey,
   getSchemaElement,
+  hashData,
 } from './lib/utils';
 
 import {
@@ -607,15 +608,7 @@ export class ERC725 {
    */
   // eslint-disable-next-line class-methods-use-this
   _hashAndCompare(data, hash: string, lowerCaseHashFunction: string) {
-    let dataToHash;
-    if (lowerCaseHashFunction === 'keccak256(utf8)') {
-      dataToHash = JSON.stringify(data);
-    }
-    if (lowerCaseHashFunction === 'keccak256(bytes)') {
-      dataToHash = data;
-    }
-
-    const jsonHash = keccak256(dataToHash);
+    const jsonHash = hashData(data, lowerCaseHashFunction);
 
     // throw error if hash mismatch
     if (jsonHash !== hash) {

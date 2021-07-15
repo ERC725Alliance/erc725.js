@@ -35,6 +35,23 @@ import {
 import { CONSTANTS } from './constants';
 import { hashData } from './utils';
 
+interface JSONURLData {
+  hashFunction: string;
+  url: string;
+}
+
+interface JSONURLDataWithHash extends JSONURLData {
+  hash: string;
+  json?: never;
+}
+
+interface JSONURLDataWithJson extends JSONURLData {
+  hash?: never;
+  json: unknown;
+}
+
+type JSONURLDataToEncode = JSONURLDataWithHash | JSONURLDataWithJson;
+
 const encodeDataSourceWithHash = (
   hashType: string,
   dataHash: string,
@@ -42,7 +59,8 @@ const encodeDataSourceWithHash = (
 ): string => {
   const lowerHashType = hashType.toLowerCase();
   const hashFunction = CONSTANTS.hashFunctions.find(
-    (e) => e.name === lowerHashType || e.sig === lowerHashType,
+    (hashFunc) =>
+      hashFunc.name === lowerHashType || hashFunc.sig === lowerHashType,
   );
 
   if (!hashFunction) {
@@ -139,7 +157,7 @@ const valueTypeEncodingMap = {
 };
 
 // Use enum for type bellow
-// Is it this enum Erc725SchemaValueType? (If so, custom is missing fron enum)
+// Is it this enum Erc725SchemaValueType? (If so, custom is missing from enum)
 export const valueContentEncodingMap = {
   Keccak256: {
     type: 'bytes32',
@@ -213,12 +231,7 @@ export const valueContentEncodingMap = {
   JSONURL: {
     type: 'custom',
     // eslint-disable-next-line arrow-body-style
-    encode: (value: {
-      hash?: string;
-      json?: unknown;
-      hashFunction: string;
-      url: string;
-    }) => {
+    encode: (value: JSONURLDataToEncode) => {
       const { hash, json, hashFunction, url } = value;
 
       let hashedJson = hash;
@@ -229,7 +242,7 @@ export const valueContentEncodingMap = {
 
       if (!hashedJson) {
         throw new Error(
-          'You have to provider either the hash or the json via the respective properties',
+          'You have to provide either the hash or the json via the respective properties',
         );
       }
 
