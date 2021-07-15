@@ -2,3 +2,5 @@
 /build
 /docs/build
 .vscode/*
+.nyc_output
+coverage

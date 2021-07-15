@@ -9,7 +9,7 @@
     "build": "run-p build:*",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
-    "test": "npm run lint && env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha",
+    "test": "npm run lint && env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=text --reporter=lcov mocha",
     "lint": "eslint . --ext .ts",
     "build-publish": "rm -rf build && npm run build && npm publish",
     "docs:generate": "npx typedoc --out docs/technical-reference src/index.ts --includeVersion --hideInPageTOC true --sort visibility --readme none --entryDocument modules.md"
@@ -58,7 +58,8 @@
     "ts-node": "^10.0.0",
     "typedoc": "^0.21.4",
     "typedoc-plugin-markdown": "^3.10.3",
-    "typescript": "^4.3.2"
+    "typescript": "^4.3.2",
+    "nyc": "^15.1.0"
   },
   "dependencies": {
     "graphql-tag": "2.12.4",
