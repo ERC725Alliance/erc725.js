@@ -11,7 +11,8 @@
     "build:module": "tsc -p tsconfig.module.json",
     "test": "npm run lint && env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha",
     "lint": "eslint . --ext .ts",
-    "build-publish": "rm -rf build && npm run build && npm publish"
+    "build-publish": "rm -rf build && npm run build && npm publish",
+    "docs:generate": "npx typedoc --out docs/technical-reference src/index.ts --includeVersion --hideInPageTOC true --sort visibility --readme none --entryDocument modules.md"
   },
   "repository": {
     "type": "git",
@@ -54,7 +55,9 @@
     "mocha": "^9.0.0",
     "npm-run-all": "^4.1.5",
     "ts-node": "^10.0.0",
-    "typescript": "^4.3.2"
+    "typescript": "^4.3.2",
+    "typedoc": "^0.21.4",
+    "typedoc-plugin-markdown": "^3.10.3"
   },
   "dependencies": {
     "graphql-tag": "2.12.4",
