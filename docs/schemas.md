@@ -11,21 +11,21 @@ with `erc725.js`. There are certainly more possibilities, and even several
 nonsensical or redundant possibilities which will not or may not be
 supported.
 
-*Quick reference for keys used in schema definitions below see*
+_Quick reference for keys used in schema definitions below see_
 [official
 documentation](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md).
 
--   `name`: An arbitrary name
--   `key`: The sha3 hash of the name
--   `keyType`: One of the supported erc725 keyTypes
--   `valueContent`: The described content type for parsing
--   `valueType`: The type of the content data in store for decoding
+- `name`: An arbitrary name
+- `key`: The sha3 hash of the name
+- `keyType`: One of the supported erc725 keyTypes
+- `valueContent`: The described content type for parsing
+- `valueType`: The type of the content data in store for decoding
 
 ## Supported Schema Elements
 
 ### Mapping:<custom\>:bytes
 
-``` javascript
+```javascript
 {
   name: "SupportedStandards:ERC725Account",
   keyType: "Mapping",
@@ -41,7 +41,7 @@ parsedData: "0xafdeb5d6",
 
 ### Singleton:JSONURL:bytes
 
-``` javascript
+```javascript
 {
   name: "TestJSONURL",
   key: "0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99",
@@ -63,7 +63,7 @@ parsedData: {
 
 ### Singleton:AssetURL:bytes
 
-``` javascript
+```javascript
 {
   name: "TestAssetURL",
   key: "0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee",
@@ -85,7 +85,7 @@ parsedData: {
 
 ### Singleton:Keccak256:bytes32
 
-``` javascript
+```javascript
 {
   name: "TestKeccak256",
   key: "0xd6c7198ea09a1d3357688e1dbdf0e07f6cfaf94359e0a4fc11e4f5f1d59d54f4",
@@ -102,7 +102,7 @@ parsedData: "0x4d75a97aff0964309140e9821514861e5ddcc827113b70a2b69db16dde0695dc"
 
 ### Singleton:Address:bytes
 
-``` javascript
+```javascript
 {
   name: "TestAddress",
   key: "0x7bf6ecfbf659a88c662d7f099c14e468610f786f6e29f0d346e44f772ef0d187",
@@ -119,7 +119,7 @@ parsedData: "0x0C03fBa782b07bCf810DEb3b7f0595024A444F4e", // a real address
 
 ### Singleton:Markdown:bytes
 
-``` javascript
+```javascript
 {
   name: "TestMarkdown",
   key: "0x328f991bde3a9d8c548b7b2dbc303a362202dddbcd33219650d85bedcd75ac9b",
@@ -136,7 +136,7 @@ parsedData: "# Testing markdown. \n Welcome to markdown **test**.",
 
 ### Singleton:String:string
 
-``` javascript
+```javascript
 {
   name: "LSP3Name",
   key: "0xa5f15b1fa920bbdbc28f5d785e5224e3a66eb5f7d4092dc9ba82d5e5ae3abc87",
@@ -153,7 +153,7 @@ parsedData: "patrick-mcdowell",
 
 ### Singleton:URL:bytes
 
-``` javascript
+```javascript
 {
   name: "LSP3Profile",
   key: "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
@@ -170,7 +170,7 @@ parsedData: "ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd",
 
 ### Array:Number:uint256
 
-``` javascript
+```javascript
 {
   name: "LSP3IssuedAssets[]",
   key: "0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0",
@@ -198,7 +198,7 @@ parsedData: [
 
 ### Array:JSONURL:bytes
 
-``` javascript
+```javascript
 {
   name: "TestObjArray[]",
   key: "0x9985edaf12cbacf5ac7d6ed54f0445cc0ea56075aee9b9942e4ab3bf4239f950",
@@ -241,7 +241,7 @@ parsedData: [
 
 ### Singleton:String:string
 
-``` javascript
+```javascript
 {
   name: "TestStringValueType",
   key: "0xc0929170bbaeb216f869c80a5c937f7a1c887a5a92262dac50313aef131f0c03",
@@ -258,7 +258,7 @@ parsedData: [
 
 ### Singleton:Number:uint256
 
-``` javascript
+```javascript
 {
   name: "TestUintValueType",
   key: "0x61529294800f5739edc21a6cf8ba1bad3fd3e11d03d2ab5219ce9c0131b93f93",
@@ -275,7 +275,7 @@ parsedData: "99", // NOTE: This is a string result because web3 utils returns st
 
 ### Singleton:Number:bytes
 
-``` javascript
+```javascript
 {
   name: "TestNumberWithBytesValueType",
   key: "0x64a44e72c25d95851b1d449428d8d27093b2ef3e0b36a2b3497ae17edf979e61",
@@ -294,7 +294,7 @@ parsedData: "99",
 
 ### Singleton:String:bytes
 
-``` javascript
+```javascript
 {
   name: "TestStringWithBytesValueType",
   key: "0x3ef4d417afa66557c9e1463723b391a518eee0c61d29be4e10882999c7848041",
@@ -316,7 +316,7 @@ Below, the on chain `valueType` of the data is of an array of that type.
 
 ### Singleton:String:string\[\]
 
-``` javascript
+```javascript
 {
   name: "TestStringValueTypeArray",
   key: "0xd7a8f1af4a0d9de8d17c177ff06f1689c0c3f1310edbbe53733da0b084ccff18",
@@ -333,7 +333,7 @@ parsedData: ["apple sauce", "butter chicken"],
 
 ### Singleton:String:bytes
 
-``` javascript
+```javascript
 {
   name: "TestBytesValueTypeArray",
   key: "0xd6b3622ec62ae4459c0276bd5e2e26011201fada1cbc2b33283e9c20495c05fe",
@@ -353,7 +353,7 @@ parsedData: [
 
 ### Singleton:Address:address\[\]
 
-``` javascript
+```javascript
 {
   name: "TestAddressValueTypeArray",
   key: "0xe45f3de809830d5ac3aeab862200fc670391fcb99018dcd2522fee7cf07f93ee",
@@ -373,7 +373,7 @@ parsedData: [
 
 ### Singleton:Number:uint256\[\]
 
-``` javascript
+```javascript
 {
   name: "TestUintValueTypeArray",
   key: "0xdaa41a5e1acc41087359e61588e80bf0b7f1d96063b98bdff73b4ce3a645b40b",
@@ -394,7 +394,7 @@ parsedData: [
 
 ### Singleton:Keccak256:bytes32\[\]
 
-``` javascript
+```javascript
 {
   name: "TestBytes32ValueTypeArray",
   key: "0x7e2458b2b22ff4357510c3491b7c041df2ee4f11ba4d6f4f4e34101fc2645a97",
@@ -414,7 +414,7 @@ parsedData: [
 
 ### Singleton:URL:string\[\]
 
-``` javascript
+```javascript
 {
   name: "TestURLStringValueTypeArray",
   key: "0x1a9818703b62d00000bd3e8c7499296d42966619cd735a92eac7488de8881bb8",
@@ -434,7 +434,7 @@ parsedData: [
 
 ### Singleton:<custom\>:bytes32
 
-``` javascript
+```javascript
 {
   name: "TestHashKey",
   key: "0xed579debad05d91a79b46589987171dfce1c8ffa8b1d8c1ddc851cc104ea6029",
