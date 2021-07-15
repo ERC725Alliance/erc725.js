@@ -1,6 +1,7 @@
 ---
 sidebar_position: 1.3
 ---
+
 # Providers
 
 The provider by which `erc725.js` will request blockchain data is set on
@@ -12,10 +13,12 @@ The following provider types are supported:
 
 This will use the web3 provider available at web3.providers
 
-``` javascript
-import Web3 from 'web3'
+```javascript
+import Web3 from 'web3';
 
-const web3provider = new Web3(new Web3.providers.HttpProvider('https://rpc.l14.lukso.network'));
+const web3provider = new Web3(
+  new Web3.providers.HttpProvider('https://rpc.l14.lukso.network'),
+);
 ```
 
 ## Ethereum (Metamask)
@@ -23,7 +26,7 @@ const web3provider = new Web3(new Web3.providers.HttpProvider('https://rpc.l14.l
 This is the provider available at `window.ethereum` injected into a
 compatible web browser from the [Metamask plugin](https://metamask.io/).
 
-``` javascript
+```javascript
 const ethereumProvider = window.ethereum;
 ```
 
@@ -32,23 +35,23 @@ const ethereumProvider = window.ethereum;
 Also supported is a [GraphQL
 client](https://www.apollographql.com/docs/) as the provider.
 
-``` javascript
+```javascript
 import { ApolloClient, InMemoryCache } from '@apollo/client';
 
 const apolloProvider = new ApolloClient({
   uri: 'http://localhost:8080/graphql',
   cache: new InMemoryCache(),
   fetchOptions: {
-    mode: 'no-cors'
-  }
+    mode: 'no-cors',
+  },
 });
 
 // NOTE: The apollo provider *must* be passed as a member of an object along
 // with a type member when creating a new instance of the ERC725 class.
 const providerParam = {
-    provider: apolloProvider,
-    type: 'ApolloClient'
-}
+  provider: apolloProvider,
+  type: 'ApolloClient',
+};
 ```
 
 :::note Note

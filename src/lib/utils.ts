@@ -18,17 +18,26 @@
  */
 
 import {
-    checkAddressChecksum, isAddress, keccak256, leftPad, numberToHex, padLeft
-} from 'web3-utils'
-import { Erc725Schema } from '../types/Erc725Schema'
+  checkAddressChecksum,
+  isAddress,
+  keccak256,
+  leftPad,
+  numberToHex,
+  padLeft,
+} from 'web3-utils';
+import { Erc725Schema } from '../types/Erc725Schema';
 
 import {
-    decodeValueContent, decodeValueType, encodeValueContent, encodeValueType, valueContentEncodingMap as valueContentMap
-} from './encoder'
+  decodeValueContent,
+  decodeValueType,
+  encodeValueContent,
+  encodeValueType,
+  valueContentEncodingMap as valueContentMap,
+} from './encoder';
 
 type Erc725ObjectSchema = Pick<
-    Erc725Schema,
-    'key' | 'keyType' | 'valueContent' | 'valueType' | 'name'
+  Erc725Schema,
+  'key' | 'keyType' | 'valueContent' | 'valueType' | 'name'
 >;
 
 /**
@@ -38,90 +47,63 @@ type Erc725ObjectSchema = Pick<
  * @return the encoded value as per the schema
  */
 export function encodeKeyValue(
-    schemaElementDefinition: Erc725ObjectSchema,
-    value: string
+  schemaElementDefinition: Erc725ObjectSchema,
+  value: string,
 ) {
+  // Check if existing in the supported valueContent mapping.
+  if (
+    !valueContentMap[schemaElementDefinition.valueContent] &&
+    schemaElementDefinition.valueContent.substr(0, 2) !== '0x'
+  ) {
+    throw new Error(
+      `The valueContent '${schemaElementDefinition.valueContent} 
+            for ${schemaElementDefinition.name} is not supported.`,
+    );
+  }
 
-    // Check if existing in the supported valueContent mapping.
-    if (
-        !valueContentMap[schemaElementDefinition.valueContent]
-        && schemaElementDefinition.valueContent.substr(0, 2) !== '0x'
-    ) {
+  let result;
+  const sameEncoding =
+    valueContentMap[schemaElementDefinition.valueContent] &&
+    valueContentMap[schemaElementDefinition.valueContent].type ===
+      schemaElementDefinition.valueType.split('[]')[0];
+  const isArray =
+    schemaElementDefinition.valueType.substr(
+      schemaElementDefinition.valueType.length - 2,
+    ) === '[]';
 
-        throw new Error(
-            `The valueContent '${schemaElementDefinition.valueContent} 
-            for ${schemaElementDefinition.name} is not supported.`
-        )
+  // We only loop if the valueType done by abi.encodeParameter can not handle it directly
+  if (Array.isArray(value) && !sameEncoding) {
+    // value type encoding will handle it?
 
+    // we handle an array element encoding
+    const results: (string | false)[] = [];
+    for (let index = 0; index < value.length; index++) {
+      const element = value[index];
+      results.push(
+        encodeValueContent(schemaElementDefinition.valueContent, element),
+      );
     }
+    result = results;
+  } else if (!isArray) {
+    // Straight forward encode
+    result = encodeValueContent(schemaElementDefinition.valueContent, value);
+  } else if (sameEncoding) {
+    result = value; // leaving this for below
+  }
 
-    let result
-    const sameEncoding = valueContentMap[schemaElementDefinition.valueContent]
-        && valueContentMap[schemaElementDefinition.valueContent].type
-            === schemaElementDefinition.valueType.split('[]')[0]
-    const isArray = schemaElementDefinition.valueType.substr(
-        schemaElementDefinition.valueType.length - 2
-    ) === '[]'
+  if (
+    // and we only skip bytes regardless
+    schemaElementDefinition.valueType !== 'bytes' &&
+    // Requires encoding because !sameEncoding means both encodings are required
+    !sameEncoding
+  ) {
+    result = encodeValueType(schemaElementDefinition.valueType, result);
+  } else if (isArray && sameEncoding) {
+    result = encodeValueType(schemaElementDefinition.valueType, result);
+  }
 
-    // We only loop if the valueType done by abi.encodeParameter can not handle it directly
-    if (Array.isArray(value) && !sameEncoding) {
-
-        // value type encoding will handle it?
-
-        // we handle an array element encoding
-        const results: (string | false)[] = []
-        for (let index = 0; index < value.length; index++) {
-
-            const element = value[index]
-            results.push(
-                encodeValueContent(
-                    schemaElementDefinition.valueContent,
-                    element
-                )
-            )
-
-        }
-        result = results
-
-    } else if (!isArray) {
-
-        // Straight forward encode
-        result = encodeValueContent(
-            schemaElementDefinition.valueContent,
-            value
-        )
-
-    } else if (sameEncoding) {
-
-        result = value // leaving this for below
-
-    }
-
-    if (
-        // and we only skip bytes regardless
-        schemaElementDefinition.valueType !== 'bytes'
-        // Requires encoding because !sameEncoding means both encodings are required
-        && !sameEncoding
-    ) {
-
-        result = encodeValueType(
-            schemaElementDefinition.valueType,
-            result
-        )
-
-    } else if (isArray && sameEncoding) {
-
-        result = encodeValueType(
-            schemaElementDefinition.valueType,
-            result
-        )
-
-    }
-
-    return result
-
+  return result;
 }
-
 
 /**
  *
@@ -131,15 +113,7 @@ export function encodeKeyValue(
  */
 // eslint-disable-next-line arrow-body-style
 export function encodeArrayKey(key: string, index: number) {
-
-    return (
-        key.substr(0, 34)
-        + padLeft(numberToHex(index), 32).replace(
-            '0x',
-            ''
-        )
-    )
-
+  return key.substr(0, 34) + padLeft(numberToHex(index), 32).replace('0x', '');
 }
 
 /**
@@ -149,17 +123,12 @@ export function encodeArrayKey(key: string, index: number) {
  * @return a string of the encoded schema name
  */
 export function encodeKeyName(name: string) {
-
-    const colon = name.indexOf(':')
-    // if name:subname, then construct using bytes16(hashFirstWord) + bytes12(0) + bytes4(hashLastWord)
-    return colon !== -1
-        ? keccak256(name.substr(0, colon)).substr(0, 34)
-                + leftPad(
-                    keccak256(name.substr(colon + 1)).substr(2, 8),
-                    32
-                )
-        : keccak256(name) // otherwise just bytes32(hash)
-
+  const colon = name.indexOf(':');
+  // if name:subname, then construct using bytes16(hashFirstWord) + bytes12(0) + bytes4(hashLastWord)
+  return colon !== -1
+    ? keccak256(name.substr(0, colon)).substr(0, 34) +
+        leftPad(keccak256(name.substr(colon + 1)).substr(2, 8), 32)
+    : keccak256(name); // otherwise just bytes32(hash)
 }
 
 /**
@@ -169,34 +138,27 @@ export function encodeKeyName(name: string) {
  * @return Modified schema element of keyType 'Singleton' for fetching or decoding/encoding the array element
  */
 export function transposeArraySchema(
-    schema: Erc725Schema,
-    index: number
+  schema: Erc725Schema,
+  index: number,
 ): Erc725ObjectSchema {
+  // Use enum Erc725SchemaKeyType instead?
+  if (schema.keyType.toLowerCase() !== 'array') {
+    console.error(
+      'Schema is not of keyType "Array" for schema: "' + schema.name + '".',
+    );
+  }
 
-    // Use enum Erc725SchemaKeyType instead?
-    if (schema.keyType.toLowerCase() !== 'array') {
-
-        console.error(
-            'Schema is not of keyType "Array" for schema: "'
-                + schema.name
-                + '".'
-        )
-
-    }
-
-    return {
-        name: schema.name,
-        key: encodeArrayKey(schema.key, index),
-        keyType: 'Singleton',
-        // TODO: This can be solved by defining an extra "Erc725ArraySchema" for array
-        // @ts-ignore
-        valueContent: schema.elementValueContent,
-        // @ts-ignore
-        valueType: schema.elementValueType
-    }
-
+  return {
+    name: schema.name,
+    key: encodeArrayKey(schema.key, index),
+    keyType: 'Singleton',
+    // TODO: This can be solved by defining an extra "Erc725ArraySchema" for array
+    // @ts-ignore
+    valueContent: schema.elementValueContent,
+    // @ts-ignore
+    valueType: schema.elementValueType,
+  };
 }
-
 
 /**
  *
@@ -205,54 +167,44 @@ export function transposeArraySchema(
  * @return the encoded value for the key as per the supplied schema
  */
 export function encodeKey(schema: Erc725Schema, value) {
+  // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
+  if (schema.keyType.toLowerCase() === 'array' && Array.isArray(value)) {
+    const results: { key: string; value: string }[] = [];
 
-    // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
-    if (schema.keyType.toLowerCase() === 'array' && Array.isArray(value)) {
+    for (let index = 0; index < value.length; index++) {
+      const dataElement = value[index];
+      if (index === 0) {
+        // This is arrayLength as the first element in the raw array
+        results.push({
+          key: schema.key,
+          // @ts-ignore
+          value: encodeKeyValue(schema, value.length), // the array length
+        });
+      }
 
-        const results: { key: string; value: string }[] = []
-
-        for (let index = 0; index < value.length; index++) {
-
-            const dataElement = value[index]
-            if (index === 0) {
-
-                // This is arrayLength as the first element in the raw array
-                results.push({
-                    key: schema.key,
-                    // @ts-ignore
-                    value: encodeKeyValue(schema, value.length) // the array length
-                })
-
-            }
-
-            const newSchema = transposeArraySchema(schema, index)
-            results.push({
-                key: newSchema.key,
-                value: encodeKeyValue(newSchema, dataElement)
-            })
-
-        }
-
-        return results
-
+      const newSchema = transposeArraySchema(schema, index);
+      results.push({
+        key: newSchema.key,
+        value: encodeKeyValue(newSchema, dataElement),
+      });
     }
 
-    if (
-        schema.keyType.toLowerCase() === 'singleton'
-        || schema.keyType.toLowerCase() === 'mapping'
-    ) {
+    return results;
+  }
 
-        return encodeKeyValue(schema, value)
+  if (
+    schema.keyType.toLowerCase() === 'singleton' ||
+    schema.keyType.toLowerCase() === 'mapping'
+  ) {
+    return encodeKeyValue(schema, value);
+  }
 
-    }
-
-    console.error(
-        'Incorrect data match or keyType in schema from encodeKey(): "'
-            + schema.keyType
-            + '"'
-    )
-    return null
-
+  console.error(
+    'Incorrect data match or keyType in schema from encodeKey(): "' +
+      schema.keyType +
+      '"',
+  );
+  return null;
 }
 
 /**
@@ -262,40 +214,29 @@ export function encodeKey(schema: Erc725Schema, value) {
  * @return: all encoded data as per required by the schema and provided data
  */
 export function encodeAllData(schemas: Erc725Schema[], data) {
+  const results: { key: string; value: string }[] = [];
 
-    const results: {key: string, value: string}[] = []
+  for (let index = 0; index < schemas.length; index++) {
+    const schemaElement = schemas[index];
+    const filteredData = data[schemaElement.name];
 
-    for (let index = 0; index < schemas.length; index++) {
-
-        const schemaElement = schemas[index]
-        const filteredData = data[schemaElement.name]
-
-        const res = encodeKey(schemaElement, filteredData)
-        if (res) {
-
-            if (schemaElement.keyType === 'Array') {
-
-                // Encoded array element returns as key-value pairs
-                results.push(...res)
-
-            } else {
-
-                // Singleton encoding returns just the value, so we add the key for key-value pair
-                results.push({
-                    key: schemaElement.key,
-                    value: res
-                })
-
-            }
-
-        }
-
+    const res = encodeKey(schemaElement, filteredData);
+    if (res) {
+      if (schemaElement.keyType === 'Array') {
+        // Encoded array element returns as key-value pairs
+        results.push(...res);
+      } else {
+        // Singleton encoding returns just the value, so we add the key for key-value pair
+        results.push({
+          key: schemaElement.key,
+          value: res,
+        });
+      }
     }
+  }
 
-    return results
-
+  return results;
 }
-
 
 /**
  *
@@ -304,93 +245,67 @@ export function encodeAllData(schemas: Erc725Schema[], data) {
  * @return the decoded value as per the schema
  */
 export function decodeKeyValue(schemaElementDefinition, value) {
+  // Check for the missing map.
+  if (
+    !valueContentMap[schemaElementDefinition.valueContent] &&
+    schemaElementDefinition.valueContent.substr(0, 2) !== '0x'
+  ) {
+    throw new Error(
+      'The valueContent "' +
+        schemaElementDefinition.valueContent +
+        '" for "' +
+        schemaElementDefinition.name +
+        '" is not supported.',
+    );
+  }
 
-    // Check for the missing map.
-    if (
-        !valueContentMap[schemaElementDefinition.valueContent]
-        && schemaElementDefinition.valueContent.substr(0, 2) !== '0x'
-    ) {
+  let sameEncoding =
+    valueContentMap[schemaElementDefinition.valueContent] &&
+    valueContentMap[schemaElementDefinition.valueContent].type ===
+      schemaElementDefinition.valueType.split('[]')[0];
+  const isArray =
+    schemaElementDefinition.valueType.substr(
+      schemaElementDefinition.valueType.length - 2,
+    ) === '[]';
 
-        throw new Error(
-            'The valueContent "'
-                + schemaElementDefinition.valueContent
-                + '" for "'
-                + schemaElementDefinition.name
-                + '" is not supported.'
-        )
+  // VALUE TYPE
+  if (
+    schemaElementDefinition.valueType !== 'bytes' && // we ignore because all is decoded by bytes to start with (abi)
+    schemaElementDefinition.valueType !== 'string' &&
+    !isAddress(value) // checks for addresses, since technically an address is bytes?
+  ) {
+    // eslint-disable-next-line no-param-reassign
+    value = decodeValueType(schemaElementDefinition.valueType, value);
+  }
 
+  // As per exception above, if address and sameEncoding, then the address still needs to be handled
+  if (sameEncoding && isAddress(value) && !checkAddressChecksum(value)) {
+    sameEncoding = !sameEncoding;
+  }
+
+  if (sameEncoding && schemaElementDefinition.valueType !== 'string') {
+    return value;
+  }
+
+  // VALUE CONTENT
+  // We are finished if duplicated encoding methods
+
+  if (isArray && Array.isArray(value)) {
+    // value must be an array also
+    const results: (string | false)[] = [];
+
+    for (let index = 0; index < value.length; index++) {
+      const element = value[index];
+      results.push(
+        decodeValueContent(schemaElementDefinition.valueContent, element),
+      );
     }
 
-    let sameEncoding = valueContentMap[schemaElementDefinition.valueContent]
-        && valueContentMap[schemaElementDefinition.valueContent].type
-            === schemaElementDefinition.valueType.split('[]')[0]
-    const isArray = schemaElementDefinition.valueType.substr(
-        schemaElementDefinition.valueType.length - 2
-    ) === '[]'
+    return results;
+  }
 
-    // VALUE TYPE
-    if (
-        schemaElementDefinition.valueType !== 'bytes' // we ignore because all is decoded by bytes to start with (abi)
-        && schemaElementDefinition.valueType !== 'string'
-        && !isAddress(value) // checks for addresses, since technically an address is bytes?
-    ) {
-
-        // eslint-disable-next-line no-param-reassign
-        value = decodeValueType(
-            schemaElementDefinition.valueType,
-            value
-        )
-
-    }
-
-    // As per exception above, if address and sameEncoding, then the address still needs to be handled
-    if (
-        sameEncoding
-        && isAddress(value)
-        && !checkAddressChecksum(value)
-    ) {
-
-        sameEncoding = !sameEncoding
-
-    }
-
-    if (sameEncoding && schemaElementDefinition.valueType !== 'string') {
-
-        return value
-
-    }
-
-    // VALUE CONTENT
-    // We are finished if duplicated encoding methods
-
-    if (isArray && Array.isArray(value)) {
-
-        // value must be an array also
-        const results: (string | false)[] = []
-
-        for (let index = 0; index < value.length; index++) {
-
-            const element = value[index]
-            results.push(
-                decodeValueContent(
-                    schemaElementDefinition.valueContent,
-                    element
-                )
-            )
-
-        }
-
-        return results
-
-    }
-
-    return decodeValueContent(
-        schemaElementDefinition.valueContent,
-        value
-    )
-
+  return decodeValueContent(schemaElementDefinition.valueContent, value);
 }
-
 
 /**
  *
@@ -399,71 +314,53 @@ export function decodeKeyValue(schemaElementDefinition, value) {
  * @return the decoded value/values as per the schema definition
  */
 export function decodeKey(schema: Erc725Schema, value) {
-
-    if (schema.keyType.toLowerCase() === 'array') {
-
-        const results: any[] = []
-        const valueElement = value.find(e => e.key === schema.key)
-        // Handle empty/non-existent array
-        if (!valueElement) {
-
-            return results
-
-        }
-
-        const arrayLength = decodeKeyValue(schema, valueElement.value) || 0
-
-        // This will not run if no match or arrayLength
-        for (let index = 0; index < arrayLength; index++) {
-
-            const newSchema = transposeArraySchema(schema, index)
-            const dataElement = value.find(e => e.key === newSchema.key)
-
-            if (dataElement) {
-
-                results.push(
-                    decodeKeyValue(newSchema, dataElement.value)
-                )
-
-            }
-
-        } // end for loop
-
-        return results
-
+  if (schema.keyType.toLowerCase() === 'array') {
+    const results: any[] = [];
+    const valueElement = value.find((e) => e.key === schema.key);
+    // Handle empty/non-existent array
+    if (!valueElement) {
+      return results;
     }
 
-    if (
-        schema.keyType.toLowerCase() === 'singleton'
-        || schema.keyType.toLowerCase() === 'mapping'
-    ) {
+    const arrayLength = decodeKeyValue(schema, valueElement.value) || 0;
 
-        if (Array.isArray(value)) {
+    // This will not run if no match or arrayLength
+    for (let index = 0; index < arrayLength; index++) {
+      const newSchema = transposeArraySchema(schema, index);
+      const dataElement = value.find((e) => e.key === newSchema.key);
 
-            const newValue = value.find(e => e.key === schema.key)
+      if (dataElement) {
+        results.push(decodeKeyValue(newSchema, dataElement.value));
+      }
+    } // end for loop
 
-            // Handle empty or non-values
-            if (!newValue) {
+    return results;
+  }
 
-                return null
+  if (
+    schema.keyType.toLowerCase() === 'singleton' ||
+    schema.keyType.toLowerCase() === 'mapping'
+  ) {
+    if (Array.isArray(value)) {
+      const newValue = value.find((e) => e.key === schema.key);
 
-            }
+      // Handle empty or non-values
+      if (!newValue) {
+        return null;
+      }
 
-            return decodeKeyValue(schema, newValue.value)
-
-        }
-
-        return decodeKeyValue(schema, value)
-
+      return decodeKeyValue(schema, newValue.value);
     }
 
-    console.error(
-        'Incorrect data match or keyType in schema from decodeKey(): "'
-            + schema.keyType
-            + '"'
-    )
-    return null
+    return decodeKeyValue(schema, value);
+  }
 
+  console.error(
+    'Incorrect data match or keyType in schema from decodeKey(): "' +
+      schema.keyType +
+      '"',
+  );
+  return null;
 }
 
 /**
@@ -473,24 +370,18 @@ export function decodeKey(schema: Erc725Schema, value) {
  * @return: all decoded data as per required by the schema and provided data
  */
 export function decodeAllData(schemas: Erc725Schema[], data) {
+  const results = {};
 
-    const results = {}
+  for (let index = 0; index < schemas.length; index++) {
+    const schemaElement = schemas[index];
 
-    for (let index = 0; index < schemas.length; index++) {
-
-        const schemaElement = schemas[index]
-
-        const res = decodeKey(schemaElement, data)
-        if (res) {
-
-            results[schemaElement.name] = res
-
-        }
-
+    const res = decodeKey(schemaElement, data);
+    if (res) {
+      results[schemaElement.name] = res;
     }
+  }
 
-    return results
-
+  return results;
 }
 
 /**
@@ -500,25 +391,16 @@ export function decodeAllData(schemas: Erc725Schema[], data) {
  * @return The requested schema element from the full array of schemas
  */
 export function getSchemaElement(schemas: Erc725Schema[], key: string) {
+  const keyHash = key.substr(0, 2) !== '0x' ? encodeKeyName(key) : key;
+  const schemaElement = schemas.find((e) => e.key === keyHash);
+  if (!schemaElement) {
+    throw new Error(
+      'No matching schema found for key: "' + key + '" (' + keyHash + ').',
+    );
+  }
 
-    const keyHash = key.substr(0, 2) !== '0x' ? encodeKeyName(key) : key
-    const schemaElement = schemas.find(e => e.key === keyHash)
-    if (!schemaElement) {
-
-        throw new Error(
-            'No matching schema found for key: "'
-                + key
-                + '" ('
-                + keyHash
-                + ').'
-        )
-
-    }
-
-    return schemaElement
-
+  return schemaElement;
 }
-
 
 /**
  * Hash data depending on chosen hashFunction
@@ -529,18 +411,16 @@ export function getSchemaElement(schemas: Erc725Schema[], key: string) {
  * @return {*}  {string}
  */
 export function hashData(data, hashFunction): string {
-
-    switch (hashFunction.toLowerCase()) {
-
+  switch (hashFunction.toLowerCase()) {
     case 'keccak256(utf8)':
-        return keccak256(JSON.stringify(data))
+      return keccak256(JSON.stringify(data));
 
     case 'keccak256(bytes)':
-        return keccak256(data)
+      return keccak256(data);
 
     default:
-        throw new Error(`Chosen hashFunction ${hashFunction.toLowerCase()} is not supported`)
-
-    }
-
+      throw new Error(
+        `Chosen hashFunction ${hashFunction.toLowerCase()} is not supported`,
+      );
+  }
 }

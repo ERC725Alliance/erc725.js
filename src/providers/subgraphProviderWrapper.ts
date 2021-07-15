@@ -22,53 +22,42 @@
   in accordance with implementation of datastore in subgraph definition
 */
 
-import { queries } from '../lib/queries'
+import { queries } from '../lib/queries';
 
 export default class GraphSource {
+  // TODO: provide correct interface for provider
+  public provider: any = {};
 
-    // TODO: provide correct interface for provider
-    public provider: any = {};
+  constructor(provider: any) {
+    this.provider = provider;
+  }
 
-    constructor(provider: any) {
+  // eslint-disable-next-line class-methods-use-this
+  getOwner() {
+    throw new Error(
+      "We're sorry, getOwner() method not yet supported in graph provider type.",
+    );
+  }
 
-        this.provider = provider
-
+  async getData(address, keys) {
+    if (!keys || Array.isArray(keys)) {
+      // TODO: support array of keys
+      throw new Error(`Incorrect parameter 'keys' in getData() ${keys}`);
     }
+    // Get the value for the specific single key
+    const query = queries.getDataByKey(address, keys);
+    const result = await this.provider.query({ query });
+    // Single out the first result as expected
+    const ret =
+      result.data[Object.keys(result.data)[0]][0] &&
+      result.data[Object.keys(result.data)[0]][0].value;
+    return !ret ? null : ret;
+  }
 
-    // eslint-disable-next-line class-methods-use-this
-    getOwner() {
-
-        throw new Error(
-            "We're sorry, getOwner() method not yet supported in graph provider type."
-        )
-
-    }
-
-    async getData(address, keys) {
-
-        if (!keys || Array.isArray(keys)) {
-
-            // TODO: support array of keys
-            throw new Error(`Incorrect parameter 'keys' in getData() ${keys}`)
-
-        }
-        // Get the value for the specific single key
-        const query = queries.getDataByKey(address, keys)
-        const result = await this.provider.query({ query })
-        // Single out the first result as expected
-        const ret = result.data[Object.keys(result.data)[0]][0]
-            && result.data[Object.keys(result.data)[0]][0].value
-        return !ret ? null : ret
-
-    }
-
-    async getAllData(address) {
-
-        const query = queries.getAllData(address)
-        const result = await this.provider.query({ query })
-        // Return the data query array
-        return result.data[Object.keys(result.data)[0]]
-
-    }
-
+  async getAllData(address) {
+    const query = queries.getAllData(address);
+    const result = await this.provider.query({ query });
+    // Return the data query array
+    return result.data[Object.keys(result.data)[0]];
+  }
 }

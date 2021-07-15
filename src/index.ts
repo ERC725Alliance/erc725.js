@@ -19,23 +19,29 @@
  * @date 2020
  */
 
-import { isAddress, keccak256, toChecksumAddress } from 'web3-utils'
+import { isAddress, keccak256, toChecksumAddress } from 'web3-utils';
 
-import GraphSource from './providers/subgraphProviderWrapper'
-import Web3Source from './providers/web3ProviderWrapper'
-import EthereumSource from './providers/ethereumProviderWrapper'
+import GraphSource from './providers/subgraphProviderWrapper';
+import Web3Source from './providers/web3ProviderWrapper';
+import EthereumSource from './providers/ethereumProviderWrapper';
 import {
-    decodeAllData, decodeKey, decodeKeyValue, encodeAllData, encodeArrayKey, encodeKey, getSchemaElement
-} from './lib/utils'
+  decodeAllData,
+  decodeKey,
+  decodeKeyValue,
+  encodeAllData,
+  encodeArrayKey,
+  encodeKey,
+  getSchemaElement,
+} from './lib/utils';
 
 import {
-    Erc725Schema,
-    Erc725SchemaKeyType,
-    Erc725SchemaValueContent,
-    Erc725SchemaValueType
-} from './types/Erc725Schema'
+  Erc725Schema,
+  Erc725SchemaKeyType,
+  Erc725SchemaValueContent,
+  Erc725SchemaValueType,
+} from './types/Erc725Schema';
 
-import { ERC725Config } from './types/Config'
+import { ERC725Config } from './types/Config';
 
 enum ProviderType {
   GRAPH = 'graph',
@@ -44,11 +50,11 @@ enum ProviderType {
 }
 
 export {
-    Erc725Schema,
-    Erc725SchemaKeyType,
-    Erc725SchemaValueContent,
-    Erc725SchemaValueType
-}
+  Erc725Schema,
+  Erc725SchemaKeyType,
+  Erc725SchemaValueContent,
+  Erc725SchemaValueType,
+};
 
 /**
  * :::caution
@@ -57,7 +63,6 @@ export {
  *
  */
 export class ERC725 {
-
   options: {
     schema;
     address?;
@@ -101,81 +106,67 @@ export class ERC725 {
    *
    */
   constructor(
-      schema: Erc725Schema[],
-      address?: string,
-      provider?: any,
-      config?: ERC725Config
+    schema: Erc725Schema[],
+    address?: string,
+    provider?: any,
+    config?: ERC725Config,
   ) {
+    // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
 
-      // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
+    // TODO: Add check for schema format?
+    if (!schema) {
+      throw new Error('Missing schema.');
+    }
 
-      // TODO: Add check for schema format?
-      if (!schema) {
+    const defaultConfig = {
+      ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/',
+    };
 
-          throw new Error('Missing schema.')
+    // Init options member
+    this.options = {
+      schema,
+      address,
+      providerType: null,
+      config: {
+        ...defaultConfig,
+        ...config,
+      },
+    };
 
+    // do not fail on no-provider
+    if (!provider) return;
+
+    const givenProvider = provider.provider || provider;
+
+    // CASE: GraphQL provider
+
+    if (provider.type === 'ApolloClient') {
+      this.options.providerType = ProviderType.GRAPH;
+      this.options.provider = new GraphSource(givenProvider);
+
+      // This checks to see if its a subgraph, since TheGraph subgraphs cannot checksum addresses to store
+      const isSubgraph = givenProvider.link?.options?.uri.includes('/subgraph');
+      if (!isSubgraph && address) {
+        this.options.address = toChecksumAddress(address);
       }
 
-      const defaultConfig = {
-          ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/'
-      }
+      // CASE: Ethereum provider
+    } else if (provider.request || provider.type === 'EthereumProvider') {
+      this.options.providerType = ProviderType.ETHEREUM;
+      this.options.provider = new EthereumSource(givenProvider);
 
-      // Init options member
-      this.options = {
-          schema,
-          address,
-          providerType: null,
-          config: {
-              ...defaultConfig,
-              ...config
-          }
-      }
+      // CASE: Web3 or deprecated ethereum provider
+    } else if (
+      (!provider.request && provider.send) ||
+      provider.type === 'Web3Provider'
+    ) {
+      this.options.providerType = ProviderType.WEB3;
+      this.options.provider = new Web3Source(givenProvider);
 
-      // do not fail on no-provider
-      if (!provider) return
-
-      const givenProvider = provider.provider || provider
-
-      // CASE: GraphQL provider
-
-      if (provider.type === 'ApolloClient') {
-
-          this.options.providerType = ProviderType.GRAPH
-          this.options.provider = new GraphSource(givenProvider)
-
-          // This checks to see if its a subgraph, since TheGraph subgraphs cannot checksum addresses to store
-          const isSubgraph = givenProvider.link?.options?.uri.includes('/subgraph')
-          if (!isSubgraph && address) {
-
-              this.options.address = toChecksumAddress(address)
-
-          }
-
-          // CASE: Ethereum provider
-
-      } else if (provider.request || provider.type === 'EthereumProvider') {
-
-          this.options.providerType = ProviderType.ETHEREUM
-          this.options.provider = new EthereumSource(givenProvider)
-
-          // CASE: Web3 or deprecated ethereum provider
-
-      } else if (
-          (!provider.request && provider.send)
-      || provider.type === 'Web3Provider'
-      ) {
-
-          this.options.providerType = ProviderType.WEB3
-          this.options.provider = new Web3Source(givenProvider)
-
-          // CASE: Unknown provider
-
-      } else {
-
-          throw new Error(`Incorrect or unsupported provider ${givenProvider}`)
-
-      }
-
+      // CASE: Unknown provider
+    } else {
+      throw new Error(`Incorrect or unsupported provider ${givenProvider}`);
+    }
   }
 
   /**
@@ -202,47 +193,37 @@ export class ERC725 {
    * :::
    */
   async getData(key: string, customSchema?: Erc725Schema) {
+    if (!isAddress(this.options.address)) {
+      throw new Error('Missing ERC725 contract address.');
+    }
+    if (!this.options.provider) {
+      throw new Error('Missing provider.');
+    }
 
-      if (!isAddress(this.options.address)) {
+    const schema = customSchema ? [customSchema] : this.options.schema;
+    const keySchema = getSchemaElement(schema, key);
 
-          throw new Error('Missing ERC725 contract address.')
+    // Get all the raw data possible.
+    const rawData = await this.options.provider.getData(
+      this.options.address,
+      keySchema.key,
+    );
+    // Decode and return the data
 
-      }
-      if (!this.options.provider) {
+    if (keySchema.keyType.toLowerCase() === 'array') {
+      const dat = [{ key: keySchema.key, value: rawData }];
+      const res = await this._getArrayValues(keySchema, dat);
 
-          throw new Error('Missing provider.')
-
-      }
-
-      const schema = customSchema ? [customSchema] : this.options.schema
-      const keySchema = getSchemaElement(schema, key)
-
-      // Get all the raw data possible.
-      const rawData = await this.options.provider.getData(
-          this.options.address,
-          keySchema.key
-      )
-      // Decode and return the data
-
-      if (keySchema.keyType.toLowerCase() === 'array') {
-
-          const dat = [{ key: keySchema.key, value: rawData }]
-          const res = await this._getArrayValues(keySchema, dat)
-
-          // Handle empty arrays
-          if (res && res.length > 0) {
-
-              res.push(dat[0]) // add the raw data array length
-              return decodeKey(keySchema, res)
-
-          }
-
-          return [] // return empty array if no results
-
+      // Handle empty arrays
+      if (res && res.length > 0) {
+        res.push(dat[0]); // add the raw data array length
+        return decodeKey(keySchema, res);
       }
 
-      return decodeKey(keySchema, rawData)
+      return []; // return empty array if no results
+    }
 
+    return decodeKey(keySchema, rawData);
   }
 
   /**
@@ -274,84 +255,66 @@ export class ERC725 {
    * :::
    */
   async getAllData() {
+    const results = {};
+    let res;
+    if (!isAddress(this.options.address)) {
+      throw new Error('Missing ERC725 contract address.');
+    }
+    if (!this.options.provider) {
+      throw new Error('Missing provider.');
+    }
 
-      const results = {}
-      let res
-      if (!isAddress(this.options.address)) {
+    // Get all the key hashes from the schema
+    const keyHashes = this.options.schema.map((e) => e.key);
+    // Get all the raw data from the provider based on schema key hashes
+    let allRawData = await this.options.provider.getAllData(
+      this.options.address,
+      keyHashes,
+    );
 
-          throw new Error('Missing ERC725 contract address.')
+    // Take out null data values, since data may not fulfill entire schema
+    allRawData = await allRawData.filter((e) => e.value !== null);
 
-      }
-      if (!this.options.provider) {
+    if (this.options.providerType === ProviderType.GRAPH) {
+      // If the provider type is a graphql client, we assume it can get ALL keys (including array keys)
+      res = decodeAllData(this.options.schema, allRawData);
+    } else {
+      // Otherwise we assume the array element keys are not available in raw results, so they must be fetched
+      const arraySchemas = this.options.schema.filter(
+        (e) => e.keyType.toLowerCase() === 'array',
+      );
 
-          throw new Error('Missing provider.')
-
-      }
-
-      // Get all the key hashes from the schema
-      const keyHashes = this.options.schema.map(e => e.key)
-      // Get all the raw data from the provider based on schema key hashes
-      let allRawData = await this.options.provider.getAllData(
-          this.options.address,
-          keyHashes
-      )
-
-      // Take out null data values, since data may not fulfill entire schema
-      allRawData = await allRawData.filter(e => e.value !== null)
-
-      if (this.options.providerType === ProviderType.GRAPH) {
-
-          // If the provider type is a graphql client, we assume it can get ALL keys (including array keys)
-          res = decodeAllData(this.options.schema, allRawData)
-
-      } else {
-
-          // Otherwise we assume the array element keys are not available in raw results, so they must be fetched
-          const arraySchemas = this.options.schema.filter(
-              e => e.keyType.toLowerCase() === 'array'
-          )
-
-          // Get missing 'Array' fields for all arrays, as necessary
-          for (let index = 0; index < arraySchemas.length; index++) {
-
-              const schemaElement = arraySchemas[index]
-              const arrayValues = await this._getArrayValues(
-                  schemaElement,
-                  allRawData
-              )
-              arrayValues.forEach(e => allRawData.push(e))
-
-          }
-
-          this.options.schema.forEach(element => {
-
-              results[element.name] = null
-
-          })
-          res = decodeAllData(this.options.schema, allRawData)
-
+      // Get missing 'Array' fields for all arrays, as necessary
+      for (let index = 0; index < arraySchemas.length; index++) {
+        const schemaElement = arraySchemas[index];
+        const arrayValues = await this._getArrayValues(
+          schemaElement,
+          allRawData,
+        );
+        arrayValues.forEach((e) => allRawData.push(e));
       }
 
-      // Now that we can safely assume we have all array values
+      this.options.schema.forEach((element) => {
+        results[element.name] = null;
+      });
+      res = decodeAllData(this.options.schema, allRawData);
+    }
 
-      // initialize values as null, to all schema name elements on results object
-      this.options.schema.forEach(element => {
+    // Now that we can safely assume we have all array values
 
-          results[element.name] = null
+    // initialize values as null, to all schema name elements on results object
+    this.options.schema.forEach((element) => {
+      results[element.name] = null;
+    });
 
-      })
+    // Put the values in associated elements for return object
+    for (let index = 0; index < Object.keys(res).length; index++) {
+      const key = Object.keys(res)[index];
+      const element = res[key];
+      results[key] = element;
+    }
 
-      // Put the values in associated elements for return object
-      for (let index = 0; index < Object.keys(res).length; index++) {
-
-          const key = Object.keys(res)[index]
-          const element = res[key]
-          results[key] = element
-
-      }
-
-      return results
-
+    return results;
   }
 
   /**
@@ -385,64 +348,48 @@ export class ERC725 {
    *
    */
   async fetchData(key: string, customSchema?: Erc725Schema) {
+    const schema = customSchema ? [customSchema] : this.options.schema;
+    const keySchema = getSchemaElement(schema, key);
 
-      const schema = customSchema ? [customSchema] : this.options.schema
-      const keySchema = getSchemaElement(schema, key)
+    const result = await this.getData(key, customSchema);
 
-      const result = await this.getData(key, customSchema)
+    if (!result) return null;
 
-      if (!result) return null
+    // change ipfs urls
+    if (result && result.url && result.url.indexOf('ipfs://') !== -1) {
+      result.url = result.url.replace(
+        'ipfs://',
+        this.options.config.ipfsGateway,
+      );
+    }
 
-      // change ipfs urls
-      if (result && result.url && result.url.indexOf('ipfs://') !== -1) {
-
-          result.url = result.url.replace(
-              'ipfs://',
-              this.options.config.ipfsGateway
-          )
-
-      }
-
-      switch (keySchema.valueContent.toLowerCase()) {
-
+    switch (keySchema.valueContent.toLowerCase()) {
       case 'jsonurl':
       case 'asseturl': {
+        const lowerCaseHashFunction = result.hashFunction.toLowerCase();
 
-          const lowerCaseHashFunction = result.hashFunction.toLowerCase()
+        let response;
+        try {
+          response = await fetch(result.url).then((a) => {
+            if (lowerCaseHashFunction === 'keccak256(bytes)') {
+              return a.arrayBuffer().then((buffer) => new Uint8Array(buffer));
+            }
 
-          let response
-          try {
+            return a.json();
+          });
+        } catch (error) {
+          console.error(error, `GET request to ${result.url} failed`);
+          throw error;
+        }
 
-              response = await fetch(result.url).then(a => {
-
-                  if (lowerCaseHashFunction === 'keccak256(bytes)') {
-
-                      return a.arrayBuffer().then(buffer => new Uint8Array(buffer))
-
-                  }
-
-                  return a.json()
-
-              })
-
-          } catch (error) {
-
-              console.error(error, `GET request to ${result.url} failed`)
-              throw error
-
-          }
-
-          return response
-          && this._hashAndCompare(response, result.hash, lowerCaseHashFunction)
-              ? response
-              : null
-
+        return response &&
+          this._hashAndCompare(response, result.hash, lowerCaseHashFunction)
+          ? response
+          : null;
       }
       default:
-          return result
-
-      }
-
+        return result;
+    }
   }
 
   /**
@@ -493,9 +440,7 @@ export class ERC725 {
    * :::
    */
   encodeAllData(data) {
-
-      return encodeAllData(this.options.schema, data)
-
+    return encodeAllData(this.options.schema, data);
   }
 
   /**
@@ -530,12 +475,13 @@ export class ERC725 {
    * https://stackblitz.com/edit/erc725js-encode-data?devtoolsheight=66&file=index.js
    * :::
    */
-  encodeData(key: string, data: { json: unknown; url: string, hashFunction: string }): string;
+  encodeData(
+    key: string,
+    data: { json: unknown; url: string; hashFunction: string },
+  ): string;
   encodeData(key: string, data) {
-
-      const schema = getSchemaElement(this.options.schema, key)
-      return encodeKey(schema, data)
-
+    const schema = getSchemaElement(this.options.schema, key);
+    return encodeKey(schema, data);
   }
 
   /**
@@ -585,9 +531,7 @@ export class ERC725 {
    * :::
    */
   decodeAllData(data: { key: string; value: string }[]) {
-
-      return decodeAllData(this.options.schema, data)
-
+    return decodeAllData(this.options.schema, data);
   }
 
   /**
@@ -623,10 +567,8 @@ export class ERC725 {
    * :::
    */
   decodeData(key: string, data) {
-
-      const schema = getSchemaElement(this.options.schema, key)
-      return decodeKey(schema, data)
-
+    const schema = getSchemaElement(this.options.schema, key);
+    return decodeKey(schema, data);
   }
 
   /**
@@ -653,9 +595,7 @@ export class ERC725 {
    * ```
    */
   getOwner(address?: string): string {
-
-      return this.options.provider.getOwner(address || this.options.address)
-
+    return this.options.provider.getOwner(address || this.options.address);
   }
 
   /**
@@ -667,33 +607,25 @@ export class ERC725 {
    */
   // eslint-disable-next-line class-methods-use-this
   _hashAndCompare(data, hash: string, lowerCaseHashFunction: string) {
+    let dataToHash;
+    if (lowerCaseHashFunction === 'keccak256(utf8)') {
+      dataToHash = JSON.stringify(data);
+    }
+    if (lowerCaseHashFunction === 'keccak256(bytes)') {
+      dataToHash = data;
+    }
 
-      let dataToHash
-      if (lowerCaseHashFunction === 'keccak256(utf8)') {
+    const jsonHash = keccak256(dataToHash);
 
-          dataToHash = JSON.stringify(data)
-
-      }
-      if (lowerCaseHashFunction === 'keccak256(bytes)') {
-
-          dataToHash = data
-
-      }
-
-      const jsonHash = keccak256(dataToHash)
-
-      // throw error if hash mismatch
-      if (jsonHash !== hash) {
-
-          throw new Error(`
+    // throw error if hash mismatch
+    if (jsonHash !== hash) {
+      throw new Error(`
               Hash mismatch, returned JSON ("${jsonHash}") is different than the one 
               linked from the ERC725Y Smart contract: "${hash}"
-          `)
+          `);
+    }
 
-      }
-
-      return true
-
+    return true;
   }
 
   /**
@@ -705,58 +637,47 @@ export class ERC725 {
    * @return an array of keys/values
    */
   async _getArrayValues(schema: Erc725Schema, data: Record<string, any>) {
+    if (schema.keyType !== 'Array') {
+      throw new Error(
+        `The "_getArrayFields" method requires a schema definition with "keyType: Array",
+        ${schema}`,
+      );
+    }
+    const results: { key: string; value }[] = [];
 
-      if (schema.keyType !== 'Array') {
+    // 1. get the array length
+    const value = data.find((e) => e.key === schema.key); // get the length key/value pair
 
-          throw new Error(
-              `The "_getArrayFields" method requires a schema definition with "keyType: Array",
-        ${schema}`
-          )
+    if (!value || !value.value) {
+      return results;
+    } // Handle empty/non-existent array
+    const arrayLength = await decodeKeyValue(schema, value.value); // get the int array length
 
+    // 2. Get the array values for the length of the array
+    for (let index = 0; index < arrayLength; index++) {
+      // 2.1 get the new schema key
+      const arrayElementKey = encodeArrayKey(schema.key, index);
+      let arrayElement;
+
+      // 2.2 Check the data first just in case.
+      arrayElement = data.find((e) => e.key === arrayElementKey);
+
+      if (!arrayElement) {
+        // 3. Otherwise we get the array key element value
+        arrayElement = await this.options.provider.getData(
+          this.options.address,
+          arrayElementKey,
+        );
+
+        results.push({
+          key: arrayElementKey,
+          value: arrayElement,
+        });
       }
-      const results: { key: string; value }[] = []
+    }
 
-      // 1. get the array length
-      const value = data.find(e => e.key === schema.key) // get the length key/value pair
-
-      if (!value || !value.value) {
-
-          return results
-
-      } // Handle empty/non-existent array
-      const arrayLength = await decodeKeyValue(schema, value.value) // get the int array length
-
-      // 2. Get the array values for the length of the array
-      for (let index = 0; index < arrayLength; index++) {
-
-          // 2.1 get the new schema key
-          const arrayElementKey = encodeArrayKey(schema.key, index)
-          let arrayElement
-
-          // 2.2 Check the data first just in case.
-          arrayElement = data.find(e => e.key === arrayElementKey)
-
-          if (!arrayElement) {
-
-              // 3. Otherwise we get the array key element value
-              arrayElement = await this.options.provider.getData(
-                  this.options.address,
-                  arrayElementKey
-              )
-
-              results.push({
-                  key: arrayElementKey,
-                  value: arrayElement
-              })
-
-          }
-
-      }
-
-      return results
-
+    return results;
   }
-
 }
 
-export default ERC725
+export default ERC725;

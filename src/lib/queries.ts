@@ -3,11 +3,11 @@
 import { gql } from 'graphql-tag';
 
 export const queries = {
-    /**
-     * Get data for single key from ERC725 instance
-     */
-    getDataByKey(address: string, key: string) {
-        return gql`
+  /**
+   * Get data for single key from ERC725 instance
+   */
+  getDataByKey(address: string, key: string) {
+    return gql`
     {
       erc725DataStores (where:{address:"${address}",key:"${key}"}) {
         id
@@ -17,13 +17,13 @@ export const queries = {
       }
     }
     `;
-    },
+  },
 
-    /**
-     * Get the ERC725 instance kv pairs
-     */
-    getAllData(id: string) {
-        return gql`
+  /**
+   * Get the ERC725 instance kv pairs
+   */
+  getAllData(id: string) {
+    return gql`
     {
       erc725DataStores (where:{address:"${id}"}) {
         id
@@ -33,6 +33,5 @@ export const queries = {
       }
     }
     `;
-    },
-
+  },
 };
