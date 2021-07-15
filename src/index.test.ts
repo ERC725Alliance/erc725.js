@@ -48,6 +48,45 @@ import 'isomorphic-fetch';
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
 
 describe('Running erc725.js tests...', () => {
+  it('should throw when no arguments are supplied', () => {
+    assert.throws(
+      () => {
+        // @ts-ignore
+        // eslint-disable-next-line no-new
+        new ERC725();
+      },
+      (error) => error.message === 'Missing schema.',
+    );
+  });
+
+  it('should throw when incorrect or unsupported provider is provided', () => {
+    assert.throws(
+      () => {
+        // @ts-ignore
+        // eslint-disable-next-line no-new
+        new ERC725(mockSchema, address, { test: false });
+      },
+      (error) =>
+        error.message.indexOf('Incorrect or unsupported provider') >= -1,
+    );
+  });
+
+  it('should throw when incorrect calling getData without address & provider options set', async () => {
+    const erc725 = new ERC725(mockSchema);
+    try {
+      await erc725.getData('LSP3Profile');
+    } catch (error) {
+      assert.deepStrictEqual(error.message, 'Missing ERC725 contract address.');
+    }
+
+    try {
+      erc725.options.address = address;
+      await erc725.getData('LSP3Profile');
+    } catch (error) {
+      assert.deepStrictEqual(error.message, 'Missing provider.');
+    }
+  });
+
   describe('Getting all data in schema by provider', () => {
     // Construct the full data and results
     const fullResults = generateAllResults(mockSchema);

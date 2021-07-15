@@ -36,17 +36,18 @@ import { CONSTANTS } from './constants';
 import { hashData } from './utils';
 
 interface JSONURLData {
-  hashFunction: string;
   url: string;
 }
 
 interface JSONURLDataWithHash extends JSONURLData {
   hash: string;
+  hashFunction: string;
   json?: never;
 }
 
 interface JSONURLDataWithJson extends JSONURLData {
   hash?: never;
+  hashFunction?: never;
   json: unknown;
 }
 
@@ -237,7 +238,12 @@ export const valueContentEncodingMap = {
       let hashedJson = hash;
 
       if (json) {
-        hashedJson = hashData(json, hashFunction);
+        if (hashFunction) {
+          throw new Error(
+            'When passing in the `json` property, we use "keccak256(utf8)" as a hashingFunction at all times',
+          );
+        }
+        hashedJson = hashData(json, 'keccak256(utf8)');
       }
 
       if (!hashedJson) {
@@ -246,7 +252,11 @@ export const valueContentEncodingMap = {
         );
       }
 
-      return encodeDataSourceWithHash(hashFunction, hashedJson, url);
+      return encodeDataSourceWithHash(
+        hashFunction || 'keccak256(utf8)',
+        hashedJson,
+        url,
+      );
     },
     decode: (value) => {
       const result = decodeDataSourceWithHash(value);
