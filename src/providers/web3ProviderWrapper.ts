@@ -24,7 +24,7 @@
 
 import * as abi from 'web3-eth-abi';
 
-import { CONSTANTS } from '../lib/constants';
+import { METHODS } from '../lib/constants';
 import { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 
@@ -97,13 +97,13 @@ export default class Web3Source {
     method: Method,
     methodParam?: string,
   ): JsonRpc {
-    if (!CONSTANTS.methods[method]) {
+    if (!METHODS[method]) {
       throw new Error('Contract method "' + method + '"not supported');
     }
 
     const data = methodParam
-      ? CONSTANTS.methods[method].sig + methodParam.replace('0x', '')
-      : CONSTANTS.methods[method].sig;
+      ? METHODS[method].sig + methodParam.replace('0x', '')
+      : METHODS[method].sig;
 
     // eslint-disable-next-line no-return-assign
     return {
@@ -112,9 +112,9 @@ export default class Web3Source {
       params: [
         {
           to: address,
-          gas: CONSTANTS.methods[method].gas,
-          gasPrice: CONSTANTS.methods[method].gasPrice,
-          value: CONSTANTS.methods[method].value,
+          gas: METHODS[method].gas,
+          gasPrice: METHODS[method].gasPrice,
+          value: METHODS[method].value,
           data,
         },
       ],
@@ -137,7 +137,7 @@ export default class Web3Source {
 
   // eslint-disable-next-line class-methods-use-this
   _decodeResult(method: Method, result) {
-    if (!CONSTANTS.methods[method]) {
+    if (!METHODS[method]) {
       console.error('Contract method: "' + method + '" is not supported.');
       return null;
     }
@@ -146,9 +146,6 @@ export default class Web3Source {
       ? null
       : // eslint-disable-next-line operator-linebreak
         // @ts-ignore
-        web3abi.decodeParameter(
-          CONSTANTS.methods[method].returnEncoding,
-          rpcResult,
-        );
+        web3abi.decodeParameter(METHODS[method].returnEncoding, rpcResult);
   }
 }

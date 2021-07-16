@@ -26,6 +26,11 @@ import {
   padLeft,
 } from 'web3-utils';
 import { Erc725Schema } from '../types/Erc725Schema';
+import {
+  HASH_FUNCTIONS,
+  SUPPORTED_HASH_FUNCTIONS,
+  SUPPORTED_HASH_FUNCTIONS_LIST,
+} from './constants';
 
 import {
   decodeValueContent,
@@ -402,19 +407,25 @@ export function getSchemaElement(schemas: Erc725Schema[], key: string) {
   return schemaElement;
 }
 
-export function hashData(data: unknown, hashFunction: string): string {
-  switch (hashFunction.toLowerCase()) {
-    case 'keccak256(utf8)':
-    case '0x6f357c6a':
-      return keccak256(JSON.stringify(data));
+export function getHashFunction(hashFunctionNameOrHash) {
+  const hashFunction = HASH_FUNCTIONS[hashFunctionNameOrHash];
 
-    case 'keccak256(bytes)':
-    case '0x8019f9b1':
-      return keccak256(data);
-
-    default:
-      throw new Error(
-        `Chosen hashFunction '${hashFunction.toLowerCase()}' is not supported`,
-      );
+  if (!hashFunction) {
+    throw new Error(
+      `Chosen hashFunction '${hashFunctionNameOrHash}' is not supported.
+      Supported hashFunctions: ${SUPPORTED_HASH_FUNCTIONS_LIST}
+      `,
+    );
   }
+
+  return hashFunction;
+}
+
+export function hashData(
+  data: unknown,
+  hashFunctionNameOrHash: SUPPORTED_HASH_FUNCTIONS,
+): string {
+  const hashFunction = getHashFunction(hashFunctionNameOrHash);
+
+  return hashFunction.method(data);
 }

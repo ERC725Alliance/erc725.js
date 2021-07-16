@@ -26,14 +26,18 @@ import {
   hexToNumber,
   hexToUtf8,
   isAddress,
+  keccak256,
   numberToHex,
   padLeft,
   toChecksumAddress,
   utf8ToHex,
 } from 'web3-utils';
 
-import { CONSTANTS } from './constants';
-import { hashData } from './utils';
+import {
+  SUPPORTED_HASH_FUNCTIONS,
+  SUPPORTED_HASH_FUNCTION_STRINGS,
+} from './constants';
+import { getHashFunction, hashData } from './utils';
 
 interface JSONURLData {
   url: string;
@@ -41,7 +45,7 @@ interface JSONURLData {
 
 interface JSONURLDataWithHash extends JSONURLData {
   hash: string;
-  hashFunction: string;
+  hashFunction: SUPPORTED_HASH_FUNCTIONS;
   json?: never;
 }
 
@@ -54,25 +58,14 @@ interface JSONURLDataWithJson extends JSONURLData {
 type JSONURLDataToEncode = JSONURLDataWithHash | JSONURLDataWithJson;
 
 const encodeDataSourceWithHash = (
-  hashType: string,
+  hashType: SUPPORTED_HASH_FUNCTIONS,
   dataHash: string,
   dataSource: string,
 ): string => {
-  const lowerHashType = hashType.toLowerCase();
-  const hashFunction = CONSTANTS.hashFunctions.find(
-    (hashFunc) =>
-      hashFunc.name === lowerHashType || hashFunc.sig === lowerHashType,
-  );
+  const hashFunction = getHashFunction(hashType);
 
-  if (!hashFunction) {
-    throw new Error(
-      'Unsupported hash type to encode hash and value: ' + hashType,
-    );
-  }
-
-  // NOTE: QUESTION: Do we need 'toHex', in case future algorithms do not output hex as keccak does?
   return (
-    hashFunction.sig +
+    keccak256(hashFunction.name).substr(0, 10) +
     dataHash.replace('0x', '') +
     utf8ToHex(dataSource).replace('0x', '')
   );
@@ -82,15 +75,13 @@ const decodeDataSourceWithHash = (
   value: string,
 ): { hashFunction: string; dataHash: string; dataSource: string } | null => {
   const hashFunctionSig = value.substr(0, 10);
-  const hashFunction = CONSTANTS.hashFunctions.find(
-    (e) => e.sig === hashFunctionSig,
-  );
+  const hashFunction = getHashFunction(hashFunctionSig);
+
   const encodedData = value.replace('0x', '').substr(8); // Rest of data string after function hash
   const dataHash = '0x' + encodedData.substr(0, 64); // Get jsonHash 32 bytes
   const dataSource = hexToUtf8('0x' + encodedData.substr(64)); // Get remainder as URI
-  return hashFunction
-    ? { hashFunction: hashFunction.name, dataHash, dataSource }
-    : null;
+
+  return { hashFunction: hashFunction.name, dataHash, dataSource };
 };
 
 const valueTypeEncodingMap = {
@@ -243,7 +234,10 @@ export const valueContentEncodingMap = {
             'When passing in the `json` property, we use "keccak256(utf8)" as a hashingFunction at all times',
           );
         }
-        hashedJson = hashData(json, 'keccak256(utf8)');
+        hashedJson = hashData(
+          json,
+          SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+        );
       }
 
       if (!hashedJson) {
@@ -253,7 +247,7 @@ export const valueContentEncodingMap = {
       }
 
       return encodeDataSourceWithHash(
-        hashFunction || 'keccak256(utf8)',
+        hashFunction || SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
         hashedJson,
         url,
       );

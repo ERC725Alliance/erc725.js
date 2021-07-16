@@ -18,8 +18,8 @@ describe('#encodeData', () => {
   it('JSONURL with superfluous hashFunction argument (when we hash the json ourselves)', () => {
     assert.throws(
       () => {
-        // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
         valueContentEncodingMap.JSONURL.encode({
+          // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
           hashFunction: 'whatever',
           url: 'https://file-desination.com/file-name',
           json: {
@@ -36,8 +36,8 @@ describe('#encodeData', () => {
   it('JSONURL without json / hash should throw an error', () => {
     assert.throws(
       () => {
-        // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
         valueContentEncodingMap.JSONURL.encode({
+          // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
           hashFunction: 'keccak256(utf8)',
           url: 'https://file-desination.com/file-name',
         });

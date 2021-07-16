@@ -43,6 +43,7 @@ import {
 } from './types/Erc725Schema';
 
 import { ERC725Config } from './types/Config';
+import { SUPPORTED_HASH_FUNCTIONS } from './lib/constants';
 
 enum ProviderType {
   GRAPH = 'graph',
@@ -607,7 +608,11 @@ export class ERC725 {
    * @internal
    */
   // eslint-disable-next-line class-methods-use-this
-  _hashAndCompare(data, hash: string, lowerCaseHashFunction: string) {
+  _hashAndCompare(
+    data,
+    hash: string,
+    lowerCaseHashFunction: SUPPORTED_HASH_FUNCTIONS,
+  ) {
     const jsonHash = hashData(data, lowerCaseHashFunction);
 
     // throw error if hash mismatch
