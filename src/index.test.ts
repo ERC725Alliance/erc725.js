@@ -71,7 +71,7 @@ describe('Running erc725.js tests...', () => {
     );
   });
 
-  it('should throw when incorrect calling getData without address & provider options set', async () => {
+  it('should throw when calling getData without address & provider options set', async () => {
     const erc725 = new ERC725(mockSchema);
     try {
       await erc725.getData('LSP3Profile');

@@ -24,7 +24,7 @@ describe('#JSONURL encode', () => {
     assert.deepStrictEqual(result, hashFunction + jsonDataHash + urlHash);
   });
 
-  it('JSONURL with superfluous hashFunction argument (when we hash the json ourselves)', () => {
+  it('throws when the hashFunction of JSON of JSONURL to encode is not keccak256(utf8)', () => {
     assert.throws(
       () => {
         valueContentEncodingMap.JSONURL.encode({
@@ -42,7 +42,7 @@ describe('#JSONURL encode', () => {
     );
   });
 
-  it('JSONURL without json / hash should throw an error', () => {
+  it('throws when JSONURL encode a JSON without json or hash key', () => {
     assert.throws(
       () => {
         valueContentEncodingMap.JSONURL.encode({
