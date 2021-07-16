@@ -66,8 +66,8 @@ const encodeDataSourceWithHash = (
 
   return (
     keccak256(hashFunction.name).substr(0, 10) +
-    dataHash.replace('0x', '') +
-    utf8ToHex(dataSource).replace('0x', '')
+    dataHash.substr(2) +
+    utf8ToHex(dataSource).substr(2)
   );
 };
 

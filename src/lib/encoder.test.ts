@@ -1,18 +1,27 @@
 import assert from 'assert';
+import { keccak256, utf8ToHex } from 'web3-utils';
 import { valueContentEncodingMap } from './encoder';
 
-describe('#encodeData', () => {
-  it('JSONURL and hash json ourselves', () => {
-    const result = valueContentEncodingMap.JSONURL.encode({
-      url: 'https://file-desination.com/file-name',
+describe('#JSONURL encode', () => {
+  it('encodes and hashes JSON data', () => {
+    const dataToEncode = {
+      url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
       json: {
-        test: true,
+        myProperty: 'is a string',
+        anotherProperty: {
+          sdfsdf: 123456,
+        },
       },
-    });
-    assert.deepStrictEqual(
-      result,
-      '0x6f357c6a35709f35a87bedba632da6c0c99c927a532a27aee80f24556a7ba06723dd3c0168747470733a2f2f66696c652d646573696e6174696f6e2e636f6d2f66696c652d6e616d65',
+    };
+    const result = valueContentEncodingMap.JSONURL.encode(dataToEncode);
+
+    // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
+    const hashFunction = '0x6f357c6a';
+    const urlHash = utf8ToHex(dataToEncode.url).substring(2);
+    const jsonDataHash = keccak256(JSON.stringify(dataToEncode.json)).substring(
+      2,
     );
+    assert.deepStrictEqual(result, hashFunction + jsonDataHash + urlHash);
   });
 
   it('JSONURL with superfluous hashFunction argument (when we hash the json ourselves)', () => {
