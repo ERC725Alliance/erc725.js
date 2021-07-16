@@ -1,4 +1,3 @@
-/* eslint-disable lines-between-class-members */
 /*
     This file is part of ERC725.js.
     ERC725.js is free software: you can redistribute it and/or modify

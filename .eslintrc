@@ -40,24 +40,9 @@
     "no-console": "off",
     "import/extensions": ["error", "always", { "ts": "never", "js": "never" }],
     "max-classes-per-file": ["error", 3],
-    "max-len": [
-      "error",
-      {
-        "code": 120,
-        "ignoreComments": true,
-        "ignoreStrings": true
-      }
-    ],
-    "quotes": ["error", "single", { "avoidEscape": true }],
     "no-underscore-dangle": ["error", { "allowAfterThis": true }],
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
-    "no-multiple-empty-lines": ["error", { "max": 2 }],
-    "lines-between-class-members": ["error", "always"],
-    "padding-line-between-statements": [
-      "error",
-      { "blankLine": "always", "prev": "var", "next": "return" },
-      { "blankLine": "always", "prev": "block-like", "next": "return" }
-    ],
+    "lines-between-class-members": "off",
     "prefer-template": 0, // Allow simple string concatenation
     "no-await-in-loop": 0, // NOTE: This should be removed?
     "import/prefer-default-export": 0
