@@ -20,7 +20,7 @@
 // Tests for the ERC725.js package
 import assert from 'assert';
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
-import ERC725 from '../src';
+import ERC725 from '.';
 import {
   decodeAllData,
   decodeKey,
@@ -28,21 +28,65 @@ import {
   encodeAllData,
   encodeKey,
   encodeKeyValue,
-} from '../src/lib/utils';
-import { Erc725Schema } from '../src/types/Erc725Schema';
-import { ApolloClient, EthereumProvider, HttpProvider } from './mockProviders';
-import { mockSchema } from './mockSchema';
+} from './lib/utils';
+import { Erc725Schema } from './types/Erc725Schema';
+import {
+  ApolloClient,
+  EthereumProvider,
+  HttpProvider,
+} from '../test/mockProviders';
+import { mockSchema } from '../test/mockSchema';
 import {
   generateAllData,
   generateAllRawData,
   generateAllResults,
-} from './testHelpers';
+} from '../test/testHelpers';
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import 'isomorphic-fetch';
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
 
 describe('Running erc725.js tests...', () => {
+  it('should throw when no arguments are supplied', () => {
+    assert.throws(
+      () => {
+        // @ts-ignore
+        // eslint-disable-next-line no-new
+        new ERC725();
+      },
+      (error) => error.message === 'Missing schema.',
+    );
+  });
+
+  it('should throw when incorrect or unsupported provider is provided', () => {
+    assert.throws(
+      () => {
+        // @ts-ignore
+        // eslint-disable-next-line no-new
+        new ERC725(mockSchema, address, { test: false });
+      },
+      (error) =>
+        error.message.indexOf('Incorrect or unsupported provider') >= -1,
+    );
+  });
+
+  it('should throw when calling getData without address & provider options set', async () => {
+    const erc725 = new ERC725(mockSchema);
+    try {
+      await erc725.getData('LSP3Profile');
+    } catch (error) {
+      assert.deepStrictEqual(error.message, 'Missing ERC725 contract address.');
+    }
+
+    try {
+      erc725.options.address = address;
+      await erc725.getData('LSP3Profile');
+    } catch (error) {
+      assert.deepStrictEqual(error.message, 'Missing provider.');
+    }
+  });
+
   describe('Getting all data in schema by provider', () => {
     // Construct the full data and results
     const fullResults = generateAllResults(mockSchema);
@@ -366,12 +410,10 @@ describe('Running erc725.js tests...', () => {
             const data = generateAllResults([schemaElement])[
               schemaElement.name
             ];
-            // eslint-disable-next-line max-len
             const intendedResults = allGraphData.filter(
               (e) => e.key.substr(0, 34) === schemaElement.key.substr(0, 34),
             );
             const erc725 = new ERC725([schemaElement]);
-            // eslint-disable-next-line max-len
             // handle '0x'....
             // intendedResults = intendedResults.filter(e => e !== '0x' && e.value !== '0x')
             const results = erc725.encodeData(schemaElement.name, data);

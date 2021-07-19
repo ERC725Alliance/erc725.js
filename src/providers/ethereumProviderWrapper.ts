@@ -24,7 +24,7 @@
 
 import * as abi from 'web3-eth-abi';
 
-import { CONSTANTS } from '../lib/constants';
+import { METHODS } from '../lib/constants';
 import { Method } from '../types/Method';
 
 // @ts-ignore
@@ -77,14 +77,14 @@ export default class EthereumSource {
   // eslint-disable-next-line class-methods-use-this
   _constructJSONRPC(address: string, method: Method, methodParam?: string) {
     const data = methodParam
-      ? CONSTANTS.methods[method].sig + methodParam.replace('0x', '')
-      : CONSTANTS.methods[method].sig;
+      ? METHODS[method].sig + methodParam.replace('0x', '')
+      : METHODS[method].sig;
     // eslint-disable-next-line no-return-assign
     return {
       to: address,
-      gas: CONSTANTS.methods[method].gas,
-      gasPrice: CONSTANTS.methods[method].gasPrice,
-      value: CONSTANTS.methods[method].value,
+      gas: METHODS[method].gas,
+      gasPrice: METHODS[method].gasPrice,
+      value: METHODS[method].value,
       data,
     };
   }
@@ -97,18 +97,13 @@ export default class EthereumSource {
 
   // eslint-disable-next-line class-methods-use-this
   _decodeResult(method: Method, result: string) {
-    if (!CONSTANTS.methods[method]) {
+    if (!METHODS[method]) {
       console.error('Contract method: "' + method + '" is not supported.');
       return null;
     }
 
     return result === '0x'
       ? null
-      : // eslint-disable-next-line operator-linebreak
-        // @ts-ignore
-        web3Abi.decodeParameter(
-          CONSTANTS.methods[method].returnEncoding,
-          result,
-        );
+      : web3Abi.decodeParameter(METHODS[method].returnEncoding, result);
   }
 }
