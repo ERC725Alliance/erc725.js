@@ -2,5 +2,6 @@
   "entryPoints": ["./src/index.ts"],
   "out": "docs",
   "plugin": [],
+  "includeVersion": true,
   "exclude": ["**/*+(.spec|.e2e).ts"]
 }

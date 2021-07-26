@@ -1,10 +1,13 @@
 # erc725.js
 
-This library allows for interfacing with ERC725Y compliant contract on an EVM using the [ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md).
+Allows for interfacing with ERC725Y compliant contracts on an EVM blockchain using the [ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md) standard.
 
-For more information see [Documentation](https://docs.lukso.tech/tools/erc725js/getting-started).
+![NPM Version](https://badge.fury.io/js/erc725.js.svg)
 
-_This package is currently in early stages of development, use only for testing or experimentation purposes_
+For more information see [Documentation](https://docs.lukso.tech/tools/erc725js/getting-started).<br/><br/>
+⚠️⚠️⚠️<br/>
+_This package is currently in early stages of development, use only for testing or experimentation purposes_<br/>
+⚠️⚠️⚠️<br/>
 
 ## Installation
 
@@ -13,10 +16,9 @@ $ npm install erc725.js
 ```
 
 ```js
-import ERC725 from 'erc725.js';
-// Or alternately the named export in cases where it
-// assists with integration into node modules or commonjs.
 import { ERC725 } from 'erc725.js';
+// Or alternatively the default export
+import ERC725 from 'erc725.js';
 ```
 
 ## Example Instantiation
@@ -113,6 +115,7 @@ $ npm test
 ## Publishing
 
 ```shell script
-$npm run build-publish
+$ npm run build-publish
 ```
-Will build and then publish the package to npm.
+
+Will build the package and then publish it to `npm`.
