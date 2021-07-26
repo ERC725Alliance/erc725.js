@@ -12,7 +12,8 @@
     "test": "npm run lint && env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=text --reporter=lcov mocha",
     "lint": "eslint . --ext .ts",
     "build-publish": "rm -rf build && npm run build && npm test && npm publish",
-    "docs:generate": "npx typedoc"
+    "docs:generate": "npx typedoc",
+    "docs:generate:html": "npx typedoc --options typedoc.html.json"
   },
   "repository": {
     "type": "git",

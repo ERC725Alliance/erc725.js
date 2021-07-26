@@ -1,10 +1,9 @@
 {
   "entryPoints": ["./src/index.ts"],
-  "out": "docs/markdown/technical-reference",
+  "out": "docs/html/technical-reference",
   "includeVersion": true,
-  "readme": "none",
+  "plugin": [],
   "excludePrivate": true,
-  "hideInPageTOC": true,
-  "hideBreadcrumbs": true,
+  "readme": "none",
   "exclude": ["**/*+(.spec|.e2e).ts"]
 }
