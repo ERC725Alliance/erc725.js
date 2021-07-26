@@ -25,6 +25,7 @@ import {
   numberToHex,
   padLeft,
 } from 'web3-utils';
+import { DataToEncode, EncodedData } from '../types';
 import { Erc725Schema } from '../types/Erc725Schema';
 import {
   HASH_FUNCTIONS,
@@ -215,32 +216,34 @@ export function encodeKey(schema: Erc725Schema, value) {
 /**
  *
  * @param schemas schemas is an array of objects of schema definitions
- * @param data data is an array of objects of key-value pairs
+ * @param dataToEncode data is an array of objects of key-value pairs
  * @return: all encoded data as per required by the schema and provided data
  */
-export function encodeAllData(schemas: Erc725Schema[], data) {
-  const results: { key: string; value: string }[] = [];
-
-  for (let index = 0; index < schemas.length; index++) {
-    const schemaElement = schemas[index];
-    const filteredData = data[schemaElement.name];
-
-    const res = encodeKey(schemaElement, filteredData);
-    if (res) {
-      if (schemaElement.keyType === 'Array') {
-        // Encoded array element returns as key-value pairs
-        results.push(...res);
-      } else {
-        // Singleton encoding returns just the value, so we add the key for key-value pair
-        results.push({
-          key: schemaElement.key,
-          value: res,
-        });
+export function encodeData(
+  schemas: Erc725Schema[],
+  dataToEncode: DataToEncode,
+): EncodedData[] {
+  return Object.entries(dataToEncode)
+    .map(([key, value]) => {
+      const schemaElement = schemas.find((schema) => schema.name === key);
+      if (!schemaElement) {
+        throw new Error(`Invalid schema element "${key}" detected`);
       }
-    }
-  }
-
-  return results;
+      return {
+        encodedKey: encodeKey(schemaElement, value),
+        schemaElement,
+      };
+    })
+    .flatMap(({ encodedKey, schemaElement }) => {
+      if (Array.isArray(encodedKey)) {
+        // Encoded array element returns as key-value pairs
+        return encodedKey;
+      }
+      return {
+        key: schemaElement.key,
+        value: encodedKey,
+      };
+    });
 }
 
 /**

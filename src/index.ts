@@ -27,9 +27,8 @@ import {
   decodeAllData,
   decodeKey,
   decodeKeyValue,
-  encodeAllData,
+  encodeData,
   encodeArrayKey,
-  encodeKey,
   getSchemaElement,
   hashData,
 } from './lib/utils';
@@ -43,6 +42,7 @@ import {
 
 import { ERC725Config } from './types/Config';
 import { SUPPORTED_HASH_FUNCTIONS } from './lib/constants';
+import { DataToEncode, KeyValuePair } from './types';
 
 enum ProviderType {
   GRAPH = 'graph',
@@ -77,7 +77,7 @@ export class ERC725 {
    * **Example**
    *
    * ```js
-   * import ERC725 from 'erc725.js';
+   * import { ERC725 } from 'erc725.js';
    * import Web3 from 'web3';
    *
    * const schema = [
@@ -392,13 +392,14 @@ export class ERC725 {
   }
 
   /**
-   * @param data An object of keys matching to corresponding schema element names, with associated data.
-   * @returns all encoded data as per required by the schema and provided data
+   * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
+   * The JSON will be hashed with keccak256 and you can store the return value [JSONURL](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl) on the blockchain.
    *
-   * **Example**
+   * @param {DataToEncode} data
+   * @returns A key-value pair, containing the encoded values
    *
    * ```javascript
-   * myERC725.encodeAllData({
+   * myERC725.encodeData({
    *   LSP3Profile: {
    *     hashFunction: 'keccak256(utf8)',
    *     hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
@@ -438,86 +439,8 @@ export class ERC725 {
    * https://stackblitz.com/edit/erc725js-encode-all-data?devtoolsheight=66&file=index.js
    * :::
    */
-  encodeAllData(data) {
-    return encodeAllData(this.options.schema, data);
-  }
-
-  /**
-   * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
-   * The JSON will be hashed with `keccak256` and you can store the return value ([JSONURL](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl))
-   * on the blockchain.
-   *
-   * @param key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
-   * @param data The JSON object will be converted to a string and hashed with keccak256.
-   *
-   * @returns Returns encoded data as a string
-   *
-   * **Example**
-   *
-   * ```javascript
-   * const json = {
-   *   "name": "rryter",
-   *   "description": "Web Developer located in Switzerland.",
-   *   "profileImage": [...], // omitted to enhance readability
-   *   "backgroundImage": [...], // omitted to enhance readability
-   *   "tags": [
-   *     "public profile"
-   *   ],
-   *   "links": []
-   * }
-   *
-   * myERC725.encodeData('LSP3Profile', {
-   *   json,
-   *   url: 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D'
-   * });
-   * // > 0x6f357c6a119e72d0ad8b6341457f7d2601d140a61c4a04e58199e91a289cec62773e35ac696670733a2f2f516d624b76435645655069444b78756f7579747939624d73574241785a444772326a68786434704c474c78393544
-   * ```
-   * :::note Try it
-   * https://stackblitz.com/edit/erc725js-encode-data-json?devtoolsheight=33&file=index.js
-   * :::
-   */
-  encodeData(key: string, data: { json: JSON; url: string }): string;
-  /**
-   * Encode data according to schema to be able to save it on the blockchain.
-   *
-   * @param key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
-   * @param data Data structured according to the corresponding schema definition.
-   *
-   * @returns Returns encoded data as defined and expected in the schema (single value for keyTypes ‘Singleton’ & ‘Mapping’, or an array of encoded key-value objects for keyType ‘Array).
-   *
-   * **Example**
-   *
-   * ```javascript
-   * myERC725.encodeData('LSP3IssuedAssets[]', [
-   *     '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
-   *     '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826'
-   * ]);
-   * // > [
-   * //     {
-   * //         key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
-   * //         value: '0x0000000000000000000000000000000000000000000000000000000000000002'
-   * //     },
-   * //     {
-   * //         key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
-   * //         value: '0xd94353d9b005b3c0a9da169b768a31c57844e490'
-   * //     },
-   * //     {
-   * //         key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
-   * //         value: '0xdaea594e385fc724449e3118b2db7e86dfba1826'
-   * //     }
-   * // ]
-   * ```
-   * :::note Try it
-   * https://stackblitz.com/edit/erc725js-encode-data?devtoolsheight=66&file=index.js
-   * :::
-   */
-  encodeData(
-    key: string,
-    data: unknown,
-  ): string | { key: string; value: string }[];
-  encodeData(key: string, data: unknown) {
-    const schema = getSchemaElement(this.options.schema, key);
-    return encodeKey(schema, data);
+  encodeData(data: DataToEncode): KeyValuePair[] {
+    return encodeData(this.options.schema, data);
   }
 
   /**
@@ -714,3 +637,4 @@ export class ERC725 {
 }
 
 export default ERC725;
+export { DataToEncode, ERC725Config, EncodedData, KeyValuePair } from './types';

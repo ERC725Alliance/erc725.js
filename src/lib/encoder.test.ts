@@ -154,9 +154,11 @@ describe('#JSONURL encode', () => {
       links: [],
     };
 
-    const encodedData = myERC725.encodeData('LSP3Profile', {
-      json,
-      url: 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
+    const encodedData = myERC725.encodeData({
+      LSP3Profile: {
+        json,
+        url: 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
+      },
     });
 
     const decodedData = myERC725.decodeData('LSP3Profile', encodedData);
