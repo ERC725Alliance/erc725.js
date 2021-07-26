@@ -1,5 +1,3 @@
-erc725.js - v0.5.7
-
 # erc725.js - v0.5.7
 
 ## Classes
@@ -24,7 +22,7 @@ Renames and exports: [ERC725](classes/ERC725.md)
 
 #### Defined in
 
-[types/Erc725Schema.ts:3](https://github.com/ERC725Alliance/erc725.js/blob/68c4bcb/src/types/Erc725Schema.ts#L3)
+[types/Erc725Schema.ts:3](https://github.com/ERC725Alliance/erc725.js/blob/847dac8/src/types/Erc725Schema.ts#L3)
 
 ___
 
@@ -34,7 +32,7 @@ ___
 
 #### Defined in
 
-[types/Erc725Schema.ts:5](https://github.com/ERC725Alliance/erc725.js/blob/68c4bcb/src/types/Erc725Schema.ts#L5)
+[types/Erc725Schema.ts:5](https://github.com/ERC725Alliance/erc725.js/blob/847dac8/src/types/Erc725Schema.ts#L5)
 
 ___
 
@@ -44,4 +42,4 @@ ___
 
 #### Defined in
 
-[types/Erc725Schema.ts:15](https://github.com/ERC725Alliance/erc725.js/blob/68c4bcb/src/types/Erc725Schema.ts#L15)
+[types/Erc725Schema.ts:15](https://github.com/ERC725Alliance/erc725.js/blob/847dac8/src/types/Erc725Schema.ts#L15)

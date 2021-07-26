@@ -1,7 +1,9 @@
 {
   "entryPoints": ["./src/index.ts"],
-  "out": "docs",
-  "plugin": [],
+  "out": "docs/technical-reference",
   "includeVersion": true,
+  "readme": "none",
+  "hideInPageTOC": true,
+  "hideBreadcrumbs": true,
   "exclude": ["**/*+(.spec|.e2e).ts"]
 }

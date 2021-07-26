@@ -4,9 +4,10 @@ Allows for interfacing with ERC725Y compliant contracts on an EVM blockchain usi
 
 ![NPM Version](https://badge.fury.io/js/erc725.js.svg)
 
-For more information see [Documentation](https://docs.lukso.tech/tools/erc725js/getting-started).<br/><br/>
+For more information see [Documentation](https://docs.lukso.tech/tools/erc725js/getting-started).
+
 ⚠️⚠️⚠️<br/>
-_This package is currently in early stages of development, use only for testing or experimentation purposes_<br/>
+_This package is currently in early stages of development, use only for testing or experimentation purposes_
 ⚠️⚠️⚠️<br/>
 
 ## Installation
@@ -24,7 +25,7 @@ import ERC725 from 'erc725.js';
 ## Example Instantiation
 
 ```js
-import ERC725 from 'erc725.js';
+import { ERC725 } from 'erc725.js';
 import Web3 from 'web3';
 
 // Part of LSP3-UniversalProfile Schema
@@ -118,4 +119,4 @@ $ npm test
 $ npm run build-publish
 ```
 
-Will build the package and then publish it to `npm`.
+Will build and then publish the package to npm.
