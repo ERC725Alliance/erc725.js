@@ -58,10 +58,9 @@ export {
 };
 
 /**
- * :::caution
- * This package is currently in early stages of development, use only for testing or experimentation purposes.
- * :::
- *
+ * ⚠️⚠️⚠️<br/>
+ * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
+ * ⚠️⚠️⚠️<br/>
  */
 export class ERC725 {
   options: {
@@ -75,7 +74,7 @@ export class ERC725 {
   /**
    * Creates an instance of ERC725.
    *
-   * **Example**
+   * ### Example
    *
    * ```js
    * import ERC725 from 'erc725.js';
@@ -176,7 +175,7 @@ export class ERC725 {
    * @param {Erc725Schema} customSchema An optional schema to override attached schema of ERC725 class instance.
    * @returns Returns decoded data as defined and expected in the schema.
    *
-   * **Example**
+   * ### Example
    *
    * ```javascript
    * await myERC725.getData("SupportedStandards:ERC725Account");
@@ -189,9 +188,8 @@ export class ERC725 {
    * //   url: 'ipfs://QmbTmcbp8ZW23vkQrqkasMFqNg2z1iP4e3BCUMz9PKDsSV'
    * // }
    * ```
-   * :::note Try it
-   * https://stackblitz.com/edit/erc725js-get-data?devtoolsheight=66&file=index.js
-   * :::
+   * ### Demo
+   * > https://stackblitz.com/edit/erc725js-get-data?devtoolsheight=66&file=index.js
    */
   async getData(key: string, customSchema?: Erc725Schema) {
     if (!isAddress(this.options.address)) {
@@ -231,7 +229,7 @@ export class ERC725 {
    * Get all available data from the contract as per the class schema definition.
    * @returns An object with schema element key names as properties, with corresponding associated decoded data as values.
    *
-   * **Example**
+   * ### Example
    *
    * ```javascript
    * await myERC725.getAllData();
@@ -251,9 +249,8 @@ export class ERC725 {
    * //     ]
    * // }
    * ```
-   * :::note Try it
-   * https://stackblitz.com/edit/erc725js-get-all-data?devtoolsheight=33&file=index.js
-   * :::
+   * ### Demo
+   * > https://stackblitz.com/edit/erc725js-get-all-data?devtoolsheight=33&file=index.js
    */
   async getAllData() {
     const results = {};
@@ -327,7 +324,7 @@ export class ERC725 {
    * @param {Erc725Schema} customSchema An optional custom schema element to use for decoding the returned value. Overrides attached schema of the class instance on this call only.
    * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData
    *
-   * **Example**
+   * ### Example
    *
    * ```javascript
    * await myERC725.fetchData('LSP3Profile');
@@ -343,9 +340,8 @@ export class ERC725 {
    * // }
    * ```
    *
-   * :::note Try it
-   * https://stackblitz.com/edit/erc725js-fetch-data?devtoolsheight=66&file=index.js
-   * :::
+   * ### Demo
+   * > https://stackblitz.com/edit/erc725js-fetch-data?devtoolsheight=66&file=index.js
    *
    */
   async fetchData(key: string, customSchema?: Erc725Schema) {
@@ -397,7 +393,7 @@ export class ERC725 {
    * @param data An object of keys matching to corresponding schema element names, with associated data.
    * @returns all encoded data as per required by the schema and provided data
    *
-   * **Example**
+   * ### Example
    *
    * ```javascript
    * myERC725.encodeAllData({
@@ -436,21 +432,56 @@ export class ERC725 {
    * //  }
    * // ]
    * ```
-   * :::note Try it
-   * https://stackblitz.com/edit/erc725js-encode-all-data?devtoolsheight=66&file=index.js
-   * :::
+   * ### Demo
+   * > https://stackblitz.com/edit/erc725js-encode-all-data?devtoolsheight=66&file=index.js
    */
   encodeAllData(data) {
     return encodeAllData(this.options.schema, data);
   }
 
   /**
-   * Encode data according to schema.
+   * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
+   * The JSON will be hashed with `keccak256` and you can store the return value ([JSONURL](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl))
+   * on the blockchain.
+   *
+   * @param key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
+   * @param data The JSON object will be converted to a string and hashed with keccak256.
+   *
+   * @returns Returns encoded data as a string
+   *
+   * ## Example
+   *
+   * ```javascript
+   * const json = {
+   *   "name": "rryter",
+   *   "description": "Web Developer located in Switzerland.",
+   *   "profileImage": [...], // omitted to enhance readability
+   *   "backgroundImage": [...], // omitted to enhance readability
+   *   "tags": [
+   *     "public profile"
+   *   ],
+   *   "links": []
+   * }
+   *
+   * myERC725.encodeData('LSP3Profile', {
+   *   json,
+   *   url: 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D'
+   * });
+   * // > 0x6f357c6a119e72d0ad8b6341457f7d2601d140a61c4a04e58199e91a289cec62773e35ac696670733a2f2f516d624b76435645655069444b78756f7579747939624d73574241785a444772326a68786434704c474c78393544
+   * ```
+   * ## Demo
+   * > https://stackblitz.com/edit/erc725js-encode-data-json?devtoolsheight=33&file=index.js
+   */
+  encodeData(key: string, data: { json: JSON; url: string }): string;
+  /**
+   * Encode data according to schema to be able to save it on the blockchain.
+   *
    * @param key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
    * @param data Data structured according to the corresponding schema definition.
+   *
    * @returns Returns encoded data as defined and expected in the schema (single value for keyTypes ‘Singleton’ & ‘Mapping’, or an array of encoded key-value objects for keyType ‘Array).
    *
-   * **Example**
+   * ### Example
    *
    * ```javascript
    * myERC725.encodeData('LSP3IssuedAssets[]', [
@@ -472,15 +503,14 @@ export class ERC725 {
    * //     }
    * // ]
    * ```
-   * :::note Try it
-   * https://stackblitz.com/edit/erc725js-encode-data?devtoolsheight=66&file=index.js
-   * :::
+   * ### Demo
+   * > https://stackblitz.com/edit/erc725js-encode-data?devtoolsheight=66&file=index.js
    */
   encodeData(
     key: string,
-    data: { json: unknown; url: string; hashFunction: string },
-  ): string;
-  encodeData(key: string, data) {
+    data: unknown,
+  ): string | { key: string; value: string }[];
+  encodeData(key: string, data: unknown) {
     const schema = getSchemaElement(this.options.schema, key);
     return encodeKey(schema, data);
   }
@@ -490,7 +520,7 @@ export class ERC725 {
    * @param data An array of encoded key:value pairs.
    * @returns An object with keys matching the ERC725 instance schema keys, with attached decoded data as expected by the schema.
    *
-   * **Example**
+   * ### Example
    *
    * ```javascript
    * myERC725.decodeAllData([
@@ -527,9 +557,8 @@ export class ERC725 {
    * //   ]
    * // }
    * ```
-   * :::note Try it
-   * https://stackblitz.com/edit/erc725js-decode-all-data?devtoolsheight=33&file=index.js
-   * :::
+   * ### Demo
+   * > https://stackblitz.com/edit/erc725js-decode-all-data?devtoolsheight=33&file=index.js
    */
   decodeAllData(data: { key: string; value: string }[]) {
     return decodeAllData(this.options.schema, data);
@@ -541,7 +570,7 @@ export class ERC725 {
    * @param data Either a single object, or an array of objects of key: value: pairs.
    * @returns Returns decoded data as defined and expected in the schema:
    *
-   * **Example**
+   * ### Example
    *
    * ```javascript
    * myERC725.decodeData('LSP3IssuedAssets[]', [
@@ -563,9 +592,8 @@ export class ERC725 {
    * //   '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826'
    * // ]
    * ```
-   * :::note Try it
-   * https://stackblitz.com/edit/erc725js-decode-data?devtoolsheight=33&file=index.js
-   * :::
+   * ### Demo
+   * > https://stackblitz.com/edit/erc725js-decode-data?devtoolsheight=33&file=index.js
    */
   decodeData(key: string, data) {
     const schema = getSchemaElement(this.options.schema, key);
@@ -579,13 +607,11 @@ export class ERC725 {
    * @param {string} [address]
    * @returns The address of the contract owner as stored in the contract.
    *
-   * :::caution
+   * ⚠️⚠️⚠️<br/>
+   *    This method is not yet supported when using the `graph` provider type.<br/>
+   * ⚠️⚠️⚠️<br/>
    *
-   *    This method is not yet supported when using the `graph` provider type.
-   *
-   * :::
-   *
-   * **Example**
+   * ### Example
    *
    * ```javascript
    * await myERC725.getOwner();
