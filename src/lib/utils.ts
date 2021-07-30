@@ -40,7 +40,7 @@ import {
   valueContentEncodingMap as valueContentMap,
 } from './encoder';
 
-type Erc725ObjectSchema = Pick<
+type ERC725ObjectSchema = Pick<
   ERC725JSONSchema,
   'key' | 'keyType' | 'valueContent' | 'valueType' | 'name'
 >;
@@ -52,7 +52,7 @@ type Erc725ObjectSchema = Pick<
  * @return the encoded value as per the schema
  */
 export function encodeKeyValue(
-  schemaElementDefinition: Erc725ObjectSchema,
+  schemaElementDefinition: ERC725ObjectSchema,
   value: string,
 ) {
   // Check if existing in the supported valueContent mapping.
@@ -163,7 +163,7 @@ export function getSchemaElement(schemas: ERC725JSONSchema[], key: string) {
 export function transposeArraySchema(
   schema: ERC725JSONSchema,
   index: number,
-): Erc725ObjectSchema {
+): ERC725ObjectSchema {
   // Use enum ERC725JSONSchemaKeyType instead?
   if (schema.keyType.toLowerCase() !== 'array') {
     console.error(
