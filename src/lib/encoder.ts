@@ -132,7 +132,7 @@ const valueTypeEncodingMap = {
 };
 
 // Use enum for type bellow
-// Is it this enum Erc725SchemaValueType? (If so, custom is missing from enum)
+// Is it this enum ERC725JSONSchemaValueType? (If so, custom is missing from enum)
 export const valueContentEncodingMap = {
   Keccak256: {
     type: 'bytes32',

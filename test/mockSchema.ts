@@ -2,9 +2,9 @@
 // make one schema that tests every single type
 /* eslint-disable */
 
-import { Erc725Schema } from '../src/types/Erc725Schema';
+import { ERC725JSONSchema } from '../src/types/ERC725JSONSchema';
 
-export const mockSchema: (Erc725Schema & {
+export const mockSchema: (ERC725JSONSchema & {
   returnRawData?;
   returnGraphData?;
   expectedResult?;

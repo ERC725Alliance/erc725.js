@@ -25,7 +25,7 @@ import {
   numberToHex,
   padLeft,
 } from 'web3-utils';
-import { Erc725Schema, GenericSchema } from '../types/Erc725Schema';
+import { ERC725JSONSchema, GenericSchema } from '../types/ERC725JSONSchema';
 import {
   HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTIONS,
@@ -41,7 +41,7 @@ import {
 } from './encoder';
 
 type Erc725ObjectSchema = Pick<
-  Erc725Schema,
+  ERC725JSONSchema,
   'key' | 'keyType' | 'valueContent' | 'valueType' | 'name'
 >;
 
@@ -142,7 +142,7 @@ export function encodeKeyName(name: string) {
  * @param {string} key A string of either the schema element name, or key
  * @return The requested schema element from the full array of schemas
  */
-export function getSchemaElement(schemas: Erc725Schema[], key: string) {
+export function getSchemaElement(schemas: ERC725JSONSchema[], key: string) {
   const keyHash = key.substr(0, 2) !== '0x' ? encodeKeyName(key) : key;
   const schemaElement = schemas.find((e) => e.key === keyHash);
   if (!schemaElement) {
@@ -161,10 +161,10 @@ export function getSchemaElement(schemas: Erc725Schema[], key: string) {
  * @return Modified schema element of keyType 'Singleton' for fetching or decoding/encoding the array element
  */
 export function transposeArraySchema(
-  schema: Erc725Schema,
+  schema: ERC725JSONSchema,
   index: number,
 ): Erc725ObjectSchema {
-  // Use enum Erc725SchemaKeyType instead?
+  // Use enum ERC725JSONSchemaKeyType instead?
   if (schema.keyType.toLowerCase() !== 'array') {
     console.error(
       'Schema is not of keyType "Array" for schema: "' + schema.name + '".',
@@ -189,7 +189,7 @@ export function transposeArraySchema(
  * @param value will be either key-value pairs for a key type of Array, or a single value for type Singleton
  * @return the encoded value for the key as per the supplied schema
  */
-export function encodeKey(schema: Erc725Schema, value) {
+export function encodeKey(schema: ERC725JSONSchema, value) {
   // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
   if (schema.keyType.toLowerCase() === 'array' && Array.isArray(value)) {
     const results: { key: string; value: string }[] = [];
@@ -305,7 +305,7 @@ export function decodeKeyValue(schemaElementDefinition, value) {
  * @param value will be either key-value pairs for a key type of Array, or a single value for type Singleton
  * @return the decoded value/values as per the schema definition
  */
-export function decodeKey(schema: Erc725Schema, value) {
+export function decodeKey(schema: ERC725JSONSchema, value) {
   if (schema.keyType.toLowerCase() === 'array') {
     const results: any[] = [];
     const valueElement = value.find((e) => e.key === schema.key);
@@ -364,7 +364,10 @@ export function decodeKey(schema: Erc725Schema, value) {
 export function decodeData<
   Schema extends GenericSchema,
   T extends keyof Schema,
->(data: { [K in T]: Schema[T]['decodeData']['inputTypes'] }, schema) {
+>(
+  data: { [K in T]: Schema[T]['decodeData']['inputTypes'] },
+  schema,
+): { [K in T]: Schema[T]['decodeData']['returnValues'] } {
   return Object.entries(data).reduce((decodedData, [key, value]) => {
     const schemaElement = getSchemaElement(schema, key);
 

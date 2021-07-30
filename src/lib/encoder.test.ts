@@ -2,7 +2,7 @@ import assert from 'assert';
 import { keccak256, utf8ToHex } from 'web3-utils';
 import { valueContentEncodingMap } from './encoder';
 import { ERC725 } from '../index';
-import { Erc725Schema } from '../types/Erc725Schema';
+import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { hashData } from './utils';
 import {
   SUPPORTED_HASH_FUNCTION_HASHES,
@@ -66,7 +66,7 @@ describe('#JSONURL encode', () => {
   });
 
   it('should encode JSON properly', () => {
-    const schema: Erc725Schema[] = [
+    const schema: ERC725JSONSchema[] = [
       {
         name: 'LSP3Profile',
         key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',

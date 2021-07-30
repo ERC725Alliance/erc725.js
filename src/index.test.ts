@@ -27,7 +27,7 @@ import {
   encodeKey,
   encodeKeyValue,
 } from './lib/utils';
-import { Erc725Schema } from './types/Erc725Schema';
+import { ERC725JSONSchema } from './types/ERC725JSONSchema';
 import {
   ApolloClient,
   EthereumProvider,
@@ -295,7 +295,7 @@ describe('Running erc725.js tests...', () => {
             }
             // Change the encoding on the schema....
             // const arraySchema = schemaElement
-            const arraySchema: Erc725Schema = {
+            const arraySchema: ERC725JSONSchema = {
               name: schemaElement.name,
               key: schemaElement.key,
               keyType: 'Singleton',

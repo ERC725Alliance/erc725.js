@@ -34,12 +34,12 @@ import {
 } from './lib/utils';
 
 import {
-  Erc725Schema,
-  Erc725SchemaKeyType,
-  Erc725SchemaValueContent,
-  Erc725SchemaValueType,
+  ERC725JSONSchema,
+  ERC725JSONSchemaKeyType,
+  ERC725JSONSchemaValueContent,
+  ERC725JSONSchemaValueType,
   GenericSchema,
-} from './types/Erc725Schema';
+} from './types/ERC725JSONSchema';
 
 import { ERC725Config } from './types/Config';
 import { SUPPORTED_HASH_FUNCTIONS } from './lib/constants';
@@ -51,10 +51,10 @@ enum ProviderType {
 }
 
 export {
-  Erc725Schema,
-  Erc725SchemaKeyType,
-  Erc725SchemaValueContent,
-  Erc725SchemaValueType,
+  ERC725JSONSchema,
+  ERC725JSONSchemaKeyType,
+  ERC725JSONSchemaValueContent,
+  ERC725JSONSchemaValueType,
 };
 
 /**
@@ -64,7 +64,7 @@ export {
  */
 export class ERC725<Schema extends GenericSchema> {
   options: {
-    schema: Erc725Schema[];
+    schema: ERC725JSONSchema[];
     address?;
     providerType?: ProviderType | null;
     provider?;
@@ -99,14 +99,14 @@ export class ERC725<Schema extends GenericSchema> {
    * const myERC725 = new ERC725(schema, address, provider, config);
    * ```
    *
-   * @param {Erc725Schema[]} schema More information available here: [LSP-2-ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md)
+   * @param {ERC725JSONSchema[]} schema More information available here: [LSP-2-ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md)
    * @param {string} address Address of the ERC725 contract you want to interact with
    * @param {any} provider
    * @param {ERC725Config} config Configuration object.
    *
    */
   constructor(
-    schema: Erc725Schema[],
+    schema: ERC725JSONSchema[],
     address?: string,
     provider?: any,
     config?: ERC725Config,
@@ -171,6 +171,7 @@ export class ERC725<Schema extends GenericSchema> {
 
   /**
    * Get all available data from the contract as per the class schema definition.
+   * @param {(SchemaKey | SchemaKey[])} [data] B
    * @returns An object with schema element key names as properties, with corresponding associated decoded data as values.
    *
    * **Example**
@@ -194,10 +195,12 @@ export class ERC725<Schema extends GenericSchema> {
    * // }
    * ```
    * :::note Try it
-   * https://stackblitz.com/edit/erc725js-get-all-data?devtoolsheight=33&file=index.js
+   * https://stackblitz.com/edit/erc725js-get-data?devtoolsheight=33&file=index.js
    * :::
    */
-  async getData<T extends keyof Schema>(data?: T | T[]) {
+  async getData(
+    keyOrKeys?: string | string[],
+  ): Promise<{ [key: string]: any }> {
     if (!isAddress(this.options.address)) {
       throw new Error('Missing ERC725 contract address.');
     }
@@ -205,16 +208,16 @@ export class ERC725<Schema extends GenericSchema> {
       throw new Error('Missing provider.');
     }
 
-    if (!data) {
+    if (!keyOrKeys) {
       // eslint-disable-next-line no-param-reassign
-      data = this.options.schema.map((element) => element.name as any);
+      keyOrKeys = this.options.schema.map((element) => element.name);
     }
 
-    if (Array.isArray(data)) {
-      return this.getDataMultiple(data as string[]);
+    if (Array.isArray(keyOrKeys)) {
+      return this.getDataMultiple(keyOrKeys);
     }
 
-    return this.getDataSingle(data as string);
+    return this.getDataSingle(keyOrKeys);
   }
 
   /**
@@ -223,7 +226,7 @@ export class ERC725<Schema extends GenericSchema> {
    * https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
    *
    * @param {string} key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
-   * @param {Erc725Schema} customSchema An optional custom schema element to use for decoding the returned value. Overrides attached schema of the class instance on this call only.
+   * @param {ERC725JSONSchema} customSchema An optional custom schema element to use for decoding the returned value. Overrides attached schema of the class instance on this call only.
    * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData
    *
    * **Example**
@@ -249,8 +252,8 @@ export class ERC725<Schema extends GenericSchema> {
   async fetchData(key: string) {
     const keySchema = getSchemaElement(this.options.schema, key);
 
-    let result = await this.getData(key);
-    result = result[key];
+    const data = await this.getData(key);
+    const result = data[key];
 
     if (!result) return null;
 
@@ -463,7 +466,7 @@ export class ERC725<Schema extends GenericSchema> {
    * @return an array of keys/values
    */
   private async getArrayValues(
-    schema: Erc725Schema,
+    schema: ERC725JSONSchema,
     data: Record<string, any>,
   ) {
     if (schema.keyType !== 'Array') {
