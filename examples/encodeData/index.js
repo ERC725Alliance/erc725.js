@@ -95,7 +95,7 @@ const encodedDataMany = myERC725.encodeData({
 
 const encodedDataJson = myERC725.encodeData({
   LSP3Profile: {
-    json: { name: 'reto' },
+    json: { name: 'ERC725.js' },
     url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
   },
 });
