@@ -9,11 +9,12 @@ export const queries = {
   getDataByKey(address: string, key: string) {
     return gql`
     {
-      erc725DataStores (where:{address:"${address}",key:"${key}"}) {
-        id
+      findUniqueErc725(where: {address: "${address}"}){
         address
-        key
-        value
+        ERC725DataStore(where: {key: {equals: "${key}"}}){
+          key
+          value
+        }
       }
     }
     `;
@@ -22,14 +23,15 @@ export const queries = {
   /**
    * Get the ERC725 instance kv pairs
    */
-  getAllData(id: string) {
+  getAllData(address: string) {
     return gql`
     {
-      erc725DataStores (where:{address:"${id}"}) {
-        id
+      findUniqueErc725(where: {address: "${address}"}){
         address
-        key
-        value
+        ERC725DataStore{
+          key
+          value
+        }
       }
     }
     `;
