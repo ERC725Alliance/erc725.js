@@ -7,7 +7,7 @@
 ## Interfaces
 
 - [ERC725Config](interfaces/ERC725Config.md)
-- [Erc725Schema](interfaces/Erc725Schema.md)
+- [ERC725JSONSchema](interfaces/ERC725JSONSchema.md)
 - [KeyValuePair](interfaces/KeyValuePair.md)
 
 ## References
@@ -18,30 +18,30 @@ Renames and exports: [ERC725](classes/ERC725.md)
 
 ## Type aliases
 
-### Erc725SchemaKeyType
+### ERC725JSONSchemaKeyType
 
-Ƭ **Erc725SchemaKeyType**: ``"Singleton"`` \| ``"Mapping"`` \| ``"Array"``
+Ƭ **ERC725JSONSchemaKeyType**: ``"Singleton"`` \| ``"Mapping"`` \| ``"Array"``
 
 #### Defined in
 
-[types/Erc725Schema.ts:3](https://github.com/ERC725Alliance/erc725.js/blob/51bcfc7/src/types/Erc725Schema.ts#L3)
+[types/ERC725JSONSchema.ts:3](https://github.com/ERC725Alliance/erc725.js/blob/9fc1155/src/types/ERC725JSONSchema.ts#L3)
 
 ___
 
-### Erc725SchemaValueContent
+### ERC725JSONSchemaValueContent
 
-Ƭ **Erc725SchemaValueContent**: ``"Number"`` \| ``"String"`` \| ``"Address"`` \| ``"Keccak256"`` \| ``"AssetURL"`` \| ``"JSONURL"`` \| ``"URL"`` \| ``"Markdown"``
+Ƭ **ERC725JSONSchemaValueContent**: ``"Number"`` \| ``"String"`` \| ``"Address"`` \| ``"Keccak256"`` \| ``"AssetURL"`` \| ``"JSONURL"`` \| ``"URL"`` \| ``"Markdown"``
 
 #### Defined in
 
-[types/Erc725Schema.ts:5](https://github.com/ERC725Alliance/erc725.js/blob/51bcfc7/src/types/Erc725Schema.ts#L5)
+[types/ERC725JSONSchema.ts:5](https://github.com/ERC725Alliance/erc725.js/blob/9fc1155/src/types/ERC725JSONSchema.ts#L5)
 
 ___
 
-### Erc725SchemaValueType
+### ERC725JSONSchemaValueType
 
-Ƭ **Erc725SchemaValueType**: ``"string"`` \| ``"address"`` \| ``"uint256"`` \| ``"bytes32"`` \| ``"bytes"`` \| ``"string[]"`` \| ``"address[]"`` \| ``"uint256[]"`` \| ``"bytes32[]"`` \| ``"bytes[]"``
+Ƭ **ERC725JSONSchemaValueType**: ``"string"`` \| ``"address"`` \| ``"uint256"`` \| ``"bytes32"`` \| ``"bytes"`` \| ``"string[]"`` \| ``"address[]"`` \| ``"uint256[]"`` \| ``"bytes32[]"`` \| ``"bytes[]"``
 
 #### Defined in
 
-[types/Erc725Schema.ts:15](https://github.com/ERC725Alliance/erc725.js/blob/51bcfc7/src/types/Erc725Schema.ts#L15)
+[types/ERC725JSONSchema.ts:15](https://github.com/ERC725Alliance/erc725.js/blob/9fc1155/src/types/ERC725JSONSchema.ts#L15)

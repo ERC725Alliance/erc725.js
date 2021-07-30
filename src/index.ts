@@ -74,9 +74,7 @@ export class ERC725<Schema extends GenericSchema> {
   /**
    * Creates an instance of ERC725.
    *
-   * **Example**
-   *
-   * ```js
+   * ```js title="Example"
    * import { ERC725 } from 'erc725.js';
    * import Web3 from 'web3';
    *
@@ -170,15 +168,12 @@ export class ERC725<Schema extends GenericSchema> {
   }
 
   /**
-   * Get all available data from the contract as per the class schema definition.
-   * @param {(SchemaKey | SchemaKey[])} [data] B
-   * @returns An object with schema element key names as properties, with corresponding associated decoded data as values.
+   * Gets decoded data for `one | many |  all` keys of the specified `ERC725` smart-contract.
+   * When omitting the `keyOrKeys` parameter, it will get all the keys (as per {@link ERC725JSONSchema | ERC725JSONSchema}) definition).
+   * @returns An object with schema element key names as properties, with corresponding associated **decoded** data as values.
    *
-   * **Example**
-   *
-   * ```javascript
+   * ```javascript title="Get decoded data of all keys from schema"
    * await myERC725.getData();
-   * // >
    * // {
    * //     'SupportedStandards:ERC725Account': '0xafdeb5d6',
    * //     LSP3Profile: {
@@ -190,13 +185,28 @@ export class ERC725<Schema extends GenericSchema> {
    * //     'LSP3IssuedAssets[]': [
    * //       '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
    * //       '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826',
-   * //       ...
    * //     ]
    * // }
    * ```
-   * :::note Try it
-   * https://stackblitz.com/edit/erc725js-get-data?devtoolsheight=33&file=index.js
-   * :::
+   *
+   * ```javascript title="Get decoded data for one key"
+   * await myERC725.getData('SupportedStandards:ERC725Account');
+   * // {
+   * //     'SupportedStandards:ERC725Account': '0xafdeb5d6',
+   * // }
+   * ```
+   *
+   * ```javascript title="Get decoded data for many keys"
+   * await myERC725.getData(['SupportedStandards:ERC725Account', 'LSP3Profile']);
+   * // {
+   * //     'SupportedStandards:ERC725Account': '0xafdeb5d6',
+   * //     LSP3Profile: {
+   * //       hashFunction: 'keccak256(utf8)',
+   * //       hash: '0x8700cccf72722106436cbc5309a8ebb308224d5f601990c070ea751a6bed4fc0',
+   * //       url: 'ipfs://QmV8K2ZPZHErvVzjSE7vewgEzvfLnhdea8RLJRqZGNu9Je'
+   * //     },
+   * // }
+   * ```
    */
   async getData(
     keyOrKeys?: string | string[],
@@ -229,11 +239,9 @@ export class ERC725<Schema extends GenericSchema> {
    * @param {ERC725JSONSchema} customSchema An optional custom schema element to use for decoding the returned value. Overrides attached schema of the class instance on this call only.
    * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData
    *
-   * **Example**
-   *
-   * ```javascript
+   * ```javascript title="Example"
    * await myERC725.fetchData('LSP3Profile');
-   * // > {
+   * // {
    * //   LSP3Profile: {
    * //     name: 'the-dematerialised',
    * //     description: 'The Destination for Digital Fashion. We are a Web 3.0 Marketplace, Authenticated on the LUKSO Blockchain. The Future is Dematerialised.',
@@ -292,16 +300,39 @@ export class ERC725<Schema extends GenericSchema> {
       default:
         return result;
     }
-    return result;
   }
+
+  /**
+   * @hidden
+   */
+  encodeData<T extends keyof Schema>(
+    dataByKey: { [K in T]: Schema[T]['encodeData']['inputTypes'] },
+  );
 
   /**
    * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
    * The JSON will be hashed with keccak256 and you can store the return value [JSONURL](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl) on the blockchain.
    *
-   * @returns A key-value pair, containing the encoded values
+   * @returns An object with the same keys as the object that was passed in as a parameter.
    *
-   * ```javascript
+   * ```javascript title="Encode data for one key"
+   * myERC725.encodeData({
+   *   LSP3Profile: {
+   *     hashFunction: 'keccak256(utf8)',
+   *     hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+   *     url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx'
+   *   },
+   * });
+   * // {
+   * //   LSP3Profile: {
+   * //     key: "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
+   * //     value:
+   * //       "0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178",
+   * //   },
+   * // };
+   * ```
+   *
+   * ```javascript title="Encode data for many keys"
    * myERC725.encodeData({
    *   LSP3Profile: {
    *     hashFunction: 'keccak256(utf8)',
@@ -315,36 +346,34 @@ export class ERC725<Schema extends GenericSchema> {
    *   LSP1UniversalReceiverDelegate: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb'
    * });
    *
-   * // > [
-   * //  {
+   * // {
+   * //  "LSP3Profile": {
    * //      "key": "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
    * //      "value": "0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178"
    * //  },
-   * //  {
+   * //  "LSP1UniversalReceiverDelegate": {
    * //      "key": "0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47",
    * //      "value": "0x1183790f29be3cdfd0a102862fea1a4a30b3adab"
    * //  },
-   * //  {
-   * //      "key": "0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0",
-   * //      "value": "0x0000000000000000000000000000000000000000000000000000000000000002"
-   * //  },
-   * //  {
-   * //      "key": "0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000",
-   * //      "value": "0xd94353d9b005b3c0a9da169b768a31c57844e490"
-   * //  },
-   * //  {
-   * //      "key": "0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001",
-   * //      "value": "0xdaea594e385fc724449e3118b2db7e86dfba1826"
-   * //  }
-   * // ]
+   * //  "LSP3IssuedAssets[]": [
+   * //      {
+   * //          "key": "0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0",
+   * //          "value": "0x0000000000000000000000000000000000000000000000000000000000000002"
+   * //      },
+   * //      {
+   * //          "key": "0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000",
+   * //          "value": "0xd94353d9b005b3c0a9da169b768a31c57844e490"
+   * //      },
+   * //      {
+   * //          "key": "0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001",
+   * //          "value": "0xdaea594e385fc724449e3118b2db7e86dfba1826"
+   * //      }
+   * //  ]
+   * // }
    * ```
-   * :::note Try it
-   * https://stackblitz.com/edit/erc725js-encode-all-data?devtoolsheight=66&file=index.js
-   * :::
    */
-  encodeData<T extends keyof Schema>(
-    dataByKey: { [K in T]: Schema[T]['encodeData']['inputTypes'] },
-  ) {
+  encodeData(dataByKey: { [key: string]: any }): { [key: string]: any };
+  encodeData<T extends keyof Schema>(dataByKey: { [key: string]: any }) {
     return Object.entries(dataByKey).reduce(
       (encodedData, [key, value]) => {
         const schemaElement = getSchemaElement(this.options.schema, key);
@@ -372,31 +401,57 @@ export class ERC725<Schema extends GenericSchema> {
    * @param data Either a single object, or an array of objects of key: value: pairs.
    * @returns Returns decoded data as defined and expected in the schema:
    *
-   * **Example**
-   *
-   * ```javascript
-   * myERC725.decodeData('LSP3IssuedAssets[]', [
-   *    {
-   *        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
-   *        value: '0x0000000000000000000000000000000000000000000000000000000000000002'
-   *    },
-   *    {
-   *        key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
-   *        value: '0xd94353d9b005b3c0a9da169b768a31c57844e490'
-   *    },
-   *    {
-   *        key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
-   *        value: '0xdaea594e385fc724449e3118b2db7e86dfba1826'
-   *    }
-   * ]);
-   * // > [
-   * //   '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
-   * //   '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826'
-   * // ]
+   * ```javascript title="Decode one key"
+   * myERC725.decodeData({
+   *   "LSP3IssuedAssets[]": [
+   *     {
+   *       key: "0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0",
+   *       value:
+   *         "0x0000000000000000000000000000000000000000000000000000000000000002",
+   *     },
+   *     {
+   *       key: "0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000",
+   *       value: "0xd94353d9b005b3c0a9da169b768a31c57844e490",
+   *     },
+   *     {
+   *       key: "0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001",
+   *       value: "0xdaea594e385fc724449e3118b2db7e86dfba1826",
+   *     },
+   *   ],
+   * });
+   * // {
+   * //   "LSP3IssuedAssets[]": [
+   * //     "0xD94353D9B005B3c0A9Da169b768a31C57844e490",
+   * //     "0xDaea594E385Fc724449E3118B2Db7E86dFBa1826",
+   * //   ],
+   * // }
    * ```
-   * :::note Try it
-   * https://stackblitz.com/edit/erc725js-decode-data?devtoolsheight=33&file=index.js
-   * :::
+   *
+   * ```javascript title="Decode multiple keys"
+   * myERC725.decodeData({
+   *   "LSP3IssuedAssets[]": [
+   *     {
+   *       key: "0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0",
+   *       value:
+   *         "0x0000000000000000000000000000000000000000000000000000000000000002",
+   *     },
+   *     {
+   *       key: "0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000",
+   *       value: "0xd94353d9b005b3c0a9da169b768a31c57844e490",
+   *     },
+   *     {
+   *       key: "0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001",
+   *       value: "0xdaea594e385fc724449e3118b2db7e86dfba1826",
+   *     },
+   *   ],
+   * });
+   * // {
+   * //   "LSP3IssuedAssets[]": [
+   * //     "0xD94353D9B005B3c0A9Da169b768a31C57844e490",
+   * //     "0xDaea594E385Fc724449E3118B2Db7E86dFBa1826",
+   * //   ],
+   * // }
+   * ```
    */
   decodeData<T extends keyof Schema>(
     data: { [K in T]: Schema[T]['decodeData']['inputTypes'] },
@@ -417,14 +472,12 @@ export class ERC725<Schema extends GenericSchema> {
    *    This method is not yet supported when using the `graph` provider type.<br/>
    * ⚠️⚠️⚠️<br/>
    *
-   * **Example**
-   *
-   * ```javascript
+   * ```javascript title="Example"
    * await myERC725.getOwner();
-   * // > '0x94933413384997F9402cc07a650e8A34d60F437A'
+   * // '0x94933413384997F9402cc07a650e8A34d60F437A'
    *
    * await myERC725.getOwner("0x3000783905Cc7170cCCe49a4112Deda952DDBe24");
-   * // > '0x7f1b797b2Ba023Da2482654b50724e92EB5a7091'
+   * // '0x7f1b797b2Ba023Da2482654b50724e92EB5a7091'
    * ```
    */
   getOwner(address?: string): string {
@@ -538,14 +591,6 @@ export class ERC725<Schema extends GenericSchema> {
     };
   }
 
-  /**
-   * TBD
-   *
-   * @private
-   * @param {string[]} keyNames
-   * @return {*}
-   * @memberof ERC725
-   */
   private async getDataMultiple(keyNames: string[]) {
     const keyHashes = keyNames.map((keyName) => {
       const schemaElement = getSchemaElement(this.options.schema, keyName);

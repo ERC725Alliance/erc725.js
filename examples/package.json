@@ -1,0 +1,12 @@
+{
+  "name": "erc725.js examples",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "postinstall": "cd .. && npm link && cd ./examples && npm link erc725.js"
+  },
+  "dependencies": {
+    "web3": "1.5.0",
+    "erc725.js": "0.5.7"
+  }
+}
