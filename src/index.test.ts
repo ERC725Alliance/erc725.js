@@ -106,7 +106,7 @@ describe('Running erc725.js tests...', () => {
       assert.deepStrictEqual(result, fullResults);
     });
 
-    it('with apollo client', async () => {
+    xit('with apollo client', async () => {
       const provider = new ApolloClient({
         returnData: allGraphData,
         getAll: true,
