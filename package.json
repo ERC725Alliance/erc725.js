@@ -13,7 +13,7 @@
     "lint": "eslint . --ext .ts",
     "build-publish": "rm -rf build && npm run build && npm test && standard-version",
     "docs:generate": "run-p docs:generate:*",
-    "docs:generate:markdown": "npx typedoc",
+    "docs:generate:markdown": "typedoc --options typedoc.json",
     "docs:generate:html": "npx typedoc --options typedoc.html.json"
   },
   "repository": {
@@ -62,6 +62,7 @@
     "standard-version": "^9.3.1",
     "ts-node": "^10.0.0",
     "typedoc": "^0.21.4",
+    "typedoc-plugin-markdown": "^3.10.4",
     "typescript": "^4.3.2"
   },
   "dependencies": {

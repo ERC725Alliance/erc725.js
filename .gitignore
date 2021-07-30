@@ -1,6 +1,7 @@
 /node_modules
 /build
 /docs/build
+docs/html
 .vscode/*
 .nyc_output
 coverage
