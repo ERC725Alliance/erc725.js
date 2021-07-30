@@ -61,8 +61,7 @@ export default class Web3Source {
     );
   }
 
-  async getAllData(address: string, keys) {
-    // generate payload
+  async getAllData(address: string, keys: string[]) {
     const payload: JsonRpc[] = [];
     for (let index = 0; index < keys.length; index++) {
       payload.push(
@@ -70,7 +69,6 @@ export default class Web3Source {
       );
     }
 
-    // call node
     const results: any = await this._callContract(payload);
 
     // map results to keys
