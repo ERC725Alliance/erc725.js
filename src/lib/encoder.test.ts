@@ -24,7 +24,7 @@ describe('#JSONURL encode', () => {
     const result = valueContentEncodingMap.JSONURL.encode(dataToEncode);
 
     // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
-    const hashFunction = SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_UTF8; // keccak256(utf8)
+    const hashFunction = SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_UTF8;
     const urlHash = utf8ToHex(dataToEncode.url).substring(2);
     const jsonDataHash = keccak256(JSON.stringify(dataToEncode.json)).substring(
       2,
