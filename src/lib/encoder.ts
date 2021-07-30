@@ -32,30 +32,13 @@ import {
   toChecksumAddress,
   utf8ToHex,
 } from 'web3-utils';
+import { JSONURLDataToEncode } from '../types';
 
 import {
   SUPPORTED_HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './constants';
 import { getHashFunction, hashData } from './utils';
-
-interface JSONURLData {
-  url: string;
-}
-
-interface JSONURLDataWithHash extends JSONURLData {
-  hash: string;
-  hashFunction: SUPPORTED_HASH_FUNCTIONS;
-  json?: never;
-}
-
-interface JSONURLDataWithJson extends JSONURLData {
-  hash?: never;
-  hashFunction?: never;
-  json: unknown;
-}
-
-type JSONURLDataToEncode = JSONURLDataWithHash | JSONURLDataWithJson;
 
 const encodeDataSourceWithHash = (
   hashType: SUPPORTED_HASH_FUNCTIONS,

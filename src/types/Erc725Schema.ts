@@ -49,3 +49,19 @@ export interface Erc725Schema {
   elementValueContent?: Erc725SchemaValueContent; // exists for array elements
   elementValueType?: Erc725SchemaValueType; // exists for array elements
 }
+
+export interface GenericSchema {
+  [key: string]: {
+    encodeData: {
+      inputTypes: any;
+      returnValues: any;
+    };
+    decodeData: {
+      inputTypes: any;
+      returnValues: any;
+    };
+    getData: {
+      returnValues: any;
+    };
+  };
+}

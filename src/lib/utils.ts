@@ -25,8 +25,7 @@ import {
   numberToHex,
   padLeft,
 } from 'web3-utils';
-import { DataToEncode, EncodedData } from '../types';
-import { Erc725Schema } from '../types/Erc725Schema';
+import { Erc725Schema, GenericSchema } from '../types/Erc725Schema';
 import {
   HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTIONS,
@@ -139,6 +138,24 @@ export function encodeKeyName(name: string) {
 
 /**
  *
+ * @param schemas An array of objects
+ * @param {string} key A string of either the schema element name, or key
+ * @return The requested schema element from the full array of schemas
+ */
+export function getSchemaElement(schemas: Erc725Schema[], key: string) {
+  const keyHash = key.substr(0, 2) !== '0x' ? encodeKeyName(key) : key;
+  const schemaElement = schemas.find((e) => e.key === keyHash);
+  if (!schemaElement) {
+    throw new Error(
+      'No matching schema found for key: "' + key + '" (' + keyHash + ').',
+    );
+  }
+
+  return schemaElement;
+}
+
+/**
+ *
  * @param schema An object of a schema definition that must have a keyType of 'Array'
  * @param index The index of the array element to transpose the schema to
  * @return Modified schema element of keyType 'Singleton' for fetching or decoding/encoding the array element
@@ -211,39 +228,6 @@ export function encodeKey(schema: Erc725Schema, value) {
       '"',
   );
   return null;
-}
-
-/**
- *
- * @param schemas schemas is an array of objects of schema definitions
- * @param dataToEncode data is an array of objects of key-value pairs
- * @return: all encoded data as per required by the schema and provided data
- */
-export function encodeData(
-  schemas: Erc725Schema[],
-  dataToEncode: DataToEncode,
-): EncodedData[] {
-  return Object.entries(dataToEncode)
-    .map(([key, value]) => {
-      const schemaElement = schemas.find((schema) => schema.name === key);
-      if (!schemaElement) {
-        throw new Error(`Invalid schema element "${key}" detected`);
-      }
-      return {
-        encodedKey: encodeKey(schemaElement, value),
-        schemaElement,
-      };
-    })
-    .flatMap(({ encodedKey, schemaElement }) => {
-      if (Array.isArray(encodedKey)) {
-        // Encoded array element returns as key-value pairs
-        return encodedKey;
-      }
-      return {
-        key: schemaElement.key,
-        value: encodedKey,
-      };
-    });
 }
 
 /**
@@ -377,37 +361,21 @@ export function decodeKey(schema: Erc725Schema, value) {
  * @param data data is an array of objects of key-value pairs
  * @return: all decoded data as per required by the schema and provided data
  */
-export function decodeAllData(schemas: Erc725Schema[], data) {
-  const results = {};
+export function decodeData<
+  Schema extends GenericSchema,
+  T extends keyof Schema,
+>(data: { [K in T]: Schema[T]['decodeData']['inputTypes'] }, schema) {
+  return Object.entries(data).reduce((decodedData, [key, value]) => {
+    const schemaElement = getSchemaElement(schema, key);
 
-  for (let index = 0; index < schemas.length; index++) {
-    const schemaElement = schemas[index];
-
-    const res = decodeKey(schemaElement, data);
-    if (res) {
-      results[schemaElement.name] = res;
-    }
-  }
-
-  return results;
-}
-
-/**
- *
- * @param schemas An array of objects
- * @param {string} key A string of either the schema element name, or key
- * @return The requested schema element from the full array of schemas
- */
-export function getSchemaElement(schemas: Erc725Schema[], key: string) {
-  const keyHash = key.substr(0, 2) !== '0x' ? encodeKeyName(key) : key;
-  const schemaElement = schemas.find((e) => e.key === keyHash);
-  if (!schemaElement) {
-    throw new Error(
-      'No matching schema found for key: "' + key + '" (' + keyHash + ').',
-    );
-  }
-
-  return schemaElement;
+    return {
+      ...decodedData,
+      [schemaElement.name]: decodeKey(
+        schemaElement,
+        value,
+      ) as Schema[T]['decodeData']['returnValues'],
+    };
+  }, {} as any);
 }
 
 export function getHashFunction(hashFunctionNameOrHash) {

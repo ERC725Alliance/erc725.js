@@ -22,10 +22,8 @@ import assert from 'assert';
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
 import ERC725 from '.';
 import {
-  decodeAllData,
   decodeKey,
   decodeKeyValue,
-  encodeData,
   encodeKey,
   encodeKeyValue,
 } from './lib/utils';
@@ -44,6 +42,7 @@ import {
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'isomorphic-fetch';
+import { Schema } from '../generatedSchema';
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
 
@@ -95,15 +94,15 @@ describe('Running erc725.js tests...', () => {
 
     it('with web3.currentProvider', async () => {
       const provider = new HttpProvider({ returnData: allRawData });
-      const erc725 = new ERC725(mockSchema, address, provider);
-      const result = await erc725.getAllData();
+      const erc725 = new ERC725<Schema>(mockSchema, address, provider);
+      const result = await erc725.getData();
       assert.deepStrictEqual(result, fullResults);
     });
 
     it('with ethereumProvider EIP 1193', async () => {
       const provider = new EthereumProvider({ returnData: allRawData });
       const erc725 = new ERC725(mockSchema, address, provider);
-      const result = await erc725.getAllData();
+      const result = await erc725.getData();
       assert.deepStrictEqual(result, fullResults);
     });
 
@@ -116,7 +115,7 @@ describe('Running erc725.js tests...', () => {
         provider,
         type: 'ApolloClient',
       });
-      const result = await erc725.getAllData();
+      const result = await erc725.getData();
       assert.deepStrictEqual(result, fullResults);
     });
 
@@ -244,7 +243,9 @@ describe('Running erc725.js tests...', () => {
         const provider = new HttpProvider({ returnData: returnRawData });
         const erc725 = new ERC725(mockSchema, address, provider);
         const result = await erc725.getData(schemaElement.key);
-        assert.deepStrictEqual(result, schemaElement.expectedResult);
+        assert.deepStrictEqual(result, {
+          [schemaElement.name]: schemaElement.expectedResult,
+        });
       });
 
       it(schemaElement.name + ' with ethereumProvider EIP 1193', async () => {
@@ -252,7 +253,9 @@ describe('Running erc725.js tests...', () => {
         const provider = new HttpProvider({ returnData: returnRawData });
         const erc725 = new ERC725(mockSchema, address, provider);
         const result = await erc725.getData(schemaElement.key);
-        assert.deepStrictEqual(result, schemaElement.expectedResult);
+        assert.deepStrictEqual(result, {
+          [schemaElement.name]: schemaElement.expectedResult,
+        });
       });
 
       it(schemaElement.name + ' with apollo graph provider', async () => {
@@ -263,41 +266,15 @@ describe('Running erc725.js tests...', () => {
           type: 'ApolloClient',
         });
         const result = await erc725.getData(schemaElement.key);
-        assert.deepStrictEqual(result, schemaElement.expectedResult);
+        assert.deepStrictEqual(result, {
+          [schemaElement.name]: schemaElement.expectedResult,
+        });
       });
     });
   });
 
   describe('Testing utility encoding & decoding functions', () => {
-    const allGraphData = generateAllData(mockSchema);
-    const fullResults = generateAllResults(mockSchema) as any;
-
-    /* ********************************************* */
-    /* Testing encoding/decoding for all schema data */
-
-    it('Encode all data!', async () => {
-      console.log(mockSchema, fullResults);
-      const result = encodeData(mockSchema, fullResults);
-      assert.deepStrictEqual(result, allGraphData);
-    });
-
-    it('Decode all data!', async () => {
-      const result = decodeAllData(mockSchema, allGraphData);
-      assert.deepStrictEqual(result, fullResults);
-    });
-
-    it('!!!Encode all data from class instance!', async () => {
-      const erc725 = new ERC725(mockSchema);
-      const result = erc725.encodeData(fullResults as any);
-      assert.deepStrictEqual(result, allGraphData);
-    });
-
-    it('!!!Decode all data from class instance!', async () => {
-      const erc725 = new ERC725(mockSchema);
-      const result = erc725.decodeAllData(allGraphData);
-      assert.deepStrictEqual(result, fullResults);
-    });
-
+    const allGraphData = generateAllData(mockSchema) as any;
     /* **************************************** */
     /* Testing encoding/decoding field by field */
     for (let index = 0; index < mockSchema.length; index++) {
@@ -420,7 +397,12 @@ describe('Running erc725.js tests...', () => {
             const results = erc725.encodeData({
               [schemaElement.name]: data,
             });
-            assert.deepStrictEqual(results, intendedResults);
+            assert.deepStrictEqual(results, {
+              [schemaElement.name]: {
+                key: schemaElement.key,
+                value: intendedResults,
+              },
+            });
           },
         );
 
@@ -435,8 +417,12 @@ describe('Running erc725.js tests...', () => {
               schemaElement.name
             ];
             const erc725 = new ERC725([schemaElement]);
-            const results = erc725.decodeData(schemaElement.name, values);
-            assert.deepStrictEqual(results, intendedResults);
+            const results = erc725.decodeData({
+              [schemaElement.name]: values,
+            });
+            assert.deepStrictEqual(results, {
+              [schemaElement.name]: intendedResults,
+            });
           },
         );
       } else {
@@ -462,21 +448,22 @@ describe('Running erc725.js tests...', () => {
           const result = erc725.encodeData({
             [schemaElement.name]: schemaElement.expectedResult,
           });
-          assert.deepStrictEqual(result, [
-            {
+          assert.deepStrictEqual(result, {
+            [schemaElement.name]: {
               key: schemaElement.key,
               value: schemaElement.returnGraphData,
             },
-          ]);
+          });
         });
 
         it('Decode data value from naked class instance!', async () => {
           const erc725 = new ERC725([schemaElement]);
-          const result = erc725.decodeData(
-            schemaElement.name,
-            schemaElement.returnGraphData,
-          );
-          assert.deepStrictEqual(result, schemaElement.expectedResult);
+          const result = erc725.decodeData({
+            [schemaElement.name]: schemaElement.returnGraphData,
+          });
+          assert.deepStrictEqual(result, {
+            [schemaElement.name]: schemaElement.expectedResult,
+          });
         });
       }
     }
