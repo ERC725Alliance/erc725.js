@@ -56,7 +56,7 @@ const encodeDataSourceWithHash = (
 
 const decodeDataSourceWithHash = (
   value: string,
-): { hashFunction: string; dataHash: string; dataSource: string } | null => {
+): { hashFunction: string; hash: string; url: string } => {
   const hashFunctionSig = value.substr(0, 10);
   const hashFunction = getHashFunction(hashFunctionSig);
 
@@ -64,7 +64,7 @@ const decodeDataSourceWithHash = (
   const dataHash = '0x' + encodedData.substr(0, 64); // Get jsonHash 32 bytes
   const dataSource = hexToUtf8('0x' + encodedData.substr(64)); // Get remainder as URI
 
-  return { hashFunction: hashFunction.name, dataHash, dataSource };
+  return { hashFunction: hashFunction.name, hash: dataHash, url: dataSource };
 };
 
 const valueTypeEncodingMap = {
@@ -192,22 +192,13 @@ export const valueContentEncodingMap = {
     type: 'custom',
     encode: (value) =>
       encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
-    decode: (value) => {
-      const result = decodeDataSourceWithHash(value);
-      return result
-        ? {
-            hashFunction: result.hashFunction,
-            hash: result.dataHash,
-            url: result.dataSource,
-          }
-        : null;
-    },
+    decode: (value: string) => decodeDataSourceWithHash(value),
   },
   JSONURL: {
     type: 'custom',
     // eslint-disable-next-line arrow-body-style
-    encode: (value: JSONURLDataToEncode) => {
-      const { hash, json, hashFunction, url } = value;
+    encode: (dataToEncode: JSONURLDataToEncode) => {
+      const { hash, json, hashFunction, url } = dataToEncode;
 
       let hashedJson = hash;
 
@@ -235,16 +226,7 @@ export const valueContentEncodingMap = {
         url,
       );
     },
-    decode: (value) => {
-      const result = decodeDataSourceWithHash(value);
-      return result
-        ? {
-            hashFunction: result.hashFunction,
-            hash: result.dataHash,
-            url: result.dataSource,
-          }
-        : null;
-    },
+    decode: (dataToDecode) => decodeDataSourceWithHash(dataToDecode),
   },
 };
 
