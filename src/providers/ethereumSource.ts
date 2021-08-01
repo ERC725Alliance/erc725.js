@@ -33,11 +33,8 @@ const web3Abi = abi.default;
 export default class EthereumSource {
   public provider: any;
 
-  public deprecated: boolean;
-
-  constructor(provider: any, deprecated?: 'deprecated') {
+  constructor(provider: any) {
     this.provider = provider;
-    this.deprecated = deprecated === 'deprecated';
   }
 
   async getOwner(address: string) {
@@ -51,10 +48,9 @@ export default class EthereumSource {
   }
 
   async getData(address: string, keyHash: string) {
-    let result = await this._callContract([
+    const result = await this._callContract([
       this._constructJSONRPC(address, Method.GET_DATA, keyHash),
     ]);
-    result = this.deprecated ? result.result : result;
     return this._decodeResult(Method.GET_DATA, result);
   }
 
@@ -90,9 +86,7 @@ export default class EthereumSource {
   }
 
   async _callContract(params: any) {
-    return this.deprecated
-      ? this.provider.send('eth_call', params)
-      : this.provider.request({ method: 'eth_call', params });
+    return this.provider.request({ method: 'eth_call', params });
   }
 
   // eslint-disable-next-line class-methods-use-this

@@ -20,9 +20,9 @@
 
 import { isAddress, toChecksumAddress } from 'web3-utils';
 
-import GraphSource from './providers/subgraphProviderWrapper';
-import Web3Source from './providers/web3ProviderWrapper';
-import EthereumSource from './providers/ethereumProviderWrapper';
+import GraphSource from './providers/graphSource';
+import Web3Source from './providers/web3Source';
+import EthereumSource from './providers/ethereumSource';
 import {
   encodeArrayKey,
   getSchemaElement,
