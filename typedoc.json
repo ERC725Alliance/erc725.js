@@ -1,6 +1,6 @@
 {
   "entryPoints": ["./src/index.ts"],
-  "out": "docs/markdown/technical-reference",
+  "out": "docs/technical-reference",
   "includeVersion": true,
   "readme": "none",
   "excludePrivate": true,
