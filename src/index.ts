@@ -31,6 +31,7 @@ import {
   decodeKeyValue,
   decodeKey,
   hashData,
+  hashAndCompare,
 } from './lib/utils';
 
 import {
@@ -69,7 +70,7 @@ export {
 export class ERC725<Schema extends GenericSchema> {
   options: {
     schema: ERC725JSONSchema[];
-    address?;
+    address?: string;
     providerType?: ProviderType | null;
     provider?;
     config: ERC725Config;
@@ -109,7 +110,7 @@ export class ERC725<Schema extends GenericSchema> {
    */
   constructor(
     schema: ERC725JSONSchema[],
-    address?: string,
+    address?,
     provider?: any,
     config?: ERC725Config,
   ) {
@@ -172,9 +173,17 @@ export class ERC725<Schema extends GenericSchema> {
   }
 
   /**
-   * Gets decoded data for `one | many |  all` keys of the specified `ERC725` smart-contract.
-   * When omitting the `keyOrKeys` parameter, it will get all the keys (as per {@link ERC725JSONSchema | ERC725JSONSchema}) definition).
-   * @returns An object with schema element key names as properties, with corresponding associated **decoded** data as values.
+   * Gets **decoded data** for one, many or all keys of the specified `ERC725` smart-contract.
+   * When omitting the `keyOrKeys` parameter, it will get all the keys (as per {@link ERC725JSONSchema | ERC725JSONSchema} definition).
+   *
+   * :::caution
+   * Data returned by this function does not contain external data of [`JSONURL`](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl),
+   * or [`ASSETURL`](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#asseturl) schema elements.
+   *
+   * If you would like to receive everything in one go, you can use {@link ERC725.fetchData | `fetchData`} for that.
+   * :::
+   *
+   * @returns An object with schema element key names as properties, with corresponding **decoded** data as values.
    *
    * ```javascript title="Get decoded data of all keys from schema"
    * await myERC725.getData();
@@ -212,10 +221,11 @@ export class ERC725<Schema extends GenericSchema> {
    * // }
    * ```
    */
+  async getData(keysOrKeys?: string | string[]);
   async getData(
     keyOrKeys?: string | string[],
   ): Promise<{ [key: string]: any }> {
-    if (!isAddress(this.options.address)) {
+    if (!isAddress(this.options.address as string)) {
       throw new Error('Missing ERC725 contract address.');
     }
     if (!this.options.provider) {
@@ -235,11 +245,15 @@ export class ERC725<Schema extends GenericSchema> {
   }
 
   /**
-   * Fetches data from IPFS or an HTTP(s) endpoint stored as `JSONURL`, or `ASSETURL` valueContent type and
-   * compares the hash of the downloaded JSON with the hash stored on the blockchain. More details available here:
-   * https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
+   * Since {@link ERC725.getData | `getData`} exclusively returns data that is stored on the blockchain, `fetchData` comes in handy.
+   * Additionally to the data from the blockchain, `fetchData` also returns data from IPFS or HTTP(s) endpoints
+   * stored as [`JSONURL`](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl), or [`ASSETURL`](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#asseturl).
    *
-   * @param {string} key The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
+   * :::info
+   * To guarantee **data authenticity** `fetchData` compares the `hash` of the fetched JSON with the `hash` stored on the blockchain.
+   * :::
+   *
+   * @param {string} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
    * @param {ERC725JSONSchema} customSchema An optional custom schema element to use for decoding the returned value. Overrides attached schema of the class instance on this call only.
    * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData
    *
@@ -257,7 +271,7 @@ export class ERC725<Schema extends GenericSchema> {
    * // }
    * ```
    *
-   * :::note Try it
+   * :::info Try it
    * https://stackblitz.com/edit/erc725js-fetch-data?devtoolsheight=66&file=index.js
    * :::
    */
@@ -306,7 +320,7 @@ export class ERC725<Schema extends GenericSchema> {
           throw error;
         }
 
-        const isDataAuthentic = this.hashAndCompare(
+        const isDataAuthentic = hashAndCompare(
           receivedData,
           dataEntry.hash,
           dataEntry.hashFunction,
@@ -322,24 +336,18 @@ export class ERC725<Schema extends GenericSchema> {
   }
 
   /**
-   * @hidden
-   */
-  encodeData<T extends keyof Schema>(
-    dataByKey: { [K in T]: Schema[T]['encodeData']['inputTypes'] },
-  );
-
-  /**
-   * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
-   * The JSON will be hashed with keccak256 and you can store the return value [JSONURL](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl) on the blockchain.
+   * To be able to store your data on the blockchain, you need to encode it according to your {@link ERC725JSONSchema}.
    *
-   * @returns An object with the same keys as the object that was passed in as a parameter.
+   * @param {{ [key: string]: any }} data An object with one or many properties, containing the data that needs to be encoded.
+   * @returns An object with the same keys as the object that was passed in as a parameter containing the encoded data, ready to be stored on the blockchain.
    *
-   * ```javascript title="Encode data for one key"
+   * ```javascript title="Encoding object with one key"
+   * const json = { LSP3Profile: { name: 'erc725.js', description: 'Javascript Library'} };
+   *
    * myERC725.encodeData({
    *   LSP3Profile: {
-   *     hashFunction: 'keccak256(utf8)',
-   *     hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
-   *     url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx'
+   *     json,
+   *     url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
    *   },
    * });
    * // {
@@ -351,25 +359,15 @@ export class ERC725<Schema extends GenericSchema> {
    * // };
    * ```
    *
-   * ```javascript title="Encode data for many keys"
+   * ```javascript title="Encoding object with many keys"
    * myERC725.encodeData({
-   *   LSP3Profile: {
-   *     hashFunction: 'keccak256(utf8)',
-   *     hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
-   *     url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx'
-   *   },
    *   'LSP3IssuedAssets[]': [
    *     '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
    *     '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826'
    *   ],
    *   LSP1UniversalReceiverDelegate: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb'
    * });
-   *
    * // {
-   * //  "LSP3Profile": {
-   * //      "key": "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
-   * //      "value": "0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178"
-   * //  },
    * //  "LSP1UniversalReceiverDelegate": {
    * //      "key": "0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47",
    * //      "value": "0x1183790f29be3cdfd0a102862fea1a4a30b3adab"
@@ -390,20 +388,25 @@ export class ERC725<Schema extends GenericSchema> {
    * //  ]
    * // }
    * ```
+   * :::tip
+   * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
+   * The JSON will be hashed with keccak256.
+   * :::
    */
-  encodeData(dataByKey: { [key: string]: any }): { [key: string]: any };
-  encodeData<T extends keyof Schema>(dataByKey: { [key: string]: any }) {
-    return Object.entries(dataByKey).reduce(
-      (encodedData, [key, value]) => {
+  encodeData(data: { [key: string]: any }): { [key: string]: any };
+  encodeData<T extends keyof Schema>(
+    data: { [K in T]: Schema[T]['encodeData']['inputTypes'] },
+  ) {
+    return Object.entries(data).reduce(
+      (accumulator, [key, value]) => {
         const schemaElement = getSchemaElement(this.options.schema, key);
 
-        // eslint-disable-next-line no-param-reassign
-        encodedData[key] = {
+        accumulator[key] = {
           value: encodeKey(schemaElement, value),
           key: schemaElement.key,
         };
 
-        return encodedData;
+        return accumulator;
       },
       {} as {
         [K in T]: {
@@ -415,9 +418,15 @@ export class ERC725<Schema extends GenericSchema> {
   }
 
   /**
-   * Decode data from contract store.
-   * @param {string} key Either the schema element name or key.
-   * @param data Either a single object, or an array of objects of key: value: pairs.
+   * In case you are reading the key-value store from an ERC725 smart-contract key-value store
+   * without `erc725.js` you can use `decodeData` to do the decoding for you.
+   *
+   * :::tip
+   * It is more convenient to use {@link ERC725.fetchData | `fetchData`}.
+   * It does the `decoding` and `fetching` of external references for you automatically.
+   * :::
+   *
+   * @param {{ [key: string]: any }} data An object with one or many properties.
    * @returns Returns decoded data as defined and expected in the schema:
    *
    * ```javascript title="Decode one key"
@@ -463,15 +472,23 @@ export class ERC725<Schema extends GenericSchema> {
    *       value: "0xdaea594e385fc724449e3118b2db7e86dfba1826",
    *     },
    *   ],
+   *   LSP3Profile:
+   *    '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
    * });
    * // {
    * //   "LSP3IssuedAssets[]": [
    * //     "0xD94353D9B005B3c0A9Da169b768a31C57844e490",
    * //     "0xDaea594E385Fc724449E3118B2Db7E86dFBa1826",
    * //   ],
+   * //   LSP3Profile: {
+   * //     hashFunction: 'keccak256(utf8)',
+   * //     hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+   * //     url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx'
+   * //   },
    * // }
    * ```
    */
+  decodeData(data: { [key: string]: any }): { [key: string]: any };
   decodeData<T extends keyof Schema>(
     data: { [K in T]: Schema[T]['decodeData']['inputTypes'] },
   ): {
@@ -501,32 +518,6 @@ export class ERC725<Schema extends GenericSchema> {
    */
   getOwner(address?: string): string {
     return this.options.provider.getOwner(address || this.options.address);
-  }
-
-  /**
-   * Hashes the data received with the specified hashing function,
-   * and compares the result with the provided hash.
-   *
-   * @throws *Error* in case of a mismatch of the hashes.
-   * @internal
-   */
-  // eslint-disable-next-line class-methods-use-this
-  private hashAndCompare(
-    data,
-    hash: string,
-    lowerCaseHashFunction: SUPPORTED_HASH_FUNCTIONS,
-  ) {
-    const jsonHash = hashData(data, lowerCaseHashFunction);
-
-    // throw error if hash mismatch
-    if (jsonHash !== hash) {
-      throw new Error(`
-              Hash mismatch, returned JSON ("${jsonHash}") is different than the one
-              linked from the ERC725Y Smart contract: "${hash}"
-          `);
-    }
-
-    return true;
   }
 
   /**
@@ -624,24 +615,16 @@ export class ERC725<Schema extends GenericSchema> {
 
     if (this.options.providerType === ProviderType.GRAPH) {
       // If the provider type is a graphql client, we assume it can get ALL keys (including array keys)
-      return allRawData.reduce(
-        // eslint-disable-next-line no-return-assign
-        (accumulator, current) => {
-          accumulator[current.key] = current.value;
-          return accumulator;
-        },
-        {},
-      );
-    }
-
-    const tmpData = allRawData.reduce(
-      // eslint-disable-next-line no-return-assign
-      (accumulator, current) => {
+      return allRawData.reduce((accumulator, current) => {
         accumulator[current.key] = current.value;
         return accumulator;
-      },
-      {},
-    );
+      }, {});
+    }
+
+    const tmpData = allRawData.reduce((accumulator, current) => {
+      accumulator[current.key] = current.value;
+      return accumulator;
+    }, {});
 
     // Get missing 'Array' fields for all arrays, as necessary
     const arraySchemas = this.options.schema.filter(

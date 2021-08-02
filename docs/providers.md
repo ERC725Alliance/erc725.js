@@ -54,7 +54,7 @@ const providerParam = {
 };
 ```
 
-:::note Note
+:::info Note
 Currently the `link` property of the options object for the Apollo client
 is not supported, and known to not function correctly.
 :::

@@ -403,3 +403,27 @@ export function hashData(
 
   return hashFunction.method(data);
 }
+
+/**
+ * Hashes the data received with the specified hashing function,
+ * and compares the result with the provided hash.
+ *
+ * @throws *Error* in case of a mismatch of the hashes.
+ */
+export function hashAndCompare(
+  data,
+  hash: string,
+  lowerCaseHashFunction: SUPPORTED_HASH_FUNCTIONS,
+) {
+  const jsonHash = hashData(data, lowerCaseHashFunction);
+
+  // throw error if hash mismatch
+  if (jsonHash !== hash) {
+    throw new Error(`
+              Hash mismatch, returned JSON ("${jsonHash}") is different than the one
+              linked from the ERC725Y smart-contract: "${hash}"
+          `);
+  }
+
+  return true;
+}
