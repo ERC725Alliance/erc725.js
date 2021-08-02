@@ -5,20 +5,20 @@ export interface KeyValuePair {
   value: any;
 }
 
-interface JSONURLData {
+interface URLData {
   url: string;
 }
 
-export interface JSONURLDataWithHash extends JSONURLData {
+export interface URLDataWithHash extends URLData {
   hash: string;
   hashFunction: SUPPORTED_HASH_FUNCTIONS;
   json?: never;
 }
 
-export interface JSONURLDataWithJson extends JSONURLData {
+export interface URLDataWithJson extends URLData {
   hash?: never;
   hashFunction?: never;
   json: unknown;
 }
 
-export type JSONURLDataToEncode = JSONURLDataWithHash | JSONURLDataWithJson;
+export type JSONURLDataToEncode = URLDataWithHash | URLDataWithJson;

@@ -46,7 +46,7 @@ import {
   SUPPORTED_HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './lib/constants';
-import { JSONURLDataWithHash, KeyValuePair } from './types';
+import { URLDataWithHash, KeyValuePair } from './types';
 
 enum ProviderType {
   GRAPH = 'graph',
@@ -276,7 +276,7 @@ export class ERC725<Schema extends GenericSchema> {
   }
 
   private getDataFromExternalSources(dataFromChain: { [key: string]: any }): {
-    [key: string]: JSONURLDataWithHash;
+    [key: string]: URLDataWithHash;
   } {
     return Object.entries(dataFromChain)
       .filter(([key]) => {
@@ -665,7 +665,7 @@ export class ERC725<Schema extends GenericSchema> {
     return decodeData(tmpData, this.options.schema);
   }
 
-  private patchIPFSUrlsIfApplicable(receivedData: any) {
+  private patchIPFSUrlsIfApplicable(receivedData: URLDataWithHash) {
     if (
       receivedData &&
       receivedData.url &&
