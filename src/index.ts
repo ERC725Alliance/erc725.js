@@ -30,7 +30,6 @@ import {
   decodeData,
   decodeKeyValue,
   decodeKey,
-  hashData,
   hashAndCompare,
 } from './lib/utils';
 
@@ -43,10 +42,7 @@ import {
 } from './types/ERC725JSONSchema';
 
 import { ERC725Config } from './types/Config';
-import {
-  SUPPORTED_HASH_FUNCTIONS,
-  SUPPORTED_HASH_FUNCTION_STRINGS,
-} from './lib/constants';
+import { SUPPORTED_HASH_FUNCTION_STRINGS } from './lib/constants';
 import { URLDataWithHash, KeyValuePair } from './types';
 
 enum ProviderType {
