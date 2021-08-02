@@ -62,6 +62,9 @@ export {
  * :::warning
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
  * :::
+ *
+ * @typeParam Schema **Work in progress, nothing to see here**.
+ *
  */
 export class ERC725<Schema extends GenericSchema> {
   options: {
@@ -246,7 +249,7 @@ export class ERC725<Schema extends GenericSchema> {
    * stored as [`JSONURL`](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl), or [`ASSETURL`](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#asseturl).
    *
    * :::info
-   * To guarantee **data authenticity** `fetchData` compares the `hash` of the fetched JSON with the `hash` stored on the blockchain.
+   * To ensure **data authenticity** `fetchData` compares the `hash` of the fetched JSON with the `hash` stored on the blockchain.
    * :::
    *
    * @param {string} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
@@ -386,7 +389,7 @@ export class ERC725<Schema extends GenericSchema> {
    * ```
    * :::tip
    * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
-   * The JSON will be hashed with keccak256.
+   * The JSON will be hashed with `keccak256`.
    * :::
    */
   encodeData(data: { [key: string]: any }): { [key: string]: any };
@@ -644,7 +647,13 @@ export class ERC725<Schema extends GenericSchema> {
     return decodeData(tmpData, this.options.schema);
   }
 
-  private patchIPFSUrlsIfApplicable(receivedData: URLDataWithHash) {
+  /**
+   * Changes the protocol from `ipfs://` to `http(s)://` and adds the selected IPFS gateway.
+   * `ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D => https://ipfs.lukso.network/ipfs/QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D`
+   */
+  private patchIPFSUrlsIfApplicable(
+    receivedData: URLDataWithHash,
+  ): URLDataWithHash {
     if (
       receivedData &&
       receivedData.url &&

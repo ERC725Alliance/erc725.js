@@ -180,9 +180,25 @@ const encodedDataJson = myERC725.encodeData({
 }
 */
 
-console.info('// encodeData(...) with one key');
-console.log(encodedDataOne);
-console.info('// encodeData(...) with many keys');
-console.log(encodedDataMany);
-console.info('// encodeData(...) hashing JSON directly');
-console.log(encodedDataJson);
+// console.info('// encodeData(...) with one key');
+// console.log(encodedDataOne);
+// console.info('// encodeData(...) with many keys');
+// console.log(encodedDataMany);
+// console.info('// encodeData(...) hashing JSON directly');
+// console.log(encodedDataJson);
+
+const data = Object.entries(encodedDataMany).flatMap(([, value]) => {
+  if (Array.isArray(value.value)) {
+    return value.value;
+  }
+
+  return {
+    key: value.key,
+    value: value.value,
+  };
+
+  // return myContract.methods.setData(key, value).send();
+});
+
+console.log(data);
+// await Promise.all(setDataPromises);
