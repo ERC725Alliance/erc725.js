@@ -42,7 +42,11 @@ import {
 } from './types/ERC725JSONSchema';
 
 import { ERC725Config } from './types/Config';
-import { SUPPORTED_HASH_FUNCTIONS } from './lib/constants';
+import {
+  SUPPORTED_HASH_FUNCTIONS,
+  SUPPORTED_HASH_FUNCTION_STRINGS,
+} from './lib/constants';
+import { JSONURLDataWithHash, KeyValuePair } from './types';
 
 enum ProviderType {
   GRAPH = 'graph',
@@ -58,9 +62,9 @@ export {
 };
 
 /**
- * ⚠️⚠️⚠️<br/>
+ * :::warning
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
- * ⚠️⚠️⚠️<br/>
+ * :::
  */
 export class ERC725<Schema extends GenericSchema> {
   options: {
@@ -257,49 +261,64 @@ export class ERC725<Schema extends GenericSchema> {
    * https://stackblitz.com/edit/erc725js-fetch-data?devtoolsheight=66&file=index.js
    * :::
    */
-  async fetchData(key: string) {
-    const keySchema = getSchemaElement(this.options.schema, key);
+  async fetchData(
+    keyOrKeys: string | string[],
+  ): Promise<{ [key: string]: KeyValuePair }> {
+    const dataFromChain = await this.getData(keyOrKeys);
+    const dataFromExternalSources = await this.getDataFromExternalSources(
+      dataFromChain,
+    );
 
-    const data = await this.getData(key);
-    const result = data[key];
+    return {
+      ...dataFromChain,
+      ...dataFromExternalSources,
+    };
+  }
 
-    if (!result) return null;
-
-    // change ipfs urls
-    if (result && result.url && result.url.indexOf('ipfs://') !== -1) {
-      result.url = result.url.replace(
-        'ipfs://',
-        this.options.config.ipfsGateway,
-      );
-    }
-
-    switch (keySchema.valueContent.toLowerCase()) {
-      case 'jsonurl':
-      case 'asseturl': {
-        const lowerCaseHashFunction = result.hashFunction.toLowerCase();
-
-        let response;
+  private getDataFromExternalSources(dataFromChain: { [key: string]: any }): {
+    [key: string]: JSONURLDataWithHash;
+  } {
+    return Object.entries(dataFromChain)
+      .filter(([key]) => {
+        const keySchema = getSchemaElement(this.options.schema, key);
+        return ['jsonurl', 'asseturl'].includes(
+          keySchema.valueContent.toLowerCase(),
+        );
+      })
+      .reduce(async (accumulator: any, [key, dataEntry]) => {
+        let receivedData;
         try {
-          response = await fetch(result.url).then((a) => {
-            if (lowerCaseHashFunction === 'keccak256(bytes)') {
-              return a.arrayBuffer().then((buffer) => new Uint8Array(buffer));
+          const { url } = this.patchIPFSUrlsIfApplicable(dataEntry);
+          receivedData = await fetch(url).then(async (response) => {
+            if (
+              dataEntry.hashFunction ===
+              SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_BYTES
+            ) {
+              return response
+                .arrayBuffer()
+                .then((buffer) => new Uint8Array(buffer));
             }
 
-            return a.json();
+            return response.json();
           });
         } catch (error) {
-          console.error(error, `GET request to ${result.url} failed`);
+          console.error(error, `GET request to ${dataEntry.url} failed`);
           throw error;
         }
 
-        return response &&
-          this.hashAndCompare(response, result.hash, lowerCaseHashFunction)
-          ? response
-          : null;
-      }
-      default:
-        return result;
-    }
+        const isDataAuthentic = this.hashAndCompare(
+          receivedData,
+          dataEntry.hash,
+          dataEntry.hashFunction,
+        );
+
+        if (!isDataAuthentic) {
+          accumulator[key] = null;
+        }
+
+        accumulator[key] = receivedData;
+        return accumulator;
+      }, {});
   }
 
   /**
@@ -468,9 +487,9 @@ export class ERC725<Schema extends GenericSchema> {
    * @param {string} [address]
    * @returns The address of the contract owner as stored in the contract.
    *
-   * ⚠️⚠️⚠️<br/>
-   *    This method is not yet supported when using the `graph` provider type.<br/>
-   * ⚠️⚠️⚠️<br/>
+   * :::warning
+   *    This method is not yet supported when using the `graph` provider type.
+   * :::
    *
    * ```javascript title="Example"
    * await myERC725.getOwner();
@@ -644,6 +663,24 @@ export class ERC725<Schema extends GenericSchema> {
     }
 
     return decodeData(tmpData, this.options.schema);
+  }
+
+  private patchIPFSUrlsIfApplicable(receivedData: any) {
+    if (
+      receivedData &&
+      receivedData.url &&
+      receivedData.url.indexOf('ipfs://') !== -1
+    ) {
+      return {
+        ...receivedData,
+        url: receivedData.url.replace(
+          'ipfs://',
+          this.options.config.ipfsGateway,
+        ),
+      };
+    }
+
+    return receivedData;
   }
 }
 

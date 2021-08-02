@@ -144,8 +144,8 @@ describe('Running erc725.js tests...', () => {
         address,
         provider,
       );
-      const result = await erc725.fetchData('TestJSONURL');
-      assert.deepStrictEqual(result, {
+      const result: any = await erc725.fetchData('TestJSONURL');
+      assert.deepStrictEqual(result.TestJSONURL, {
         LSP3Profile: {
           backgroundImage:
             'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
@@ -184,8 +184,8 @@ describe('Running erc725.js tests...', () => {
           ipfsGateway: 'https://ipfs.lukso.network/ipfs/',
         },
       );
-      const result = await erc725.fetchData('TestJSONURL');
-      assert.deepStrictEqual(result, {
+      const result: any = await erc725.fetchData('TestJSONURL');
+      assert.deepStrictEqual(result.TestJSONURL, {
         LSP3Profile: {
           backgroundImage:
             'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
@@ -228,9 +228,9 @@ describe('Running erc725.js tests...', () => {
         address,
         provider,
       );
-      const result = await erc725.fetchData('TestAssetURL');
+      const result: any = await erc725.fetchData('TestAssetURL');
       assert.strictEqual(
-        Object.prototype.toString.call(result),
+        Object.prototype.toString.call(result.TestAssetURL),
         '[object Uint8Array]',
       );
     });
