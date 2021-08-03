@@ -4,7 +4,7 @@ sidebar_position: 1.4
 
 # Writing Data
 
-This package is not capable of writing data to the blockchain, or relaying data do the blockchain. However it’s utility methods can be used to prepare data for writing to the blockchain. This will provide information that may provide guidance for doing so outside of this package.
+This package is not capable of writing data to the blockchain, or relaying data to the blockchain. However it’s utility methods can be used to prepare data for writing to the blockchain. This will provide information that may provide guidance for doing so outside of this package.
 
 ## Example
 
