@@ -1,14 +1,30 @@
-# erc725.js
+<p align="center">
+ <h2 align="center"><strong>erc725.js</strong></h2>
+ <p align="center">Allows for interfacing with <a href="https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md">ERC725Y</a> compliant contracts on an EVM blockchain.</p>
+</p>
 
-Allows for interfacing with ERC725Y compliant contracts on an EVM blockchain using the [ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md) standard.
+<p align="center">
+<a href="https://github.com/ERC725Alliance/erc725.js/actions">
+    <img alt="Version" src="https://badge.fury.io/js/erc725.js.svg" />
+  </a>
+  
+  <a href="https://github.com/ERC725Alliance/erc725.js/actions">
+    <img alt="Tests Passing" src="https://github.com/ERC725Alliance/erc725.js/actions/workflows/node.js.yml/badge.svg" />
+  </a>
+  <a href="https://codecov.io/gh/ERC725Alliance/erc725.js">
+    <img src="https://codecov.io/gh/ERC725Alliance/erc725.js/branch/main/graph/badge.svg" />
+  </a>
+  <a href="https://github.com/ERC725Alliance/erc725.js/issues">
+    <img alt="Issues" src="https://img.shields.io/github/issues/ERC725Alliance/erc725.js?color=0088ff" />
+  </a>
+  <a href="https://github.com/ERC725Alliance/erc725.js/pulls">
+    <img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/ERC725Alliance/erc725.js?color=0088ff" />
+  </a>
+</p>
+<p align="center">For more information see <a href="https://docs.lukso.tech/tools/erc725js/getting-started">Documentation</a>.</p>
 
-![NPM Version](https://badge.fury.io/js/erc725.js.svg)
-
-For more information see [Documentation](https://docs.lukso.tech/tools/erc725js/getting-started).
-
-⚠️⚠️⚠️<br/>
-_This package is currently in early stages of development, use only for testing or experimentation purposes_
-⚠️⚠️⚠️<br/>
+:warning: | _This package is currently in early stages of development.<br/> Use for testing or experimentation purposes only_
+:---: | :---
 
 ## Installation
 
