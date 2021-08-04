@@ -88,29 +88,33 @@ await erc725.getOwner();
 // > '0x28D25E70819140daF65b724158D00c373D1a18ee'
 
 await erc725.getData('SupportedStandards:ERC725Account');
-// > '0xafdeb5d6'
+/* > {
+  'SupportedStandards:ERC725Account': '0xafdeb5d6'
+}
+*/
 
 await erc725.getData('LSP3Profile');
-/* >
-{
-    url: 'ipfs://QmXybv2LdJWscy1C6yRKUjvnaj6aqKktZX4g4xmz2nyYj2',
-    hash: '0xb4f9d72e83bbe7e250ed9ec80332c493b7b3d73e0d72f7b2c7ab01c39216eb1a',
-    hashFunction: 'keccak256(utf8)'
+/* > {
+  LSP3Profile: {
+    hashFunction: 'keccak256(utf8)',
+    hash: '0xd96ff7776660095f661d16010c4349aa7478a9129ce0670f771596a6ff2d864a',
+    url: 'ipfs://QmbTmcbp8ZW23vkQrqkasMFqNg2z1iP4e3BCUMz9PKDsSV'
+  }
 }
 */
 
 await erc725.fetchData('LSP3Profile'); // downloads and verifies the linked JSON
-/* > 
-{
+/* > {
+  LSP3Profile: {
     LSP3Profile: {
-        name: 'frozeman',
-        description: 'The inventor of ERC725 and ERC20...',
-        links: [
-            { title: 'Twitter', url: 'https://twitter.com/feindura' },
-            { title: 'lukso.network', url: 'https://lukso.network' }
-        ],
-        ...
+      name: 'patrick-mcdowell',
+      links: [Array],
+      description: "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
+      profileImage: [Array],
+      backgroundImage: [Array],
+      tags: [Array]
     }
+  }
 }
 */
 ```
