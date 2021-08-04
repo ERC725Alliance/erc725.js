@@ -8,7 +8,7 @@
 
 #### Defined in
 
-[types/encodeData/JSONURL.ts:4](https://github.com/ERC725Alliance/erc725.js/blob/00ce808/src/types/encodeData/JSONURL.ts#L4)
+[types/encodeData/JSONURL.ts:4](https://github.com/ERC725Alliance/erc725.js/blob/50c1814/src/types/encodeData/JSONURL.ts#L4)
 
 ___
 
@@ -18,4 +18,4 @@ ___
 
 #### Defined in
 
-[types/encodeData/JSONURL.ts:5](https://github.com/ERC725Alliance/erc725.js/blob/00ce808/src/types/encodeData/JSONURL.ts#L5)
+[types/encodeData/JSONURL.ts:5](https://github.com/ERC725Alliance/erc725.js/blob/50c1814/src/types/encodeData/JSONURL.ts#L5)

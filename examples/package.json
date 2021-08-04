@@ -3,7 +3,11 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "postinstall": "cd .. && npm link && cd ./examples && npm link erc725.js"
+    "postinstall": "cd .. && npm link && cd ./examples && npm link erc725.js",
+    "fetchData": "node src/fetchData.js",
+    "getData": "node src/getData.js",
+    "encodeData": "node src/encodeData.js",
+    "decodeData": "node src/decodeData.js"
   },
   "dependencies": {
     "erc725.js": "0.5.7",

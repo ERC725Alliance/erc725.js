@@ -24,7 +24,7 @@ Renames and exports: [ERC725](classes/ERC725.md)
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:3](https://github.com/ERC725Alliance/erc725.js/blob/00ce808/src/types/ERC725JSONSchema.ts#L3)
+[types/ERC725JSONSchema.ts:3](https://github.com/ERC725Alliance/erc725.js/blob/50c1814/src/types/ERC725JSONSchema.ts#L3)
 
 ___
 
@@ -34,7 +34,7 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:5](https://github.com/ERC725Alliance/erc725.js/blob/00ce808/src/types/ERC725JSONSchema.ts#L5)
+[types/ERC725JSONSchema.ts:5](https://github.com/ERC725Alliance/erc725.js/blob/50c1814/src/types/ERC725JSONSchema.ts#L5)
 
 ___
 
@@ -44,4 +44,4 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:15](https://github.com/ERC725Alliance/erc725.js/blob/00ce808/src/types/ERC725JSONSchema.ts#L15)
+[types/ERC725JSONSchema.ts:15](https://github.com/ERC725Alliance/erc725.js/blob/50c1814/src/types/ERC725JSONSchema.ts#L15)
