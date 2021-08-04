@@ -78,27 +78,8 @@ export class ERC725<Schema extends GenericSchema> {
   /**
    * Creates an instance of ERC725.
    *
-   * ```js title="Example"
-   * import { ERC725 } from 'erc725.js';
-   * import Web3 from 'web3';
-   *
-   * const schema = [
-   *     {
-   *         name: "LSP3Profile",
-   *         key: "0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5",
-   *         keyType: "Singleton",
-   *         valueContent: "JSONURL",
-   *         valueType: "bytes",
-   *     },
-   * ];
-   *
-   * const address = "0x0c03fba782b07bcf810deb3b7f0595024a444f4e";
-   * const provider = new Web3.providers.HttpProvider("https://rpc.l14.lukso.network");
-   * const config = {
-   *    ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
-   * }
-   *
-   * const myERC725 = new ERC725(schema, address, provider, config);
+   * ```js reference title="Instantiation"
+   * https://github.com/ERC725Alliance/erc725.js/blob/feature/simplify-api/examples/decodeData/index.js#L1-L45
    * ```
    *
    * @param {ERC725JSONSchema[]} schema More information available here: [LSP-2-ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md)
@@ -639,8 +620,6 @@ export class ERC725<Schema extends GenericSchema> {
       if (arrayValues && arrayValues.length > 0) {
         arrayValues.push(dat[keySchema.key]); // add the raw data array length
         tmpData[keySchema.key] = arrayValues;
-      } else {
-        tmpData[keySchema.key] = {}; // return empty object if there are no arrayValues
       }
     }
 
