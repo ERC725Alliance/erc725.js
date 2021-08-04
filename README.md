@@ -119,13 +119,13 @@ await erc725.fetchData('LSP3Profile'); // downloads and verifies the linked JSON
 */
 ```
 
-## Bundling for typescript
+## Building
 
 ```shell script
 $ npm run build
 ```
 
-This will build the library into `/lib`
+This will build the library into `/build`
 
 ## Testing
 
@@ -136,7 +136,7 @@ $ npm test
 ## Publishing
 
 ```shell script
-$ npm run build-publish
+$ npm run publish
 ```
 
 Will build and then publish the package to npm.
