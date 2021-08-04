@@ -105,8 +105,8 @@ await erc725.getData('LSP3Profile');
 
 await erc725.fetchData('LSP3Profile'); // downloads and verifies the linked JSON
 /* > {
-  LSP3Profile: {
-    LSP3Profile: {
+  LSP3Profile: { // key of the schema
+    LSP3Profile: { // content of the JSON structure as per https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
       name: 'patrick-mcdowell',
       links: [Array],
       description: "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
