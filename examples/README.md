@@ -4,13 +4,13 @@
 ```
 npm run fetchData
 ```
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/layout-component)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/edit/erc725js-fetch-data?devtoolsheight=66&file=index.js)
 
 ## getData
 ```
 npm run getData
 ```
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/layout-component)
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/edit/erc725js-get-data?devtoolsheight=66&file=package.json)
 
 ## encodeData
 ```
