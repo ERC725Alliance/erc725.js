@@ -23,10 +23,10 @@
 </p>
 <p align="center">For more information see <a href="https://docs.lukso.tech/tools/erc725js/getting-started">Documentation</a>.</p>
 
-:warning: | _This package is currently in early stages of development,<br/> use for testing or experimentation purposes only._
-:---: | :---
-
 ## Installation
+
+| :warning: | _This package is currently in early stages of development,<br/> use for testing or experimentation purposes only._ |
+| :-------: | :----------------------------------------------------------------------------------------------------------------- |
 
 ```shell script
 $ npm install erc725.js
