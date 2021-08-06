@@ -11,7 +11,8 @@
     "build:module": "tsc -p tsconfig.module.json",
     "test": "npm run lint && env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=text --reporter=lcov mocha",
     "lint": "eslint . --ext .ts",
-    "build-publish": "rm -rf build && npm run build && standard-version"
+    "build-publish": "rm -rf build && npm run build && npm test && standard-version",
+    "docs:generate": "npx typedoc"
   },
   "repository": {
     "type": "git",
@@ -47,8 +48,10 @@
     "@typescript-eslint/eslint-plugin": "^4.26.1",
     "@typescript-eslint/parser": "^4.26.1",
     "assert": "^2.0.0",
+    "gh-pages": "3.2.3",
     "eslint": "^7.28.0",
     "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.23.4",
     "isomorphic-fetch": "^3.0.0",
     "mocha": "^9.0.0",
@@ -56,6 +59,7 @@
     "nyc": "^15.1.0",
     "standard-version": "^9.3.1",
     "ts-node": "^10.0.0",
+    "typedoc": "^0.21.4",
     "typescript": "^4.3.2"
   },
   "dependencies": {

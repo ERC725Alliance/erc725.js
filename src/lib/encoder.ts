@@ -21,294 +21,290 @@
   this handles encoding and decoding as per necessary for the erc725 schema specifications
 */
 
-import Web3Abi from 'web3-eth-abi'
+import Web3Abi from 'web3-eth-abi';
 import {
-    hexToNumber, hexToUtf8, isAddress, numberToHex, padLeft, toChecksumAddress, utf8ToHex
-} from 'web3-utils'
+  hexToNumber,
+  hexToUtf8,
+  isAddress,
+  keccak256,
+  numberToHex,
+  padLeft,
+  toChecksumAddress,
+  utf8ToHex,
+} from 'web3-utils';
 
-import { CONSTANTS } from './constants'
+import {
+  SUPPORTED_HASH_FUNCTIONS,
+  SUPPORTED_HASH_FUNCTION_STRINGS,
+} from './constants';
+import { getHashFunction, hashData } from './utils';
+
+interface JSONURLData {
+  url: string;
+}
+
+interface JSONURLDataWithHash extends JSONURLData {
+  hash: string;
+  hashFunction: SUPPORTED_HASH_FUNCTIONS;
+  json?: never;
+}
+
+interface JSONURLDataWithJson extends JSONURLData {
+  hash?: never;
+  hashFunction?: never;
+  json: unknown;
+}
+
+type JSONURLDataToEncode = JSONURLDataWithHash | JSONURLDataWithJson;
 
 const encodeDataSourceWithHash = (
-    hashType: string,
-    dataHash: string,
-    dataSource: string
+  hashType: SUPPORTED_HASH_FUNCTIONS,
+  dataHash: string,
+  dataSource: string,
 ): string => {
+  const hashFunction = getHashFunction(hashType);
 
-    const lowerHashType = hashType.toLowerCase()
-    const hashFunction = CONSTANTS.hashFunctions.find(
-        e => e.name === lowerHashType || e.sig === lowerHashType
-    )
-
-    if (!hashFunction) {
-
-        throw new Error(
-            'Unsupported hash type to encode hash and value: ' + hashType
-        )
-
-    }
-
-    // NOTE: QUESTION: Do we need 'toHex', in case future algorithms do not output hex as keccak does?
-    return (
-        hashFunction.sig
-        + dataHash.replace('0x', '')
-        + utf8ToHex(dataSource).replace('0x', '')
-    )
-
-}
+  return (
+    keccak256(hashFunction.name).substr(0, 10) +
+    dataHash.substr(2) +
+    utf8ToHex(dataSource).substr(2)
+  );
+};
 
 const decodeDataSourceWithHash = (
-    value: string
+  value: string,
 ): { hashFunction: string; dataHash: string; dataSource: string } | null => {
+  const hashFunctionSig = value.substr(0, 10);
+  const hashFunction = getHashFunction(hashFunctionSig);
 
-    const hashFunctionSig = value.substr(0, 10)
-    const hashFunction = CONSTANTS.hashFunctions.find(
-        e => e.sig === hashFunctionSig
-    )
-    const encoodedData = value.replace('0x', '').substr(8) // Rest of data string after function hash
-    const dataHash = '0x' + encoodedData.substr(0, 64) // Get jsonHash 32 bytes
-    const dataSource = hexToUtf8('0x' + encoodedData.substr(64)) // Get remainder as URI
-    return hashFunction
-        ? { hashFunction: hashFunction.name, dataHash, dataSource }
-        : null
+  const encodedData = value.replace('0x', '').substr(8); // Rest of data string after function hash
+  const dataHash = '0x' + encodedData.substr(0, 64); // Get jsonHash 32 bytes
+  const dataSource = hexToUtf8('0x' + encodedData.substr(64)); // Get remainder as URI
 
-}
+  return { hashFunction: hashFunction.name, dataHash, dataSource };
+};
 
 const valueTypeEncodingMap = {
-    string: {
-        // @ts-ignore
-        encode: value => Web3Abi.encodeParameter('string', value),
-        // @ts-ignore
-        decode: value => Web3Abi.decodeParameter('string', value)
-    },
-    address: {
-        // @ts-ignore
-        encode: value => Web3Abi.encodeParameter('address', value),
-        // @ts-ignore
-        decode: value => Web3Abi.decodeParameter('address', value)
-    },
-    // NOTE: We could add conditional handling of numeric values here...
-    uint256: {
-        // @ts-ignore
-        encode: value => Web3Abi.encodeParameter('uint256', value),
-        // @ts-ignore
-        decode: value => Web3Abi.decodeParameter('uint256', value)
-    },
-    bytes32: {
-        // @ts-ignore
-        encode: value => Web3Abi.encodeParameter('bytes32', value),
-        // @ts-ignore
-        decode: value => Web3Abi.decodeParameter('bytes32', value)
-    },
-    bytes: {
-        // @ts-ignore
-        encode: value => Web3Abi.encodeParameter('bytes', value),
-        // @ts-ignore
-        decode: value => Web3Abi.decodeParameter('bytes', value)
-    },
-    'string[]': {
-        // @ts-ignore
-        encode: value => Web3Abi.encodeParameter('string[]', value),
-        // @ts-ignore
-        decode: value => Web3Abi.decodeParameter('string[]', value)
-    },
-    'address[]': {
-        // @ts-ignore
-        encode: value => Web3Abi.encodeParameter('address[]', value),
-        // @ts-ignore
-        decode: value => Web3Abi.decodeParameter('address[]', value)
-    },
-    'uint256[]': {
-        // @ts-ignore
-        encode: value => Web3Abi.encodeParameter('uint256[]', value),
-        // @ts-ignore
-        decode: value => Web3Abi.decodeParameter('uint256[]', value)
-    },
-    'bytes32[]': {
-        // @ts-ignore
-        encode: value => Web3Abi.encodeParameter('bytes32[]', value),
-        // @ts-ignore
-        decode: value => Web3Abi.decodeParameter('bytes32[]', value)
-    },
-    'bytes[]': {
-        // @ts-ignore
-        encode: value => Web3Abi.encodeParameter('bytes[]', value),
-        // @ts-ignore
-        decode: value => Web3Abi.decodeParameter('bytes[]', value)
-    }
-}
+  string: {
+    // @ts-ignore
+    encode: (value) => Web3Abi.encodeParameter('string', value),
+    // @ts-ignore
+    decode: (value) => Web3Abi.decodeParameter('string', value),
+  },
+  address: {
+    // @ts-ignore
+    encode: (value) => Web3Abi.encodeParameter('address', value),
+    // @ts-ignore
+    decode: (value) => Web3Abi.decodeParameter('address', value),
+  },
+  // NOTE: We could add conditional handling of numeric values here...
+  uint256: {
+    // @ts-ignore
+    encode: (value) => Web3Abi.encodeParameter('uint256', value),
+    // @ts-ignore
+    decode: (value) => Web3Abi.decodeParameter('uint256', value),
+  },
+  bytes32: {
+    // @ts-ignore
+    encode: (value) => Web3Abi.encodeParameter('bytes32', value),
+    // @ts-ignore
+    decode: (value) => Web3Abi.decodeParameter('bytes32', value),
+  },
+  bytes: {
+    // @ts-ignore
+    encode: (value) => Web3Abi.encodeParameter('bytes', value),
+    // @ts-ignore
+    decode: (value) => Web3Abi.decodeParameter('bytes', value),
+  },
+  'string[]': {
+    // @ts-ignore
+    encode: (value) => Web3Abi.encodeParameter('string[]', value),
+    // @ts-ignore
+    decode: (value) => Web3Abi.decodeParameter('string[]', value),
+  },
+  'address[]': {
+    // @ts-ignore
+    encode: (value) => Web3Abi.encodeParameter('address[]', value),
+    // @ts-ignore
+    decode: (value) => Web3Abi.decodeParameter('address[]', value),
+  },
+  'uint256[]': {
+    // @ts-ignore
+    encode: (value) => Web3Abi.encodeParameter('uint256[]', value),
+    // @ts-ignore
+    decode: (value) => Web3Abi.decodeParameter('uint256[]', value),
+  },
+  'bytes32[]': {
+    // @ts-ignore
+    encode: (value) => Web3Abi.encodeParameter('bytes32[]', value),
+    // @ts-ignore
+    decode: (value) => Web3Abi.decodeParameter('bytes32[]', value),
+  },
+  'bytes[]': {
+    // @ts-ignore
+    encode: (value) => Web3Abi.encodeParameter('bytes[]', value),
+    // @ts-ignore
+    decode: (value) => Web3Abi.decodeParameter('bytes[]', value),
+  },
+};
 
 // Use enum for type bellow
-// Is it this enum Erc725SchemaValueType? (If so, custom is missing fron enum)
+// Is it this enum Erc725SchemaValueType? (If so, custom is missing from enum)
 export const valueContentEncodingMap = {
-    Keccak256: {
-        type: 'bytes32',
-        encode: value => value,
-        decode: value => value
+  Keccak256: {
+    type: 'bytes32',
+    encode: (value) => value,
+    decode: (value) => value,
+  },
+  // NOTE: Deprecated. For reference/testing in future
+  ArrayLength: {
+    type: 'uint256',
+    encode: (value) => padLeft(numberToHex(value), 64),
+    decode: (value) => hexToNumber(value),
+  },
+  Number: {
+    type: 'uint256',
+    // NOTE; extra logic is to handle and always return a string number
+    encode: (value) => {
+      // eslint-disable-next-line no-param-reassign
+      try {
+        // eslint-disable-next-line no-param-reassign
+        value = parseInt(value, 10);
+      } catch (error) {
+        throw new Error(error);
+      }
+
+      return padLeft(numberToHex(value), 64);
     },
-    // NOTE: Deprecated. For reference/testing in future
-    ArrayLength: {
-        type: 'uint256',
-        encode: value => padLeft(numberToHex(value), 64),
-        decode: value => hexToNumber(value)
+    decode: (value) => '' + hexToNumber(value),
+  },
+  // NOTE: This is not symmetrical, and always returns a checksummed address
+  Address: {
+    type: 'address',
+    encode: (value) => {
+      if (isAddress(value)) {
+        return value.toLowerCase();
+      }
+
+      throw new Error('Address: "' + value + '" is an invalid address.');
     },
-    Number: {
-        type: 'uint256',
-        // NOTE; extra logic is to handle and always return a string number
-        encode: value => {
-
-            // eslint-disable-next-line no-param-reassign
-            try {
-
-                // eslint-disable-next-line no-param-reassign
-                value = parseInt(value, 10)
-
-            } catch (error) {
-
-                throw new Error(error)
-
-            }
-
-            return padLeft(numberToHex(value), 64)
-
-        },
-        decode: value => '' + hexToNumber(value)
+    decode: (value) => toChecksumAddress(value),
+  },
+  String: {
+    type: 'string',
+    encode: (value) => utf8ToHex(value),
+    decode: (value) => hexToUtf8(value),
+  },
+  Markdown: {
+    type: 'string',
+    encode: (value) => utf8ToHex(value),
+    decode: (value) => hexToUtf8(value),
+  },
+  URL: {
+    type: 'string',
+    encode: (value) => utf8ToHex(value),
+    decode: (value) => hexToUtf8(value),
+  },
+  AssetURL: {
+    type: 'custom',
+    encode: (value) =>
+      encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
+    decode: (value) => {
+      const result = decodeDataSourceWithHash(value);
+      return result
+        ? {
+            hashFunction: result.hashFunction,
+            hash: result.dataHash,
+            url: result.dataSource,
+          }
+        : null;
     },
-    // NOTE: This is not symmetrical, and always returns a checksummed address
-    Address: {
-        type: 'address',
-        encode: value => {
+  },
+  JSONURL: {
+    type: 'custom',
+    // eslint-disable-next-line arrow-body-style
+    encode: (value: JSONURLDataToEncode) => {
+      const { hash, json, hashFunction, url } = value;
 
-            if (isAddress(value)) {
+      let hashedJson = hash;
 
-                return value.toLowerCase()
-
-            }
-
-            throw new Error('Address: "' + value + '" is an invalid address.')
-
-        },
-        decode: value => toChecksumAddress(value)
-    },
-    String: {
-        type: 'string',
-        encode: value => utf8ToHex(value),
-        decode: value => hexToUtf8(value)
-    },
-    Markdown: {
-        type: 'string',
-        encode: value => utf8ToHex(value),
-        decode: value => hexToUtf8(value)
-    },
-    URL: {
-        type: 'string',
-        encode: value => utf8ToHex(value),
-        decode: value => hexToUtf8(value)
-    },
-    AssetURL: {
-        type: 'custom',
-        encode: value => encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
-        decode: value => {
-
-            const result = decodeDataSourceWithHash(value)
-            return result
-                ? {
-                    hashFunction: result.hashFunction,
-                    hash: result.dataHash,
-                    url: result.dataSource
-                }
-                : null
-
+      if (json) {
+        if (hashFunction) {
+          throw new Error(
+            'When passing in the `json` property, we use "keccak256(utf8)" as a hashingFunction at all times',
+          );
         }
+        hashedJson = hashData(
+          json,
+          SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+        );
+      }
+
+      if (!hashedJson) {
+        throw new Error(
+          'You have to provide either the hash or the json via the respective properties',
+        );
+      }
+
+      return encodeDataSourceWithHash(
+        hashFunction || SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+        hashedJson,
+        url,
+      );
     },
-    JSONURL: {
-        type: 'custom',
-        // eslint-disable-next-line arrow-body-style
-        encode: value => {
-
-            // TODO: do json hashing here
-            // const hashFunction = CONSTANTS.hashFunctions.find(e => e.sig = value.hashFunction)
-            // need the json
-            // if (value.json) {
-
-            //     const hash = hashFunction(JSON.stringify(value.json))
-
-            // }
-            return encodeDataSourceWithHash(
-                value.hashFunction,
-                value.hash,
-                value.url
-            )
-
-        },
-        decode: value => {
-
-            const result = decodeDataSourceWithHash(value)
-            return result
-                ? {
-                    hashFunction: result.hashFunction,
-                    hash: result.dataHash,
-                    url: result.dataSource
-                }
-                : null
-
-        }
-    }
-}
+    decode: (value) => {
+      const result = decodeDataSourceWithHash(value);
+      return result
+        ? {
+            hashFunction: result.hashFunction,
+            hash: result.dataHash,
+            url: result.dataSource,
+          }
+        : null;
+    },
+  },
+};
 
 export function encodeValueType(type: string, value: string): string {
+  if (!valueTypeEncodingMap[type]) {
+    throw new Error('Could not encode valueType: "' + type + '".');
+  }
 
-    if (!valueTypeEncodingMap[type]) {
-
-        throw new Error('Could not encode valueType: "' + type + '".')
-
-    }
-
-    return value ? valueTypeEncodingMap[type].encode(value) : value
-
+  return value ? valueTypeEncodingMap[type].encode(value) : value;
 }
 
 export function decodeValueType(type: string, value: string) {
+  if (!valueTypeEncodingMap[type]) {
+    throw new Error('Could not decode valueType: "' + type + '".');
+  }
 
-    if (!valueTypeEncodingMap[type]) {
+  if (value === '0x') return null;
 
-        throw new Error('Could not decode valueType: "' + type + '".')
-
-    }
-
-    if (value === '0x') return null
-
-    return value ? valueTypeEncodingMap[type].decode(value) : value
-
+  return value ? valueTypeEncodingMap[type].decode(value) : value;
 }
 
-export function encodeValueContent(type: string, value: string): string | false {
+export function encodeValueContent(
+  type: string,
+  value: string,
+): string | false {
+  if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
+    throw new Error('Could not encode valueContent: "' + type + '".');
+  } else if (type.substr(0, 2) === '0x') {
+    return type === value ? value : false;
+  }
 
-    if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
-
-        throw new Error('Could not encode valueContent: "' + type + '".')
-
-    } else if (type.substr(0, 2) === '0x') {
-
-        return type === value ? value : false
-
-    }
-
-    return value ? valueContentEncodingMap[type].encode(value) : '0x'
-
+  return value ? valueContentEncodingMap[type].encode(value) : '0x';
 }
 
-export function decodeValueContent(type: string, value: string): string | false {
+export function decodeValueContent(
+  type: string,
+  value: string,
+): string | false {
+  if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
+    throw new Error('Could not decode valueContent: "' + type + '".');
+  } else if (type.substr(0, 2) === '0x') {
+    return type === value ? value : false;
+  }
 
-    if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
-
-        throw new Error('Could not decode valueContent: "' + type + '".')
-
-    } else if (type.substr(0, 2) === '0x') {
-
-        return type === value ? value : false
-
-    }
-
-    return value ? valueContentEncodingMap[type].decode(value) : value
-
+  return value ? valueContentEncodingMap[type].decode(value) : value;
 }
