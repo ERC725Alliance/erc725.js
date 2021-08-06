@@ -25,6 +25,7 @@ import {
   numberToHex,
   padLeft,
 } from 'web3-utils';
+import { KeyValuePair } from '../types';
 import { ERC725JSONSchema, GenericSchema } from '../types/ERC725JSONSchema';
 import {
   HASH_FUNCTIONS,
@@ -357,7 +358,7 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
 
 /**
  *
- * @param schemas schemas is an array of objects of schema definitions
+ * @param schema schema is an array of objects of schema definitions
  * @param data data is an array of objects of key-value pairs
  * @return: all decoded data as per required by the schema and provided data
  */
@@ -366,7 +367,7 @@ export function decodeData<
   T extends keyof Schema,
 >(
   data: { [K in T]: Schema[T]['decodeData']['inputTypes'] },
-  schema,
+  schema: ERC725JSONSchema[],
 ): { [K in T]: Schema[T]['decodeData']['returnValues'] } {
   return Object.entries(data).reduce((decodedData, [key, value]) => {
     const schemaElement = getSchemaElement(schema, key);
@@ -379,6 +380,37 @@ export function decodeData<
       ) as Schema[T]['decodeData']['returnValues'],
     };
   }, {} as any);
+}
+
+/**
+ * @param schema schema is an array of objects of schema definitions
+ * @param data data is an array of objects of key-value pairs
+ */
+export function encodeData<
+  Schema extends GenericSchema,
+  T extends keyof Schema,
+>(
+  data: { [K in T]: Schema[T]['encodeData']['inputTypes'] },
+  schema: ERC725JSONSchema[],
+): { [K in T]: Schema[T]['encodeData']['returnValues'] } {
+  return Object.entries(data).reduce(
+    (accumulator, [key, value]) => {
+      const schemaElement = getSchemaElement(schema, key);
+
+      accumulator[key] = {
+        value: encodeKey(schemaElement, value),
+        key: schemaElement.key,
+      };
+
+      return accumulator;
+    },
+    {} as {
+      [K in T]: {
+        key: string;
+        value: Schema[T]['encodeData']['returnValues'];
+      };
+    },
+  );
 }
 
 export function getHashFunction(hashFunctionNameOrHash) {
@@ -426,4 +458,35 @@ export function hashAndCompare(
   }
 
   return true;
+}
+
+/**
+ * Transform the object containing the encoded data into an array, for easier handling when writing the data to the blockchain.
+ *
+ * @param {{
+ *   [key: string]: any;
+ * }} encodedData This is essentially the object you receive when calling `encodeData(...)`
+ * @return {*}  KeyValuePair[] An array of key-value objects
+ */
+export function flattenEncodedData(encodedData: {
+  [key: string]: any;
+}): KeyValuePair[] {
+  return (
+    Object.entries(encodedData)
+      .reduce((keyValuePairs: any[], [, encodedDataElement]) => {
+        if (Array.isArray(encodedDataElement.value)) {
+          return keyValuePairs.concat(encodedDataElement.value);
+        }
+        keyValuePairs.push({
+          key: encodedDataElement.key,
+          value: encodedDataElement.value,
+        });
+        return keyValuePairs;
+      }, [])
+      // sort array of objects by keys, to not be dependent on the order of the object's keys
+      .sort((a, b) => {
+        if (a.key < b.key) return -1;
+        return a.key > b.key ? 1 : 0;
+      })
+  );
 }

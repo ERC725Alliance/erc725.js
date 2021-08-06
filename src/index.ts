@@ -26,11 +26,11 @@ import EthereumSource from './providers/ethereumSource';
 import {
   encodeArrayKey,
   getSchemaElement,
-  encodeKey,
   decodeData,
   decodeKeyValue,
   decodeKey,
   hashAndCompare,
+  encodeData,
 } from './lib/utils';
 
 import {
@@ -58,6 +58,8 @@ export {
   ERC725JSONSchemaValueType,
 };
 
+export { ERC725Config, KeyValuePair } from './types';
+export { flattenEncodedData } from './lib/utils';
 /**
  * :::warning
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
@@ -313,24 +315,7 @@ export class ERC725<Schema extends GenericSchema> {
   encodeData<T extends keyof Schema>(
     data: { [K in T]: Schema[T]['encodeData']['inputTypes'] },
   ) {
-    return Object.entries(data).reduce(
-      (accumulator, [key, value]) => {
-        const schemaElement = getSchemaElement(this.options.schema, key);
-
-        accumulator[key] = {
-          value: encodeKey(schemaElement, value),
-          key: schemaElement.key,
-        };
-
-        return accumulator;
-      },
-      {} as {
-        [K in T]: {
-          key: string;
-          value: Schema[T]['encodeData']['returnValues'];
-        };
-      },
-    );
+    return encodeData<Schema, T>(data, this.options.schema);
   }
 
   /**
@@ -537,4 +522,3 @@ export class ERC725<Schema extends GenericSchema> {
 }
 
 export default ERC725;
-export { ERC725Config, KeyValuePair } from './types';
