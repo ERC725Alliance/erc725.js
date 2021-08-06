@@ -26,7 +26,7 @@ function getData(bytes32 key) external view returns(bytes value)
 function setData(bytes32 _key, bytes memory _value) external
 ```
 
-Without surpise, the [Universal Profile contract](https://github.com/lukso-network/universalprofile-smart-contracts/blob/main/contracts/LSP3Account.sol) implements the ERC725Y standard.
+Without surprise, the [Universal Profile contract](https://github.com/lukso-network/universalprofile-smart-contracts/blob/main/contracts/LSP3Account.sol) implements the ERC725Y standard.
 
 Let's take a look at this Universal Profile smart contract: `0x23a86EF830708204646abFE631cA1a60d04c4FbE`.
 
@@ -193,11 +193,13 @@ console.log(profileData);
 ```js title="output"
 {
   LSP3Profile: {
-    name: 'hugo',
-    description: 'Everything tech @ LUKSO 👾',
-    links: [ [Object] ],
-    profileImage: [ [Object], [Object], [Object], [Object], [Object] ],
-    backgroundImage: [ [Object], [Object], [Object], [Object], [Object] ]
+    LSP3Profile: {
+      name: 'hugo',
+      description: 'Everything tech @ LUKSO 👾',
+      links: [ [Object] ],
+      profileImage: [ [Object], [Object], [Object], [Object], [Object] ],
+      backgroundImage: [ [Object], [Object], [Object], [Object], [Object] ]
+    }
   }
 }
 ```
