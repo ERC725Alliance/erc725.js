@@ -1,8 +1,13 @@
 import Web3 from 'web3';
 import { ERC725 } from 'erc725.js';
 
+// this is needed because node does not support `fetch` out of the box
+// isomorphic-fetch is not needed in a browser environment
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'isomorphic-fetch';
+
+const RPC_ENDPOINT = 'https://rpc.l14.lukso.network';
+const IPFS_GATEWAY = 'https://ipfs.lukso.network/ipfs/';
 
 export function getInstance() {
   const schema = [
@@ -39,11 +44,9 @@ export function getInstance() {
   ];
 
   const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
-  const provider = new Web3.providers.HttpProvider(
-    'https://rpc.l14.lukso.network',
-  );
+  const provider = new Web3.providers.HttpProvider(RPC_ENDPOINT);
   const config = {
-    ipfsGateway: 'https://ipfs.lukso.network/ipfs/',
+    ipfsGateway: IPFS_GATEWAY,
   };
 
   return new ERC725(schema, address, provider, config);

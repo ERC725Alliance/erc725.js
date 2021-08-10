@@ -70,7 +70,7 @@ const schema = [
   },
 ];
 
-const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
+const address = '0x3000783905Cc7170cCCe49a4112Deda952DDBe24';
 const provider = new Web3.providers.HttpProvider(
   'https://rpc.l14.lukso.network',
 );
@@ -107,9 +107,9 @@ await erc725.fetchData('LSP3Profile'); // downloads and verifies the linked JSON
 /* > {
   LSP3Profile: { // key of the schema
     LSP3Profile: { // content of the JSON structure as per https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
-      name: 'patrick-mcdowell',
+      name: '...',
       links: [Array],
-      description: "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
+      description: "...",
       profileImage: [Array],
       backgroundImage: [Array],
       tags: [Array]

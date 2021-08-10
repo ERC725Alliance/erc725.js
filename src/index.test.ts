@@ -144,7 +144,7 @@ describe('Running erc725.js tests...', () => {
         address,
         provider,
       );
-      const result: any = await erc725.fetchData('TestJSONURL');
+      const result = await erc725.fetchData('TestJSONURL');
       assert.deepStrictEqual(result.TestJSONURL, {
         LSP3Profile: {
           backgroundImage:
@@ -184,7 +184,7 @@ describe('Running erc725.js tests...', () => {
           ipfsGateway: 'https://ipfs.lukso.network/ipfs/',
         },
       );
-      const result: any = await erc725.fetchData('TestJSONURL');
+      const result = await erc725.fetchData('TestJSONURL');
       assert.deepStrictEqual(result.TestJSONURL, {
         LSP3Profile: {
           backgroundImage:
@@ -228,7 +228,7 @@ describe('Running erc725.js tests...', () => {
         address,
         provider,
       );
-      const result: any = await erc725.fetchData('TestAssetURL');
+      const result = await erc725.fetchData('TestAssetURL');
       assert.strictEqual(
         Object.prototype.toString.call(result.TestAssetURL),
         '[object Uint8Array]',
@@ -355,7 +355,6 @@ describe('Running erc725.js tests...', () => {
             const data = generateAllResults([schemaElement])[
               schemaElement.name
             ];
-            // eslint-disable-next-line max-len
             const intendedResults = allGraphData.filter(
               (e) => e.key.substr(0, 34) === schemaElement.key.substr(0, 34),
             );

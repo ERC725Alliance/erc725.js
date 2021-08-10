@@ -117,7 +117,6 @@ export function encodeKeyValue(
  * @param index An integer representing the intended array index
  * @return The raw bytes key for the array element
  */
-// eslint-disable-next-line arrow-body-style
 export function encodeArrayKey(key: string, index: number) {
   return key.substr(0, 34) + padLeft(numberToHex(index), 32).replace('0x', '');
 }
@@ -444,16 +443,16 @@ export function hashData(
  */
 export function hashAndCompare(
   data,
-  hash: string,
+  expectedHash: string,
   lowerCaseHashFunction: SUPPORTED_HASH_FUNCTIONS,
 ) {
   const jsonHash = hashData(data, lowerCaseHashFunction);
 
   // throw error if hash mismatch
-  if (jsonHash !== hash) {
+  if (jsonHash !== expectedHash) {
     throw new Error(`
               Hash mismatch, returned JSON ("${jsonHash}") is different than the one
-              linked from the ERC725Y smart-contract: "${hash}"
+              linked from the ERC725Y smart-contract: "${expectedHash}"
           `);
   }
 
@@ -461,7 +460,8 @@ export function hashAndCompare(
 }
 
 /**
- * Transform the object containing the encoded data into an array, for easier handling when writing the data to the blockchain.
+ * Transform the object containing the encoded data into an array ordered by keys,
+ * for easier handling when writing the data to the blockchain.
  *
  * @param {{
  *   [key: string]: any;

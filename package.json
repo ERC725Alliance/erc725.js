@@ -14,7 +14,7 @@
     "publish": "rm -rf build && npm run build && npm test && standard-version",
     "docs:generate": "npm run docs:generate:markdown",
     "docs:generate:markdown": "typedoc --options typedoc.json",
-    "docs:generate:html": "npx typedoc --options typedoc.html.json"
+    "docs:generate:html": "typedoc --options typedoc.html.json"
   },
   "repository": {
     "type": "git",

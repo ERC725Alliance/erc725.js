@@ -196,7 +196,6 @@ export const valueContentEncodingMap = {
   },
   JSONURL: {
     type: 'custom',
-    // eslint-disable-next-line arrow-body-style
     encode: (dataToEncode: JSONURLDataToEncode) => {
       const { hash, json, hashFunction, url } = dataToEncode;
 

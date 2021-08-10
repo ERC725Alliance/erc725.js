@@ -79,7 +79,7 @@ export default class EthereumSource {
     const data = methodParam
       ? METHODS[method].sig + methodParam.replace('0x', '')
       : METHODS[method].sig;
-    // eslint-disable-next-line no-return-assign
+
     return {
       to: address,
       gas: METHODS[method].gas,
