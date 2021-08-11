@@ -457,37 +457,44 @@ export class ERC725<Schema extends GenericSchema> {
     });
 
     // Get all the raw data from the provider based on schema key hashes
-    const allRawData = await this.options.provider.getAllData(
+    const allRawData: KeyValuePair[] = await this.options.provider.getAllData(
       this.options.address,
       keyHashes,
     );
 
     if (this.options.providerType === ProviderType.GRAPH) {
       // If the provider type is a graphql client, we assume it can get ALL keys (including array keys)
-      return allRawData.reduce((accumulator, current) => {
-        accumulator[current.key] = current.value;
-        return accumulator;
-      }, {});
+      return allRawData.reduce<{ [key: string]: any }>(
+        (accumulator, current) => {
+          accumulator[current.key] = current.value;
+          return accumulator;
+        },
+        {},
+      );
     }
 
-    const tmpData = allRawData.reduce((accumulator, current) => {
-      accumulator[current.key] = current.value;
-      return accumulator;
-    }, {});
+    const tmpData = allRawData.reduce<{ [key: string]: any }>(
+      (accumulator, current) => {
+        accumulator[current.key] = current.value;
+        return accumulator;
+      },
+      {},
+    );
 
     // Get missing 'Array' fields for all arrays, as necessary
     const arraySchemas = this.options.schema.filter(
       (e) => e.keyType.toLowerCase() === 'array',
     );
-    for (let index = 0; index < arraySchemas.length; index++) {
-      const keySchema = arraySchemas[index];
-      const dat = {
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const keySchema of arraySchemas) {
+      const dataKeyValue = {
         [keySchema.key]: { key: keySchema.key, value: tmpData[keySchema.key] },
       };
-      const arrayValues = await this.getArrayValues(keySchema, dat);
+      const arrayValues = await this.getArrayValues(keySchema, dataKeyValue);
 
       if (arrayValues && arrayValues.length > 0) {
-        arrayValues.push(dat[keySchema.key]); // add the raw data array length
+        arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
         tmpData[keySchema.key] = arrayValues;
       }
     }
