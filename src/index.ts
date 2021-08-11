@@ -81,7 +81,7 @@ export class ERC725<Schema extends GenericSchema> {
    * Creates an instance of ERC725.
    *
    * ```js reference title="Instantiation"
-   * https://github.com/ERC725Alliance/erc725.js/blob/feature/simplify-api/examples/src/instantiation.js#L1-L50
+   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/instantiation.js#L1-L50
    * ```
    *
    * @param {ERC725JSONSchema[]} schema More information available here: [LSP-2-ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md)
@@ -168,15 +168,15 @@ export class ERC725<Schema extends GenericSchema> {
    * @returns An object with schema element key names as properties, with corresponding **decoded** data as values.
    *
    * ```javascript title="getData - all keys from schema"
-   * https://github.com/ERC725Alliance/erc725.js/blob/feature/simplify-api/examples/src/getData.js#L7-L30
+   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/getData.js#L7-L30
    * ```
    *
    * ```javascript reference title="getData - one key  "
-   * https://github.com/ERC725Alliance/erc725.js/blob/feature/simplify-api/examples/src/getData.js#L32-L41
+   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/getData.js#L32-L41
    * ```
    *
    * ```javascript reference title="getData - many keys"
-   * https://github.com/ERC725Alliance/erc725.js/blob/feature/simplify-api/examples/src/getData.js#L43-L56
+   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/getData.js#L43-L56
    * ```
    */
   async getData(keysOrKeys?: string | string[]);
@@ -216,15 +216,15 @@ export class ERC725<Schema extends GenericSchema> {
    * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData
    *
    * ```javascript title="getData - all keys from schema"
-   * https://github.com/ERC725Alliance/erc725.js/blob/feature/simplify-api/examples/src/fetchData.js#L7-L35
+   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/fetchData.js#L7-L35
    * ```
    *
    * ```javascript reference title="getData - one key  "
-   * https://github.com/ERC725Alliance/erc725.js/blob/feature/simplify-api/examples/src/fetchData.js#L37-L51
+   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/fetchData.js#L37-L51
    * ```
    *
    * ```javascript reference title="getData - many keys"
-   * https://github.com/ERC725Alliance/erc725.js/blob/feature/simplify-api/examples/src/fetchData.js#L53-L71
+   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/fetchData.js#L53-L71
    * ```
    */
   async fetchData(
@@ -291,15 +291,15 @@ export class ERC725<Schema extends GenericSchema> {
    * @returns An object with the same keys as the object that was passed in as a parameter containing the encoded data, ready to be stored on the blockchain.
    *
    * ```javascript reference title="Encoding object with one key"
-   * https://github.com/ERC725Alliance/erc725.js/blob/feature/simplify-api/examples/src/encodeData.js#L7-L19
+   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/encodeData.js#L7-L19
    * ```
    *
    * ```javascript reference title="Encoding object with one key"
-   * https://github.com/ERC725Alliance/erc725.js/blob/feature/simplify-api/examples/src/encodeData.js#L22-L37
+   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/encodeData.js#L22-L37
    * ```
    *
    * ```javascript reference title="Encoding object with one key"
-   * https://github.com/ERC725Alliance/erc725.js/blob/feature/simplify-api/examples/src/encodeData.js#L39-L67
+   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/encodeData.js#L39-L67
    * ```
    *
    * ```
@@ -328,11 +328,11 @@ export class ERC725<Schema extends GenericSchema> {
    * @returns Returns decoded data as defined and expected in the schema:
    *
    * ```javascript reference title="Decode one key"
-   * https://github.com/ERC725Alliance/erc725.js/blob/feature/simplify-api/examples/src/decodeData.js#L7-L19
+   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/decodeData.js#L7-L19
    * ```
    *
    * ```javascript reference title="Decode multiple keys"
-   * https://github.com/ERC725Alliance/erc725.js/blob/feature/simplify-api/examples/src/decodeData.js#L21-L49
+   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/decodeData.js#L21-L49
    * ```
    */
   decodeData(data: { [key: string]: any }): { [key: string]: any };
