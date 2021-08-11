@@ -1,8 +1,8 @@
 import assert from 'assert';
-import {} from 'web3-utils';
-// eslint-disable-next-line import/no-extraneous-dependencies
 
 import EthereumSource from './ethereumSource';
+
+const erc725AccountAddress = '0x214be121bB52e6909c5158579b3458f8760f1b2f';
 
 describe('EthereumSource', () => {
   it('#getOwner should return an address', async () => {
@@ -16,10 +16,11 @@ describe('EthereumSource', () => {
     };
     const ethSource = new EthereumSource(provider);
 
-    const owner = await ethSource.getOwner(
-      '0x214be121bB52e6909c5158579b3458f8760f1b2f',
+    const ownerAddress = await ethSource.getOwner(erc725AccountAddress);
+    assert.deepStrictEqual(
+      ownerAddress,
+      '0xA78E0E7C9b1B36F7E25C5CcDfdbA005Ec37eadf4',
     );
-    assert.deepStrictEqual(owner, '0xA78E0E7C9b1B36F7E25C5CcDfdbA005Ec37eadf4');
   });
 
   it('#getOwner should throw when promise was rejected', async () => {
@@ -30,7 +31,7 @@ describe('EthereumSource', () => {
     const ethSource = new EthereumSource(provider);
 
     try {
-      await ethSource.getOwner('0x214be121bB52e6909c5158579b3458f8760f1b2f');
+      await ethSource.getOwner(erc725AccountAddress);
     } catch (error) {
       assert.deepStrictEqual(error.message, 'some error');
     }
