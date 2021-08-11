@@ -59,7 +59,7 @@ export {
 };
 
 export { ERC725Config, KeyValuePair } from './types';
-export { flattenEncodedData } from './lib/utils';
+export { flattenEncodedData, encodeData } from './lib/utils';
 /**
  * :::warning
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
@@ -228,7 +228,7 @@ export class ERC725<Schema extends GenericSchema> {
    * ```
    */
   async fetchData(
-    keyOrKeys: string | string[],
+    keyOrKeys?: string | string[],
   ): Promise<{ [key: string]: KeyValuePair }> {
     const dataFromChain = await this.getData(keyOrKeys);
     const dataFromExternalSources = await this.getDataFromExternalSources(

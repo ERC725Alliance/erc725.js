@@ -2,25 +2,23 @@
 sidebar_position: 1.4
 ---
 
-# Writing Data
+# How to write data to the key-value store of an ERC725Account
 
-This package is not capable of writing data to the blockchain, or relaying data to the blockchain. However it’s utility methods can be used to prepare data for writing to the blockchain. This will provide information that may provide guidance for doing so outside of this package.
+This package is not capable of writing or relaying data to the blockchain. However it’s utility methods can be used to prepare data for writing to the blockchain. This will provide information that may provide guidance for doing so.
 
 ## Example
 
-<details><summary>CLICK ME</summary>
+1. Encode data using `encodeData`
+2. Flatten encoded data using `flattenEncodedData`
+3. Get a reference to the desired contract, you will need the ABI (jsonInterface)
+4. Iterate on flattenedData and call `setData`
+
+<details><summary>Instantiation omitted for brevity, click here to show it</summary>
+<br/>
+
 <p>
 
-#### yes, even hidden code blocks!
-
-```python
-print("hello world!")
-```
-
-</p>
-</details>
-
-```js
+```js title="Instantiation"
 import Web3 from 'web3';
 import { ERC725 } from 'erc725.js';
 
@@ -66,6 +64,13 @@ const config = {
 };
 
 const myERC725 = new ERC725(schema, address, provider, config);
+```
+
+</p>
+</details>
+
+```js
+// 1. Encode data using `encodeData`
 const encodedData = myERC725.encodeData({
   LSP3Profile: {
     hashFunction: 'keccak256(utf8)',
@@ -79,16 +84,39 @@ const encodedData = myERC725.encodeData({
   LSP1UniversalReceiverDelegate: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
 });
 
-// Generate contract instance as per Web3 docs.
-const setDataPromises = Object.entries(encodedData).map(
-  async ([key, value]) => {
-    return myContract.methods.setData(key, value).send();
-  },
+// 2. Flatten encoded data using `flattenEncodedData`
+const dataToSaveOnChain = flattenEncodedData(encodedDataManyKeys);
+
+// 3. Get a reference to the desired contract
+const erc725Contract = new web3.eth.Contract(
+  [
+    // NOTE: We are not loading the full contract ABI, only the function we need
+    {
+      inputs: [
+        {
+          internalType: 'bytes32',
+          name: '_key',
+          type: 'bytes32',
+        },
+        {
+          internalType: 'bytes',
+          name: '_value',
+          type: 'bytes',
+        },
+      ],
+      name: 'setData',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function',
+    },
+  ],
+  ERC725_ADDRESS, // replace this with the desired value
 );
 
-await Promise.all(setDataPromises);
-```
-
-```
-
+// 4. Iterate on flattenedData and call `setData`
+await Promise.all(
+  dataToSaveOnChain.map(async ({ key, value }) => {
+    return erc725Contract.methods.setData(key, value).send();
+  }),
+);
 ```

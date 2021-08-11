@@ -24,7 +24,7 @@ Renames and exports: [ERC725](classes/ERC725.md)
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:3](https://github.com/ERC725Alliance/erc725.js/blob/50c1814/src/types/ERC725JSONSchema.ts#L3)
+[types/ERC725JSONSchema.ts:3](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/types/ERC725JSONSchema.ts#L3)
 
 ___
 
@@ -34,7 +34,7 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:5](https://github.com/ERC725Alliance/erc725.js/blob/50c1814/src/types/ERC725JSONSchema.ts#L5)
+[types/ERC725JSONSchema.ts:5](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/types/ERC725JSONSchema.ts#L5)
 
 ___
 
@@ -44,4 +44,57 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:15](https://github.com/ERC725Alliance/erc725.js/blob/50c1814/src/types/ERC725JSONSchema.ts#L15)
+[types/ERC725JSONSchema.ts:15](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/types/ERC725JSONSchema.ts#L15)
+
+## Functions
+
+### encodeData
+
+▸ **encodeData**<`Schema`, `T`\>(`data`, `schema`): { [K in T]: Schema[T]["encodeData"]["returnValues"]}
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `Schema` | extends `GenericSchema` |
+| `T` | extends `string` \| `number` \| `symbol` |
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `data` | { [K in T]: Schema[T]["encodeData"]["inputTypes"]} | an object of key-value pairs |
+| `schema` | [`ERC725JSONSchema`](interfaces/ERC725JSONSchema.md)[] | an array of schema definitions as per $[ERC725JSONSchema](interfaces/ERC725JSONSchema.md) |
+
+#### Returns
+
+{ [K in T]: Schema[T]["encodeData"]["returnValues"]}
+
+#### Defined in
+
+[lib/utils.ts:388](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/lib/utils.ts#L388)
+
+___
+
+### flattenEncodedData
+
+▸ **flattenEncodedData**(`encodedData`): [`KeyValuePair`](interfaces/KeyValuePair.md)[]
+
+Transform the object containing the encoded data into an array ordered by keys,
+for easier handling when writing the data to the blockchain.
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `encodedData` | `Object` |
+
+#### Returns
+
+[`KeyValuePair`](interfaces/KeyValuePair.md)[]
+
+KeyValuePair[] An array of key-value objects
+
+#### Defined in
+
+[lib/utils.ts:462](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/lib/utils.ts#L462)

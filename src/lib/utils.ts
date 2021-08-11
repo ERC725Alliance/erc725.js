@@ -382,8 +382,8 @@ export function decodeData<
 }
 
 /**
- * @param schema schema is an array of objects of schema definitions
- * @param data data is an array of objects of key-value pairs
+ * @param schema an array of schema definitions as per ${@link ERC725JSONSchema}
+ * @param data an object of key-value pairs
  */
 export function encodeData<
   Schema extends GenericSchema,
@@ -392,24 +392,16 @@ export function encodeData<
   data: { [K in T]: Schema[T]['encodeData']['inputTypes'] },
   schema: ERC725JSONSchema[],
 ): { [K in T]: Schema[T]['encodeData']['returnValues'] } {
-  return Object.entries(data).reduce(
-    (accumulator, [key, value]) => {
-      const schemaElement = getSchemaElement(schema, key);
+  return Object.entries(data).reduce((accumulator, [key, value]) => {
+    const schemaElement = getSchemaElement(schema, key);
 
-      accumulator[key] = {
-        value: encodeKey(schemaElement, value),
-        key: schemaElement.key,
-      };
+    accumulator[key] = {
+      value: encodeKey(schemaElement, value),
+      key: schemaElement.key,
+    };
 
-      return accumulator;
-    },
-    {} as {
-      [K in T]: {
-        key: string;
-        value: Schema[T]['encodeData']['returnValues'];
-      };
-    },
-  );
+    return accumulator;
+  }, {} as any);
 }
 
 export function getHashFunction(hashFunctionNameOrHash) {
