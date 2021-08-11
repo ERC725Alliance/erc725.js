@@ -302,7 +302,6 @@ export class ERC725<Schema extends GenericSchema> {
    * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/encodeData.js#L39-L67
    * ```
    *
-   * ```
    * :::tip
    * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
    * The JSON will be hashed with `keccak256`.
