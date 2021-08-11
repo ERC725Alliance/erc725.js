@@ -441,19 +441,18 @@ export function hashData(
  *
  * @throws *Error* in case of a mismatch of the hashes.
  */
-export function hashAndCompare(
+export function isDataAuthentic(
   data,
   expectedHash: string,
   lowerCaseHashFunction: SUPPORTED_HASH_FUNCTIONS,
 ) {
   const jsonHash = hashData(data, lowerCaseHashFunction);
 
-  // throw error if hash mismatch
   if (jsonHash !== expectedHash) {
-    throw new Error(`
-              Hash mismatch, returned JSON ("${jsonHash}") is different than the one
-              linked from the ERC725Y smart-contract: "${expectedHash}"
-          `);
+    console.error(
+      `Hash mismatch, returned JSON hash ("${jsonHash}") is different from expected hash "${expectedHash}"`,
+    );
+    return false;
   }
 
   return true;

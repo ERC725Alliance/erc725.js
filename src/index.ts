@@ -29,7 +29,7 @@ import {
   decodeData,
   decodeKeyValue,
   decodeKey,
-  hashAndCompare,
+  isDataAuthentic,
   encodeData,
 } from './lib/utils';
 
@@ -272,17 +272,14 @@ export class ERC725<Schema extends GenericSchema> {
           throw error;
         }
 
-        const isDataAuthentic = hashAndCompare(
+        accumulator[key] = isDataAuthentic(
           receivedData,
           dataEntry.hash,
           dataEntry.hashFunction,
-        );
+        )
+          ? receivedData
+          : null;
 
-        if (!isDataAuthentic) {
-          accumulator[key] = null;
-        }
-
-        accumulator[key] = receivedData;
         return accumulator;
       }, {});
   }
@@ -433,11 +430,13 @@ export class ERC725<Schema extends GenericSchema> {
 
     // Decode and return the data
     if (keySchema.keyType.toLowerCase() === 'array') {
-      const dat = { [keySchema.key]: { key: keySchema.key, value: rawData } };
-      const arrayValues = await this.getArrayValues(keySchema, dat);
+      const dataKeyValue = {
+        [keySchema.key]: { key: keySchema.key, value: rawData },
+      };
+      const arrayValues = await this.getArrayValues(keySchema, dataKeyValue);
 
       if (arrayValues && arrayValues.length > 0) {
-        arrayValues.push(dat[keySchema.key]); // add the raw data array length
+        arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
         return {
           [keySchema.name]: decodeKey(keySchema, arrayValues),
         };
