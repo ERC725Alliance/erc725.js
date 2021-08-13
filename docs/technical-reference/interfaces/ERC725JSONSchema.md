@@ -9,6 +9,7 @@
     valueType: "bytes",
   },
 ```
+
 :::info
 Detailed information available on [LSP-2-ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md)
 :::
@@ -21,9 +22,9 @@ Detailed information available on [LSP-2-ERC725YJSONSchema](https://github.com/l
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:47](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/types/ERC725JSONSchema.ts#L47)
+[types/ERC725JSONSchema.ts:47](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/types/ERC725JSONSchema.ts#L47)
 
-___
+---
 
 ### elementKeyType
 
@@ -31,9 +32,9 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:48](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/types/ERC725JSONSchema.ts#L48)
+[types/ERC725JSONSchema.ts:48](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/types/ERC725JSONSchema.ts#L48)
 
-___
+---
 
 ### elementValueContent
 
@@ -41,9 +42,9 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:49](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/types/ERC725JSONSchema.ts#L49)
+[types/ERC725JSONSchema.ts:49](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/types/ERC725JSONSchema.ts#L49)
 
-___
+---
 
 ### elementValueType
 
@@ -51,9 +52,9 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:50](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/types/ERC725JSONSchema.ts#L50)
+[types/ERC725JSONSchema.ts:50](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/types/ERC725JSONSchema.ts#L50)
 
-___
+---
 
 ### key
 
@@ -61,9 +62,9 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:43](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/types/ERC725JSONSchema.ts#L43)
+[types/ERC725JSONSchema.ts:43](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/types/ERC725JSONSchema.ts#L43)
 
-___
+---
 
 ### keyType
 
@@ -71,9 +72,9 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:44](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/types/ERC725JSONSchema.ts#L44)
+[types/ERC725JSONSchema.ts:44](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/types/ERC725JSONSchema.ts#L44)
 
-___
+---
 
 ### name
 
@@ -81,9 +82,9 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:42](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/types/ERC725JSONSchema.ts#L42)
+[types/ERC725JSONSchema.ts:42](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/types/ERC725JSONSchema.ts#L42)
 
-___
+---
 
 ### valueContent
 
@@ -91,9 +92,9 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:45](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/types/ERC725JSONSchema.ts#L45)
+[types/ERC725JSONSchema.ts:45](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/types/ERC725JSONSchema.ts#L45)
 
-___
+---
 
 ### valueType
 
@@ -101,4 +102,4 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:46](https://github.com/ERC725Alliance/erc725.js/blob/8d9f3d2/src/types/ERC725JSONSchema.ts#L46)
+[types/ERC725JSONSchema.ts:46](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/types/ERC725JSONSchema.ts#L46)
