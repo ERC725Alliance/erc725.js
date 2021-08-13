@@ -4,7 +4,7 @@ sidebar_position: 1.3
 
 # Providers
 
-The provider by which `erc725.js` will request blockchain data is set on
+The provider by which `@erc725/erc725.js` will request blockchain data is set on
 the instantiation of the class, through the configuration object.
 
 The following provider types are supported:

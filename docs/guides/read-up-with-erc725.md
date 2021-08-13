@@ -130,13 +130,13 @@ As you can see, it is relatively easy to read the values. For the example above,
 You could get something like this: `0x6f357c6af7a5b24b3c5374ab4e21d3fd250e105b4b242a12cfff1cdc83b6bd3251d027cb697066733a2f2f516d584462617639734c4b58715158656a4b42374664624133454e70794476413136564439715256436d4d773943`.
 
 For this key, the `valueContent` type is `JSONURL`, we need to decode it. You can do it manually, with the help of the [LSP-2 ERC725Y JSON Schema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl).
-Or you can use `erc725.js` to fetch/decode the data automatically 🪄📜
+Or you can use `@erc725/erc725.js` to fetch/decode the data automatically 🪄📜
 
 ## Fetching/decoding data with @erc725/erc725.js
 
-As you may have noticed, the key/values of a LSP-2 ERC725Y JSON Schema is very flexible and decoding the values can be a bit tedious. This is where `erc725.js` comes to the rescue ⛑️.
+As you may have noticed, the key/values of a LSP-2 ERC725Y JSON Schema is very flexible and decoding the values can be a bit tedious. This is where `@erc725/erc725.js` comes to the rescue ⛑️.
 
-With `erc725.js`, you only need to give a JSON Schema and a contract address to automatically read the decoded data of the contract. Let's try:
+With `@erc725/erc725.js`, you only need to give a JSON Schema and a contract address to automatically read the decoded data of the contract. Let's try:
 
 1.  Install @erc725/erc725.js: `npm i @erc725/erc725.js`
 2.  Copy the ERC725Y JSON Schema. It can be found under the [Implementation](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md#implementation) section

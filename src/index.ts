@@ -316,7 +316,7 @@ export class ERC725<Schema extends GenericSchema> {
 
   /**
    * In case you are reading the key-value store from an ERC725 smart-contract key-value store
-   * without `erc725.js` you can use `decodeData` to do the decoding for you.
+   * without `@erc725/erc725.js` you can use `decodeData` to do the decoding for you.
    *
    * :::tip
    * It is more convenient to use {@link ERC725.fetchData | `fetchData`}.

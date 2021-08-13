@@ -4,10 +4,10 @@ sidebar_position: 1.1
 
 # Getting Started
 
-The `erc725.js` package allows you to easily interact with the ERC-725 schemas.
+The `@erc725/erc725.js` package allows you to easily interact with the ERC-725 schemas.
 
 - GitHub repo: https://github.com/ERC725Alliance/erc725.js
-- NPM: https://www.npmjs.com/package/erc725.js
+- NPM: https://www.npmjs.com/package/@erc725/erc725.js
 
 ## Installation
 
