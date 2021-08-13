@@ -14,7 +14,7 @@ Also follow architectural guidelines (_TODO_)
 
 After you have written your code contributions, make a pull request from your branch.
 
-Use the pull request template (_TODO_) to fill in the request
+Use the pull request template to fill in the request
 
 Tests will have to be performed on the PR before it is considered.
 

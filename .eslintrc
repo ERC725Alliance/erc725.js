@@ -45,7 +45,8 @@
     "lines-between-class-members": "off",
     "prefer-template": 0, // Allow simple string concatenation
     "no-await-in-loop": 0, // NOTE: This should be removed?
-    "import/prefer-default-export": 0
+    "import/prefer-default-export": 0,
+    "arrow-body-style": "off"
   },
   "ignorePatterns": ["node_modules/**/*", "build/**/*"]
 }

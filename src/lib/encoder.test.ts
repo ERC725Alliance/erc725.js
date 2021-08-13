@@ -2,9 +2,13 @@ import assert from 'assert';
 import { keccak256, utf8ToHex } from 'web3-utils';
 import { valueContentEncodingMap } from './encoder';
 import { ERC725 } from '../index';
-import { Erc725Schema } from '../types/Erc725Schema';
+import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { hashData } from './utils';
-import { SUPPORTED_HASH_FUNCTION_STRINGS } from './constants';
+import {
+  SUPPORTED_HASH_FUNCTION_HASHES,
+  SUPPORTED_HASH_FUNCTION_STRINGS,
+} from './constants';
+import { Schema } from '../../test/generatedSchema';
 
 describe('#JSONURL encode', () => {
   it('encodes and hashes JSON data', () => {
@@ -20,7 +24,7 @@ describe('#JSONURL encode', () => {
     const result = valueContentEncodingMap.JSONURL.encode(dataToEncode);
 
     // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
-    const hashFunction = '0x6f357c6a';
+    const hashFunction = SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_UTF8;
     const urlHash = utf8ToHex(dataToEncode.url).substring(2);
     const jsonDataHash = keccak256(JSON.stringify(dataToEncode.json)).substring(
       2,
@@ -62,7 +66,7 @@ describe('#JSONURL encode', () => {
   });
 
   it('should encode JSON properly', () => {
-    const schema: Erc725Schema[] = [
+    const schema: ERC725JSONSchema[] = [
       {
         name: 'LSP3Profile',
         key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
@@ -71,7 +75,8 @@ describe('#JSONURL encode', () => {
         valueType: 'bytes',
       },
     ];
-    const myERC725 = new ERC725(schema);
+
+    const myERC725 = new ERC725<Schema>(schema);
 
     const json = {
       name: 'rryter',
@@ -154,23 +159,27 @@ describe('#JSONURL encode', () => {
       links: [],
     };
 
-    const encodedData = myERC725.encodeData('LSP3Profile', {
-      json,
-      url: 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
+    const encodedData = myERC725.encodeData({
+      LSP3Profile: {
+        json,
+        url: 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
+      },
     });
 
-    const decodedData = myERC725.decodeData('LSP3Profile', encodedData);
+    const decodedData = myERC725.decodeData({
+      LSP3Profile: encodedData.LSP3Profile.value,
+    });
 
     assert.deepStrictEqual(
-      decodedData.url,
+      decodedData.LSP3Profile.url,
       'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
     );
     assert.deepStrictEqual(
-      decodedData.hash,
+      decodedData.LSP3Profile.hash,
       hashData(json, SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8),
     );
     assert.deepStrictEqual(
-      decodedData.hashFunction,
+      decodedData.LSP3Profile.hashFunction,
       SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
     );
   });
