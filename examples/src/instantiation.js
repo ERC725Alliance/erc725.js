@@ -1,5 +1,5 @@
 import Web3 from 'web3';
-import { ERC725 } from 'erc725.js';
+import { ERC725 } from '@erc725/erc725.js';
 
 // this is needed because node does not support `fetch` out of the box
 // isomorphic-fetch is not needed in a browser environment

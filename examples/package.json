@@ -9,7 +9,7 @@
     "decodeData": "node src/decodeData.js"
   },
   "dependencies": {
-    "erc725.js": "0.6.0",
+    "@erc725/erc725.js": "0.5.8",
     "web3": "1.5.0"
   },
   "devDependencies": {
