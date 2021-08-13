@@ -42,7 +42,7 @@ import {
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'isomorphic-fetch';
-import { Schema } from '../generatedSchema';
+import { Schema } from '../test/generatedSchema';
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
 

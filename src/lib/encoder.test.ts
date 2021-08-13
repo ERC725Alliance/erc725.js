@@ -8,7 +8,7 @@ import {
   SUPPORTED_HASH_FUNCTION_HASHES,
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './constants';
-import { Schema } from '../../generatedSchema';
+import { Schema } from '../../test/generatedSchema';
 
 describe('#JSONURL encode', () => {
   it('encodes and hashes JSON data', () => {
