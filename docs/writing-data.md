@@ -20,7 +20,7 @@ This package is not capable of writing or relaying data to the blockchain. Howev
 
 ```js title="Instantiation"
 import Web3 from 'web3';
-import { ERC725 } from 'erc725.js';
+import { ERC725 } from '@erc725/erc725.js';
 
 export const schema = [
   {

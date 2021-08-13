@@ -18,7 +18,7 @@ The `erc725.js` package allows you to easily interact with the ERC-725 schemas.
 ## Instantiation
 
 ```js
-import { ERC725 } from 'erc725.js';
+import { ERC725 } from '@erc725/erc725.js';
 import Web3 from 'web3';
 
 // Part of LSP3-UniversalProfile Schema

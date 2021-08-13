@@ -33,7 +33,7 @@ $ npm install erc725.js
 ```
 
 ```js
-import { ERC725 } from 'erc725.js';
+import { ERC725 } from '@erc725/erc725.js';
 // Or alternatively the default export
 import ERC725 from 'erc725.js';
 ```
@@ -41,7 +41,7 @@ import ERC725 from 'erc725.js';
 ## Example Instantiation
 
 ```js
-import { ERC725 } from 'erc725.js';
+import { ERC725 } from '@erc725/erc725.js';
 import Web3 from 'web3';
 
 // Part of LSP3-UniversalProfile Schema
