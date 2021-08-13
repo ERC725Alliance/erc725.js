@@ -1,11 +1,11 @@
 <p align="center">
- <h2 align="center"><strong>erc725.js</strong></h2>
+ <h2 align="center"><strong>@erc725/erc725.js</strong></h2>
  <p align="center">Allows for interfacing with <a href="https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md">ERC725Y</a> compliant contracts on an EVM blockchain.</p>
 </p>
 
 <p align="center">
 <a href="https://github.com/ERC725Alliance/erc725.js/actions">
-    <img alt="Version" src="https://badge.fury.io/js/erc725.js.svg" />
+    <img alt="Version" src="https://badge.fury.io/js/@erc725/erc725.js.svg" />
   </a>
   
   <a href="https://github.com/ERC725Alliance/erc725.js/actions">
@@ -29,13 +29,13 @@
 | :-------: | :----------------------------------------------------------------------------------------------------------------- |
 
 ```shell script
-$ npm install erc725.js
+$ npm install @erc725/erc725.js
 ```
 
 ```js
 import { ERC725 } from '@erc725/erc725.js';
 // Or alternatively the default export
-import ERC725 from 'erc725.js';
+import ERC725 from '@erc725/erc725.js';
 ```
 
 ## Example Instantiation

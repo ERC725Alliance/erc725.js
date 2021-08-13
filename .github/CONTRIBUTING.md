@@ -1,4 +1,4 @@
-# Contributions to ERC725.js
+# Contributions to @erc725/erc725.js
 
 ## Open issues
 

@@ -2,14 +2,14 @@
 sidebar_label: Fetch Universal Profile data
 ---
 
-# Fetch a Universal Profile contract's data with erc725.js
+# Fetch a Universal Profile contract's data with @erc725/erc725.js
 
-How to easily fetch the data of a Universal Profile smart contract, based on ERC725Y with [erc725.js](https://www.npmjs.com/package/erc725.js) ?
+How to easily fetch the data of a Universal Profile smart contract, based on ERC725Y with [@erc725/erc725.js](https://www.npmjs.com/package/@erc725/erc725.js) ?
 
 If you browse the profiles on [Universal Profile](https://universalprofile.cloud), you can see they all have similar characteristics. They have a profile name, a profile picture, a background image, etc.
 Where is this information defined and stored? How to easily access this data?
 
-The purpose of this guide is to walk you through the standards of the LUKSO ecosystem and to show you how to use erc725.js package.
+The purpose of this guide is to walk you through the standards of the LUKSO ecosystem and to show you how to use @erc725/erc725.js package.
 
 ## Standards
 
@@ -132,13 +132,13 @@ You could get something like this: `0x6f357c6af7a5b24b3c5374ab4e21d3fd250e105b4b
 For this key, the `valueContent` type is `JSONURL`, we need to decode it. You can do it manually, with the help of the [LSP-2 ERC725Y JSON Schema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl).
 Or you can use `erc725.js` to fetch/decode the data automatically 🪄📜
 
-## Fetching/decoding data with erc725.js
+## Fetching/decoding data with @erc725/erc725.js
 
 As you may have noticed, the key/values of a LSP-2 ERC725Y JSON Schema is very flexible and decoding the values can be a bit tedious. This is where `erc725.js` comes to the rescue ⛑️.
 
 With `erc725.js`, you only need to give a JSON Schema and a contract address to automatically read the decoded data of the contract. Let's try:
 
-1.  Install erc725.js: `npm i erc725.js`
+1.  Install @erc725/erc725.js: `npm i @erc725/erc725.js`
 2.  Copy the ERC725Y JSON Schema. It can be found under the [Implementation](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md#implementation) section
 3.  Read the data
 

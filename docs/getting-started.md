@@ -12,7 +12,7 @@ The `erc725.js` package allows you to easily interact with the ERC-725 schemas.
 ## Installation
 
 ```bash
-  npm install erc725.js
+  npm install @erc725/erc725.js
 ```
 
 ## Instantiation
