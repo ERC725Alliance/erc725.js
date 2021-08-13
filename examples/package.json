@@ -1,0 +1,18 @@
+{
+  "name": "erc725.js-examples",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "fetchData": "node src/fetchData.js",
+    "getData": "node src/getData.js",
+    "encodeData": "node src/encodeData.js",
+    "decodeData": "node src/decodeData.js"
+  },
+  "dependencies": {
+    "erc725.js": "0.6.0",
+    "web3": "1.5.0"
+  },
+  "devDependencies": {
+    "isomorphic-fetch": "^3.0.0"
+  }
+}

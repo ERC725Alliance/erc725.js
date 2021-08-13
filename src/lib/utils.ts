@@ -25,7 +25,8 @@ import {
   numberToHex,
   padLeft,
 } from 'web3-utils';
-import { Erc725Schema } from '../types/Erc725Schema';
+import { KeyValuePair } from '../types';
+import { ERC725JSONSchema, GenericSchema } from '../types/ERC725JSONSchema';
 import {
   HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTIONS,
@@ -40,8 +41,8 @@ import {
   valueContentEncodingMap as valueContentMap,
 } from './encoder';
 
-type Erc725ObjectSchema = Pick<
-  Erc725Schema,
+type ERC725ObjectSchema = Pick<
+  ERC725JSONSchema,
   'key' | 'keyType' | 'valueContent' | 'valueType' | 'name'
 >;
 
@@ -52,7 +53,7 @@ type Erc725ObjectSchema = Pick<
  * @return the encoded value as per the schema
  */
 export function encodeKeyValue(
-  schemaElementDefinition: Erc725ObjectSchema,
+  schemaElementDefinition: ERC725ObjectSchema,
   value: string,
 ) {
   // Check if existing in the supported valueContent mapping.
@@ -116,7 +117,6 @@ export function encodeKeyValue(
  * @param index An integer representing the intended array index
  * @return The raw bytes key for the array element
  */
-// eslint-disable-next-line arrow-body-style
 export function encodeArrayKey(key: string, index: number) {
   return key.substr(0, 34) + padLeft(numberToHex(index), 32).replace('0x', '');
 }
@@ -138,15 +138,33 @@ export function encodeKeyName(name: string) {
 
 /**
  *
+ * @param schemas An array of objects
+ * @param {string} key A string of either the schema element name, or key
+ * @return The requested schema element from the full array of schemas
+ */
+export function getSchemaElement(schemas: ERC725JSONSchema[], key: string) {
+  const keyHash = key.substr(0, 2) !== '0x' ? encodeKeyName(key) : key;
+  const schemaElement = schemas.find((e) => e.key === keyHash);
+  if (!schemaElement) {
+    throw new Error(
+      'No matching schema found for key: "' + key + '" (' + keyHash + ').',
+    );
+  }
+
+  return schemaElement;
+}
+
+/**
+ *
  * @param schema An object of a schema definition that must have a keyType of 'Array'
  * @param index The index of the array element to transpose the schema to
  * @return Modified schema element of keyType 'Singleton' for fetching or decoding/encoding the array element
  */
 export function transposeArraySchema(
-  schema: Erc725Schema,
+  schema: ERC725JSONSchema,
   index: number,
-): Erc725ObjectSchema {
-  // Use enum Erc725SchemaKeyType instead?
+): ERC725ObjectSchema {
+  // Use enum ERC725JSONSchemaKeyType instead?
   if (schema.keyType.toLowerCase() !== 'array') {
     console.error(
       'Schema is not of keyType "Array" for schema: "' + schema.name + '".',
@@ -171,7 +189,7 @@ export function transposeArraySchema(
  * @param value will be either key-value pairs for a key type of Array, or a single value for type Singleton
  * @return the encoded value for the key as per the supplied schema
  */
-export function encodeKey(schema: Erc725Schema, value) {
+export function encodeKey(schema: ERC725JSONSchema, value) {
   // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
   if (schema.keyType.toLowerCase() === 'array' && Array.isArray(value)) {
     const results: { key: string; value: string }[] = [];
@@ -210,37 +228,6 @@ export function encodeKey(schema: Erc725Schema, value) {
       '"',
   );
   return null;
-}
-
-/**
- *
- * @param schemas schemas is an array of objects of schema definitions
- * @param data data is an array of objects of key-value pairs
- * @return: all encoded data as per required by the schema and provided data
- */
-export function encodeAllData(schemas: Erc725Schema[], data) {
-  const results: { key: string; value: string }[] = [];
-
-  for (let index = 0; index < schemas.length; index++) {
-    const schemaElement = schemas[index];
-    const filteredData = data[schemaElement.name];
-
-    const res = encodeKey(schemaElement, filteredData);
-    if (res) {
-      if (schemaElement.keyType === 'Array') {
-        // Encoded array element returns as key-value pairs
-        results.push(...res);
-      } else {
-        // Singleton encoding returns just the value, so we add the key for key-value pair
-        results.push({
-          key: schemaElement.key,
-          value: res,
-        });
-      }
-    }
-  }
-
-  return results;
 }
 
 /**
@@ -318,7 +305,7 @@ export function decodeKeyValue(schemaElementDefinition, value) {
  * @param value will be either key-value pairs for a key type of Array, or a single value for type Singleton
  * @return the decoded value/values as per the schema definition
  */
-export function decodeKey(schema: Erc725Schema, value) {
+export function decodeKey(schema: ERC725JSONSchema, value) {
   if (schema.keyType.toLowerCase() === 'array') {
     const results: any[] = [];
     const valueElement = value.find((e) => e.key === schema.key);
@@ -370,41 +357,51 @@ export function decodeKey(schema: Erc725Schema, value) {
 
 /**
  *
- * @param schemas schemas is an array of objects of schema definitions
+ * @param schema schema is an array of objects of schema definitions
  * @param data data is an array of objects of key-value pairs
  * @return: all decoded data as per required by the schema and provided data
  */
-export function decodeAllData(schemas: Erc725Schema[], data) {
-  const results = {};
+export function decodeData<
+  Schema extends GenericSchema,
+  T extends keyof Schema,
+>(
+  data: { [K in T]: Schema[T]['decodeData']['inputTypes'] },
+  schema: ERC725JSONSchema[],
+): { [K in T]: Schema[T]['decodeData']['returnValues'] } {
+  return Object.entries(data).reduce((decodedData, [key, value]) => {
+    const schemaElement = getSchemaElement(schema, key);
 
-  for (let index = 0; index < schemas.length; index++) {
-    const schemaElement = schemas[index];
-
-    const res = decodeKey(schemaElement, data);
-    if (res) {
-      results[schemaElement.name] = res;
-    }
-  }
-
-  return results;
+    return {
+      ...decodedData,
+      [schemaElement.name]: decodeKey(
+        schemaElement,
+        value,
+      ) as Schema[T]['decodeData']['returnValues'],
+    };
+  }, {} as any);
 }
 
 /**
- *
- * @param schemas An array of objects
- * @param {string} key A string of either the schema element name, or key
- * @return The requested schema element from the full array of schemas
+ * @param schema an array of schema definitions as per ${@link ERC725JSONSchema}
+ * @param data an object of key-value pairs
  */
-export function getSchemaElement(schemas: Erc725Schema[], key: string) {
-  const keyHash = key.substr(0, 2) !== '0x' ? encodeKeyName(key) : key;
-  const schemaElement = schemas.find((e) => e.key === keyHash);
-  if (!schemaElement) {
-    throw new Error(
-      'No matching schema found for key: "' + key + '" (' + keyHash + ').',
-    );
-  }
+export function encodeData<
+  Schema extends GenericSchema,
+  T extends keyof Schema,
+>(
+  data: { [K in T]: Schema[T]['encodeData']['inputTypes'] },
+  schema: ERC725JSONSchema[],
+): { [K in T]: Schema[T]['encodeData']['returnValues'] } {
+  return Object.entries(data).reduce((accumulator, [key, value]) => {
+    const schemaElement = getSchemaElement(schema, key);
 
-  return schemaElement;
+    accumulator[key] = {
+      value: encodeKey(schemaElement, value),
+      key: schemaElement.key,
+    };
+
+    return accumulator;
+  }, {} as any);
 }
 
 export function getHashFunction(hashFunctionNameOrHash) {
@@ -428,4 +425,59 @@ export function hashData(
   const hashFunction = getHashFunction(hashFunctionNameOrHash);
 
   return hashFunction.method(data);
+}
+
+/**
+ * Hashes the data received with the specified hashing function,
+ * and compares the result with the provided hash.
+ *
+ * @throws *Error* in case of a mismatch of the hashes.
+ */
+export function isDataAuthentic(
+  data,
+  expectedHash: string,
+  lowerCaseHashFunction: SUPPORTED_HASH_FUNCTIONS,
+) {
+  const jsonHash = hashData(data, lowerCaseHashFunction);
+
+  if (jsonHash !== expectedHash) {
+    console.error(
+      `Hash mismatch, returned JSON hash ("${jsonHash}") is different from expected hash "${expectedHash}"`,
+    );
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Transform the object containing the encoded data into an array ordered by keys,
+ * for easier handling when writing the data to the blockchain.
+ *
+ * @param {{
+ *   [key: string]: any;
+ * }} encodedData This is essentially the object you receive when calling `encodeData(...)`
+ * @return {*}  KeyValuePair[] An array of key-value objects
+ */
+export function flattenEncodedData(encodedData: {
+  [key: string]: any;
+}): KeyValuePair[] {
+  return (
+    Object.entries(encodedData)
+      .reduce((keyValuePairs: any[], [, encodedDataElement]) => {
+        if (Array.isArray(encodedDataElement.value)) {
+          return keyValuePairs.concat(encodedDataElement.value);
+        }
+        keyValuePairs.push({
+          key: encodedDataElement.key,
+          value: encodedDataElement.value,
+        });
+        return keyValuePairs;
+      }, [])
+      // sort array of objects by keys, to not be dependent on the order of the object's keys
+      .sort((a, b) => {
+        if (a.key < b.key) return -1;
+        return a.key > b.key ? 1 : 0;
+      })
+  );
 }

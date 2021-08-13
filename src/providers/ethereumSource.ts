@@ -33,29 +33,25 @@ const web3Abi = abi.default;
 export default class EthereumSource {
   public provider: any;
 
-  public deprecated: boolean;
-
-  constructor(provider: any, deprecated?: 'deprecated') {
+  constructor(provider: any) {
     this.provider = provider;
-    this.deprecated = deprecated === 'deprecated';
   }
 
   async getOwner(address: string) {
-    const params = this._constructJSONRPC(address, Method.OWNER);
-    const result = await this._callContract([params]);
+    const params = this.constructJSONRPC(address, Method.OWNER);
+    const result = await this.callContract([params]);
     if (result.error) {
       throw result.error;
     }
 
-    return this._decodeResult(Method.OWNER, result);
+    return this.decodeResult(Method.OWNER, result);
   }
 
   async getData(address: string, keyHash: string) {
-    let result = await this._callContract([
-      this._constructJSONRPC(address, Method.GET_DATA, keyHash),
+    const result = await this.callContract([
+      this.constructJSONRPC(address, Method.GET_DATA, keyHash),
     ]);
-    result = this.deprecated ? result.result : result;
-    return this._decodeResult(Method.GET_DATA, result);
+    return this.decodeResult(Method.GET_DATA, result);
   }
 
   async getAllData(address: string, keys: string[]) {
@@ -75,11 +71,15 @@ export default class EthereumSource {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  _constructJSONRPC(address: string, method: Method, methodParam?: string) {
+  private constructJSONRPC(
+    address: string,
+    method: Method,
+    methodParam?: string,
+  ) {
     const data = methodParam
       ? METHODS[method].sig + methodParam.replace('0x', '')
       : METHODS[method].sig;
-    // eslint-disable-next-line no-return-assign
+
     return {
       to: address,
       gas: METHODS[method].gas,
@@ -89,19 +89,12 @@ export default class EthereumSource {
     };
   }
 
-  async _callContract(params: any) {
-    return this.deprecated
-      ? this.provider.send('eth_call', params)
-      : this.provider.request({ method: 'eth_call', params });
+  private async callContract(params: any) {
+    return this.provider.request({ method: 'eth_call', params });
   }
 
   // eslint-disable-next-line class-methods-use-this
-  _decodeResult(method: Method, result: string) {
-    if (!METHODS[method]) {
-      console.error('Contract method: "' + method + '" is not supported.');
-      return null;
-    }
-
+  private decodeResult(method: Method, result: string) {
     return result === '0x'
       ? null
       : web3Abi.decodeParameter(METHODS[method].returnEncoding, result);

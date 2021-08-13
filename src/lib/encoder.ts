@@ -32,30 +32,13 @@ import {
   toChecksumAddress,
   utf8ToHex,
 } from 'web3-utils';
+import { JSONURLDataToEncode } from '../types';
 
 import {
   SUPPORTED_HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './constants';
 import { getHashFunction, hashData } from './utils';
-
-interface JSONURLData {
-  url: string;
-}
-
-interface JSONURLDataWithHash extends JSONURLData {
-  hash: string;
-  hashFunction: SUPPORTED_HASH_FUNCTIONS;
-  json?: never;
-}
-
-interface JSONURLDataWithJson extends JSONURLData {
-  hash?: never;
-  hashFunction?: never;
-  json: unknown;
-}
-
-type JSONURLDataToEncode = JSONURLDataWithHash | JSONURLDataWithJson;
 
 const encodeDataSourceWithHash = (
   hashType: SUPPORTED_HASH_FUNCTIONS,
@@ -73,7 +56,7 @@ const encodeDataSourceWithHash = (
 
 const decodeDataSourceWithHash = (
   value: string,
-): { hashFunction: string; dataHash: string; dataSource: string } | null => {
+): { hashFunction: string; hash: string; url: string } => {
   const hashFunctionSig = value.substr(0, 10);
   const hashFunction = getHashFunction(hashFunctionSig);
 
@@ -81,7 +64,7 @@ const decodeDataSourceWithHash = (
   const dataHash = '0x' + encodedData.substr(0, 64); // Get jsonHash 32 bytes
   const dataSource = hexToUtf8('0x' + encodedData.substr(64)); // Get remainder as URI
 
-  return { hashFunction: hashFunction.name, dataHash, dataSource };
+  return { hashFunction: hashFunction.name, hash: dataHash, url: dataSource };
 };
 
 const valueTypeEncodingMap = {
@@ -149,7 +132,7 @@ const valueTypeEncodingMap = {
 };
 
 // Use enum for type bellow
-// Is it this enum Erc725SchemaValueType? (If so, custom is missing from enum)
+// Is it this enum ERC725JSONSchemaValueType? (If so, custom is missing from enum)
 export const valueContentEncodingMap = {
   Keccak256: {
     type: 'bytes32',
@@ -209,22 +192,12 @@ export const valueContentEncodingMap = {
     type: 'custom',
     encode: (value) =>
       encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
-    decode: (value) => {
-      const result = decodeDataSourceWithHash(value);
-      return result
-        ? {
-            hashFunction: result.hashFunction,
-            hash: result.dataHash,
-            url: result.dataSource,
-          }
-        : null;
-    },
+    decode: (value: string) => decodeDataSourceWithHash(value),
   },
   JSONURL: {
     type: 'custom',
-    // eslint-disable-next-line arrow-body-style
-    encode: (value: JSONURLDataToEncode) => {
-      const { hash, json, hashFunction, url } = value;
+    encode: (dataToEncode: JSONURLDataToEncode) => {
+      const { hash, json, hashFunction, url } = dataToEncode;
 
       let hashedJson = hash;
 
@@ -252,16 +225,7 @@ export const valueContentEncodingMap = {
         url,
       );
     },
-    decode: (value) => {
-      const result = decodeDataSourceWithHash(value);
-      return result
-        ? {
-            hashFunction: result.hashFunction,
-            hash: result.dataHash,
-            url: result.dataSource,
-          }
-        : null;
-    },
+    decode: (dataToDecode) => decodeDataSourceWithHash(dataToDecode),
   },
 };
 

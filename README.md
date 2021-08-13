@@ -1,16 +1,32 @@
-# erc725.js
+<p align="center">
+ <h2 align="center"><strong>erc725.js</strong></h2>
+ <p align="center">Allows for interfacing with <a href="https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md">ERC725Y</a> compliant contracts on an EVM blockchain.</p>
+</p>
 
-Allows for interfacing with ERC725Y compliant contracts on an EVM blockchain using the [ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md) standard.
-
-![NPM Version](https://badge.fury.io/js/erc725.js.svg)
-
-For more information see [Documentation](https://docs.lukso.tech/tools/erc725js/getting-started).
-
-⚠️⚠️⚠️<br/>
-_This package is currently in early stages of development, use only for testing or experimentation purposes_
-⚠️⚠️⚠️<br/>
+<p align="center">
+<a href="https://github.com/ERC725Alliance/erc725.js/actions">
+    <img alt="Version" src="https://badge.fury.io/js/erc725.js.svg" />
+  </a>
+  
+  <a href="https://github.com/ERC725Alliance/erc725.js/actions">
+    <img alt="Tests Passing" src="https://github.com/ERC725Alliance/erc725.js/actions/workflows/node.js.yml/badge.svg" />
+  </a>
+  <a href="https://codecov.io/gh/ERC725Alliance/erc725.js">
+    <img src="https://codecov.io/gh/ERC725Alliance/erc725.js/branch/main/graph/badge.svg" />
+  </a>
+  <a href="https://github.com/ERC725Alliance/erc725.js/issues">
+    <img alt="Issues" src="https://img.shields.io/github/issues/ERC725Alliance/erc725.js?color=0088ff" />
+  </a>
+  <a href="https://github.com/ERC725Alliance/erc725.js/pulls">
+    <img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/ERC725Alliance/erc725.js?color=0088ff" />
+  </a>
+</p>
+<p align="center">For more information see <a href="https://docs.lukso.tech/tools/erc725js/getting-started">Documentation</a>.</p>
 
 ## Installation
+
+| :warning: | _This package is currently in early stages of development,<br/> use for testing or experimentation purposes only._ |
+| :-------: | :----------------------------------------------------------------------------------------------------------------- |
 
 ```shell script
 $ npm install erc725.js
@@ -54,7 +70,7 @@ const schema = [
   },
 ];
 
-const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
+const address = '0x3000783905Cc7170cCCe49a4112Deda952DDBe24';
 const provider = new Web3.providers.HttpProvider(
   'https://rpc.l14.lukso.network',
 );
@@ -72,40 +88,44 @@ await erc725.getOwner();
 // > '0x28D25E70819140daF65b724158D00c373D1a18ee'
 
 await erc725.getData('SupportedStandards:ERC725Account');
-// > '0xafdeb5d6'
+/* > {
+  'SupportedStandards:ERC725Account': '0xafdeb5d6'
+}
+*/
 
 await erc725.getData('LSP3Profile');
-/* >
-{
-    url: 'ipfs://QmXybv2LdJWscy1C6yRKUjvnaj6aqKktZX4g4xmz2nyYj2',
-    hash: '0xb4f9d72e83bbe7e250ed9ec80332c493b7b3d73e0d72f7b2c7ab01c39216eb1a',
-    hashFunction: 'keccak256(utf8)'
+/* > {
+  LSP3Profile: {
+    hashFunction: 'keccak256(utf8)',
+    hash: '0xd96ff7776660095f661d16010c4349aa7478a9129ce0670f771596a6ff2d864a',
+    url: 'ipfs://QmbTmcbp8ZW23vkQrqkasMFqNg2z1iP4e3BCUMz9PKDsSV'
+  }
 }
 */
 
 await erc725.fetchData('LSP3Profile'); // downloads and verifies the linked JSON
-/* > 
-{
-    LSP3Profile: {
-        name: 'frozeman',
-        description: 'The inventor of ERC725 and ERC20...',
-        links: [
-            { title: 'Twitter', url: 'https://twitter.com/feindura' },
-            { title: 'lukso.network', url: 'https://lukso.network' }
-        ],
-        ...
+/* > {
+  LSP3Profile: { // key of the schema
+    LSP3Profile: { // content of the JSON structure as per https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
+      name: '...',
+      links: [Array],
+      description: "...",
+      profileImage: [Array],
+      backgroundImage: [Array],
+      tags: [Array]
     }
+  }
 }
 */
 ```
 
-## Bundling for typescript
+## Building
 
 ```shell script
 $ npm run build
 ```
 
-This will build the library into `/lib`
+This will build the library into `/build`
 
 ## Testing
 
@@ -116,7 +136,7 @@ $ npm test
 ## Publishing
 
 ```shell script
-$ npm run build-publish
+$ npm run publish
 ```
 
 Will build and then publish the package to npm.

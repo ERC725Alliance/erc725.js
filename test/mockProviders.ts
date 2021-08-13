@@ -87,8 +87,9 @@ export class ApolloClient {
     let val;
     if (!this.getAll && Array.isArray(this.returnData)) {
       keyParam =
-        props.query.definitions[0].selectionSet.selections[0].arguments[0].value
-          .fields[1].value.value; // this gives the field key in query
+        props.query.definitions[0].selectionSet.selections[0].selectionSet
+          .selections[1].arguments[0].value.fields[0].value.fields[0].value
+          .value;
       val = this.returnData.find((e) => e.key === keyParam).value;
     } else if (!this.getAll && !Array.isArray(this.returnData)) {
       val = this.returnData.value;
