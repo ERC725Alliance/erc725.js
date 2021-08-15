@@ -167,7 +167,7 @@ export class ERC725<Schema extends GenericSchema> {
    *
    * @returns An object with schema element key names as properties, with corresponding **decoded** data as values.
    *
-   * ```javascript title="getData - all keys from schema"
+   * ```javascript reference title="getData - all keys from schema"
    * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/getData.js#L7-L30
    * ```
    *
