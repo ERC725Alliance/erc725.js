@@ -18,11 +18,11 @@
  * @date 2020
  */
 
-import { isAddress, toChecksumAddress } from 'web3-utils';
+import { isAddress } from 'web3-utils';
 
-import GraphSource from './providers/graphSource';
-import Web3Source from './providers/web3Source';
+import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
 import EthereumSource from './providers/ethereumSource';
+
 import {
   encodeArrayKey,
   getSchemaElement,
@@ -126,30 +126,26 @@ export class ERC725<Schema extends GenericSchema> {
     // CASE: GraphQL provider
 
     if (provider.type === 'ApolloClient') {
-      this.options.providerType = ProviderType.GRAPH;
-      this.options.provider = new GraphSource(givenProvider);
-
-      // This checks to see if its a subgraph, since TheGraph subgraphs cannot checksum addresses to store
-      const isSubgraph = givenProvider.link?.options?.uri.includes('/subgraph');
-      if (!isSubgraph && address) {
-        this.options.address = toChecksumAddress(address);
-      }
-
-      // CASE: Ethereum provider
+      // this.options.providerType = ProviderType.GRAPH;
+      // this.options.provider = new GraphSource(givenProvider);
+      // // This checks to see if its a subgraph, since TheGraph subgraphs cannot checksum addresses to store
+      // const isSubgraph = givenProvider.link?.options?.uri.includes('/subgraph');
+      // if (!isSubgraph && address) {
+      //   this.options.address = toChecksumAddress(address);
+      // }
     } else if (provider.request || provider.type === 'EthereumProvider') {
+      // CASE: Ethereum provider
       this.options.providerType = ProviderType.ETHEREUM;
       this.options.provider = new EthereumSource(givenProvider);
-
-      // CASE: Web3 or deprecated ethereum provider
     } else if (
       (!provider.request && provider.send) ||
       provider.type === 'Web3Provider'
     ) {
+      // CASE: Web3 or deprecated ethereum provider
       this.options.providerType = ProviderType.WEB3;
-      this.options.provider = new Web3Source(givenProvider);
-
-      // CASE: Unknown provider
+      this.options.provider = new Web3ProviderWrapper(givenProvider);
     } else {
+      // CASE: Unknown provider
       throw new Error(`Incorrect or unsupported provider ${givenProvider}`);
     }
   }
