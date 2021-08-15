@@ -43,8 +43,8 @@ import {
 
 import { ERC725Config } from './types/Config';
 import { SUPPORTED_HASH_FUNCTION_STRINGS } from './lib/constants';
-import { URLDataWithHash, KeyValuePair } from './types';
-import { GraphProviderWrapper } from './providers/graphSource';
+import { URLDataWithHash, KeyValuePair, ProviderTypes } from './types';
+import { ProviderWrapper } from './providers/baseProviderWrapper';
 
 export {
   ERC725JSONSchema,
@@ -53,8 +53,9 @@ export {
   ERC725JSONSchemaValueType,
 };
 
-export { ERC725Config, KeyValuePair } from './types';
+export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
 export { flattenEncodedData, encodeData } from './lib/utils';
+export { ProviderWrapper as BaseProviderWrapper } from './providers/baseProviderWrapper';
 /**
  * :::warning
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
@@ -67,10 +68,7 @@ export class ERC725<Schema extends GenericSchema> {
   options: {
     schema: ERC725JSONSchema[];
     address?: string;
-    provider:
-      | GraphProviderWrapper
-      | EthereumProviderWrapper
-      | Web3ProviderWrapper;
+    provider?: ProviderWrapper;
     config: ERC725Config;
   };
 
@@ -116,19 +114,19 @@ export class ERC725<Schema extends GenericSchema> {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  initializeProvider(givenProvider): any {
+  initializeProvider(givenProvider): ProviderWrapper | undefined {
     // do not fail on no-provider
     if (!givenProvider) return undefined;
 
     switch (true) {
-      case givenProvider instanceof GraphProviderWrapper:
-        return givenProvider;
-
       case typeof givenProvider.request === 'function':
         return new EthereumProviderWrapper(givenProvider);
 
       case !givenProvider.request && typeof givenProvider.send === 'function':
         return new Web3ProviderWrapper(givenProvider);
+
+      case givenProvider.type === ProviderTypes.GRAPH_QL:
+        return givenProvider;
 
       default:
         throw new Error(`Incorrect or unsupported provider ${givenProvider}`);
@@ -383,7 +381,7 @@ export class ERC725<Schema extends GenericSchema> {
 
       if (!arrayElement) {
         // 3. Otherwise we get the array key element value
-        arrayElement = await this.options.provider.getData(
+        arrayElement = await this.options.provider?.getData(
           this.options.address as string,
           arrayElementKey,
         );
@@ -400,7 +398,7 @@ export class ERC725<Schema extends GenericSchema> {
 
   private async getDataSingle(data: string) {
     const keySchema = getSchemaElement(this.options.schema, data);
-    const rawData = await this.options.provider.getData(
+    const rawData = await this.options.provider?.getData(
       this.options.address as string,
       keySchema.key,
     );
@@ -434,12 +432,12 @@ export class ERC725<Schema extends GenericSchema> {
     });
 
     // Get all the raw data from the provider based on schema key hashes
-    const allRawData: KeyValuePair[] = await this.options.provider.getAllData(
+    const allRawData: KeyValuePair[] = await this.options.provider?.getAllData(
       this.options.address as string,
       keyHashes,
     );
 
-    if (this.options.provider instanceof GraphProviderWrapper) {
+    if (this.options.provider?.type === ProviderTypes.GRAPH_QL) {
       // If the provider type is a graphql client, we assume it can get ALL keys (including array keys)
       return allRawData.reduce<{ [key: string]: any }>(
         (accumulator, current) => {
