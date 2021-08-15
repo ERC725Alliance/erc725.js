@@ -21,7 +21,7 @@
 import { isAddress } from 'web3-utils';
 
 import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
-import EthereumSource from './providers/ethereumSource';
+import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
 
 import {
   encodeArrayKey,
@@ -44,12 +44,7 @@ import {
 import { ERC725Config } from './types/Config';
 import { SUPPORTED_HASH_FUNCTION_STRINGS } from './lib/constants';
 import { URLDataWithHash, KeyValuePair } from './types';
-
-enum ProviderType {
-  GRAPH = 'graph',
-  ETHEREUM = 'ethereum',
-  WEB3 = 'web3',
-}
+import { GraphProviderWrapper } from './providers/graphSource';
 
 export {
   ERC725JSONSchema,
@@ -72,8 +67,10 @@ export class ERC725<Schema extends GenericSchema> {
   options: {
     schema: ERC725JSONSchema[];
     address?: string;
-    providerType?: ProviderType | null;
-    provider?;
+    provider:
+      | GraphProviderWrapper
+      | EthereumProviderWrapper
+      | Web3ProviderWrapper;
     config: ERC725Config;
   };
 
@@ -107,46 +104,34 @@ export class ERC725<Schema extends GenericSchema> {
       ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/',
     };
 
-    // Init options member
     this.options = {
       schema,
       address,
-      providerType: null,
+      provider: this.initializeProvider(provider),
       config: {
         ...defaultConfig,
         ...config,
       },
     };
+  }
 
+  // eslint-disable-next-line class-methods-use-this
+  initializeProvider(givenProvider): any {
     // do not fail on no-provider
-    if (!provider) return;
+    if (!givenProvider) return undefined;
 
-    const givenProvider = provider.provider || provider;
+    switch (true) {
+      case givenProvider instanceof GraphProviderWrapper:
+        return givenProvider;
 
-    // CASE: GraphQL provider
+      case typeof givenProvider.request === 'function':
+        return new EthereumProviderWrapper(givenProvider);
 
-    if (provider.type === 'ApolloClient') {
-      // this.options.providerType = ProviderType.GRAPH;
-      // this.options.provider = new GraphSource(givenProvider);
-      // // This checks to see if its a subgraph, since TheGraph subgraphs cannot checksum addresses to store
-      // const isSubgraph = givenProvider.link?.options?.uri.includes('/subgraph');
-      // if (!isSubgraph && address) {
-      //   this.options.address = toChecksumAddress(address);
-      // }
-    } else if (provider.request || provider.type === 'EthereumProvider') {
-      // CASE: Ethereum provider
-      this.options.providerType = ProviderType.ETHEREUM;
-      this.options.provider = new EthereumSource(givenProvider);
-    } else if (
-      (!provider.request && provider.send) ||
-      provider.type === 'Web3Provider'
-    ) {
-      // CASE: Web3 or deprecated ethereum provider
-      this.options.providerType = ProviderType.WEB3;
-      this.options.provider = new Web3ProviderWrapper(givenProvider);
-    } else {
-      // CASE: Unknown provider
-      throw new Error(`Incorrect or unsupported provider ${givenProvider}`);
+      case !givenProvider.request && typeof givenProvider.send === 'function':
+        return new Web3ProviderWrapper(givenProvider);
+
+      default:
+        throw new Error(`Incorrect or unsupported provider ${givenProvider}`);
     }
   }
 
@@ -179,12 +164,7 @@ export class ERC725<Schema extends GenericSchema> {
   async getData(
     keyOrKeys?: string | string[],
   ): Promise<{ [key: string]: any }> {
-    if (!isAddress(this.options.address as string)) {
-      throw new Error('Missing ERC725 contract address.');
-    }
-    if (!this.options.provider) {
-      throw new Error('Missing provider.');
-    }
+    this.getAddressAndProvider();
 
     if (!keyOrKeys) {
       // eslint-disable-next-line no-param-reassign
@@ -358,8 +338,10 @@ export class ERC725<Schema extends GenericSchema> {
    * // '0x7f1b797b2Ba023Da2482654b50724e92EB5a7091'
    * ```
    */
-  getOwner(address?: string): string {
-    return this.options.provider.getOwner(address || this.options.address);
+  async getOwner(_address?: string) {
+    const { address, provider } = this.getAddressAndProvider();
+
+    return provider.getOwner(_address || address);
   }
 
   /**
@@ -402,7 +384,7 @@ export class ERC725<Schema extends GenericSchema> {
       if (!arrayElement) {
         // 3. Otherwise we get the array key element value
         arrayElement = await this.options.provider.getData(
-          this.options.address,
+          this.options.address as string,
           arrayElementKey,
         );
 
@@ -419,7 +401,7 @@ export class ERC725<Schema extends GenericSchema> {
   private async getDataSingle(data: string) {
     const keySchema = getSchemaElement(this.options.schema, data);
     const rawData = await this.options.provider.getData(
-      this.options.address,
+      this.options.address as string,
       keySchema.key,
     );
 
@@ -453,11 +435,11 @@ export class ERC725<Schema extends GenericSchema> {
 
     // Get all the raw data from the provider based on schema key hashes
     const allRawData: KeyValuePair[] = await this.options.provider.getAllData(
-      this.options.address,
+      this.options.address as string,
       keyHashes,
     );
 
-    if (this.options.providerType === ProviderType.GRAPH) {
+    if (this.options.provider instanceof GraphProviderWrapper) {
       // If the provider type is a graphql client, we assume it can get ALL keys (including array keys)
       return allRawData.reduce<{ [key: string]: any }>(
         (accumulator, current) => {
@@ -519,6 +501,20 @@ export class ERC725<Schema extends GenericSchema> {
     }
 
     return receivedData;
+  }
+
+  private getAddressAndProvider() {
+    if (!isAddress(this.options.address as string)) {
+      throw new Error('Missing ERC725 contract address.');
+    }
+    if (!this.options.provider) {
+      throw new Error('Missing provider.');
+    }
+
+    return {
+      address: this.options.address as string,
+      provider: this.options.provider,
+    };
   }
 }
 

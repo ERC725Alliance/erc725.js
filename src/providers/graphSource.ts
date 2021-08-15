@@ -24,7 +24,7 @@
 
 import { queries } from '../lib/queries';
 
-export default class GraphSource {
+export class GraphProviderWrapper {
   // TODO: provide correct interface for provider
   public provider: any = {};
 
@@ -33,19 +33,19 @@ export default class GraphSource {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  getOwner() {
+  async getOwner(): Promise<string> {
     throw new Error(
       "We're sorry, getOwner() method not yet supported in graph provider type.",
     );
   }
 
-  async getData(address, keys) {
-    if (!keys || Array.isArray(keys)) {
+  async getData(address, keyOrKeys) {
+    if (!keyOrKeys || Array.isArray(keyOrKeys)) {
       // TODO: support array of keys
-      throw new Error(`Incorrect parameter 'keys' in getData() ${keys}`);
+      throw new Error(`Incorrect parameter 'keys' in getData() ${keyOrKeys}`);
     }
     // Get the value for the specific single key
-    const query = queries.getDataByKey(address, keys);
+    const query = queries.getDataByKey(address, keyOrKeys);
     const result = await this.provider.query({ query });
     // Single out the first result as expected
     const ret =

@@ -30,7 +30,7 @@ import { Method } from '../types/Method';
 // @ts-ignore
 const web3Abi = abi.default;
 
-export default class EthereumSource {
+export class EthereumProviderWrapper {
   public provider: any;
 
   constructor(provider: any) {
