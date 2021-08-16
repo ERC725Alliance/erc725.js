@@ -44,7 +44,6 @@ import {
 import { ERC725Config } from './types/Config';
 import { SUPPORTED_HASH_FUNCTION_STRINGS } from './lib/constants';
 import { URLDataWithHash, KeyValuePair, ProviderTypes } from './types';
-import { ProviderWrapper } from './providers/baseProviderWrapper';
 
 export {
   ERC725JSONSchema,
@@ -55,7 +54,6 @@ export {
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
 export { flattenEncodedData, encodeData } from './lib/utils';
-export { ProviderWrapper as BaseProviderWrapper } from './providers/baseProviderWrapper';
 /**
  * :::warning
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
@@ -68,7 +66,7 @@ export class ERC725<Schema extends GenericSchema> {
   options: {
     schema: ERC725JSONSchema[];
     address?: string;
-    provider?: ProviderWrapper;
+    provider?;
     config: ERC725Config;
   };
 
@@ -114,7 +112,7 @@ export class ERC725<Schema extends GenericSchema> {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  initializeProvider(givenProvider): ProviderWrapper | undefined {
+  initializeProvider(givenProvider) {
     // do not fail on no-provider
     if (!givenProvider) return undefined;
 

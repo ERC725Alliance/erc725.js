@@ -26,12 +26,13 @@ import { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
 import { ProviderTypes } from '../types/provider';
-import { ProviderWrapper } from './baseProviderWrapper';
 
-export class Web3ProviderWrapper extends ProviderWrapper {
+export class Web3ProviderWrapper {
+  type: ProviderTypes;
+  provider: any;
   constructor(provider: any) {
-    super(provider);
     this.type = ProviderTypes.WEB3;
+    this.provider = provider;
   }
 
   async getOwner(address: string) {

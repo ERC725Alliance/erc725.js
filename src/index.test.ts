@@ -21,7 +21,7 @@
 import assert from 'assert';
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { GraphProviderWrapper } from '@erc725/graph-provider-wrapper';
+import { GraphProviderWrapper } from '@erc725/provider-wrappers';
 
 import ERC725 from '.';
 import {

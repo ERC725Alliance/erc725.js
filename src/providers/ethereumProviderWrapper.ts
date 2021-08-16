@@ -24,7 +24,6 @@
 
 import * as abi from 'web3-eth-abi';
 
-import { ProviderWrapper } from './baseProviderWrapper';
 import { METHODS } from '../lib/constants';
 import { Method } from '../types/Method';
 import { ProviderTypes } from '../types/provider';
@@ -32,10 +31,12 @@ import { ProviderTypes } from '../types/provider';
 // @ts-ignore
 const web3Abi = abi.default;
 
-export class EthereumProviderWrapper extends ProviderWrapper {
+export class EthereumProviderWrapper {
+  type: ProviderTypes;
+  provider: any;
   constructor(provider: any) {
-    super(provider);
     this.type = ProviderTypes.ETHEREUM;
+    this.provider = provider;
   }
 
   async getOwner(address: string) {
