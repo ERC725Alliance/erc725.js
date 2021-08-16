@@ -112,22 +112,25 @@ export class ERC725<Schema extends GenericSchema> {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  initializeProvider(givenProvider) {
+  private initializeProvider(providerOrProviderWrapper) {
     // do not fail on no-provider
-    if (!givenProvider) return undefined;
+    if (!providerOrProviderWrapper) return undefined;
 
     switch (true) {
-      case typeof givenProvider.request === 'function':
-        return new EthereumProviderWrapper(givenProvider);
+      case typeof providerOrProviderWrapper.request === 'function':
+        return new EthereumProviderWrapper(providerOrProviderWrapper);
 
-      case !givenProvider.request && typeof givenProvider.send === 'function':
-        return new Web3ProviderWrapper(givenProvider);
+      case !providerOrProviderWrapper.request &&
+        typeof providerOrProviderWrapper.send === 'function':
+        return new Web3ProviderWrapper(providerOrProviderWrapper);
 
-      case givenProvider.type === ProviderTypes.GRAPH_QL:
-        return givenProvider;
+      case providerOrProviderWrapper.type === ProviderTypes.GRAPH_QL:
+        return providerOrProviderWrapper;
 
       default:
-        throw new Error(`Incorrect or unsupported provider ${givenProvider}`);
+        throw new Error(
+          `Incorrect or unsupported provider ${providerOrProviderWrapper}`,
+        );
     }
   }
 
