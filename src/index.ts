@@ -116,22 +116,21 @@ export class ERC725<Schema extends GenericSchema> {
     // do not fail on no-provider
     if (!providerOrProviderWrapper) return undefined;
 
-    switch (true) {
-      case typeof providerOrProviderWrapper.request === 'function':
-        return new EthereumProviderWrapper(providerOrProviderWrapper);
+    if (typeof providerOrProviderWrapper.request === 'function')
+      return new EthereumProviderWrapper(providerOrProviderWrapper);
 
-      case !providerOrProviderWrapper.request &&
-        typeof providerOrProviderWrapper.send === 'function':
-        return new Web3ProviderWrapper(providerOrProviderWrapper);
+    if (
+      !providerOrProviderWrapper.request &&
+      typeof providerOrProviderWrapper.send === 'function'
+    )
+      return new Web3ProviderWrapper(providerOrProviderWrapper);
 
-      case providerOrProviderWrapper.type === ProviderTypes.GRAPH_QL:
-        return providerOrProviderWrapper;
+    if (providerOrProviderWrapper.type === ProviderTypes.GRAPH_QL)
+      return providerOrProviderWrapper;
 
-      default:
-        throw new Error(
-          `Incorrect or unsupported provider ${providerOrProviderWrapper}`,
-        );
-    }
+    throw new Error(
+      `Incorrect or unsupported provider ${providerOrProviderWrapper}`,
+    );
   }
 
   /**
