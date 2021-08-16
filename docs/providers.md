@@ -35,7 +35,18 @@ const ethereumProvider = window.ethereum;
 Also supported is a [GraphQL
 client](https://www.apollographql.com/docs/) as the provider.
 
+:::tip
+The provider is located in an external package to avoid having a dependency to `graphql` by default.
+:::
+
+## Installation
+
+`npm i @erc725/provider-wrappers @apollo/client`
+
+## Usage
+
 ```javascript
+import { GraphProviderWrapper } from '@erc725/provider-wrappers';
 import { ApolloClient, InMemoryCache } from '@apollo/client';
 
 const apolloProvider = new ApolloClient({
@@ -46,12 +57,7 @@ const apolloProvider = new ApolloClient({
   },
 });
 
-// NOTE: The apollo provider *must* be passed as a member of an object along
-// with a type member when creating a new instance of the ERC725 class.
-const providerParam = {
-  provider: apolloProvider,
-  type: 'ApolloClient',
-};
+const provider = new GraphProviderWrapper(apolloClient);
 ```
 
 :::info Note

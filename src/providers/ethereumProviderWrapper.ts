@@ -26,14 +26,16 @@ import * as abi from 'web3-eth-abi';
 
 import { METHODS } from '../lib/constants';
 import { Method } from '../types/Method';
+import { ProviderTypes } from '../types/provider';
 
 // @ts-ignore
 const web3Abi = abi.default;
 
-export default class EthereumSource {
-  public provider: any;
-
+export class EthereumProviderWrapper {
+  type: ProviderTypes;
+  provider: any;
   constructor(provider: any) {
+    this.type = ProviderTypes.ETHEREUM;
     this.provider = provider;
   }
 
