@@ -15,3 +15,7 @@ generatedSchema.ts
 typedoc.html.json
 typedoc.json
 .mocharc.json
+.prettierrc
+.node-version
+.eslintrc
+coverage

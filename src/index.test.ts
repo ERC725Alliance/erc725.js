@@ -20,6 +20,9 @@
 // Tests for the @erc725/erc725.js package
 import assert from 'assert';
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { GraphProviderWrapper } from '@erc725/provider-wrappers';
+
 import ERC725 from '.';
 import {
   decodeKey,
@@ -42,6 +45,7 @@ import {
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'isomorphic-fetch';
+
 import { Schema } from '../test/generatedSchema';
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
@@ -260,11 +264,9 @@ describe('Running @erc725/erc725.js tests...', () => {
 
       it(schemaElement.name + ' with apollo graph provider', async () => {
         const returnData = generateAllData([schemaElement]);
-        const provider = new ApolloClient({ returnData });
-        const erc725 = new ERC725(mockSchema, address, {
-          provider,
-          type: 'ApolloClient',
-        });
+        const apolloClient = new ApolloClient({ returnData });
+        const providerWrapper = new GraphProviderWrapper(apolloClient);
+        const erc725 = new ERC725(mockSchema, address, providerWrapper);
         const result = await erc725.getData(schemaElement.key);
         assert.deepStrictEqual(result, {
           [schemaElement.name]: schemaElement.expectedResult,

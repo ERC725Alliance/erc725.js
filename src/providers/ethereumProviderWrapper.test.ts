@@ -1,10 +1,10 @@
 import assert from 'assert';
 
-import EthereumSource from './ethereumSource';
+import { EthereumProviderWrapper } from './ethereumProviderWrapper';
 
 const erc725AccountAddress = '0x214be121bB52e6909c5158579b3458f8760f1b2f';
 
-describe('EthereumSource', () => {
+describe('EthereumProviderWrapper', () => {
   it('#getOwner should return an address', async () => {
     const provider = {
       request: () =>
@@ -14,7 +14,7 @@ describe('EthereumSource', () => {
           );
         }),
     };
-    const ethSource = new EthereumSource(provider);
+    const ethSource = new EthereumProviderWrapper(provider);
 
     const ownerAddress = await ethSource.getOwner(erc725AccountAddress);
     assert.deepStrictEqual(
@@ -28,7 +28,7 @@ describe('EthereumSource', () => {
       request: () =>
         new Promise((_resolve, reject) => reject(new Error('some error'))),
     };
-    const ethSource = new EthereumSource(provider);
+    const ethSource = new EthereumProviderWrapper(provider);
 
     try {
       await ethSource.getOwner(erc725AccountAddress);

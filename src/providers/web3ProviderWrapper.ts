@@ -22,41 +22,35 @@
   in accordance with implementation of smart contract interfaces of ERC725
 */
 
-import * as abi from 'web3-eth-abi';
-
-import { METHODS } from '../lib/constants';
 import { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
+import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
+import { ProviderTypes } from '../types/provider';
 
-// @ts-ignore
-const web3abi = abi.default;
-let idCount = 1;
-
-export default class Web3Source {
-  public provider: any;
-
-  constructor(provider) {
+export class Web3ProviderWrapper {
+  type: ProviderTypes;
+  provider: any;
+  constructor(provider: any) {
+    this.type = ProviderTypes.WEB3;
     this.provider = provider;
   }
 
   async getOwner(address: string) {
     const result = await this.callContract(
-      this.constructJSONRPC(address, Method.OWNER),
+      constructJSONRPC(address, Method.OWNER),
     );
-    // @ts-ignore
     if (result.error) {
-      // @ts-ignore
       throw result.error;
     }
 
-    return this.decodeResult(Method.OWNER, result);
+    return decodeResult(Method.OWNER, result);
   }
 
   async getData(address: string, keyHash: string) {
-    return this.decodeResult(
+    return decodeResult(
       Method.GET_DATA,
       await this.callContract(
-        this.constructJSONRPC(address, Method.GET_DATA, keyHash),
+        constructJSONRPC(address, Method.GET_DATA, keyHash),
       ),
     );
   }
@@ -64,9 +58,7 @@ export default class Web3Source {
   async getAllData(address: string, keys: string[]) {
     const payload: JsonRpc[] = [];
     for (let index = 0; index < keys.length; index++) {
-      payload.push(
-        this.constructJSONRPC(address, Method.GET_DATA, keys[index]),
-      );
+      payload.push(constructJSONRPC(address, Method.GET_DATA, keys[index]));
     }
 
     const results: any = await this.callContract(payload);
@@ -79,7 +71,7 @@ export default class Web3Source {
     for (let index = 0; index < payload.length; index++) {
       returnValues.push({
         key: keys[index],
-        value: this.decodeResult(
+        value: decodeResult(
           Method.GET_DATA,
           results.find((element) => payload[index].id === element.id),
         ),
@@ -89,34 +81,7 @@ export default class Web3Source {
     return returnValues;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  private constructJSONRPC(
-    address: string,
-    method: Method,
-    methodParam?: string,
-  ): JsonRpc {
-    const data = methodParam
-      ? METHODS[method].sig + methodParam.replace('0x', '')
-      : METHODS[method].sig;
-
-    // eslint-disable-next-line no-return-assign
-    return {
-      jsonrpc: '2.0',
-      method: 'eth_call',
-      params: [
-        {
-          to: address,
-          gas: METHODS[method].gas,
-          gasPrice: METHODS[method].gasPrice,
-          value: METHODS[method].value,
-          data,
-        },
-      ],
-      id: (idCount += 1),
-    };
-  }
-
-  private async callContract(payload) {
+  private async callContract(payload): Promise<any> {
     return new Promise((resolve, reject) => {
       // Send old web3 method with callback to resolve promise
       this.provider.send(payload, (e, r) => {
@@ -127,13 +92,5 @@ export default class Web3Source {
         }
       });
     });
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  private decodeResult(method: Method, result) {
-    const rpcResult = result.result;
-    return rpcResult === '0x'
-      ? null
-      : web3abi.decodeParameter(METHODS[method].returnEncoding, rpcResult);
   }
 }
