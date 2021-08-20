@@ -14,9 +14,9 @@ jobs:
           - registry-url: 'https://registry.npmjs.org'
             command: npm publish --access public
             token: NPM_TOKEN
-          - registry-url: 'https://npm.pkg.github.com'
-            command: npm publish
-            token: GITHUB_TOKEN
+          # - registry-url: 'https://npm.pkg.github.com'
+          #   command: npm publish
+          #   token: GITHUB_TOKEN
 
     steps:
       - uses: actions/checkout@v2
