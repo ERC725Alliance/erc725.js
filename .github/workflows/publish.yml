@@ -13,10 +13,10 @@ jobs:
         include:
           - registry-url: 'https://registry.npmjs.org'
             command: npm publish --access public
-            token: ${{ secrets.NPM_TOKEN }}
+            token: NPM_TOKEN
           - registry-url: 'https://npm.pkg.github.com'
             command: npm publish
-            token: ${{ secrets.GITHUB_TOKEN }}
+            token: GITHUB_TOKEN
 
     steps:
       - uses: actions/checkout@v2
@@ -30,4 +30,4 @@ jobs:
       - run: npm run build
       - run: ${{ matrix.command }}
         env:
-          NODE_AUTH_TOKEN: ${{ matrix.token }}
+          NODE_AUTH_TOKEN: ${{ secrets[matrix.token] }}
