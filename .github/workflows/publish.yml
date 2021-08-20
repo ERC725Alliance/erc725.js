@@ -25,6 +25,7 @@ jobs:
           node-version: '12.x'
           registry-url: ${{ matrix.registry-url }}
           scope: '@erc725'
+          cache: 'npm'
       - run: npm ci
       - run: npm run build
       - run: ${{ matrix.token }}
