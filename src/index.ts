@@ -282,9 +282,9 @@ export class ERC725<Schema extends GenericSchema> {
    * :::
    */
   encodeData(data: { [key: string]: any }): { [key: string]: any };
-  encodeData<T extends keyof Schema>(
-    data: { [K in T]: Schema[T]['encodeData']['inputTypes'] },
-  ) {
+  encodeData<T extends keyof Schema>(data: {
+    [K in T]: Schema[T]['encodeData']['inputTypes'];
+  }) {
     return encodeData<Schema, T>(data, this.options.schema);
   }
 
@@ -309,9 +309,9 @@ export class ERC725<Schema extends GenericSchema> {
    * ```
    */
   decodeData(data: { [key: string]: any }): { [key: string]: any };
-  decodeData<T extends keyof Schema>(
-    data: { [K in T]: Schema[T]['decodeData']['inputTypes'] },
-  ): {
+  decodeData<T extends keyof Schema>(data: {
+    [K in T]: Schema[T]['decodeData']['inputTypes'];
+  }): {
     [K in T]: Schema[T]['decodeData']['returnValues'];
   } {
     return decodeData<Schema, T>(data, this.options.schema);
