@@ -34,7 +34,7 @@ import {
   utf8ToHex,
 } from 'web3-utils';
 
-import { JSONURLDataToEncode } from '../types';
+import { JSONURLDataToEncode, URLDataWithHash } from '../types';
 
 import {
   SUPPORTED_HASH_FUNCTIONS,
@@ -60,9 +60,7 @@ const encodeDataSourceWithHash = (
 // @ts-ignore
 const abiCoder: AbiCoder.AbiCoder = AbiCoder;
 
-const decodeDataSourceWithHash = (
-  value: string,
-): { hashFunction: string; hash: string; url: string } => {
+const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   const hashFunctionSig = value.substr(0, 10);
   const hashFunction = getHashFunction(hashFunctionSig);
 
@@ -192,6 +190,7 @@ export const valueContentEncodingMap = {
     }) => encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
     decode: (value: string) => decodeDataSourceWithHash(value),
   },
+  // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
   JSONURL: {
     type: 'custom',
     encode: (dataToEncode: JSONURLDataToEncode) => {
@@ -202,7 +201,7 @@ export const valueContentEncodingMap = {
       if (json) {
         if (hashFunction) {
           throw new Error(
-            'When passing in the `json` property, we use "keccak256(utf8)" as a hashingFunction at all times',
+            'When passing in the `json` property, we use "keccak256(utf8)" as a default hashingFunction. You do not need to set a `hashFunction`.',
           );
         }
         hashedJson = hashData(
@@ -223,7 +222,7 @@ export const valueContentEncodingMap = {
         url,
       );
     },
-    decode: (dataToDecode) => decodeDataSourceWithHash(dataToDecode),
+    decode: (dataToDecode: string) => decodeDataSourceWithHash(dataToDecode),
   },
 };
 
@@ -256,7 +255,8 @@ export function encodeValueContent(
         hashFunction: SUPPORTED_HASH_FUNCTIONS;
         hash: string;
         url: string;
-      },
+      }
+    | JSONURLDataToEncode,
 ):
   | string
   | {

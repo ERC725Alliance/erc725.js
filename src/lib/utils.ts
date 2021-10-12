@@ -172,7 +172,6 @@ export function transposeArraySchema(
   schema: ERC725JSONSchema,
   index: number,
 ): ERC725ObjectSchema {
-  // Use enum ERC725JSONSchemaKeyType instead?
   if (schema.keyType.toLowerCase() !== 'array') {
     console.error(
       'Schema is not of keyType "Array" for schema: "' + schema.name + '".',
@@ -412,7 +411,7 @@ export function encodeData<
   }, {} as any);
 }
 
-export function getHashFunction(hashFunctionNameOrHash) {
+export function getHashFunction(hashFunctionNameOrHash: string) {
   const hashFunction = HASH_FUNCTIONS[hashFunctionNameOrHash];
 
   if (!hashFunction) {
