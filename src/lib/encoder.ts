@@ -75,45 +75,55 @@ const decodeDataSourceWithHash = (
 
 const valueTypeEncodingMap = {
   string: {
-    encode: (value) => abiCoder.encodeParameter('string', value),
-    decode: (value) => abiCoder.decodeParameter('string', value),
+    encode: (value: string) => abiCoder.encodeParameter('string', value),
+    decode: (value: string) => abiCoder.decodeParameter('string', value),
   },
   address: {
-    encode: (value) => abiCoder.encodeParameter('address', value),
-    decode: (value) => abiCoder.decodeParameter('address', value),
+    encode: (value: string) => abiCoder.encodeParameter('address', value),
+    decode: (value: string) => abiCoder.decodeParameter('address', value),
   },
   // NOTE: We could add conditional handling of numeric values here...
   uint256: {
-    encode: (value) => abiCoder.encodeParameter('uint256', value),
-    decode: (value) => abiCoder.decodeParameter('uint256', value),
+    encode: (value: string | number) =>
+      abiCoder.encodeParameter('uint256', value),
+    decode: (value: string) => abiCoder.decodeParameter('uint256', value),
   },
   bytes32: {
     encode: (value) => abiCoder.encodeParameter('bytes32', value),
-    decode: (value) => abiCoder.decodeParameter('bytes32', value),
+    decode: (value: string) => abiCoder.decodeParameter('bytes32', value),
+  },
+  bytes4: {
+    encode: (value) => abiCoder.encodeParameter('bytes4', value),
+    decode: (value: string) => abiCoder.decodeParameter('bytes4', value),
   },
   bytes: {
-    encode: (value) => abiCoder.encodeParameter('bytes', value),
-    decode: (value) => abiCoder.decodeParameter('bytes', value),
+    encode: (value: string) => abiCoder.encodeParameter('bytes', value),
+    decode: (value: string) => abiCoder.decodeParameter('bytes', value),
   },
   'string[]': {
-    encode: (value) => abiCoder.encodeParameter('string[]', value),
-    decode: (value) => abiCoder.decodeParameter('string[]', value),
+    encode: (value: string[]) => abiCoder.encodeParameter('string[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('string[]', value),
   },
   'address[]': {
-    encode: (value) => abiCoder.encodeParameter('address[]', value),
-    decode: (value) => abiCoder.decodeParameter('address[]', value),
+    encode: (value: string[]) => abiCoder.encodeParameter('address[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('address[]', value),
   },
   'uint256[]': {
-    encode: (value) => abiCoder.encodeParameter('uint256[]', value),
-    decode: (value) => abiCoder.decodeParameter('uint256[]', value),
+    encode: (value: Array<number | string>) =>
+      abiCoder.encodeParameter('uint256[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('uint256[]', value),
   },
   'bytes32[]': {
-    encode: (value) => abiCoder.encodeParameter('bytes32[]', value),
-    decode: (value) => abiCoder.decodeParameter('bytes32[]', value),
+    encode: (value: string[]) => abiCoder.encodeParameter('bytes32[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('bytes32[]', value),
+  },
+  'bytes4[]': {
+    encode: (value: string[]) => abiCoder.encodeParameter('bytes4[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('bytes4[]', value),
   },
   'bytes[]': {
-    encode: (value) => abiCoder.encodeParameter('bytes[]', value),
-    decode: (value) => abiCoder.decodeParameter('bytes[]', value),
+    encode: (value: string[]) => abiCoder.encodeParameter('bytes[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('bytes[]', value),
   },
 };
 
@@ -175,8 +185,11 @@ export const valueContentEncodingMap = {
   },
   AssetURL: {
     type: 'custom',
-    encode: (value) =>
-      encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
+    encode: (value: {
+      hashFunction: SUPPORTED_HASH_FUNCTIONS;
+      hash: string;
+      url: string;
+    }) => encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
     decode: (value: string) => decodeDataSourceWithHash(value),
   },
   JSONURL: {
@@ -214,7 +227,10 @@ export const valueContentEncodingMap = {
   },
 };
 
-export function encodeValueType(type: string, value: string): string {
+export function encodeValueType(
+  type: string,
+  value: string | string[] | number | number[],
+): string {
   if (!valueTypeEncodingMap[type]) {
     throw new Error('Could not encode valueType: "' + type + '".');
   }
@@ -234,8 +250,21 @@ export function decodeValueType(type: string, value: string) {
 
 export function encodeValueContent(
   type: string,
-  value: string,
-): string | false {
+  value:
+    | string
+    | {
+        hashFunction: SUPPORTED_HASH_FUNCTIONS;
+        hash: string;
+        url: string;
+      },
+):
+  | string
+  | {
+      hashFunction: SUPPORTED_HASH_FUNCTIONS;
+      hash: string;
+      url: string;
+    }
+  | false {
   if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
     throw new Error('Could not encode valueContent: "' + type + '".');
   } else if (type.substr(0, 2) === '0x') {

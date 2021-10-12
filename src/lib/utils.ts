@@ -82,7 +82,15 @@ export function encodeKeyValue(
     // value type encoding will handle it?
 
     // we handle an array element encoding
-    const results: (string | false)[] = [];
+    const results: (
+      | string
+      | {
+          hashFunction: SUPPORTED_HASH_FUNCTIONS;
+          hash: string;
+          url: string;
+        }
+      | false
+    )[] = [];
     for (let index = 0; index < value.length; index++) {
       const element = value[index];
       results.push(

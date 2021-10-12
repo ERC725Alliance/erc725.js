@@ -18,10 +18,12 @@ export type ERC725JSONSchemaValueType =
   | 'uint256'
   | 'bytes32'
   | 'bytes'
+  | 'bytes4'
   | 'string[]'
   | 'address[]'
   | 'uint256[]'
   | 'bytes32[]'
+  | 'bytes4[]'
   | 'bytes[]';
 
 /**
