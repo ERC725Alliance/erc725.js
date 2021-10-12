@@ -7,16 +7,12 @@ import {
   encodeValueContent,
   decodeValueContent,
 } from './encoder';
-import { ERC725 } from '../index';
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
-import { hashData } from './utils';
 import {
   SUPPORTED_HASH_FUNCTION_HASHES,
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './constants';
-import { Schema } from '../../test/generatedSchema';
 
-describe('encoder', () => {
+describe.only('encoder', () => {
   describe('valueType', () => {
     const testCases = [
       {
@@ -274,85 +270,6 @@ describe('encoder', () => {
           (error: any) =>
             error.message ===
             'You have to provide either the hash or the json via the respective properties',
-        );
-      });
-
-      // This test case is outside of the scope of 'encoder.ts' as it uses the global "myERC725" class.
-      // It should go somewhere else.
-      it('should encode/decode JSON properly', () => {
-        const schema: ERC725JSONSchema[] = [
-          {
-            name: 'LSP3Profile',
-            key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-            keyType: 'Singleton',
-            valueContent: 'JSONURL',
-            valueType: 'bytes',
-          },
-        ];
-
-        const myERC725 = new ERC725<Schema>(schema);
-
-        const json = {
-          name: 'rryter',
-          description: 'Web Developer located in Switzerland.',
-          profileImage: [
-            {
-              width: 1350,
-              height: 1800,
-              hashFunction: 'keccak256(bytes)',
-              hash: '0x229b60ea5b58e1ab8e6f1063300be110bb4fa663ba75d3814d60104ac6b74497',
-              url: 'ipfs://Qmbv9j6iCDDYJ1NXHTZnNHDJ6qaaKkZsf79jhUMFAXcfDR',
-            },
-            {
-              width: 768,
-              height: 1024,
-              hashFunction: 'keccak256(bytes)',
-              hash: '0x320db57770084f114988c8a94bcf219ca66c69421590466a45f382cd84995c2b',
-              url: 'ipfs://QmS4m2LmRpay7Jij4DCpvaW5zKZYy43ATZdRxUkUND6nG3',
-            },
-          ],
-          backgroundImage: [
-            {
-              width: 1024,
-              height: 768,
-              hashFunction: 'keccak256(bytes)',
-              hash: '0xbe2d39fe1e0b1911155afc74010db3483528a2b645dea8fcf47bdc34147769be',
-              url: 'ipfs://QmQ6ujfKSc91F44KtMe6WRTSCXoSdCjomQUy8hCUxHMr28',
-            },
-            {
-              width: 640,
-              height: 480,
-              hashFunction: 'keccak256(bytes)',
-              hash: '0xb115f2bf09994e79726db27a7b8d5a0de41a5b81d11b59b3038fa158718266ff',
-              url: 'ipfs://QmakaRZxJMMqwQFJY98J3wjbqYVDnaSZ9sEqBF9iMv3GNX',
-            },
-          ],
-          tags: ['public profile'],
-          links: [],
-        };
-
-        const encodedData = myERC725.encodeData({
-          LSP3Profile: {
-            json,
-            url: 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
-          },
-        });
-
-        const decodedData = myERC725.decodeData({
-          LSP3Profile: encodedData.LSP3Profile.value,
-        });
-
-        assert.deepStrictEqual(
-          decodedData.LSP3Profile.url,
-          'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
-        );
-        assert.deepStrictEqual(
-          decodedData.LSP3Profile.hash,
-          hashData(json, SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8),
-        );
-        assert.deepStrictEqual(
-          decodedData.LSP3Profile.hashFunction,
-          SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
         );
       });
     });
