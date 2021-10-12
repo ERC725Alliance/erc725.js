@@ -1,6 +1,12 @@
 import assert from 'assert';
 import { keccak256, utf8ToHex } from 'web3-utils';
-import { valueContentEncodingMap } from './encoder';
+import {
+  valueContentEncodingMap,
+  encodeValueType,
+  decodeValueType,
+  encodeValueContent,
+  decodeValueContent,
+} from './encoder';
 import { ERC725 } from '../index';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { hashData } from './utils';
@@ -10,177 +16,345 @@ import {
 } from './constants';
 import { Schema } from '../../test/generatedSchema';
 
-describe('#JSONURL encode', () => {
-  it('encodes and hashes JSON data', () => {
-    const dataToEncode = {
-      url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
-      json: {
-        myProperty: 'is a string',
-        anotherProperty: {
-          sdfsdf: 123456,
-        },
-      },
-    };
-    const result = valueContentEncodingMap.JSONURL.encode(dataToEncode);
-
-    // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
-    const hashFunction = SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_UTF8;
-    const urlHash = utf8ToHex(dataToEncode.url).substring(2);
-    const jsonDataHash = keccak256(JSON.stringify(dataToEncode.json)).substring(
-      2,
-    );
-    assert.deepStrictEqual(result, hashFunction + jsonDataHash + urlHash);
-  });
-
-  it('throws when the hashFunction of JSON of JSONURL to encode is not keccak256(utf8)', () => {
-    assert.throws(
-      () => {
-        valueContentEncodingMap.JSONURL.encode({
-          // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
-          hashFunction: 'whatever',
-          url: 'https://file-desination.com/file-name',
-          json: {
-            test: true,
-          },
-        });
-      },
-      (error) =>
-        error.message ===
-        'When passing in the `json` property, we use "keccak256(utf8)" as a hashingFunction at all times',
-    );
-  });
-
-  it('throws when JSONURL encode a JSON without json or hash key', () => {
-    assert.throws(
-      () => {
-        valueContentEncodingMap.JSONURL.encode({
-          // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
-          hashFunction: 'keccak256(utf8)',
-          url: 'https://file-desination.com/file-name',
-        });
-      },
-      (error) =>
-        error.message ===
-        'You have to provide either the hash or the json via the respective properties',
-    );
-  });
-
-  it('should encode JSON properly', () => {
-    const schema: ERC725JSONSchema[] = [
+describe('encoder', () => {
+  describe('valueType', () => {
+    const testCases = [
       {
-        name: 'LSP3Profile',
-        key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-        keyType: 'Singleton',
-        valueContent: 'JSONURL',
+        valueType: 'string',
+        decodedValue: 'Hello I am a string',
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001348656c6c6f204920616d206120737472696e6700000000000000000000000000',
+      },
+      {
+        valueType: 'address',
+        decodedValue: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        encodedValue:
+          '0x000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec7',
+      },
+      {
+        valueType: 'uint256',
+        decodedValue: '1337',
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000539',
+      },
+      {
+        valueType: 'bytes32',
+        decodedValue:
+          '0x1337000000000000000000000000000000000000000000000000000000000000',
+        encodedValue:
+          '0x1337000000000000000000000000000000000000000000000000000000000000',
+      },
+      {
+        valueType: 'bytes4',
+        decodedValue: '0x13370000',
+        encodedValue:
+          '0x1337000000000000000000000000000000000000000000000000000000000000',
+      },
+      {
         valueType: 'bytes',
+        decodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000001337',
+        encodedValue:
+          '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000001337',
+      },
+      {
+        valueType: 'string[]',
+        decodedValue: ['a', 'b'],
+        encodedValue:
+          '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000001610000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000016200000000000000000000000000000000000000000000000000000000000000',
+      },
+      {
+        valueType: 'address[]',
+        decodedValue: [
+          '0x68114e23B500Cdb63A5B6c9006f3acB0325AD0CC',
+          '0x7466e40FEF4978394A07C9124ad4aD1A374b9465',
+        ],
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000200000000000000000000000068114e23b500cdb63a5b6c9006f3acb0325ad0cc0000000000000000000000007466e40fef4978394a07c9124ad4ad1a374b9465',
+      },
+      {
+        valueType: 'uint256[]',
+        decodedValue: ['1', '99'],
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000063',
+      },
+      {
+        valueType: 'bytes32[]',
+        decodedValue: [
+          '0x1337000000000000000000000000000000000000000000000000000000000000',
+          '0x0000000000000000000000000000000000000000000000000000000061626364',
+        ],
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000213370000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000061626364',
+      },
+      {
+        valueType: 'bytes4[]',
+        decodedValue: ['0x12345678', '0x87654321'],
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000212345678000000000000000000000000000000000000000000000000000000008765432100000000000000000000000000000000000000000000000000000000',
+      },
+      {
+        valueType: 'bytes[]',
+        decodedValue: [
+          '0x0000000000000000000000000000000000000000000000000000000000001337',
+          '0x00000000000000000000000000000000000000000000000000000000000054ef',
+        ],
+        encodedValue:
+          '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000001337000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000054ef',
       },
     ];
 
-    const myERC725 = new ERC725<Schema>(schema);
+    testCases.forEach((testCase) => {
+      it(`encodes/decodes: ${testCase.valueType}`, () => {
+        const encodedValue = encodeValueType(
+          testCase.valueType,
+          testCase.decodedValue,
+        );
 
-    const json = {
-      name: 'rryter',
-      description: 'Web Developer located in Switzerland.',
-      profileImage: [
-        {
-          width: 1350,
-          height: 1800,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0x229b60ea5b58e1ab8e6f1063300be110bb4fa663ba75d3814d60104ac6b74497',
-          url: 'ipfs://Qmbv9j6iCDDYJ1NXHTZnNHDJ6qaaKkZsf79jhUMFAXcfDR',
-        },
-        {
-          width: 768,
-          height: 1024,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0x320db57770084f114988c8a94bcf219ca66c69421590466a45f382cd84995c2b',
-          url: 'ipfs://QmS4m2LmRpay7Jij4DCpvaW5zKZYy43ATZdRxUkUND6nG3',
-        },
-        {
-          width: 480,
-          height: 640,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0x8dff218f989e8c3e86950401438df313e609486eae8ff470f3dccb4bed665631',
-          url: 'ipfs://QmXuzWADWcfLCW6ur9FVpMkuLbKCMpeGJuuJKwQcr4SHWy',
-        },
-        {
-          width: 240,
-          height: 320,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0xe9a2ef4b92b5050092df676e0c2c90eab7dd8750b6457f8add3507d9d4d4b541',
-          url: 'ipfs://QmekahsQRQgiHaj12TRrn29Ux7DtdzcpFXP7vr94gKaAHo',
-        },
-        {
-          width: 135,
-          height: 180,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0x42eb23c686b95da5d2e36eaec3d6a3db7e7e50d9ed79c7662f04d7c918e70980',
-          url: 'ipfs://QmRbYFmXDKvea6XHP4yXQu6hmmx9WeZymNkdgarmXu9rVG',
-        },
-      ],
-      backgroundImage: [
-        {
-          width: 1024,
-          height: 768,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0xbe2d39fe1e0b1911155afc74010db3483528a2b645dea8fcf47bdc34147769be',
-          url: 'ipfs://QmQ6ujfKSc91F44KtMe6WRTSCXoSdCjomQUy8hCUxHMr28',
-        },
-        {
-          width: 1024,
-          height: 768,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0xbe2d39fe1e0b1911155afc74010db3483528a2b645dea8fcf47bdc34147769be',
-          url: 'ipfs://QmQ6ujfKSc91F44KtMe6WRTSCXoSdCjomQUy8hCUxHMr28',
-        },
-        {
-          width: 640,
-          height: 480,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0xb115f2bf09994e79726db27a7b8d5a0de41a5b81d11b59b3038fa158718266ff',
-          url: 'ipfs://QmakaRZxJMMqwQFJY98J3wjbqYVDnaSZ9sEqBF9iMv3GNX',
-        },
-        {
-          width: 320,
-          height: 240,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0x7bb445a253370e6e99787cfdd51f39e1c72e78519232bbbc73f5628e212391d2',
-          url: 'ipfs://QmQWnRTrv5AmWLnJXH7LrJddnMALiWU28AZKW4s7EGozBE',
-        },
-        {
-          width: 180,
-          height: 135,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0x22833de71837428db3f2f0f4d5237c5aa7b99a1069f545abd6505a8d2c4a61a3',
-          url: 'ipfs://QmSUyD96J4VFg9QoQGXBBiPrBdJddzmDUKETnHAdyqmDQQ',
-        },
-      ],
-      tags: ['public profile'],
-      links: [],
-    };
+        assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+        assert.deepStrictEqual(
+          decodeValueType(testCase.valueType, encodedValue),
+          testCase.decodedValue,
+        );
+      });
+    });
 
-    const encodedData = myERC725.encodeData({
-      LSP3Profile: {
-        json,
-        url: 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
+    it('should throw when valueType is unknown', () => {
+      assert.throws(
+        () => {
+          encodeValueType('????', 'hi');
+        },
+        () => true,
+      );
+      assert.throws(
+        () => {
+          decodeValueType('whatIsthisType', 'hi');
+        },
+        () => true,
+      );
+    });
+  });
+
+  describe('valueContent', () => {
+    const testCases = [
+      {
+        valueContent: 'Keccak256',
+        decodedValue:
+          '7f37518252ad8c46b3eecd357685e7cd0e2ed88534c10751b1b81ac04dc40bc3',
+        encodedValue:
+          '7f37518252ad8c46b3eecd357685e7cd0e2ed88534c10751b1b81ac04dc40bc3',
       },
+      {
+        valueContent: 'Number',
+        decodedValue: '876',
+        encodedValue:
+          '0x000000000000000000000000000000000000000000000000000000000000036c',
+      },
+      {
+        valueContent: 'Address',
+        decodedValue: '0xa29Afb8F3ccE086B3992621324E9d7c104F03D1B',
+        encodedValue: '0xa29afb8f3cce086b3992621324e9d7c104f03d1b',
+      },
+      {
+        valueContent: 'String',
+        decodedValue: 'hello',
+        encodedValue: '0x68656c6c6f',
+      },
+      {
+        valueContent: 'Markdown',
+        decodedValue: '# hello',
+        encodedValue: '0x232068656c6c6f',
+      },
+      {
+        valueContent: 'URL',
+        decodedValue: 'http://test.com',
+        encodedValue: '0x687474703a2f2f746573742e636f6d',
+      },
+      {
+        valueContent: 'AssetURL',
+        decodedValue: {
+          hashFunction: SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+          hash: '0x027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168',
+          url: 'http://test.com/asset.glb',
+        },
+        encodedValue:
+          '0x6f357c6a027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168687474703a2f2f746573742e636f6d2f61737365742e676c62',
+      },
+    ];
+
+    testCases.forEach((testCase) => {
+      it(`encodes/decodes: ${testCase.valueContent}`, () => {
+        const encodedValue = encodeValueContent(
+          testCase.valueContent,
+          testCase.decodedValue,
+        );
+
+        encodeValueContent(testCase.valueContent, testCase.decodedValue);
+
+        assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+        assert.deepStrictEqual(
+          decodeValueContent(testCase.valueContent, encodedValue),
+          testCase.decodedValue,
+        );
+      });
     });
 
-    const decodedData = myERC725.decodeData({
-      LSP3Profile: encodedData.LSP3Profile.value,
+    it('should throw when valueContent is unknown', () => {
+      assert.throws(
+        () => {
+          encodeValueContent('wrongContent', 'hi');
+        },
+        () => true,
+      );
+      assert.throws(
+        () => {
+          decodeValueContent('wrongContent', 'hi');
+        },
+        () => true,
+      );
     });
 
-    assert.deepStrictEqual(
-      decodedData.LSP3Profile.url,
-      'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
-    );
-    assert.deepStrictEqual(
-      decodedData.LSP3Profile.hash,
-      hashData(json, SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8),
-    );
-    assert.deepStrictEqual(
-      decodedData.LSP3Profile.hashFunction,
-      SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
-    );
+    it('should return the value if the valueContent == value', () => {
+      const value =
+        '0x027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168';
+
+      assert.deepStrictEqual(encodeValueContent(value, value), value);
+      assert.deepStrictEqual(decodeValueContent(value, value), value);
+    });
+
+    describe('JSONURL', () => {
+      it('encodes and hashes JSON data', () => {
+        const dataToEncode = {
+          url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+          json: {
+            myProperty: 'is a string',
+            anotherProperty: {
+              sdfsdf: 123456,
+            },
+          },
+        };
+        const result = valueContentEncodingMap.JSONURL.encode(dataToEncode);
+
+        // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
+        const hashFunction = SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_UTF8;
+        const urlHash = utf8ToHex(dataToEncode.url).substring(2);
+        const jsonDataHash = keccak256(
+          JSON.stringify(dataToEncode.json),
+        ).substring(2);
+        assert.deepStrictEqual(result, hashFunction + jsonDataHash + urlHash);
+      });
+
+      it('throws when the hashFunction of JSON of JSONURL to encode is not keccak256(utf8)', () => {
+        assert.throws(
+          () => {
+            valueContentEncodingMap.JSONURL.encode({
+              // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
+              hashFunction: 'whatever',
+              url: 'https://file-desination.com/file-name',
+              json: {
+                test: true,
+              },
+            });
+          },
+          (error: any) =>
+            error.message ===
+            'When passing in the `json` property, we use "keccak256(utf8)" as a hashingFunction at all times',
+        );
+      });
+
+      it('throws when JSONURL encode a JSON without json or hash key', () => {
+        assert.throws(
+          () => {
+            valueContentEncodingMap.JSONURL.encode({
+              // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
+              hashFunction: 'keccak256(utf8)',
+              url: 'https://file-desination.com/file-name',
+            });
+          },
+          (error: any) =>
+            error.message ===
+            'You have to provide either the hash or the json via the respective properties',
+        );
+      });
+
+      // This test case is outside of the scope of 'encoder.ts' as it uses the global "myERC725" class.
+      // It should go somewhere else.
+      it('should encode/decode JSON properly', () => {
+        const schema: ERC725JSONSchema[] = [
+          {
+            name: 'LSP3Profile',
+            key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+            keyType: 'Singleton',
+            valueContent: 'JSONURL',
+            valueType: 'bytes',
+          },
+        ];
+
+        const myERC725 = new ERC725<Schema>(schema);
+
+        const json = {
+          name: 'rryter',
+          description: 'Web Developer located in Switzerland.',
+          profileImage: [
+            {
+              width: 1350,
+              height: 1800,
+              hashFunction: 'keccak256(bytes)',
+              hash: '0x229b60ea5b58e1ab8e6f1063300be110bb4fa663ba75d3814d60104ac6b74497',
+              url: 'ipfs://Qmbv9j6iCDDYJ1NXHTZnNHDJ6qaaKkZsf79jhUMFAXcfDR',
+            },
+            {
+              width: 768,
+              height: 1024,
+              hashFunction: 'keccak256(bytes)',
+              hash: '0x320db57770084f114988c8a94bcf219ca66c69421590466a45f382cd84995c2b',
+              url: 'ipfs://QmS4m2LmRpay7Jij4DCpvaW5zKZYy43ATZdRxUkUND6nG3',
+            },
+          ],
+          backgroundImage: [
+            {
+              width: 1024,
+              height: 768,
+              hashFunction: 'keccak256(bytes)',
+              hash: '0xbe2d39fe1e0b1911155afc74010db3483528a2b645dea8fcf47bdc34147769be',
+              url: 'ipfs://QmQ6ujfKSc91F44KtMe6WRTSCXoSdCjomQUy8hCUxHMr28',
+            },
+            {
+              width: 640,
+              height: 480,
+              hashFunction: 'keccak256(bytes)',
+              hash: '0xb115f2bf09994e79726db27a7b8d5a0de41a5b81d11b59b3038fa158718266ff',
+              url: 'ipfs://QmakaRZxJMMqwQFJY98J3wjbqYVDnaSZ9sEqBF9iMv3GNX',
+            },
+          ],
+          tags: ['public profile'],
+          links: [],
+        };
+
+        const encodedData = myERC725.encodeData({
+          LSP3Profile: {
+            json,
+            url: 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
+          },
+        });
+
+        const decodedData = myERC725.decodeData({
+          LSP3Profile: encodedData.LSP3Profile.value,
+        });
+
+        assert.deepStrictEqual(
+          decodedData.LSP3Profile.url,
+          'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
+        );
+        assert.deepStrictEqual(
+          decodedData.LSP3Profile.hash,
+          hashData(json, SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8),
+        );
+        assert.deepStrictEqual(
+          decodedData.LSP3Profile.hashFunction,
+          SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+        );
+      });
+    });
   });
 });
