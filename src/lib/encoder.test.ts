@@ -11,8 +11,9 @@ import {
   SUPPORTED_HASH_FUNCTION_HASHES,
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './constants';
+import { JSONURLDataToEncode, URLDataWithHash } from '../types';
 
-describe.only('encoder', () => {
+describe('encoder', () => {
   describe('valueType', () => {
     const testCases = [
       {
@@ -195,6 +196,40 @@ describe.only('encoder', () => {
       });
     });
 
+    it('encodes/decodes: JSONURL', () => {
+      const dataToEncode: JSONURLDataToEncode = {
+        url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+        json: {
+          myProperty: 'is a string',
+          anotherProperty: {
+            key: 123456,
+          },
+        },
+      };
+      const encodedValue = encodeValueContent('JSONURL', dataToEncode);
+
+      const hashFunction = SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_UTF8;
+      const hexUrl = utf8ToHex(dataToEncode.url).substring(2);
+      const jsonDataHash = keccak256(
+        JSON.stringify(dataToEncode.json),
+      ).substring(2);
+      assert.deepStrictEqual(
+        encodedValue,
+        hashFunction + jsonDataHash + hexUrl,
+      );
+
+      const expectedDecodedValue: URLDataWithHash = {
+        hash: `0x${jsonDataHash}`,
+        hashFunction: SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+        url: dataToEncode.url,
+      };
+
+      assert.deepStrictEqual(
+        decodeValueContent('JSONURL', encodedValue),
+        expectedDecodedValue,
+      );
+    });
+
     it('should throw when valueContent is unknown', () => {
       assert.throws(
         () => {
@@ -219,27 +254,6 @@ describe.only('encoder', () => {
     });
 
     describe('JSONURL', () => {
-      it('encodes and hashes JSON data', () => {
-        const dataToEncode = {
-          url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
-          json: {
-            myProperty: 'is a string',
-            anotherProperty: {
-              sdfsdf: 123456,
-            },
-          },
-        };
-        const result = valueContentEncodingMap.JSONURL.encode(dataToEncode);
-
-        // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
-        const hashFunction = SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_UTF8;
-        const urlHash = utf8ToHex(dataToEncode.url).substring(2);
-        const jsonDataHash = keccak256(
-          JSON.stringify(dataToEncode.json),
-        ).substring(2);
-        assert.deepStrictEqual(result, hashFunction + jsonDataHash + urlHash);
-      });
-
       it('throws when the hashFunction of JSON of JSONURL to encode is not keccak256(utf8)', () => {
         assert.throws(
           () => {
@@ -254,7 +268,7 @@ describe.only('encoder', () => {
           },
           (error: any) =>
             error.message ===
-            'When passing in the `json` property, we use "keccak256(utf8)" as a hashingFunction at all times',
+            'When passing in the `json` property, we use "keccak256(utf8)" as a default hashingFunction. You do not need to set a `hashFunction`.',
         );
       });
 
