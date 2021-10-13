@@ -15,6 +15,7 @@ import {
   getSchemaElement,
   encodeArrayKey,
   encodeKeyValue,
+  decodeKeyValue,
 } from './utils';
 
 describe('utils', () => {
@@ -94,102 +95,102 @@ describe('utils', () => {
     });
   });
 
-  describe('encodeKeyValue', () => {
+  describe('encodeKeyValue/decodeKeyValue', () => {
     const testCases = [
       {
         valueContent: 'Keccak256',
         valueType: 'bytes32[]',
-        valueToEncode: [
+        decodedValue: [
           '0xe5d35cae7c9db9879eb8a205baa046ad99503414d6a55eb6725494a4254a6d3f',
           '0x828e919feac2ec05939abd5d221692fbe6bac5667ba5af5d191df1f7ecb1ac21',
         ],
-        expectedEncodedValue:
+        encodedValue:
           '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002e5d35cae7c9db9879eb8a205baa046ad99503414d6a55eb6725494a4254a6d3f828e919feac2ec05939abd5d221692fbe6bac5667ba5af5d191df1f7ecb1ac21',
       },
       {
         valueContent: 'Number',
         valueType: 'uint256[]',
-        valueToEncode: ['123', '456'],
-        expectedEncodedValue:
+        decodedValue: ['123', '456'],
+        encodedValue:
           '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000007b00000000000000000000000000000000000000000000000000000000000001c8',
       },
       {
         valueContent: 'Address',
         valueType: 'address[]',
-        valueToEncode: [
+        decodedValue: [
           '0xCE3e75A43B0A29292219926EAdC8C5585651219C',
           '0xba61a0b24a228807f23B46064773D28Fe51dA81C',
         ],
-        expectedEncodedValue:
+        encodedValue:
           '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000ce3e75a43b0a29292219926eadc8c5585651219c000000000000000000000000ba61a0b24a228807f23b46064773d28fe51da81c',
       },
       {
         valueContent: 'String',
         valueType: 'string[]',
-        valueToEncode: ['apple sauce', 'butter chicken'],
-        expectedEncodedValue:
+        decodedValue: ['apple sauce', 'butter chicken'],
+        encodedValue:
           '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b6170706c65207361756365000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e62757474657220636869636b656e000000000000000000000000000000000000',
       },
       {
         valueContent: 'String',
         valueType: 'string',
-        valueToEncode: 'Great-string',
-        expectedEncodedValue: utf8ToHex('Great-string'),
+        decodedValue: 'Great-string',
+        encodedValue: utf8ToHex('Great-string'),
       },
       {
         valueContent: 'Markdown',
         valueType: 'string',
-        valueToEncode: '# Title',
-        expectedEncodedValue: utf8ToHex('# Title'),
+        decodedValue: '# Title',
+        encodedValue: utf8ToHex('# Title'),
       },
       {
         valueContent: 'URL',
         valueType: 'bytes',
-        valueToEncode: 'http://day.night',
-        expectedEncodedValue: '0x687474703a2f2f6461792e6e69676874',
+        decodedValue: 'http://day.night',
+        encodedValue: '0x687474703a2f2f6461792e6e69676874',
       },
       {
         valueContent: 'AssetURL',
         valueType: 'bytes',
-        valueToEncode: {
+        decodedValue: {
           hashFunction: SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
           hash: '0x81dadadadadadadadadadadadadadadf00a4bdfa8fcaf3791d25f69b497abf88',
           url: 'http://day.night/asset.glb',
         },
-        expectedEncodedValue:
+        encodedValue:
           '0x6f357c6a81dadadadadadadadadadadadadadadf00a4bdfa8fcaf3791d25f69b497abf88687474703a2f2f6461792e6e696768742f61737365742e676c62',
       },
       {
         valueContent: 'JSONURL',
         valueType: 'bytes',
-        valueToEncode: {
+        decodedValue: {
           hashFunction: SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
           hash: '0x81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88',
           url: 'ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd',
         },
-        expectedEncodedValue:
+        encodedValue:
           '0x6f357c6a81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88697066733a2f2f516d6245724b6833466a7378787878787878787878787878787878787878787878787878787639414a4a765a6264',
       },
       // THE CASES BELOW ARE CURRENTLY NOT SUPPORTED BY THE LIB
       // {
       //   valueContent: 'Bytes',
       //   valueType: 'bytes',
-      //   valueToEncode: '0xaaAE32',
-      //   expectedEncodedValue: '0xaaAE32',
+      //   decodedValue: '0xaaAE32',
+      //   encodedValue: '0xaaAE32',
       // },
       // {
       //   valueContent: 'Bytes32',
       //   valueType: 'bytes',
-      //   valueToEncode:
+      //   decodedValue:
       //     '0x7465737400000000000000000000000000000000000000000000000000000000',
-      //   expectedEncodedValue:
+      //   encodedValue:
       //     '0x7465737400000000000000000000000000000000000000000000000000000000',
       // },
       {
         valueContent: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
         valueType: 'bytes',
-        valueToEncode: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
-        expectedEncodedValue: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
+        decodedValue: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
+        encodedValue: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
       },
     ];
 
@@ -199,9 +200,19 @@ describe('utils', () => {
           encodeKeyValue(
             testCase.valueContent,
             testCase.valueType as ERC725JSONSchemaValueType,
-            testCase.valueToEncode,
+            testCase.decodedValue,
           ),
-          testCase.expectedEncodedValue,
+          testCase.encodedValue,
+        );
+      });
+      it(`decodes correctly valueContent: ${testCase.valueContent} to valueType: ${testCase.valueType}`, () => {
+        assert.deepStrictEqual(
+          decodeKeyValue(
+            testCase.valueContent,
+            testCase.valueType as ERC725JSONSchemaValueType,
+            testCase.encodedValue,
+          ),
+          testCase.decodedValue,
         );
       });
     });
