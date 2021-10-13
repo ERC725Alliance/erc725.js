@@ -517,19 +517,17 @@ export function hashData(
 /**
  * Hashes the data received with the specified hashing function,
  * and compares the result with the provided hash.
- *
- * @throws *Error* in case of a mismatch of the hashes.
  */
 export function isDataAuthentic(
   data,
   expectedHash: string,
   lowerCaseHashFunction: SUPPORTED_HASH_FUNCTIONS,
-) {
-  const jsonHash = hashData(data, lowerCaseHashFunction);
+): boolean {
+  const dataHash = hashData(data, lowerCaseHashFunction);
 
-  if (jsonHash !== expectedHash) {
+  if (dataHash !== expectedHash) {
     console.error(
-      `Hash mismatch, returned JSON hash ("${jsonHash}") is different from expected hash "${expectedHash}"`,
+      `Hash mismatch, returned JSON hash ("${dataHash}") is different from expected hash "${expectedHash}"`,
     );
     return false;
   }
