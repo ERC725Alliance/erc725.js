@@ -105,10 +105,8 @@ describe('utils', () => {
             name: 'LSP3IssuedAssets[]',
             key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
             keyType: 'Array',
-            valueContent: 'Number',
-            valueType: 'uint256',
-            elementValueContent: 'Address',
-            elementValueType: 'address',
+            valueContent: 'Address',
+            valueType: 'address',
           },
           decodedValue: [
             '0xc444009d38d3046bb0cF81Fa2Cd295ce46A67C78',
@@ -135,10 +133,8 @@ describe('utils', () => {
             name: 'TestObjArray[]',
             key: '0x9985edaf12cbacf5ac7d6ed54f0445cc0ea56075aee9b9942e4ab3bf4239f950',
             keyType: 'Array',
-            valueContent: 'Number',
-            valueType: 'uint256',
-            elementValueContent: 'JSONURL',
-            elementValueType: 'bytes',
+            valueContent: 'JSONURL',
+            valueType: 'bytes',
           },
           decodedValue: [
             {

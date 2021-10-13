@@ -51,10 +51,6 @@ export interface ERC725JSONSchema {
   keyType: ERC725JSONSchemaKeyType; // Types that determine how the values should be interpreted.
   valueContent: ERC725JSONSchemaValueContent | string; // string holds '0x1345ABCD...' If the value content are specific bytes, than the returned value is expected to equal those bytes.
   valueType: ERC725JSONSchemaValueType;
-  elementKey?: string;
-  elementKeyType?: string;
-  elementValueContent?: ERC725JSONSchemaValueContent; // exists for array elements
-  elementValueType?: ERC725JSONSchemaValueType; // exists for array elements
 }
 
 export interface GenericSchema {

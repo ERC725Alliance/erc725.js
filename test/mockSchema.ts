@@ -140,10 +140,8 @@ export const mockSchema: (ERC725JSONSchema & {
     name: 'LSP3IssuedAssets[]',
     key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
     keyType: 'Array',
-    valueContent: 'Number',
-    valueType: 'uint256',
-    elementValueContent: 'Address',
-    elementValueType: 'address',
+    valueContent: 'Address',
+    valueType: 'address',
     // testing data
     // the full array of values
     returnRawData: [
@@ -166,10 +164,8 @@ export const mockSchema: (ERC725JSONSchema & {
     name: 'LSP3IssuedAssetsWithEmptyValue[]',
     key: '0xbcdf8aea8f803343f50b03205ac25188e17fc1f5e4e42245b0782f68786d9f92',
     keyType: 'Array',
-    valueContent: 'Number',
-    valueType: 'uint256',
-    elementValueContent: 'Address',
-    elementValueType: 'address',
+    valueContent: 'Address',
+    valueType: 'address',
     // testing data
     // the full array of values
     returnRawData: [
@@ -190,10 +186,8 @@ export const mockSchema: (ERC725JSONSchema & {
     name: 'TestObjArray[]',
     key: '0x9985edaf12cbacf5ac7d6ed54f0445cc0ea56075aee9b9942e4ab3bf4239f950',
     keyType: 'Array',
-    valueContent: 'Number', // Array length
-    valueType: 'uint256',
-    elementValueContent: 'JSONURL',
-    elementValueType: 'bytes',
+    valueContent: 'JSONURL',
+    valueType: 'bytes',
     // testing data
     // the full array of values
     returnRawData: [
@@ -438,10 +432,8 @@ export const mockSchema: (ERC725JSONSchema & {
   //   "name": "TestNestedArrayStringArray[]",
   //   "key": "0xe4d20147947de3d1b329a854199dbf938a8f8c375c411fa86df1820d4cca043b",
   //   "keyType": "Array",
-  //   "valueContent": "ArrayLength", // Array length
-  //   "valueType": "uint256",
-  //   "elementValueContent": "String",
-  //   "elementValueType": "string[]",
+  //   "valueContent": "String",
+  //   "valueType": "string[]",
   //   // testing data
   //   // the full array of values
   //   "returnRawData": [
@@ -469,10 +461,8 @@ export const mockSchema: (ERC725JSONSchema & {
   //   "name": "TestNestedArrayObjArray[]",
   //   "key": "0xf9a149b854fc24a5b7c91cce364e1d8306c7d78438a7fdc5c729c394320ebcbe",
   //   "keyType": "Array",
-  //   "valueContent": "ArrayLength", // Array length
-  //   "valueType": "uint256",
-  //   "elementValueContent": "JSONURL",
-  //   "elementValueType": "bytes[]",
+  //   "valueContent": "JSONURL",
+  //   "valueType": "bytes[]",
   //   // testing data
   //   // the full array of values
   //   "returnRawData": [
@@ -545,10 +535,8 @@ export const mockSchema: (ERC725JSONSchema & {
   //   "name": "TestNotSetArray[]",
   //   "key": "0xa90924b9b409ab609ed5136d82249ce17851a12b49bbb6f20fdedd6b3a2be61b",
   //   "keyType": "Array",
-  //   "valueContent": "Number",
-  //   "valueType": "uint256",
-  //   "elementValueContent": "Address",
-  //   "elementValueType": "address",
+  //   "valueContent": "Address",
+  //   "valueType": "address",
   //   // testing data
   //   // the full array of values
   //   "returnRawData": [

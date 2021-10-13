@@ -46,11 +46,6 @@ import {
   valueContentEncodingMap as valueContentMap,
 } from './encoder';
 
-type ERC725ObjectSchema = Pick<
-  ERC725JSONSchema,
-  'key' | 'keyType' | 'valueContent' | 'valueType' | 'name'
->;
-
 /**
  *
  * @param {string} valueContent as per ERC725Schema definition
@@ -231,34 +226,6 @@ export function getSchemaElement(schemas: ERC725JSONSchema[], key: string) {
 
 /**
  *
- * @param schema An object of a schema definition that must have a keyType of 'Array'
- * @param index The index of the array element to transpose the schema to
- * @return Modified schema element of keyType 'Singleton' for fetching or decoding/encoding the array element
- */
-export function transposeArraySchema(
-  schema: ERC725JSONSchema,
-  index: number,
-): ERC725ObjectSchema {
-  if (schema.keyType.toLowerCase() !== 'array') {
-    console.error(
-      'Schema is not of keyType "Array" for schema: "' + schema.name + '".',
-    );
-  }
-
-  return {
-    name: schema.name,
-    key: encodeArrayKey(schema.key, index),
-    keyType: 'Singleton',
-    // TODO: This can be solved by defining an extra "Erc725ArraySchema" for array
-    // @ts-ignore
-    valueContent: schema.elementValueContent,
-    // @ts-ignore
-    valueType: schema.elementValueType,
-  };
-}
-
-/**
- *
  * @param schema is an object of a schema definitions
  * @param value will be either key-value pairs for a key type of Array, or a single value for type Singleton
  * @return the encoded value for the key as per the supplied schema
@@ -287,22 +254,21 @@ export function encodeKey(
           results.push({
             key: schema.key,
             value: encodeKeyValue(
-              schema.valueContent,
-              schema.valueType,
+              'Number',
+              'uint256',
               value.length.toString(),
               schema.name,
             ),
           });
         }
 
-        const newSchema = transposeArraySchema(schema, index);
         results.push({
-          key: newSchema.key,
+          key: encodeArrayKey(schema.key, index),
           value: encodeKeyValue(
-            newSchema.valueContent,
-            newSchema.valueType,
+            schema.valueContent,
+            schema.valueType,
             dataElement,
-            newSchema.name,
+            schema.name,
           ),
         });
       }
@@ -415,25 +381,22 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
       }
 
       const arrayLength =
-        decodeKeyValue(
-          schema.valueContent,
-          schema.valueType,
-          valueElement.value,
-          schema.name,
-        ) || 0;
+        decodeKeyValue('Number', 'uint256', valueElement.value, schema.name) ||
+        0;
 
       // This will not run if no match or arrayLength
       for (let index = 0; index < arrayLength; index++) {
-        const newSchema = transposeArraySchema(schema, index);
-        const dataElement = value.find((e) => e.key === newSchema.key);
+        const dataElement = value.find(
+          (e) => e.key === encodeArrayKey(schema.key, index),
+        );
 
         if (dataElement) {
           results.push(
             decodeKeyValue(
-              newSchema.valueContent,
-              newSchema.valueType,
+              schema.valueContent,
+              schema.valueType,
               dataElement.value,
-              newSchema.name,
+              schema.name,
             ),
           );
         }

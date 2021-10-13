@@ -297,24 +297,13 @@ describe('Running @erc725/erc725.js tests...', () => {
                 leftPad(numberToHex(schemaElement.expectedResult.length), 64),
               );
             }
-            // Change the encoding on the schema....
-            // const arraySchema = schemaElement
-            const arraySchema: ERC725JSONSchema = {
-              name: schemaElement.name,
-              key: schemaElement.key,
-              keyType: 'Singleton',
-              // @ts-ignore
-              valueContent: schemaElement.elementValueContent,
-              // @ts-ignore
-              valueType: schemaElement.elementValueType,
-            };
 
             results.push(
               encodeKeyValue(
-                arraySchema.valueContent,
-                arraySchema.valueType,
+                schemaElement.valueContent,
+                schemaElement.valueType,
                 schemaElement.expectedResult[i],
-                arraySchema.name,
+                schemaElement.name,
               ),
             );
           } // end for loop
