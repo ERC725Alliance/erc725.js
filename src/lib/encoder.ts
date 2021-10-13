@@ -21,7 +21,8 @@
   this handles encoding and decoding as per necessary for the erc725 schema specifications
 */
 
-import Web3Abi from 'web3-eth-abi';
+import AbiCoder from 'web3-eth-abi';
+
 import {
   hexToNumber,
   hexToUtf8,
@@ -32,7 +33,8 @@ import {
   toChecksumAddress,
   utf8ToHex,
 } from 'web3-utils';
-import { JSONURLDataToEncode } from '../types';
+
+import { JSONURLDataToEncode, URLDataWithHash } from '../types';
 
 import {
   SUPPORTED_HASH_FUNCTIONS,
@@ -54,9 +56,11 @@ const encodeDataSourceWithHash = (
   );
 };
 
-const decodeDataSourceWithHash = (
-  value: string,
-): { hashFunction: string; hash: string; url: string } => {
+// TS can't get the types from the import...
+// @ts-ignore
+const abiCoder: AbiCoder.AbiCoder = AbiCoder;
+
+const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   const hashFunctionSig = value.substr(0, 10);
   const hashFunction = getHashFunction(hashFunctionSig);
 
@@ -69,65 +73,55 @@ const decodeDataSourceWithHash = (
 
 const valueTypeEncodingMap = {
   string: {
-    // @ts-ignore
-    encode: (value) => Web3Abi.encodeParameter('string', value),
-    // @ts-ignore
-    decode: (value) => Web3Abi.decodeParameter('string', value),
+    encode: (value: string) => abiCoder.encodeParameter('string', value),
+    decode: (value: string) => abiCoder.decodeParameter('string', value),
   },
   address: {
-    // @ts-ignore
-    encode: (value) => Web3Abi.encodeParameter('address', value),
-    // @ts-ignore
-    decode: (value) => Web3Abi.decodeParameter('address', value),
+    encode: (value: string) => abiCoder.encodeParameter('address', value),
+    decode: (value: string) => abiCoder.decodeParameter('address', value),
   },
   // NOTE: We could add conditional handling of numeric values here...
   uint256: {
-    // @ts-ignore
-    encode: (value) => Web3Abi.encodeParameter('uint256', value),
-    // @ts-ignore
-    decode: (value) => Web3Abi.decodeParameter('uint256', value),
+    encode: (value: string | number) =>
+      abiCoder.encodeParameter('uint256', value),
+    decode: (value: string) => abiCoder.decodeParameter('uint256', value),
   },
   bytes32: {
-    // @ts-ignore
-    encode: (value) => Web3Abi.encodeParameter('bytes32', value),
-    // @ts-ignore
-    decode: (value) => Web3Abi.decodeParameter('bytes32', value),
+    encode: (value) => abiCoder.encodeParameter('bytes32', value),
+    decode: (value: string) => abiCoder.decodeParameter('bytes32', value),
+  },
+  bytes4: {
+    encode: (value) => abiCoder.encodeParameter('bytes4', value),
+    decode: (value: string) => abiCoder.decodeParameter('bytes4', value),
   },
   bytes: {
-    // @ts-ignore
-    encode: (value) => Web3Abi.encodeParameter('bytes', value),
-    // @ts-ignore
-    decode: (value) => Web3Abi.decodeParameter('bytes', value),
+    encode: (value: string) => abiCoder.encodeParameter('bytes', value),
+    decode: (value: string) => abiCoder.decodeParameter('bytes', value),
   },
   'string[]': {
-    // @ts-ignore
-    encode: (value) => Web3Abi.encodeParameter('string[]', value),
-    // @ts-ignore
-    decode: (value) => Web3Abi.decodeParameter('string[]', value),
+    encode: (value: string[]) => abiCoder.encodeParameter('string[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('string[]', value),
   },
   'address[]': {
-    // @ts-ignore
-    encode: (value) => Web3Abi.encodeParameter('address[]', value),
-    // @ts-ignore
-    decode: (value) => Web3Abi.decodeParameter('address[]', value),
+    encode: (value: string[]) => abiCoder.encodeParameter('address[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('address[]', value),
   },
   'uint256[]': {
-    // @ts-ignore
-    encode: (value) => Web3Abi.encodeParameter('uint256[]', value),
-    // @ts-ignore
-    decode: (value) => Web3Abi.decodeParameter('uint256[]', value),
+    encode: (value: Array<number | string>) =>
+      abiCoder.encodeParameter('uint256[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('uint256[]', value),
   },
   'bytes32[]': {
-    // @ts-ignore
-    encode: (value) => Web3Abi.encodeParameter('bytes32[]', value),
-    // @ts-ignore
-    decode: (value) => Web3Abi.decodeParameter('bytes32[]', value),
+    encode: (value: string[]) => abiCoder.encodeParameter('bytes32[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('bytes32[]', value),
+  },
+  'bytes4[]': {
+    encode: (value: string[]) => abiCoder.encodeParameter('bytes4[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('bytes4[]', value),
   },
   'bytes[]': {
-    // @ts-ignore
-    encode: (value) => Web3Abi.encodeParameter('bytes[]', value),
-    // @ts-ignore
-    decode: (value) => Web3Abi.decodeParameter('bytes[]', value),
+    encode: (value: string[]) => abiCoder.encodeParameter('bytes[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('bytes[]', value),
   },
 };
 
@@ -147,53 +141,56 @@ export const valueContentEncodingMap = {
   },
   Number: {
     type: 'uint256',
-    // NOTE; extra logic is to handle and always return a string number
+    // NOTE: extra logic is to handle and always return a string number
     encode: (value) => {
-      // eslint-disable-next-line no-param-reassign
+      let parsedValue: number;
       try {
-        // eslint-disable-next-line no-param-reassign
-        value = parseInt(value, 10);
-      } catch (error) {
+        parsedValue = parseInt(value, 10);
+      } catch (error: any) {
         throw new Error(error);
       }
 
-      return padLeft(numberToHex(value), 64);
+      return padLeft(numberToHex(parsedValue), 64);
     },
     decode: (value) => '' + hexToNumber(value),
   },
   // NOTE: This is not symmetrical, and always returns a checksummed address
   Address: {
     type: 'address',
-    encode: (value) => {
+    encode: (value: string) => {
       if (isAddress(value)) {
         return value.toLowerCase();
       }
 
       throw new Error('Address: "' + value + '" is an invalid address.');
     },
-    decode: (value) => toChecksumAddress(value),
+    decode: (value: string) => toChecksumAddress(value),
   },
   String: {
     type: 'string',
-    encode: (value) => utf8ToHex(value),
-    decode: (value) => hexToUtf8(value),
+    encode: (value: string) => utf8ToHex(value),
+    decode: (value: string) => hexToUtf8(value),
   },
   Markdown: {
     type: 'string',
-    encode: (value) => utf8ToHex(value),
-    decode: (value) => hexToUtf8(value),
+    encode: (value: string) => utf8ToHex(value),
+    decode: (value: string) => hexToUtf8(value),
   },
   URL: {
     type: 'string',
-    encode: (value) => utf8ToHex(value),
-    decode: (value) => hexToUtf8(value),
+    encode: (value: string) => utf8ToHex(value),
+    decode: (value: string) => hexToUtf8(value),
   },
   AssetURL: {
     type: 'custom',
-    encode: (value) =>
-      encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
+    encode: (value: {
+      hashFunction: SUPPORTED_HASH_FUNCTIONS;
+      hash: string;
+      url: string;
+    }) => encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
     decode: (value: string) => decodeDataSourceWithHash(value),
   },
+  // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
   JSONURL: {
     type: 'custom',
     encode: (dataToEncode: JSONURLDataToEncode) => {
@@ -204,7 +201,7 @@ export const valueContentEncodingMap = {
       if (json) {
         if (hashFunction) {
           throw new Error(
-            'When passing in the `json` property, we use "keccak256(utf8)" as a hashingFunction at all times',
+            'When passing in the `json` property, we use "keccak256(utf8)" as a default hashingFunction. You do not need to set a `hashFunction`.',
           );
         }
         hashedJson = hashData(
@@ -225,11 +222,14 @@ export const valueContentEncodingMap = {
         url,
       );
     },
-    decode: (dataToDecode) => decodeDataSourceWithHash(dataToDecode),
+    decode: (dataToDecode: string) => decodeDataSourceWithHash(dataToDecode),
   },
 };
 
-export function encodeValueType(type: string, value: string): string {
+export function encodeValueType(
+  type: string,
+  value: string | string[] | number | number[],
+): string {
   if (!valueTypeEncodingMap[type]) {
     throw new Error('Could not encode valueType: "' + type + '".');
   }
@@ -249,8 +249,22 @@ export function decodeValueType(type: string, value: string) {
 
 export function encodeValueContent(
   type: string,
-  value: string,
-): string | false {
+  value:
+    | string
+    | {
+        hashFunction: SUPPORTED_HASH_FUNCTIONS;
+        hash: string;
+        url: string;
+      }
+    | JSONURLDataToEncode,
+):
+  | string
+  | {
+      hashFunction: SUPPORTED_HASH_FUNCTIONS;
+      hash: string;
+      url: string;
+    }
+  | false {
   if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
     throw new Error('Could not encode valueContent: "' + type + '".');
   } else if (type.substr(0, 2) === '0x') {

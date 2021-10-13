@@ -82,7 +82,15 @@ export function encodeKeyValue(
     // value type encoding will handle it?
 
     // we handle an array element encoding
-    const results: (string | false)[] = [];
+    const results: (
+      | string
+      | {
+          hashFunction: SUPPORTED_HASH_FUNCTIONS;
+          hash: string;
+          url: string;
+        }
+      | false
+    )[] = [];
     for (let index = 0; index < value.length; index++) {
       const element = value[index];
       results.push(
@@ -164,7 +172,6 @@ export function transposeArraySchema(
   schema: ERC725JSONSchema,
   index: number,
 ): ERC725ObjectSchema {
-  // Use enum ERC725JSONSchemaKeyType instead?
   if (schema.keyType.toLowerCase() !== 'array') {
     console.error(
       'Schema is not of keyType "Array" for schema: "' + schema.name + '".',
@@ -404,7 +411,7 @@ export function encodeData<
   }, {} as any);
 }
 
-export function getHashFunction(hashFunctionNameOrHash) {
+export function getHashFunction(hashFunctionNameOrHash: string) {
   const hashFunction = HASH_FUNCTIONS[hashFunctionNameOrHash];
 
   if (!hashFunction) {

@@ -70,7 +70,7 @@ const KECCAK256_BYTES = {
 export const HASH_FUNCTIONS: {
   [key: string]: {
     method: Function;
-    name: string;
+    name: SUPPORTED_HASH_FUNCTION_STRINGS;
     sig: SUPPORTED_HASH_FUNCTIONS;
   };
 } = {
