@@ -406,6 +406,31 @@ export const mockSchema: (ERC725JSONSchema & {
       '0x9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658', // 'mytestdata'
   },
 
+  {
+    name: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
+    key: '0x22496f48a493035f00000000cafecafecafecafecafecafecafecafecafecafe',
+    keyType: 'Bytes20Mapping',
+    valueContent: '0xafdeb5d6',
+    valueType: 'bytes',
+    // Testing data
+    returnRawData:
+      '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000004afdeb5d600000000000000000000000000000000000000000000000000000000',
+    returnGraphData: '0xafdeb5d6',
+    expectedResult: '0xafdeb5d6',
+  },
+  {
+    name: 'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
+    key: '0x4b80742d0000000082ac0000cafecafecafecafecafecafecafecafecafecafe',
+    keyType: 'Bytes20MappingWithGrouping',
+    valueContent: '0xafdeb5d6',
+    valueType: 'bytes',
+    // Testing data
+    returnRawData:
+      '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000004afdeb5d600000000000000000000000000000000000000000000000000000000',
+    returnGraphData: '0xafdeb5d6',
+    expectedResult: '0xafdeb5d6',
+  },
+
   // Nested array tests
   // NOTE: The below are failing on decode all (no source loops, or individual) with data out-of-bounds
   // Case 22

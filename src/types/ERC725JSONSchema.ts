@@ -1,6 +1,11 @@
 // As Defined in: https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md
 
-export type ERC725JSONSchemaKeyType = 'Singleton' | 'Mapping' | 'Array';
+export type ERC725JSONSchemaKeyType =
+  | 'Singleton'
+  | 'Mapping'
+  | 'Array'
+  | 'Bytes20Mapping'
+  | 'Bytes20MappingWithGrouping';
 
 export type ERC725JSONSchemaValueContent =
   | 'Number'
