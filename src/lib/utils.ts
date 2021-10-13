@@ -62,7 +62,7 @@ type ERC725ObjectSchema = Pick<
 export function encodeKeyValue(
   valueContent: string,
   valueType: ERC725JSONSchemaValueType,
-  value: string | string[] | JSONURLDataToEncode,
+  value: string | string[] | JSONURLDataToEncode | JSONURLDataToEncode[],
   name?: string,
 ) {
   const isSupportedValueContent =
@@ -263,7 +263,10 @@ export function transposeArraySchema(
  * @param value will be either key-value pairs for a key type of Array, or a single value for type Singleton
  * @return the encoded value for the key as per the supplied schema
  */
-export function encodeKey(schema: ERC725JSONSchema, value) {
+export function encodeKey(
+  schema: ERC725JSONSchema,
+  value: string | string[] | JSONURLDataToEncode | JSONURLDataToEncode[],
+) {
   // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
 
   const lowerCaseKeyType = schema.keyType.toLowerCase();
@@ -272,6 +275,7 @@ export function encodeKey(schema: ERC725JSONSchema, value) {
     case 'array': {
       if (!Array.isArray(value)) {
         console.error("Can't encode a non array for key of type array");
+        return null;
       }
 
       const results: { key: string; value: string }[] = [];
@@ -285,7 +289,7 @@ export function encodeKey(schema: ERC725JSONSchema, value) {
             value: encodeKeyValue(
               schema.valueContent,
               schema.valueType,
-              value.length,
+              value.length.toString(),
               schema.name,
             ),
           });
@@ -516,7 +520,7 @@ export function encodeData<
     const schemaElement = getSchemaElement(schema, key);
 
     accumulator[key] = {
-      value: encodeKey(schemaElement, value),
+      value: encodeKey(schemaElement, value as any),
       key: schemaElement.key,
     };
 
