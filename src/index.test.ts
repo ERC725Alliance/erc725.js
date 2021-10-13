@@ -332,7 +332,12 @@ describe('Running @erc725/erc725.js tests...', () => {
               // Fail silently with anything BUT the arrayLength key
               hexToNumber(element.value);
             } catch (error) {
-              const result = decodeKeyValue(schemaElement, element);
+              const result = decodeKeyValue(
+                schemaElement.valueContent,
+                schemaElement.valueType,
+                element,
+                schemaElement.name,
+              );
 
               // Handle object types
               if (
@@ -447,8 +452,10 @@ describe('Running @erc725/erc725.js tests...', () => {
 
         it('Decode data value for: ' + schemaElement.name, async () => {
           const result = decodeKeyValue(
-            schemaElement,
+            schemaElement.valueContent,
+            schemaElement.valueType,
             schemaElement.returnGraphData,
+            schemaElement.name,
           );
           assert.deepStrictEqual(result, schemaElement.expectedResult);
         });

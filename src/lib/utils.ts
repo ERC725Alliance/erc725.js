@@ -327,42 +327,42 @@ export function encodeKey(schema: ERC725JSONSchema, value) {
 
 /**
  *
- * @param schemaElementDefinition An object of the schema for this key
- * @param value the value to decode
+ * @param {string} valueContent as per ERC725Schema definition
+ * @param {string} valueType as per ERC725Schema definition
+ * @param {string} value the encoded value as string
+ * @param {string} [name]
  * @return the decoded value as per the schema
  */
-export function decodeKeyValue(schemaElementDefinition, value) {
+export function decodeKeyValue(
+  valueContent: string,
+  valueType: ERC725JSONSchemaValueType,
+  value,
+  name?: string,
+) {
   // Check for the missing map.
-  if (
-    !valueContentMap[schemaElementDefinition.valueContent] &&
-    schemaElementDefinition.valueContent.substr(0, 2) !== '0x'
-  ) {
+  if (!valueContentMap[valueContent] && valueContent.substr(0, 2) !== '0x') {
     throw new Error(
       'The valueContent "' +
-        schemaElementDefinition.valueContent +
+        valueContent +
         '" for "' +
-        schemaElementDefinition.name +
+        name +
         '" is not supported.',
     );
   }
 
   let sameEncoding =
-    valueContentMap[schemaElementDefinition.valueContent] &&
-    valueContentMap[schemaElementDefinition.valueContent].type ===
-      schemaElementDefinition.valueType.split('[]')[0];
-  const isArray =
-    schemaElementDefinition.valueType.substr(
-      schemaElementDefinition.valueType.length - 2,
-    ) === '[]';
+    valueContentMap[valueContent] &&
+    valueContentMap[valueContent].type === valueType.split('[]')[0];
+  const isArray = valueType.substr(valueType.length - 2) === '[]';
 
   // VALUE TYPE
   if (
-    schemaElementDefinition.valueType !== 'bytes' && // we ignore because all is decoded by bytes to start with (abi)
-    schemaElementDefinition.valueType !== 'string' &&
+    valueType !== 'bytes' && // we ignore because all is decoded by bytes to start with (abi)
+    valueType !== 'string' &&
     !isAddress(value) // checks for addresses, since technically an address is bytes?
   ) {
     // eslint-disable-next-line no-param-reassign
-    value = decodeValueType(schemaElementDefinition.valueType, value);
+    value = decodeValueType(valueType, value);
   }
 
   // As per exception above, if address and sameEncoding, then the address still needs to be handled
@@ -370,7 +370,7 @@ export function decodeKeyValue(schemaElementDefinition, value) {
     sameEncoding = !sameEncoding;
   }
 
-  if (sameEncoding && schemaElementDefinition.valueType !== 'string') {
+  if (sameEncoding && valueType !== 'string') {
     return value;
   }
 
@@ -383,15 +383,13 @@ export function decodeKeyValue(schemaElementDefinition, value) {
 
     for (let index = 0; index < value.length; index++) {
       const element = value[index];
-      results.push(
-        decodeValueContent(schemaElementDefinition.valueContent, element),
-      );
+      results.push(decodeValueContent(valueContent, element));
     }
 
     return results;
   }
 
-  return decodeValueContent(schemaElementDefinition.valueContent, value);
+  return decodeValueContent(valueContent, value);
 }
 
 /**
@@ -412,7 +410,13 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
         return results;
       }
 
-      const arrayLength = decodeKeyValue(schema, valueElement.value) || 0;
+      const arrayLength =
+        decodeKeyValue(
+          schema.valueContent,
+          schema.valueType,
+          valueElement.value,
+          schema.name,
+        ) || 0;
 
       // This will not run if no match or arrayLength
       for (let index = 0; index < arrayLength; index++) {
@@ -420,7 +424,14 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
         const dataElement = value.find((e) => e.key === newSchema.key);
 
         if (dataElement) {
-          results.push(decodeKeyValue(newSchema, dataElement.value));
+          results.push(
+            decodeKeyValue(
+              newSchema.valueContent,
+              newSchema.valueType,
+              dataElement.value,
+              newSchema.name,
+            ),
+          );
         }
       } // end for loop
 
@@ -438,10 +449,20 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
           return null;
         }
 
-        return decodeKeyValue(schema, newValue.value);
+        return decodeKeyValue(
+          schema.valueContent,
+          schema.valueType,
+          newValue.value,
+          schema.name,
+        );
       }
 
-      return decodeKeyValue(schema, value);
+      return decodeKeyValue(
+        schema.valueContent,
+        schema.valueType,
+        value,
+        schema.name,
+      );
     }
     default: {
       console.error(
