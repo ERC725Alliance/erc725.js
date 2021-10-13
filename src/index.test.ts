@@ -310,7 +310,12 @@ describe('Running @erc725/erc725.js tests...', () => {
             };
 
             results.push(
-              encodeKeyValue(arraySchema, schemaElement.expectedResult[i]),
+              encodeKeyValue(
+                arraySchema.valueContent,
+                arraySchema.valueType,
+                schemaElement.expectedResult[i],
+                arraySchema.name,
+              ),
             );
           } // end for loop
           assert.deepStrictEqual(results, schemaElement.returnGraphData);
@@ -432,8 +437,10 @@ describe('Running @erc725/erc725.js tests...', () => {
         // SINGLETON type: This is not an array, assumed 'Singleton
         it('Encode data value for: ' + schemaElement.name, async () => {
           const result = encodeKeyValue(
-            schemaElement,
+            schemaElement.valueContent,
+            schemaElement.valueType,
             schemaElement.expectedResult,
+            schemaElement.name,
           );
           assert.deepStrictEqual(result, schemaElement.returnGraphData);
         });

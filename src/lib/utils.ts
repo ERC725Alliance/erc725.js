@@ -25,11 +25,12 @@ import {
   padLeft,
 } from 'web3-utils';
 
-import { KeyValuePair } from '../types';
+import { KeyValuePair, JSONURLDataToEncode } from '../types';
 import {
   ERC725JSONSchema,
   GenericSchema,
   ERC725JSONSchemaKeyType,
+  ERC725JSONSchemaValueType,
 } from '../types/ERC725JSONSchema';
 
 import {
@@ -52,34 +53,33 @@ type ERC725ObjectSchema = Pick<
 
 /**
  *
- * @param schemaElementDefinition An object of the schema for this key
- * @param value can contain single value, or an object as required by schema (JSONURL, or ASSETURL)
+ * @param {string} valueContent as per ERC725Schema definition
+ * @param {string} valueType as per ERC725Schema definition
+ * @param value can contain single value, an array, or an object as required by schema (JSONURL, or ASSETURL)
+ * @param {string} [name]
  * @return the encoded value as per the schema
  */
 export function encodeKeyValue(
-  schemaElementDefinition: ERC725ObjectSchema,
-  value: string,
+  valueContent: string,
+  valueType: ERC725JSONSchemaValueType,
+  value: string | string[] | JSONURLDataToEncode,
+  name?: string,
 ) {
-  // Check if existing in the supported valueContent mapping.
-  if (
-    !valueContentMap[schemaElementDefinition.valueContent] &&
-    schemaElementDefinition.valueContent.substr(0, 2) !== '0x'
-  ) {
+  const isSupportedValueContent =
+    valueContentMap[valueContent] || valueContent.substr(0, 2) === '0x';
+
+  if (!isSupportedValueContent) {
     throw new Error(
-      `The valueContent '${schemaElementDefinition.valueContent} 
-            for ${schemaElementDefinition.name} is not supported.`,
+      `The valueContent '${valueContent}' 
+            for ${name} is not supported.`,
     );
   }
 
   let result;
   const sameEncoding =
-    valueContentMap[schemaElementDefinition.valueContent] &&
-    valueContentMap[schemaElementDefinition.valueContent].type ===
-      schemaElementDefinition.valueType.split('[]')[0];
-  const isArray =
-    schemaElementDefinition.valueType.substr(
-      schemaElementDefinition.valueType.length - 2,
-    ) === '[]';
+    valueContentMap[valueContent] &&
+    valueContentMap[valueContent].type === valueType.split('[]')[0];
+  const isArray = valueType.substr(valueType.length - 2) === '[]';
 
   // We only loop if the valueType done by abi.encodeParameter can not handle it directly
   if (Array.isArray(value) && !sameEncoding) {
@@ -97,27 +97,25 @@ export function encodeKeyValue(
     )[] = [];
     for (let index = 0; index < value.length; index++) {
       const element = value[index];
-      results.push(
-        encodeValueContent(schemaElementDefinition.valueContent, element),
-      );
+      results.push(encodeValueContent(valueContent, element));
     }
     result = results;
-  } else if (!isArray) {
+  } else if (!isArray && !Array.isArray(value)) {
     // Straight forward encode
-    result = encodeValueContent(schemaElementDefinition.valueContent, value);
+    result = encodeValueContent(valueContent, value);
   } else if (sameEncoding) {
     result = value; // leaving this for below
   }
 
   if (
     // and we only skip bytes regardless
-    schemaElementDefinition.valueType !== 'bytes' &&
+    valueType !== 'bytes' &&
     // Requires encoding because !sameEncoding means both encodings are required
     !sameEncoding
   ) {
-    result = encodeValueType(schemaElementDefinition.valueType, result);
+    result = encodeValueType(valueType, result);
   } else if (isArray && sameEncoding) {
-    result = encodeValueType(schemaElementDefinition.valueType, result);
+    result = encodeValueType(valueType, result);
   }
 
   return result;
@@ -220,7 +218,7 @@ export function encodeKeyName(name: string) {
  * @return The requested schema element from the full array of schemas
  */
 export function getSchemaElement(schemas: ERC725JSONSchema[], key: string) {
-  const keyHash = key.substr(0, 2) !== '0x' ? encodeKeyName(key) : key;
+  const keyHash = key.substr(0, 2) === '0x' ? key : encodeKeyName(key);
   const schemaElement = schemas.find((e) => e.key === keyHash);
   if (!schemaElement) {
     throw new Error(
@@ -284,15 +282,24 @@ export function encodeKey(schema: ERC725JSONSchema, value) {
           // This is arrayLength as the first element in the raw array
           results.push({
             key: schema.key,
-            // @ts-ignore
-            value: encodeKeyValue(schema, value.length), // the array length
+            value: encodeKeyValue(
+              schema.valueContent,
+              schema.valueType,
+              value.length,
+              schema.name,
+            ),
           });
         }
 
         const newSchema = transposeArraySchema(schema, index);
         results.push({
           key: newSchema.key,
-          value: encodeKeyValue(newSchema, dataElement),
+          value: encodeKeyValue(
+            newSchema.valueContent,
+            newSchema.valueType,
+            dataElement,
+            newSchema.name,
+          ),
         });
       }
 
@@ -302,7 +309,12 @@ export function encodeKey(schema: ERC725JSONSchema, value) {
     case 'bytes20mappingwithgrouping':
     case 'singleton':
     case 'mapping':
-      return encodeKeyValue(schema, value);
+      return encodeKeyValue(
+        schema.valueContent,
+        schema.valueType,
+        value,
+        schema.name,
+      );
     default:
       console.error(
         'Incorrect data match or keyType in schema from encodeKey(): "' +
