@@ -368,7 +368,12 @@ export class ERC725<Schema extends GenericSchema> {
     if (!value || !value.value) {
       return results;
     } // Handle empty/non-existent array
-    const arrayLength = await decodeKeyValue(schema, value.value); // get the int array length
+    const arrayLength = await decodeKeyValue(
+      'Number',
+      'uint256',
+      value.value,
+      schema.name,
+    ); // get the int array length
 
     // 2. Get the array values for the length of the array
     for (let index = 0; index < arrayLength; index++) {

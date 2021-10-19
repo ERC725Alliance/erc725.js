@@ -5,11 +5,11 @@
 
 <p align="center">
 <a href="https://github.com/ERC725Alliance/erc725.js/actions">
-    <img alt="Version" src="https://badge.fury.io/js/@erc725/erc725.js.svg" />
+    <img alt="Version" src="https://badge.fury.io/js/@erc725%2Ferc725.js.svg" />
   </a>
   
   <a href="https://github.com/ERC725Alliance/erc725.js/actions">
-    <img alt="Tests Passing" src="https://github.com/ERC725Alliance/erc725.js/actions/workflows/node.js.yml/badge.svg" />
+    <img alt="Tests Passing" src="https://github.com/ERC725Alliance/erc725.js/actions/workflows/lint-test-build.yml/badge.svg" />
   </a>
   <a href="https://codecov.io/gh/ERC725Alliance/erc725.js">
     <img src="https://codecov.io/gh/ERC725Alliance/erc725.js/branch/main/graph/badge.svg" />

@@ -297,20 +297,14 @@ describe('Running @erc725/erc725.js tests...', () => {
                 leftPad(numberToHex(schemaElement.expectedResult.length), 64),
               );
             }
-            // Change the encoding on the schema....
-            // const arraySchema = schemaElement
-            const arraySchema: ERC725JSONSchema = {
-              name: schemaElement.name,
-              key: schemaElement.key,
-              keyType: 'Singleton',
-              // @ts-ignore
-              valueContent: schemaElement.elementValueContent,
-              // @ts-ignore
-              valueType: schemaElement.elementValueType,
-            };
 
             results.push(
-              encodeKeyValue(arraySchema, schemaElement.expectedResult[i]),
+              encodeKeyValue(
+                schemaElement.valueContent,
+                schemaElement.valueType,
+                schemaElement.expectedResult[i],
+                schemaElement.name,
+              ),
             );
           } // end for loop
           assert.deepStrictEqual(results, schemaElement.returnGraphData);
@@ -327,7 +321,12 @@ describe('Running @erc725/erc725.js tests...', () => {
               // Fail silently with anything BUT the arrayLength key
               hexToNumber(element.value);
             } catch (error) {
-              const result = decodeKeyValue(schemaElement, element);
+              const result = decodeKeyValue(
+                schemaElement.valueContent,
+                schemaElement.valueType,
+                element,
+                schemaElement.name,
+              );
 
               // Handle object types
               if (
@@ -432,16 +431,20 @@ describe('Running @erc725/erc725.js tests...', () => {
         // SINGLETON type: This is not an array, assumed 'Singleton
         it('Encode data value for: ' + schemaElement.name, async () => {
           const result = encodeKeyValue(
-            schemaElement,
+            schemaElement.valueContent,
+            schemaElement.valueType,
             schemaElement.expectedResult,
+            schemaElement.name,
           );
           assert.deepStrictEqual(result, schemaElement.returnGraphData);
         });
 
         it('Decode data value for: ' + schemaElement.name, async () => {
           const result = decodeKeyValue(
-            schemaElement,
+            schemaElement.valueContent,
+            schemaElement.valueType,
             schemaElement.returnGraphData,
+            schemaElement.name,
           );
           assert.deepStrictEqual(result, schemaElement.expectedResult);
         });

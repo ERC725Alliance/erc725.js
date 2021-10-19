@@ -1,4 +1,8 @@
-# @erc725/erc725.js - v0.6.0
+# @erc725/erc725.js - v0.6.2-beta.4
+
+## Enumerations
+
+- [ProviderTypes](enums/ProviderTypes.md)
 
 ## Classes
 
@@ -20,11 +24,11 @@ Renames and exports: [ERC725](classes/ERC725.md)
 
 ### ERC725JSONSchemaKeyType
 
-Ƭ **ERC725JSONSchemaKeyType**: ``"Singleton"`` \| ``"Mapping"`` \| ``"Array"``
+Ƭ **ERC725JSONSchemaKeyType**: ``"Singleton"`` \| ``"Mapping"`` \| ``"Array"`` \| ``"Bytes20Mapping"`` \| ``"Bytes20MappingWithGrouping"``
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:3](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/types/ERC725JSONSchema.ts#L3)
+[types/ERC725JSONSchema.ts:3](https://github.com/ERC725Alliance/erc725.js/blob/5b9f3be/src/types/ERC725JSONSchema.ts#L3)
 
 ___
 
@@ -34,17 +38,17 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:5](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/types/ERC725JSONSchema.ts#L5)
+[types/ERC725JSONSchema.ts:10](https://github.com/ERC725Alliance/erc725.js/blob/5b9f3be/src/types/ERC725JSONSchema.ts#L10)
 
 ___
 
 ### ERC725JSONSchemaValueType
 
-Ƭ **ERC725JSONSchemaValueType**: ``"string"`` \| ``"address"`` \| ``"uint256"`` \| ``"bytes32"`` \| ``"bytes"`` \| ``"string[]"`` \| ``"address[]"`` \| ``"uint256[]"`` \| ``"bytes32[]"`` \| ``"bytes[]"``
+Ƭ **ERC725JSONSchemaValueType**: ``"string"`` \| ``"address"`` \| ``"uint256"`` \| ``"bytes32"`` \| ``"bytes"`` \| ``"bytes4"`` \| ``"string[]"`` \| ``"address[]"`` \| ``"uint256[]"`` \| ``"bytes32[]"`` \| ``"bytes4[]"`` \| ``"bytes[]"``
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:15](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/types/ERC725JSONSchema.ts#L15)
+[types/ERC725JSONSchema.ts:20](https://github.com/ERC725Alliance/erc725.js/blob/5b9f3be/src/types/ERC725JSONSchema.ts#L20)
 
 ## Functions
 
@@ -72,7 +76,7 @@ ___
 
 #### Defined in
 
-[lib/utils.ts:388](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/lib/utils.ts#L388)
+[lib/utils.ts:475](https://github.com/ERC725Alliance/erc725.js/blob/5b9f3be/src/lib/utils.ts#L475)
 
 ___
 
@@ -97,4 +101,4 @@ KeyValuePair[] An array of key-value objects
 
 #### Defined in
 
-[lib/utils.ts:462](https://github.com/ERC725Alliance/erc725.js/blob/596689d/src/lib/utils.ts#L462)
+[lib/utils.ts:547](https://github.com/ERC725Alliance/erc725.js/blob/5b9f3be/src/lib/utils.ts#L547)
