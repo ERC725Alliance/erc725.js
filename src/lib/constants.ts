@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { numberToHex, keccak256 } from 'web3-utils';
+
 import { MethodData, Encoding, Method } from '../types/Method';
 
 export const METHODS: Record<Method, MethodData> = {

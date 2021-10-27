@@ -1,6 +1,8 @@
 import * as abi from 'web3-eth-abi';
+
 import { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
+
 import { METHODS } from './constants';
 
 let idCount = 0;

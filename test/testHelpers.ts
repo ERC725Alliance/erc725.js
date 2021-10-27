@@ -19,8 +19,10 @@
 
 import { encodeArrayKey } from '../src/lib/utils';
 
+/**
+ * Takes the schema object and builds a full dataset as per expected from provider.
+ */
 export function generateAllRawData(schema) {
-  // takes the schema object and builds a full dataset as per expected from provider
   const results: any[] = [];
   for (let index = 0; index < schema.length; index++) {
     const element = schema[index];
@@ -52,8 +54,10 @@ export function generateAllRawData(schema) {
   return results;
 }
 
+/**
+ * Takes the schema object and builds a full dataset as per expected from provider.
+ */
 export function generateAllData(schema) {
-  // takes the schema object and builds a full dataset as per expected from provider
   const results: any[] = [];
   for (let index = 0; index < schema.length; index++) {
     const element = schema[index];
@@ -88,8 +92,10 @@ export function generateAllData(schema) {
   return results;
 }
 
+/**
+ * Takes the test schema/cases and builds full expected results.
+ */
 export function generateAllResults(schema) {
-  // Take the test schema/cases and builds full expected results
   const results = {};
   schema.forEach((e) => {
     results[e.name] = e.expectedResult;
