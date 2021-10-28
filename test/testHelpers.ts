@@ -22,13 +22,17 @@ import { encodeArrayKey } from '../src/lib/utils';
 /**
  * Takes the schema object and builds a full dataset as per expected from provider.
  */
-export function generateAllRawData(schema) {
-  const results: any[] = [];
+export function generateAllRawData(schema, isArrayMode: boolean) {
+  const results: { key: string; value: string }[] = [];
   for (let index = 0; index < schema.length; index++) {
     const element = schema[index];
     // if is array push data
     if (element.keyType === 'Array') {
-      element.returnRawData.forEach((e, i) => {
+      const correctReturnRawData = isArrayMode
+        ? element.returnRawDataArray
+        : element.returnRawData;
+
+      correctReturnRawData.forEach((e, i) => {
         // we assume always first element in the array in returnData array is the length
         if (i === 0) {
           results.push({
@@ -46,7 +50,7 @@ export function generateAllRawData(schema) {
     } else {
       results.push({
         key: element.key,
-        value: element.returnRawData,
+        value: isArrayMode ? element.returnRawDataArray : element.returnRawData,
       });
     }
   }

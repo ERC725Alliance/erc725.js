@@ -1,44 +1,133 @@
 // This file contains the mock providers used for tests
 
+import { METHODS } from '../src/lib/constants';
+import { Method } from '../src/types/Method';
+
+interface HttpProviderPayload {
+  jsonrpc: '2.0';
+  method: string;
+  params: Array<{
+    to: string;
+    gas: string;
+    gasPrice: string;
+    value: string;
+    data: string;
+  }>;
+  id: number;
+}
+
 export class HttpProvider {
   public returnData;
+  public supportsInterfaces: string[];
 
-  constructor(props) {
+  constructor(props, supportsInterfaces: string[]) {
     // clone array
     this.returnData = Array.isArray(props.returnData)
       ? [...props.returnData]
       : props.returnData;
+    this.supportsInterfaces = supportsInterfaces;
   }
 
-  send(payload, cb) {
+  send(payload: HttpProviderPayload | HttpProviderPayload[], cb) {
     if (Array.isArray(payload)) {
-      const results: { jsonrpc: '2.0'; id: string; result: string }[] = [];
+      const results: { jsonrpc: '2.0'; id: number; result: string }[] = [];
       for (let index = 0; index < payload.length; index++) {
-        const foundResult = this.returnData.find((element) => {
-          // get call param (key)
-          const keyParam = '0x' + payload[index].params[0].data.substr(10);
-          return element.key === keyParam;
-        });
+        const methodSignature = payload[index].params[0].data.substr(0, 10);
 
-        results.push({
-          jsonrpc: '2.0',
-          id: payload[index].id,
-          result: foundResult ? foundResult.value : '0x',
-        });
+        switch (methodSignature) {
+          case METHODS[Method.SUPPORTS_INTERFACE].sig:
+            throw new Error(
+              'Mock of support interface not supported in array mode',
+            );
+          case METHODS[Method.GET_DATA_LEGACY].sig:
+            {
+              const foundResult = this.returnData.find((element) => {
+                // get call param (key)
+                const keyParam =
+                  '0x' + payload[index].params[0].data.substr(10);
+                return element.key === keyParam;
+              });
+
+              results.push({
+                jsonrpc: '2.0',
+                id: payload[index].id,
+                result: foundResult ? foundResult.value : '0x',
+              });
+            }
+            break;
+          case METHODS[Method.GET_DATA].sig:
+            {
+              const foundResult = this.returnData.find((element) => {
+                // get call param (key)
+                const keyParam =
+                  '0x' + payload[index].params[0].data.substr(138);
+                return element.key === keyParam;
+              });
+
+              results.push({
+                jsonrpc: '2.0',
+                id: payload[index].id,
+                result: foundResult ? foundResult.value : '0x',
+              });
+            }
+            break;
+          default:
+            throw new Error(
+              `Method signature: ${methodSignature} mock is not supported in HttpProvider mock`,
+            );
+        }
       }
 
       setTimeout(() => cb(null, results), 10);
     } else {
-      // get call param (key)
-      const keyParam = '0x' + payload.params[0].data.substr(10);
+      let result: string;
+
+      const methodSignature = payload.params[0].data.substr(0, 10);
+
+      switch (methodSignature) {
+        case METHODS[Method.SUPPORTS_INTERFACE].sig:
+          {
+            const requestedInterface = `0x${payload.params[0].data.substr(
+              10,
+              8,
+            )}`;
+            if (this.supportsInterfaces.includes(requestedInterface)) {
+              result =
+                '0x0000000000000000000000000000000000000000000000000000000000000001';
+            } else {
+              result =
+                '0x0000000000000000000000000000000000000000000000000000000000000000';
+            }
+          }
+          break;
+        case METHODS[Method.GET_DATA_LEGACY].sig:
+          {
+            const keyParam = '0x' + payload.params[0].data.substr(10);
+            result = Array.isArray(this.returnData)
+              ? this.returnData.find((e) => e.key === keyParam).value
+              : this.returnData;
+          }
+          break;
+        case METHODS[Method.GET_DATA].sig:
+          {
+            const keyParam = '0x' + payload.params[0].data.substr(138);
+
+            result = Array.isArray(this.returnData)
+              ? this.returnData.find((e) => e.key === keyParam).value
+              : this.returnData;
+          }
+          break;
+        default:
+          throw new Error(
+            `Method signature: ${methodSignature} mock is not supported in HttpProvider mock`,
+          );
+      }
 
       setTimeout(
         () =>
           cb(null, {
             jsonrpc: '2.0',
-            result: Array.isArray(this.returnData)
-              ? this.returnData.find((e) => e.key === keyParam).value
-              : this.returnData,
+            result,
           }),
         10,
       );
@@ -46,23 +135,76 @@ export class HttpProvider {
   }
 }
 
+interface EthereumProviderPayload {
+  method: string;
+  params: Array<{
+    to: string;
+    gas: string;
+    gasPrice: string;
+    value: string;
+    data: string;
+  }>;
+}
+
 export class EthereumProvider {
   public returnData;
+  public supportsInterfaces: string[];
 
-  constructor(props) {
+  constructor(props, supportsInterfaces: string[]) {
     // Deconstruct to create local copy of array
     this.returnData = Array.isArray(props.returnData)
       ? [...props.returnData]
       : props.returnData;
+    this.supportsInterfaces = supportsInterfaces;
   }
 
-  request(payload) {
-    const keyParam = '0x' + payload.params[0].data.substr(10); // remove methodSig
+  request(payload: EthereumProviderPayload) {
+    let result: string;
+
+    const methodSignature = payload.params[0].data.substr(0, 10);
+
+    switch (methodSignature) {
+      case METHODS[Method.SUPPORTS_INTERFACE].sig:
+        {
+          const requestedInterface = `0x${payload.params[0].data.substr(
+            10,
+            8,
+          )}`;
+          if (this.supportsInterfaces.includes(requestedInterface)) {
+            result =
+              '0x0000000000000000000000000000000000000000000000000000000000000001';
+          } else {
+            result =
+              '0x0000000000000000000000000000000000000000000000000000000000000000';
+          }
+        }
+        break;
+      case METHODS[Method.GET_DATA_LEGACY].sig:
+        {
+          const keyParam = '0x' + payload.params[0].data.substr(10);
+
+          result = Array.isArray(this.returnData)
+            ? this.returnData.find((e) => e.key === keyParam).value
+            : this.returnData;
+        }
+        break;
+      case METHODS[Method.GET_DATA].sig:
+        {
+          const keyParam = '0x' + payload.params[0].data.substr(138);
+
+          result = Array.isArray(this.returnData)
+            ? this.returnData.find((e) => e.key === keyParam).value
+            : this.returnData;
+        }
+        break;
+      default:
+        throw new Error(
+          `Method signature: ${methodSignature} is not supported in EthereumProvider mock`,
+        );
+    }
+
     return new Promise((resolve) => {
       setTimeout(() => {
-        const result = Array.isArray(this.returnData)
-          ? this.returnData.find((e) => e.key === keyParam).value
-          : this.returnData;
         // TODO: Handle reject
         resolve(result);
       }, 50);

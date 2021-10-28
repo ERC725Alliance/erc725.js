@@ -22,10 +22,17 @@
   in accordance with implementation of smart contract interfaces of ERC725
 */
 
+import AbiCoder from 'web3-eth-abi';
+
 import { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
 import { ProviderTypes } from '../types/provider';
+import { INTERFACE_IDS } from '../lib/constants';
+
+// TS can't get the types from the import...
+// @ts-ignore
+const abiCoder: AbiCoder.AbiCoder = AbiCoder;
 
 export class Web3ProviderWrapper {
   type: ProviderTypes;
@@ -46,19 +53,97 @@ export class Web3ProviderWrapper {
     return decodeResult(Method.OWNER, result);
   }
 
-  async getData(address: string, keyHash: string) {
+  /**
+   * https://eips.ethereum.org/EIPS/eip-165
+   *
+   * @param address the smart contract address
+   * @param interfaceId ERC-165 identifier as described here: https://github.com/ERC725Alliance/ERC725/blob/develop/docs/ERC-725.md#specification
+   */
+  async supportsInterface(address: string, interfaceId: string) {
     return decodeResult(
-      Method.GET_DATA,
+      Method.SUPPORTS_INTERFACE,
       await this.callContract(
-        constructJSONRPC(address, Method.GET_DATA, keyHash),
+        constructJSONRPC(
+          address,
+          Method.SUPPORTS_INTERFACE,
+          `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
+        ),
+      ),
+    );
+  }
+
+  async getData(address: string, keyHash: string) {
+    let isErc725Y = false;
+    let isErc725YLegacy = false;
+
+    isErc725Y = await this.supportsInterface(address, INTERFACE_IDS.ERC725Y);
+
+    if (!isErc725Y) {
+      isErc725YLegacy = await this.supportsInterface(
+        address,
+        INTERFACE_IDS.ERC725Y_LEGACY,
+      );
+    }
+
+    if (!isErc725Y && !isErc725YLegacy) {
+      throw new Error(
+        `Contract: ${address} does not support ERC725Y interface.`,
+      );
+    }
+
+    if (isErc725Y) {
+      return decodeResult(
+        Method.GET_DATA,
+        await this.callContract(
+          constructJSONRPC(
+            address,
+            Method.GET_DATA,
+            abiCoder.encodeParameter('bytes32[]', [keyHash]),
+          ),
+        ),
+      )[0];
+    }
+
+    return decodeResult(
+      Method.GET_DATA_LEGACY,
+      await this.callContract(
+        constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
       ),
     );
   }
 
   async getAllData(address: string, keys: string[]) {
+    let isErc725Y = false;
+    let isErc725YLegacy = false;
+
+    isErc725Y = await this.supportsInterface(address, INTERFACE_IDS.ERC725Y);
+
+    if (!isErc725Y) {
+      isErc725YLegacy = await this.supportsInterface(
+        address,
+        INTERFACE_IDS.ERC725Y_LEGACY,
+      );
+    }
+
+    if (!isErc725Y && !isErc725YLegacy) {
+      throw new Error(
+        `Contract: ${address} does not support ERC725Y interface.`,
+      );
+    }
+
+    const method = isErc725Y ? Method.GET_DATA : Method.GET_DATA_LEGACY;
+
     const payload: JsonRpc[] = [];
     for (let index = 0; index < keys.length; index++) {
-      payload.push(constructJSONRPC(address, Method.GET_DATA, keys[index]));
+      payload.push(
+        constructJSONRPC(
+          address,
+          method,
+          isErc725Y
+            ? abiCoder.encodeParameter('bytes32[]', [keys[index]])
+            : keys[index],
+        ),
+      );
     }
 
     const results: any = await this.callContract(payload);
@@ -69,12 +154,14 @@ export class Web3ProviderWrapper {
       value: Record<string, any> | null;
     }[] = [];
     for (let index = 0; index < payload.length; index++) {
+      const decodedValue = decodeResult(
+        method,
+        results.find((element) => payload[index].id === element.id),
+      );
+
       returnValues.push({
         key: keys[index],
-        value: decodeResult(
-          Method.GET_DATA,
-          results.find((element) => payload[index].id === element.id),
-        ),
+        value: isErc725Y ? decodedValue[0] : decodedValue,
       });
     }
 

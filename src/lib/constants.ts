@@ -3,13 +3,26 @@ import { numberToHex, keccak256 } from 'web3-utils';
 
 import { MethodData, Encoding, Method } from '../types/Method';
 
+// https://github.com/ERC725Alliance/ERC725/blob/develop/docs/ERC-725.md#specification
+export const INTERFACE_IDS = {
+  ERC725Y_LEGACY: '0x2bd57b73',
+  ERC725Y: '0x5a988c0f',
+};
+
 export const METHODS: Record<Method, MethodData> = {
-  [Method.GET_DATA]: {
+  [Method.GET_DATA_LEGACY]: {
     sig: '0x54f6127f',
     gas: numberToHex(2000000),
     gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES,
+  },
+  [Method.GET_DATA]: {
+    sig: '0x4e3e6e9c',
+    gas: numberToHex(2000000),
+    gasPrice: numberToHex(100000000),
+    value: numberToHex(0),
+    returnEncoding: Encoding.BYTES_ARRAY,
   },
   [Method.DATA_COUNT]: {
     sig: '0x5da40c47',
@@ -31,6 +44,13 @@ export const METHODS: Record<Method, MethodData> = {
     gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.ADDRESS,
+  },
+  [Method.SUPPORTS_INTERFACE]: {
+    sig: '0x01ffc9a7',
+    gas: numberToHex(2000000),
+    gasPrice: numberToHex(100000000),
+    value: numberToHex(0),
+    returnEncoding: Encoding.BOOL,
   },
 };
 

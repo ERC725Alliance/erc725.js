@@ -19,7 +19,10 @@
 
 // Tests for the @erc725/erc725.js package
 import assert from 'assert';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import Web3 from 'web3';
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { GraphProviderWrapper } from '@erc725/provider-wrappers';
 
@@ -48,7 +51,10 @@ import {
 import 'isomorphic-fetch';
 
 import { Schema } from '../test/generatedSchema';
-import { SUPPORTED_HASH_FUNCTION_STRINGS } from './lib/constants';
+import {
+  INTERFACE_IDS,
+  SUPPORTED_HASH_FUNCTION_STRINGS,
+} from './lib/constants';
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
 
@@ -92,161 +98,249 @@ describe('Running @erc725/erc725.js tests...', () => {
     }
   });
 
-  describe('Getting all data in schema by provider', () => {
-    // Construct the full data and results
-    const fullResults = generateAllResults(mockSchema);
-    const allRawData = generateAllRawData(mockSchema);
-    const allGraphData = generateAllData(mockSchema);
+  describe('Getting all data in schema by provider [e2e]', () => {
+    const web3 = new Web3('https://rpc.l14.lukso.network');
+
+    const LEGACY_ERC725_CONTRACT_ADDRESS =
+      '0xb8E120e7e5EAe7bfA629Db5CEFfA69C834F74e99';
+    const ERC725_CONTRACT_ADDRESS =
+      '0x320e678bEb3369702EA14555a74414B2C531c510';
+
+    const e2eSchema: any = [
+      {
+        name: 'LSP3Profile',
+        key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+        keyType: 'Singleton',
+        valueContent: 'JSONURL',
+        valueType: 'bytes',
+      },
+      {
+        name: 'SupportedStandards:ERC725Account',
+        key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6',
+        keyType: 'Singleton',
+        valueContent: '0xafdeb5d6',
+        valueType: 'bytes',
+      },
+      {
+        name: 'LSP1UniversalReceiverDelegate',
+        key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
+        keyType: 'Singleton',
+        valueContent: 'Address',
+        valueType: 'address',
+      },
+    ];
+
+    const e2eResults = {
+      LSP3Profile: {
+        hashFunction: 'keccak256(utf8)',
+        hash: '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
+        url: 'ipfs://QmecrGejUQVXpW4zS948pNvcnQrJ1KiAoM6bdfrVcWZsn5',
+      },
+      'SupportedStandards:ERC725Account': '0xafdeb5d6',
+      LSP1UniversalReceiverDelegate:
+        '0x36e4Eb6Ee168EF54B1E8e850ACBE51045214B313',
+    };
+
+    it('with web3.currentProvider [legacy]', async () => {
+      const erc725 = new ERC725<Schema>(
+        e2eSchema,
+        LEGACY_ERC725_CONTRACT_ADDRESS,
+        web3.currentProvider,
+      );
+      const result = await erc725.getData();
+      assert.deepStrictEqual(result, e2eResults);
+    });
 
     it('with web3.currentProvider', async () => {
-      const provider = new HttpProvider({ returnData: allRawData });
-      const erc725 = new ERC725<Schema>(mockSchema, address, provider);
-      const result = await erc725.getData();
-      assert.deepStrictEqual(result, fullResults);
-    });
-
-    it('with ethereumProvider EIP 1193', async () => {
-      const provider = new EthereumProvider({ returnData: allRawData });
-      const erc725 = new ERC725(mockSchema, address, provider);
-      const result = await erc725.getData();
-      assert.deepStrictEqual(result, fullResults);
-    });
-
-    xit('with apollo client', async () => {
-      const provider = new ApolloClient({
-        returnData: allGraphData,
-        getAll: true,
-      });
-      const erc725 = new ERC725(mockSchema, address, {
-        provider,
-        type: 'ApolloClient',
-      });
-      const result = await erc725.getData();
-      assert.deepStrictEqual(result, fullResults);
-    });
-
-    it('fetchData JSONURL', async () => {
-      // this test does a real request, TODO replace with mock?
-
-      const provider = new HttpProvider({
-        returnData: [
-          {
-            key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
-            value:
-              '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000596f357c6a733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a626400000000000000',
-          },
-        ],
-      });
-      const erc725 = new ERC725(
-        [
-          {
-            name: 'TestJSONURL',
-            key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
-            keyType: 'Singleton',
-            valueContent: 'JSONURL',
-            valueType: 'bytes',
-          },
-        ],
-        address,
-        provider,
+      const erc725 = new ERC725<Schema>(
+        e2eSchema,
+        ERC725_CONTRACT_ADDRESS,
+        web3.currentProvider,
       );
-      const result = await erc725.fetchData('TestJSONURL');
-      assert.deepStrictEqual(result.TestJSONURL, {
-        LSP3Profile: {
-          backgroundImage:
-            'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
-          description:
-            "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
-          profileImage: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
-        },
-      });
+      const result = await erc725.getData();
+      assert.deepStrictEqual(result, e2eResults);
     });
+  });
 
-    it('fetchData JSONURL with custom config.ipfsGateway', async () => {
-      // this test does a real request, TODO replace with mock?
-
-      const provider = new HttpProvider({
-        returnData: [
-          {
-            key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
-            value:
-              '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000596f357c6a733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a626400000000000000',
-          },
-        ],
-      });
-      const erc725 = new ERC725(
-        [
-          {
-            name: 'TestJSONURL',
-            key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
-            keyType: 'Singleton',
-            valueContent: 'JSONURL',
-            valueType: 'bytes',
-          },
-        ],
-        address,
-        provider,
-        {
-          ipfsGateway: 'https://ipfs.lukso.network/ipfs/',
-        },
+  [
+    { name: 'legacy', interface: INTERFACE_IDS.ERC725Y_LEGACY },
+    { name: 'latest', interface: INTERFACE_IDS.ERC725Y },
+  ].forEach((contractVersion) => {
+    describe(`Getting all data in schema by provider [ERC725Y ${contractVersion.name}][mock]`, () => {
+      // Construct the full data and results
+      const fullResults = generateAllResults(mockSchema);
+      const allRawData = generateAllRawData(
+        mockSchema,
+        contractVersion.interface === INTERFACE_IDS.ERC725Y,
       );
-      const result = await erc725.fetchData('TestJSONURL');
-      assert.deepStrictEqual(result.TestJSONURL, {
-        LSP3Profile: {
-          backgroundImage:
-            'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
-          description:
-            "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
-          profileImage: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
-        },
+
+      it('with web3.currentProvider', async () => {
+        const provider = new HttpProvider({ returnData: allRawData }, [
+          contractVersion.interface,
+        ]);
+        const erc725 = new ERC725<Schema>(mockSchema, address, provider);
+        const result = await erc725.getData();
+        assert.deepStrictEqual(result, fullResults);
       });
-    });
 
-    it('fetchData AssetURL', async () => {
-      // this test does a real request, TODO replace with mock?
+      it('with ethereumProvider EIP 1193', async () => {
+        const provider = new EthereumProvider({ returnData: allRawData }, [
+          contractVersion.interface,
+        ]);
+        const erc725 = new ERC725(mockSchema, address, provider);
+        const result = await erc725.getData();
+        assert.deepStrictEqual(result, fullResults);
+      });
 
-      const provider = new HttpProvider({
-        returnData: [
+      xit('with apollo client', async () => {
+        const allGraphData = generateAllData(mockSchema);
+
+        const provider = new ApolloClient({
+          returnData: allGraphData,
+          getAll: true,
+        });
+        const erc725 = new ERC725(mockSchema, address, {
+          provider,
+          type: 'ApolloClient',
+        });
+        const result = await erc725.getData();
+        assert.deepStrictEqual(result, fullResults);
+      });
+
+      it('fetchData JSONURL', async () => {
+        // this test does a real request, TODO replace with mock?
+        const provider = new HttpProvider(
           {
-            key: '0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee',
-            value:
-              '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000598019f9b1ea67779f76db55facacfe81114abcd56b36fe15d63223aba7e5fc8251f68139f697066733a2f2f516d596f387967347a7a6d647532364e537674736f4b6555356f56523668326f686d6f61324378356939316d506600000000000000',
+            returnData: allRawData.filter(
+              (rawData) =>
+                rawData.key ===
+                '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+            ),
           },
-        ],
-      });
-      const erc725 = new ERC725(
-        [
-          {
-            name: 'TestAssetURL',
-            key: '0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee',
-            keyType: 'Singleton',
-            valueContent: 'AssetURL',
-            valueType: 'bytes',
-            // Testing data
-            // @ts-ignore
-            expectedResult: {
-              hashFunction: 'keccak256(utf8)', // 0x8019f9b1
-              hash: '0xea67779f76db55facacfe81114abcd56b36fe15d63223aba7e5fc8251f68139f', // hash of address '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
-              url: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf', // FAKE. just used from above
+          [contractVersion.interface],
+        );
+        const erc725 = new ERC725(
+          [
+            {
+              name: 'TestJSONURL',
+              key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+              keyType: 'Singleton',
+              valueContent: 'JSONURL',
+              valueType: 'bytes',
             },
+          ],
+          address,
+          provider,
+        );
+        const result = await erc725.fetchData('TestJSONURL');
+        assert.deepStrictEqual(result.TestJSONURL, {
+          LSP3Profile: {
+            backgroundImage:
+              'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
+            description:
+              "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
+            profileImage:
+              'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
           },
-        ],
-        address,
-        provider,
-      );
-      const result = await erc725.fetchData('TestAssetURL');
-      assert.strictEqual(
-        Object.prototype.toString.call(result.TestAssetURL),
-        '[object Uint8Array]',
-      );
+        });
+      });
+
+      it('fetchData JSONURL with custom config.ipfsGateway', async () => {
+        // this test does a real request, TODO replace with mock?
+
+        const provider = new HttpProvider(
+          {
+            returnData: allRawData.filter(
+              (rawData) =>
+                rawData.key ===
+                '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+            ),
+          },
+          [contractVersion.interface],
+        );
+        const erc725 = new ERC725(
+          [
+            {
+              name: 'TestJSONURL',
+              key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+              keyType: 'Singleton',
+              valueContent: 'JSONURL',
+              valueType: 'bytes',
+            },
+          ],
+          address,
+          provider,
+          {
+            ipfsGateway: 'https://ipfs.lukso.network/ipfs/',
+          },
+        );
+        const result = await erc725.fetchData('TestJSONURL');
+        assert.deepStrictEqual(result.TestJSONURL, {
+          LSP3Profile: {
+            backgroundImage:
+              'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
+            description:
+              "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
+            profileImage:
+              'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
+          },
+        });
+      });
+
+      if (contractVersion.interface === INTERFACE_IDS.ERC725Y_LEGACY) {
+        // We run this broken test only on legacy for now until it is fixed
+        it('fetchData AssetURL', async () => {
+          // this test does a real request, TODO replace with mock?
+
+          const provider = new HttpProvider(
+            {
+              returnData: [
+                {
+                  key: '0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee',
+                  value:
+                    '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000598019f9b1ea67779f76db55facacfe81114abcd56b36fe15d63223aba7e5fc8251f68139f697066733a2f2f516d596f387967347a7a6d647532364e537674736f4b6555356f56523668326f686d6f61324378356939316d506600000000000000',
+                },
+
+                // Encoded value of:
+                // {
+                //   hashFunction: 'keccak256(bytes)', // 0x8019f9b1
+                //   hash: '0xea67779f76db55facacfe81114abcd56b36fe15d63223aba7e5fc8251f68139f',
+                //   url: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
+                // },
+              ],
+            },
+            [contractVersion.interface],
+          );
+          const erc725 = new ERC725(
+            [
+              {
+                name: 'TestAssetURL',
+                key: '0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee',
+                keyType: 'Singleton',
+                valueContent: 'AssetURL',
+                valueType: 'bytes',
+              },
+            ],
+            address,
+            provider,
+          );
+          const result = await erc725.fetchData('TestAssetURL');
+          assert.strictEqual(
+            Object.prototype.toString.call(result.TestAssetURL),
+            '[object Uint8Array]',
+          );
+        });
+      }
     });
   });
 
   describe('Getting data by schema element by provider', () => {
     mockSchema.forEach((schemaElement) => {
       it(schemaElement.name + ' with web3.currentProvider', async () => {
-        const returnRawData = generateAllRawData([schemaElement]);
-        const provider = new HttpProvider({ returnData: returnRawData });
+        const returnRawData = generateAllRawData([schemaElement], false);
+        const provider = new HttpProvider({ returnData: returnRawData }, [
+          INTERFACE_IDS.ERC725Y_LEGACY,
+        ]);
         const erc725 = new ERC725(mockSchema, address, provider);
         const result = await erc725.getData(schemaElement.key);
         assert.deepStrictEqual(result, {
@@ -255,8 +349,10 @@ describe('Running @erc725/erc725.js tests...', () => {
       });
 
       it(schemaElement.name + ' with ethereumProvider EIP 1193', async () => {
-        const returnRawData = generateAllRawData([schemaElement]);
-        const provider = new HttpProvider({ returnData: returnRawData });
+        const returnRawData = generateAllRawData([schemaElement], false);
+        const provider = new HttpProvider({ returnData: returnRawData }, [
+          INTERFACE_IDS.ERC725Y_LEGACY,
+        ]);
         const erc725 = new ERC725(mockSchema, address, provider);
         const result = await erc725.getData(schemaElement.key);
         assert.deepStrictEqual(result, {
