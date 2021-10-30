@@ -89,8 +89,13 @@ export class EthereumProviderWrapper {
     );
   }
 
-  async getData(address: string, keyHash: string) {
-    const erc725Version = await this.getErc725YVersion(address);
+  async getData(
+    address: string,
+    keyHash: string,
+    providedErc725Version?: ERC725_VERSION,
+  ) {
+    const erc725Version =
+      providedErc725Version ?? (await this.getErc725YVersion(address));
 
     switch (erc725Version) {
       case 'ERC725':
@@ -125,9 +130,11 @@ export class EthereumProviderWrapper {
       value: Record<string, any> | null;
     }[] = [];
 
+    const erc725Version = await this.getErc725YVersion(address);
+
     for (let index = 0; index < keys.length; index++) {
       // TODO: call getData with array instead of multiple calls with 1 element
-      const value = await this.getData(address, keys[index]);
+      const value = await this.getData(address, keys[index], erc725Version);
 
       results.push({
         key: keys[index],
