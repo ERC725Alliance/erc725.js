@@ -28,7 +28,7 @@ import { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
 import { ProviderTypes } from '../types/provider';
-import { INTERFACE_IDS } from '../lib/constants';
+import { ERC725_VERSION, INTERFACE_IDS } from '../lib/constants';
 
 // TS can't get the types from the import...
 // @ts-ignore
@@ -53,13 +53,36 @@ export class Web3ProviderWrapper {
     return decodeResult(Method.OWNER, result);
   }
 
+  async getErc725YVersion(address: string): Promise<ERC725_VERSION> {
+    const isErc725Y = await this.supportsInterface(
+      address,
+      INTERFACE_IDS.ERC725Y,
+    );
+
+    if (isErc725Y) {
+      return ERC725_VERSION.ERC725;
+    }
+
+    const isErc725YLegacy = await this.supportsInterface(
+      address,
+      INTERFACE_IDS.ERC725Y_LEGACY,
+    );
+
+    return isErc725YLegacy
+      ? ERC725_VERSION.ERC725_LEGACY
+      : ERC725_VERSION.NOT_ERC725;
+  }
+
   /**
    * https://eips.ethereum.org/EIPS/eip-165
    *
    * @param address the smart contract address
    * @param interfaceId ERC-165 identifier as described here: https://github.com/ERC725Alliance/ERC725/blob/develop/docs/ERC-725.md#specification
    */
-  async supportsInterface(address: string, interfaceId: string) {
+  async supportsInterface(
+    address: string,
+    interfaceId: string,
+  ): Promise<boolean> {
     return decodeResult(
       Method.SUPPORTS_INTERFACE,
       await this.callContract(
@@ -73,65 +96,47 @@ export class Web3ProviderWrapper {
   }
 
   async getData(address: string, keyHash: string) {
-    let isErc725Y = false;
-    let isErc725YLegacy = false;
+    const erc725Version = await this.getErc725YVersion(address);
 
-    isErc725Y = await this.supportsInterface(address, INTERFACE_IDS.ERC725Y);
-
-    if (!isErc725Y) {
-      isErc725YLegacy = await this.supportsInterface(
-        address,
-        INTERFACE_IDS.ERC725Y_LEGACY,
-      );
-    }
-
-    if (!isErc725Y && !isErc725YLegacy) {
-      throw new Error(
-        `Contract: ${address} does not support ERC725Y interface.`,
-      );
-    }
-
-    if (isErc725Y) {
-      return decodeResult(
-        Method.GET_DATA,
-        await this.callContract(
-          constructJSONRPC(
-            address,
-            Method.GET_DATA,
-            abiCoder.encodeParameter('bytes32[]', [keyHash]),
+    switch (erc725Version) {
+      case 'ERC725': {
+        return decodeResult(
+          Method.GET_DATA,
+          await this.callContract(
+            constructJSONRPC(
+              address,
+              Method.GET_DATA,
+              abiCoder.encodeParameter('bytes32[]', [keyHash]),
+            ),
           ),
-        ),
-      )[0];
+        )[0];
+      }
+      case 'ERC725_LEGACY': {
+        return decodeResult(
+          Method.GET_DATA_LEGACY,
+          await this.callContract(
+            constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
+          ),
+        );
+      }
+      default:
+        throw new Error(
+          `Contract: ${address} does not support ERC725Y interface.`,
+        );
     }
-
-    return decodeResult(
-      Method.GET_DATA_LEGACY,
-      await this.callContract(
-        constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
-      ),
-    );
   }
 
   async getAllData(address: string, keys: string[]) {
-    let isErc725Y = false;
-    let isErc725YLegacy = false;
+    const erc725Version = await this.getErc725YVersion(address);
 
-    isErc725Y = await this.supportsInterface(address, INTERFACE_IDS.ERC725Y);
-
-    if (!isErc725Y) {
-      isErc725YLegacy = await this.supportsInterface(
-        address,
-        INTERFACE_IDS.ERC725Y_LEGACY,
-      );
-    }
-
-    if (!isErc725Y && !isErc725YLegacy) {
+    if (erc725Version === 'NOT_ERC725') {
       throw new Error(
         `Contract: ${address} does not support ERC725Y interface.`,
       );
     }
 
-    const method = isErc725Y ? Method.GET_DATA : Method.GET_DATA_LEGACY;
+    const method =
+      erc725Version === 'ERC725' ? Method.GET_DATA : Method.GET_DATA_LEGACY;
 
     const payload: JsonRpc[] = [];
     for (let index = 0; index < keys.length; index++) {
@@ -139,7 +144,7 @@ export class Web3ProviderWrapper {
         constructJSONRPC(
           address,
           method,
-          isErc725Y
+          erc725Version === 'ERC725'
             ? abiCoder.encodeParameter('bytes32[]', [keys[index]])
             : keys[index],
         ),
@@ -161,7 +166,7 @@ export class Web3ProviderWrapper {
 
       returnValues.push({
         key: keys[index],
-        value: isErc725Y ? decodedValue[0] : decodedValue,
+        value: erc725Version === 'ERC725' ? decodedValue[0] : decodedValue,
       });
     }
 

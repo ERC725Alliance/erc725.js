@@ -24,7 +24,7 @@
 
 import * as abi from 'web3-eth-abi';
 
-import { INTERFACE_IDS, METHODS } from '../lib/constants';
+import { ERC725_VERSION, INTERFACE_IDS, METHODS } from '../lib/constants';
 import { Method } from '../types/Method';
 import { ProviderTypes } from '../types/provider';
 
@@ -50,6 +50,26 @@ export class EthereumProviderWrapper {
     return this.decodeResult(Method.OWNER, result);
   }
 
+  async getErc725YVersion(address: string): Promise<ERC725_VERSION> {
+    const isErc725Y = await this.supportsInterface(
+      address,
+      INTERFACE_IDS.ERC725Y,
+    );
+
+    if (isErc725Y) {
+      return ERC725_VERSION.ERC725;
+    }
+
+    const isErc725YLegacy = await this.supportsInterface(
+      address,
+      INTERFACE_IDS.ERC725Y_LEGACY,
+    );
+
+    return isErc725YLegacy
+      ? ERC725_VERSION.ERC725_LEGACY
+      : ERC725_VERSION.NOT_ERC725;
+  }
+
   /**
    * https://eips.ethereum.org/EIPS/eip-165
    *
@@ -70,43 +90,33 @@ export class EthereumProviderWrapper {
   }
 
   async getData(address: string, keyHash: string) {
-    let isErc725Y = false;
-    let isErc725YLegacy = false;
+    const erc725Version = await this.getErc725YVersion(address);
 
-    isErc725Y = await this.supportsInterface(address, INTERFACE_IDS.ERC725Y);
+    switch (erc725Version) {
+      case 'ERC725':
+        return this.decodeResult(
+          Method.GET_DATA,
+          await this.callContract([
+            this.constructJSONRPC(
+              address,
+              Method.GET_DATA,
+              web3Abi.encodeParameter('bytes32[]', [keyHash]),
+            ),
+          ]),
+        )[0];
+      case 'ERC725_LEGACY':
+        return this.decodeResult(
+          Method.GET_DATA_LEGACY,
+          await this.callContract([
+            this.constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
+          ]),
+        );
 
-    if (!isErc725Y) {
-      isErc725YLegacy = await this.supportsInterface(
-        address,
-        INTERFACE_IDS.ERC725Y_LEGACY,
-      );
+      default:
+        throw new Error(
+          `Contract: ${address} does not support ERC725Y interface.`,
+        );
     }
-
-    if (!isErc725Y && !isErc725YLegacy) {
-      throw new Error(
-        `Contract: ${address} does not support ERC725Y interface.`,
-      );
-    }
-
-    if (isErc725Y) {
-      return this.decodeResult(
-        Method.GET_DATA,
-        await this.callContract([
-          this.constructJSONRPC(
-            address,
-            Method.GET_DATA,
-            web3Abi.encodeParameter('bytes32[]', [keyHash]),
-          ),
-        ]),
-      )[0];
-    }
-
-    return this.decodeResult(
-      Method.GET_DATA_LEGACY,
-      await this.callContract([
-        this.constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
-      ]),
-    );
   }
 
   async getAllData(address: string, keys: string[]) {

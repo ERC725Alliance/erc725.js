@@ -9,6 +9,12 @@ export const INTERFACE_IDS = {
   ERC725Y: '0x5a988c0f',
 };
 
+export enum ERC725_VERSION {
+  ERC725 = 'ERC725', // https://github.com/ERC725Alliance/ERC725/commit/cca7f98cdf243f1ebf1c0a3ae89b1e46931481b0
+  ERC725_LEGACY = 'ERC725_LEGACY',
+  NOT_ERC725 = 'NOT_ERC725',
+}
+
 export const METHODS: Record<Method, MethodData> = {
   [Method.GET_DATA_LEGACY]: {
     sig: '0x54f6127f',
