@@ -30,7 +30,7 @@ compatible web browser from the [Metamask plugin](https://metamask.io/).
 const ethereumProvider = window.ethereum;
 ```
 
-## Graphql (Apollo)
+## GraphQL (Apollo)
 
 Also supported is a [GraphQL
 client](https://www.apollographql.com/docs/) as the provider.

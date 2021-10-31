@@ -357,7 +357,7 @@ export class ERC725<Schema extends GenericSchema> {
     if (schema.keyType !== 'Array') {
       throw new Error(
         `The "_getArrayFields" method requires a schema definition with "keyType: Array",
-        ${schema}`,
+         ${schema}`,
       );
     }
     const results: { key: string; value }[] = [];
@@ -368,6 +368,7 @@ export class ERC725<Schema extends GenericSchema> {
     if (!value || !value.value) {
       return results;
     } // Handle empty/non-existent array
+
     const arrayLength = await decodeKeyValue(
       'Number',
       'uint256',
@@ -375,27 +376,37 @@ export class ERC725<Schema extends GenericSchema> {
       schema.name,
     ); // get the int array length
 
-    // 2. Get the array values for the length of the array
+    const arrayElementKeys: string[] = [];
     for (let index = 0; index < arrayLength; index++) {
-      // 2.1 get the new schema key
       const arrayElementKey = encodeArrayKey(schema.key, index);
-      let arrayElement;
-
-      // 2.2 Check the data first just in case.
-      arrayElement = data[arrayElementKey];
-
-      if (!arrayElement) {
-        // 3. Otherwise we get the array key element value
-        arrayElement = await this.options.provider?.getData(
-          this.options.address as string,
-          arrayElementKey,
-        );
-
-        results.push({
-          key: arrayElementKey,
-          value: arrayElement,
-        });
+      if (!data[arrayElementKey]) {
+        arrayElementKeys.push(arrayElementKey);
       }
+    }
+
+    if (this.options.provider.type !== ProviderTypes.GRAPH_QL) {
+      const arrayElements = await this.options.provider?.getAllData(
+        this.options.address as string,
+        arrayElementKeys,
+      );
+
+      results.push(...arrayElements);
+
+      return results;
+    }
+
+    for (let index = 0; index < arrayElementKeys.length; index++) {
+      // GraphQL provider has a different signature for getAllData(), it doesn't support `keys[]` parameter
+
+      const arrayElement = await this.options.provider?.getData(
+        this.options.address as string,
+        arrayElementKeys[index],
+      );
+
+      results.push({
+        key: arrayElementKeys[index],
+        value: arrayElement,
+      });
     }
 
     return results;

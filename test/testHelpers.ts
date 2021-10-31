@@ -19,14 +19,20 @@
 
 import { encodeArrayKey } from '../src/lib/utils';
 
-export function generateAllRawData(schema) {
-  // takes the schema object and builds a full dataset as per expected from provider
-  const results: any[] = [];
+/**
+ * Takes the schema object and builds a full dataset as per expected from provider.
+ */
+export function generateAllRawData(schema, isArrayMode: boolean) {
+  const results: { key: string; value: string }[] = [];
   for (let index = 0; index < schema.length; index++) {
     const element = schema[index];
     // if is array push data
     if (element.keyType === 'Array') {
-      element.returnRawData.forEach((e, i) => {
+      const correctReturnRawData = isArrayMode
+        ? element.returnRawDataArray
+        : element.returnRawData;
+
+      correctReturnRawData.forEach((e, i) => {
         // we assume always first element in the array in returnData array is the length
         if (i === 0) {
           results.push({
@@ -44,7 +50,7 @@ export function generateAllRawData(schema) {
     } else {
       results.push({
         key: element.key,
-        value: element.returnRawData,
+        value: isArrayMode ? element.returnRawDataArray : element.returnRawData,
       });
     }
   }
@@ -52,8 +58,10 @@ export function generateAllRawData(schema) {
   return results;
 }
 
+/**
+ * Takes the schema object and builds a full dataset as per expected from provider.
+ */
 export function generateAllData(schema) {
-  // takes the schema object and builds a full dataset as per expected from provider
   const results: any[] = [];
   for (let index = 0; index < schema.length; index++) {
     const element = schema[index];
@@ -88,8 +96,10 @@ export function generateAllData(schema) {
   return results;
 }
 
+/**
+ * Takes the test schema/cases and builds full expected results.
+ */
 export function generateAllResults(schema) {
-  // Take the test schema/cases and builds full expected results
   const results = {};
   schema.forEach((e) => {
     results[e.name] = e.expectedResult;

@@ -24,13 +24,14 @@
 
 import * as abi from 'web3-eth-abi';
 
-import { METHODS } from '../lib/constants';
+import { ERC725_VERSION, INTERFACE_IDS, METHODS } from '../lib/constants';
 import { Method } from '../types/Method';
 import { ProviderTypes } from '../types/provider';
 
 // @ts-ignore
 const web3Abi = abi.default;
 
+// https://docs.metamask.io/guide/ethereum-provider.html
 export class EthereumProviderWrapper {
   type: ProviderTypes;
   provider: any;
@@ -49,11 +50,78 @@ export class EthereumProviderWrapper {
     return this.decodeResult(Method.OWNER, result);
   }
 
-  async getData(address: string, keyHash: string) {
-    const result = await this.callContract([
-      this.constructJSONRPC(address, Method.GET_DATA, keyHash),
-    ]);
-    return this.decodeResult(Method.GET_DATA, result);
+  async getErc725YVersion(address: string): Promise<ERC725_VERSION> {
+    const isErc725Y = await this.supportsInterface(
+      address,
+      INTERFACE_IDS.ERC725Y,
+    );
+
+    if (isErc725Y) {
+      return ERC725_VERSION.ERC725;
+    }
+
+    const isErc725YLegacy = await this.supportsInterface(
+      address,
+      INTERFACE_IDS.ERC725Y_LEGACY,
+    );
+
+    return isErc725YLegacy
+      ? ERC725_VERSION.ERC725_LEGACY
+      : ERC725_VERSION.NOT_ERC725;
+  }
+
+  /**
+   * https://eips.ethereum.org/EIPS/eip-165
+   *
+   * @param address the smart contract address
+   * @param interfaceId ERC-165 identifier as described here: https://github.com/ERC725Alliance/ERC725/blob/develop/docs/ERC-725.md#specification
+   */
+  async supportsInterface(address: string, interfaceId: string) {
+    return this.decodeResult(
+      Method.SUPPORTS_INTERFACE,
+      await this.callContract([
+        this.constructJSONRPC(
+          address,
+          Method.SUPPORTS_INTERFACE,
+          `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
+        ),
+      ]),
+    );
+  }
+
+  async getData(
+    address: string,
+    keyHash: string,
+    providedErc725Version?: ERC725_VERSION,
+  ) {
+    const erc725Version =
+      providedErc725Version ?? (await this.getErc725YVersion(address));
+
+    switch (erc725Version) {
+      case 'ERC725':
+        return this.decodeResult(
+          Method.GET_DATA,
+          await this.callContract([
+            this.constructJSONRPC(
+              address,
+              Method.GET_DATA,
+              web3Abi.encodeParameter('bytes32[]', [keyHash]),
+            ),
+          ]),
+        )[0];
+      case 'ERC725_LEGACY':
+        return this.decodeResult(
+          Method.GET_DATA_LEGACY,
+          await this.callContract([
+            this.constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
+          ]),
+        );
+
+      default:
+        throw new Error(
+          `Contract: ${address} does not support ERC725Y interface.`,
+        );
+    }
   }
 
   async getAllData(address: string, keys: string[]) {
@@ -62,10 +130,16 @@ export class EthereumProviderWrapper {
       value: Record<string, any> | null;
     }[] = [];
 
+    const erc725Version = await this.getErc725YVersion(address);
+
     for (let index = 0; index < keys.length; index++) {
+      // TODO: call getData with array instead of multiple calls with 1 element
+      const value = await this.getData(address, keys[index], erc725Version);
+
       results.push({
         key: keys[index],
-        value: await this.getData(address, keys[index]),
+        // TODO: get the interface id here to prevent multiple calls in getData
+        value,
       });
     }
 
