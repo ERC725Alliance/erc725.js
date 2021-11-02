@@ -4,7 +4,7 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/ERC725Alliance/erc725.js/actions">
+  <a href="https://www.npmjs.com/package/@erc725/erc725.js">
     <img alt="Version" src="https://badge.fury.io/js/@erc725%2Ferc725.js.svg" />
   </a>
   
@@ -29,7 +29,7 @@
 | :-------: | :----------------------------------------------------------------------------------------------------------------- |
 
 ```shell script
-$ npm install @erc725/erc725.js
+npm install @erc725/erc725.js
 ```
 
 ```js
