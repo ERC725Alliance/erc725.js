@@ -158,7 +158,6 @@ export class ERC725<Schema extends GenericSchema> {
    * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/getData.js#L43-L56
    * ```
    */
-  async getData(keysOrKeys?: string | string[]);
   async getData(
     keyOrKeys?: string | string[],
   ): Promise<{ [key: string]: any }> {
@@ -203,7 +202,7 @@ export class ERC725<Schema extends GenericSchema> {
    */
   async fetchData(
     keyOrKeys?: string | string[],
-  ): Promise<{ [key: string]: KeyValuePair }> {
+  ): Promise<{ [key: string]: any }> {
     const dataFromChain = await this.getData(keyOrKeys);
     const dataFromExternalSources = await this.getDataFromExternalSources(
       dataFromChain,
@@ -216,7 +215,7 @@ export class ERC725<Schema extends GenericSchema> {
   }
 
   private getDataFromExternalSources(dataFromChain: { [key: string]: any }): {
-    [key: string]: URLDataWithHash;
+    [key: string]: any;
   } {
     return Object.entries(dataFromChain)
       .filter(([key]) => {
@@ -225,7 +224,7 @@ export class ERC725<Schema extends GenericSchema> {
           keySchema.valueContent.toLowerCase(),
         );
       })
-      .reduce(async (accumulator: any, [key, dataEntry]) => {
+      .reduce(async (accumulator, [key, dataEntry]) => {
         let receivedData;
         try {
           const { url } = this.patchIPFSUrlsIfApplicable(dataEntry);
