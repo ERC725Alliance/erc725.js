@@ -1,32 +1,16 @@
+# erc725.js &middot; [![GitHub license](https://img.shields.io/github/license/ERC725Alliance/erc725.js)](./LICENSE) [![npm version](https://img.shields.io/npm/v/@erc725/erc725.js.svg?style=flat)](https://www.npmjs.com/package/@erc725/erc725.js) [![Codecov](https://codecov.io/gh/ERC725Alliance/erc725.js/branch/main/graph/badge.svg)](https://codecov.io/gh/ERC725Alliance/erc725.js) [![Tests](https://github.com/ERC725Alliance/erc725.js/actions/workflows/lint-test-build.yml/badge.svg)](https://github.com/ERC725Alliance/erc725.js/actions)
+
 <p align="center">
  <h2 align="center"><strong>@erc725/erc725.js</strong></h2>
  <p align="center">Allows for interfacing with <a href="https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md">ERC725Y</a> compliant contracts on an EVM blockchain.</p>
 </p>
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/@erc725/erc725.js">
-    <img alt="Version" src="https://badge.fury.io/js/@erc725%2Ferc725.js.svg" />
-  </a>
-  
-  <a href="https://github.com/ERC725Alliance/erc725.js/actions">
-    <img alt="Tests Passing" src="https://github.com/ERC725Alliance/erc725.js/actions/workflows/lint-test-build.yml/badge.svg" />
-  </a>
-  <a href="https://codecov.io/gh/ERC725Alliance/erc725.js">
-    <img src="https://codecov.io/gh/ERC725Alliance/erc725.js/branch/main/graph/badge.svg" />
-  </a>
-  <a href="https://github.com/ERC725Alliance/erc725.js/issues">
-    <img alt="Issues" src="https://img.shields.io/github/issues/ERC725Alliance/erc725.js?color=0088ff" />
-  </a>
-  <a href="https://github.com/ERC725Alliance/erc725.js/pulls">
-    <img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/ERC725Alliance/erc725.js?color=0088ff" />
-  </a>
-</p>
 <p align="center">For more information see <a href="https://docs.lukso.tech/tools/erc725js/getting-started">Documentation</a>.</p>
-
-## Installation
 
 | :warning: | _This package is currently in early stages of development,<br/> use for testing or experimentation purposes only._ |
 | :-------: | :----------------------------------------------------------------------------------------------------------------- |
+
+## Installation
 
 ```shell script
 npm install @erc725/erc725.js
@@ -119,24 +103,10 @@ await erc725.fetchData('LSP3Profile'); // downloads and verifies the linked JSON
 */
 ```
 
-## Building
+## Contributing
 
-```shell script
-$ npm run build
-```
+Please check [CONTRIBUTING](./CONTRIBUTING.md).
 
-This will build the library into `/build`
+### License
 
-## Testing
-
-```shell script
-$ npm test
-```
-
-## Publishing
-
-```shell script
-$ npm run publish
-```
-
-Will build and then publish the package to npm.
+erc725.js is [Apache 2.0 licensed](./LICENSE).
