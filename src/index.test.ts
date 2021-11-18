@@ -106,6 +106,50 @@ describe('Running @erc725/erc725.js tests...', () => {
     const ERC725_CONTRACT_ADDRESS =
       '0x320e678bEb3369702EA14555a74414B2C531c510';
 
+    it('should return empty if the key does not exist in the contract', async () => {
+      const erc725 = new ERC725(
+        [
+          {
+            name: 'ThisKeyDoesNotExist',
+            key: '0xb12a0af5f83066646eb63c96bf29dcb827024d9a33189f5a61652a03951d1fbe',
+            keyType: 'Singleton',
+            valueContent: 'String',
+            valueType: 'string',
+          },
+        ],
+        ERC725_CONTRACT_ADDRESS,
+        web3.currentProvider,
+      );
+
+      const data = await erc725.getData('ThisKeyDoesNotExist');
+      assert.deepStrictEqual(data, { ThisKeyDoesNotExist: '' });
+
+      const dataArray = await erc725.getData(['ThisKeyDoesNotExist']);
+      assert.deepStrictEqual(dataArray, { ThisKeyDoesNotExist: '' });
+    });
+
+    it('should return empty if the key of type Array does not exist in the contract', async () => {
+      const erc725 = new ERC725(
+        [
+          {
+            name: 'NonExistingArray[]',
+            key: '0xd6cbdbfc8d25c9ce4720b5fe6fa8fc536803944271617bf5425b4bd579195840',
+            keyType: 'Array',
+            valueContent: 'Address',
+            valueType: 'address',
+          },
+        ],
+        ERC725_CONTRACT_ADDRESS,
+        web3.currentProvider,
+      );
+
+      const data = await erc725.getData('NonExistingArray[]');
+      assert.deepStrictEqual(data, { 'NonExistingArray[]': [] });
+
+      const dataArray = await erc725.getData(['NonExistingArray[]']);
+      assert.deepStrictEqual(dataArray, { 'NonExistingArray[]': [] });
+    });
+
     const e2eSchema: any = [
       {
         name: 'LSP3Profile',
