@@ -376,7 +376,7 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
       const results: any[] = [];
 
       // If user has requested a key which does not exist in the contract, value will be: 0x and value.find() will fail.
-      if (typeof value === 'string') {
+      if (!value || typeof value === 'string') {
         return results;
       }
 

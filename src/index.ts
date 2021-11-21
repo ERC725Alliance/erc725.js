@@ -438,7 +438,7 @@ export class ERC725<Schema extends GenericSchema> {
         };
       }
 
-      return { [data]: [] }; // return empty object if there are no arrayValues
+      return { [keySchema.name]: [] }; // return empty object if there are no arrayValues
     }
 
     return {

@@ -106,7 +106,7 @@ describe('Running @erc725/erc725.js tests...', () => {
     const ERC725_CONTRACT_ADDRESS =
       '0x320e678bEb3369702EA14555a74414B2C531c510';
 
-    it('should return empty if the key does not exist in the contract', async () => {
+    it('should return null if the key does not exist in the contract', async () => {
       const erc725 = new ERC725(
         [
           {
@@ -122,13 +122,13 @@ describe('Running @erc725/erc725.js tests...', () => {
       );
 
       const data = await erc725.getData('ThisKeyDoesNotExist');
-      assert.deepStrictEqual(data, { ThisKeyDoesNotExist: '' });
+      assert.deepStrictEqual(data, { ThisKeyDoesNotExist: null });
 
       const dataArray = await erc725.getData(['ThisKeyDoesNotExist']);
-      assert.deepStrictEqual(dataArray, { ThisKeyDoesNotExist: '' });
+      assert.deepStrictEqual(dataArray, { ThisKeyDoesNotExist: null });
     });
 
-    it('should return empty if the key of type Array does not exist in the contract', async () => {
+    it('should return [] if the key of type Array does not exist in the contract', async () => {
       const erc725 = new ERC725(
         [
           {

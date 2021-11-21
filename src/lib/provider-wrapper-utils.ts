@@ -11,9 +11,25 @@ const web3abiDecoder = abi.default;
 
 export function decodeResult(method: Method, result) {
   const rpcResult = result.result;
-  return rpcResult === '0x'
-    ? null
-    : web3abiDecoder.decodeParameter(METHODS[method].returnEncoding, rpcResult);
+
+  if (rpcResult === '0x') {
+    return null;
+  }
+
+  const decodedData = web3abiDecoder.decodeParameter(
+    METHODS[method].returnEncoding,
+    rpcResult,
+  );
+
+  if (
+    Array.isArray(decodedData) &&
+    decodedData.length === 1 &&
+    decodedData[0] === '0x'
+  ) {
+    return [null];
+  }
+
+  return decodedData;
 }
 
 export function constructJSONRPC(

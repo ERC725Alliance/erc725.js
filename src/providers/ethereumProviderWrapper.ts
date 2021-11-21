@@ -25,6 +25,7 @@
 import * as abi from 'web3-eth-abi';
 
 import { ERC725_VERSION, INTERFACE_IDS, METHODS } from '../lib/constants';
+import { decodeResult as decodeResultUtils } from '../lib/provider-wrapper-utils';
 import { Method } from '../types/Method';
 import { ProviderTypes } from '../types/provider';
 
@@ -171,8 +172,6 @@ export class EthereumProviderWrapper {
 
   // eslint-disable-next-line class-methods-use-this
   private decodeResult(method: Method, result: string) {
-    return result === '0x'
-      ? null
-      : web3Abi.decodeParameter(METHODS[method].returnEncoding, result);
+    return decodeResultUtils(method, { result });
   }
 }
