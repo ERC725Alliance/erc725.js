@@ -355,7 +355,7 @@ export class ERC725<Schema extends GenericSchema> {
   ) {
     if (schema.keyType !== 'Array') {
       throw new Error(
-        `The "_getArrayFields" method requires a schema definition with "keyType: Array",
+        `The "getArrayValues" method requires a schema definition with "keyType: Array",
          ${schema}`,
       );
     }
@@ -384,12 +384,17 @@ export class ERC725<Schema extends GenericSchema> {
     }
 
     if (this.options.provider.type !== ProviderTypes.GRAPH_QL) {
-      const arrayElements = await this.options.provider?.getAllData(
-        this.options.address as string,
-        arrayElementKeys,
-      );
+      try {
+        const arrayElements = await this.options.provider?.getAllData(
+          this.options.address as string,
+          arrayElementKeys,
+        );
 
-      results.push(...arrayElements);
+        results.push(...arrayElements);
+      } catch (err) {
+        // This case may happen if user requests an array key which does not exist in the contract.
+        // In this case, we simply skip
+      }
 
       return results;
     }
@@ -423,6 +428,7 @@ export class ERC725<Schema extends GenericSchema> {
       const dataKeyValue = {
         [keySchema.key]: { key: keySchema.key, value: rawData },
       };
+
       const arrayValues = await this.getArrayValues(keySchema, dataKeyValue);
 
       if (arrayValues && arrayValues.length > 0) {
@@ -432,7 +438,7 @@ export class ERC725<Schema extends GenericSchema> {
         };
       }
 
-      return {}; // return empty object if there are no arrayValues
+      return { [keySchema.name]: [] }; // return empty object if there are no arrayValues
     }
 
     return {
