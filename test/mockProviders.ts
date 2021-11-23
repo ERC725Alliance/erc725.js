@@ -17,14 +17,15 @@ interface HttpProviderPayload {
 }
 
 export class HttpProvider {
-  public returnData;
+  public returnData: { key: string; value: string }[];
   public supportsInterfaces: string[];
 
-  constructor(props, supportsInterfaces: string[]) {
+  constructor(
+    props: { returnData: { key: string; value: string }[] },
+    supportsInterfaces: string[],
+  ) {
     // clone array
-    this.returnData = Array.isArray(props.returnData)
-      ? [...props.returnData]
-      : props.returnData;
+    this.returnData = [...props.returnData];
     this.supportsInterfaces = supportsInterfaces;
   }
 
@@ -103,18 +104,15 @@ export class HttpProvider {
         case METHODS[Method.GET_DATA_LEGACY].sig:
           {
             const keyParam = '0x' + payload.params[0].data.substr(10);
-            result = Array.isArray(this.returnData)
-              ? this.returnData.find((e) => e.key === keyParam).value
-              : this.returnData;
+            const foundResult = this.returnData.find((e) => e.key === keyParam);
+            result = foundResult ? foundResult.value : '0x';
           }
           break;
         case METHODS[Method.GET_DATA].sig:
           {
             const keyParam = '0x' + payload.params[0].data.substr(138);
-
-            result = Array.isArray(this.returnData)
-              ? this.returnData.find((e) => e.key === keyParam).value
-              : this.returnData;
+            const foundResult = this.returnData.find((e) => e.key === keyParam);
+            result = foundResult ? foundResult.value : '0x';
           }
           break;
         default:
