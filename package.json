@@ -11,7 +11,7 @@
     "build:module": "tsc -p tsconfig.module.json",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=text --reporter=lcov mocha",
     "lint": "eslint . --ext .ts",
-    "version": "standard-version",
+    "release": "standard-version",
     "docs:generate": "npm run docs:generate:markdown",
     "docs:generate:markdown": "typedoc --options typedoc.json",
     "docs:generate:html": "typedoc --options typedoc.html.json"
