@@ -16,4 +16,4 @@ Another example: `https://cloudflare-ipfs.com/ipfs/`
 
 #### Defined in
 
-[types/Config.ts:11](https://github.com/ERC725Alliance/erc725.js/blob/9431f85/src/types/Config.ts#L11)
+[types/Config.ts:11](https://github.com/ERC725Alliance/erc725.js/blob/6794bc5/src/types/Config.ts#L11)

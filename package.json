@@ -12,9 +12,7 @@
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=text --reporter=lcov mocha",
     "lint": "eslint . --ext .ts",
     "release": "standard-version",
-    "docs:generate": "npm run docs:generate:markdown",
-    "docs:generate:markdown": "typedoc --options typedoc.json",
-    "docs:generate:html": "typedoc --options typedoc.html.json"
+    "docs:generate": "typedoc --options typedoc.json"
   },
   "repository": {
     "type": "git",
