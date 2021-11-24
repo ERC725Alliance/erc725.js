@@ -1,4 +1,5 @@
 name: Publish NPM Package
+
 on:
   release:
     types: [published]
@@ -9,26 +10,30 @@ jobs:
     permissions:
       contents: read
       packages: write
-    strategy:
-      matrix:
-        include:
-          - registry-url: 'https://registry.npmjs.org'
-            command: npm publish --access public
-            token: NPM_TOKEN
-          # - registry-url: 'https://npm.pkg.github.com'
-          #   command: npm publish
-          #   token: GITHUB_TOKEN
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
         with:
-          node-version: '12.x'
-          registry-url: ${{ matrix.registry-url }}
+          fetch-depth: 0
+
+      - name: Use Node.js v16
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
           scope: '@erc725'
           cache: 'npm'
-      - run: npm ci
-      - run: npm run build
-      - run: ${{ matrix.command }}
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Publish to NPM
+        run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets[matrix.token] }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
