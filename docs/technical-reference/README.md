@@ -1,4 +1,4 @@
-# @erc725/erc725.js - v0.7.1
+# @erc725/erc725.js - v0.8.0
 
 ## Enumerations
 
@@ -28,7 +28,7 @@ Renames and exports: [ERC725](classes/ERC725.md)
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:3](https://github.com/ERC725Alliance/erc725.js/blob/9431f85/src/types/ERC725JSONSchema.ts#L3)
+[types/ERC725JSONSchema.ts:3](https://github.com/ERC725Alliance/erc725.js/blob/6794bc5/src/types/ERC725JSONSchema.ts#L3)
 
 ___
 
@@ -38,7 +38,7 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:10](https://github.com/ERC725Alliance/erc725.js/blob/9431f85/src/types/ERC725JSONSchema.ts#L10)
+[types/ERC725JSONSchema.ts:10](https://github.com/ERC725Alliance/erc725.js/blob/6794bc5/src/types/ERC725JSONSchema.ts#L10)
 
 ___
 
@@ -48,7 +48,7 @@ ___
 
 #### Defined in
 
-[types/ERC725JSONSchema.ts:20](https://github.com/ERC725Alliance/erc725.js/blob/9431f85/src/types/ERC725JSONSchema.ts#L20)
+[types/ERC725JSONSchema.ts:20](https://github.com/ERC725Alliance/erc725.js/blob/6794bc5/src/types/ERC725JSONSchema.ts#L20)
 
 ## Functions
 
@@ -76,7 +76,7 @@ ___
 
 #### Defined in
 
-[lib/utils.ts:481](https://github.com/ERC725Alliance/erc725.js/blob/9431f85/src/lib/utils.ts#L481)
+[lib/utils.ts:481](https://github.com/ERC725Alliance/erc725.js/blob/6794bc5/src/lib/utils.ts#L481)
 
 ___
 
@@ -101,4 +101,4 @@ KeyValuePair[] An array of key-value objects
 
 #### Defined in
 
-[lib/utils.ts:553](https://github.com/ERC725Alliance/erc725.js/blob/9431f85/src/lib/utils.ts#L553)
+[lib/utils.ts:553](https://github.com/ERC725Alliance/erc725.js/blob/6794bc5/src/lib/utils.ts#L553)
