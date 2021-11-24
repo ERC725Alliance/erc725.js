@@ -114,11 +114,6 @@ import ERC725 from 'erc725.js';
 
 :::
 
-Parameters descriptions:
-
-- [ERC725Schema](./api/interfaces/erc725schema.md)
-- [Providers](./providers.md)
-
 After the instance has been created is is still possible to change settings through the options property.
 
 ```javascript
