@@ -205,11 +205,22 @@ export class EthereumProvider {
         break;
       case METHODS[Method.GET_DATA].sig:
         {
-          const keyParam = '0x' + payload.params[0].data.substr(138);
+          // Duplicated logic with HttpProvider
+          const requestedKeys = abiCoder.decodeParameter(
+            'bytes32[]',
+            payload.params[0].data.substr(10),
+          );
 
-          result = Array.isArray(this.returnData)
-            ? this.returnData.find((e) => e.key === keyParam).value
-            : this.returnData;
+          const decodedResult = requestedKeys.map((requestedKey) => {
+            const foundElement = this.returnData.find((element) => {
+              return element.key === requestedKey;
+            });
+            return foundElement
+              ? abiCoder.decodeParameter('bytes[]', foundElement.value)[0] // we need to decode the keys as the values provided to the mock are already bytes[] encoded (as it was made for "single item" request mode)
+              : '0x';
+          });
+
+          result = abiCoder.encodeParameter('bytes[]', decodedResult);
         }
         break;
       default:

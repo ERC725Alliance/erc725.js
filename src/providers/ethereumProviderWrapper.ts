@@ -30,7 +30,12 @@ import { Method } from '../types/Method';
 import { ProviderTypes } from '../types/provider';
 
 // @ts-ignore
-const web3Abi = abi.default;
+const abiCoder = abi.default;
+
+interface GetDataReturn {
+  key: string;
+  value: Record<string, any> | null;
+}
 
 // https://docs.metamask.io/guide/ethereum-provider.html
 export class EthereumProviderWrapper {
@@ -106,7 +111,7 @@ export class EthereumProviderWrapper {
             this.constructJSONRPC(
               address,
               Method.GET_DATA,
-              web3Abi.encodeParameter('bytes32[]', [keyHash]),
+              abiCoder.encodeParameter('bytes32[]', [keyHash]),
             ),
           ]),
         )[0];
@@ -125,21 +130,65 @@ export class EthereumProviderWrapper {
     }
   }
 
-  async getAllData(address: string, keys: string[]) {
+  async getAllData(address: string, keys: string[]): Promise<GetDataReturn[]> {
+    const erc725Version = await this.getErc725YVersion(address);
+
+    if (erc725Version === ERC725_VERSION.NOT_ERC725) {
+      throw new Error(
+        `Contract: ${address} does not support ERC725Y interface.`,
+      );
+    }
+
+    switch (erc725Version) {
+      case ERC725_VERSION.ERC725:
+        return this.getAllDataNonLegacy(address, keys);
+      case ERC725_VERSION.ERC725_LEGACY:
+        return this.getAllDataLegacy(address, keys);
+      default:
+        return [];
+    }
+  }
+
+  private async getAllDataNonLegacy(
+    address: string,
+    keys: string[],
+  ): Promise<GetDataReturn[]> {
+    const encodedResults = await this.callContract([
+      this.constructJSONRPC(
+        address,
+        Method.GET_DATA,
+        abiCoder.encodeParameter('bytes32[]', keys),
+      ),
+    ]);
+
+    const decodedValues = this.decodeResult(Method.GET_DATA, encodedResults);
+
+    return keys.map<GetDataReturn>((key, index) => ({
+      key,
+      value: decodedValues[index],
+    }));
+  }
+
+  private async getAllDataLegacy(
+    address: string,
+    keys: string[],
+  ): Promise<GetDataReturn[]> {
     const results: {
       key: string;
       value: Record<string, any> | null;
     }[] = [];
 
-    const erc725Version = await this.getErc725YVersion(address);
-
     for (let index = 0; index < keys.length; index++) {
-      // TODO: call getData with array instead of multiple calls with 1 element
-      const value = await this.getData(address, keys[index], erc725Version);
+      // Here we could use `getDataMultiple` instead of sending multiple calls to `getData`
+      // But this is already legacy and it won't be used anymore...
+      const value = await this.getData(
+        address,
+        keys[index],
+        ERC725_VERSION.ERC725_LEGACY,
+      );
 
       results.push({
         key: keys[index],
-        // TODO: get the interface id here to prevent multiple calls in getData
         value,
       });
     }
