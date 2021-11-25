@@ -165,11 +165,12 @@ export class EthereumProvider {
   public returnData;
   public supportsInterfaces: string[];
 
-  constructor(props, supportsInterfaces: string[]) {
+  constructor(
+    props: { returnData: { key: string; value: string }[] },
+    supportsInterfaces: string[],
+  ) {
     // Deconstruct to create local copy of array
-    this.returnData = Array.isArray(props.returnData)
-      ? [...props.returnData]
-      : props.returnData;
+    this.returnData = [...props.returnData];
     this.supportsInterfaces = supportsInterfaces;
   }
 
@@ -198,9 +199,7 @@ export class EthereumProvider {
         {
           const keyParam = '0x' + payload.params[0].data.substr(10);
 
-          result = Array.isArray(this.returnData)
-            ? this.returnData.find((e) => e.key === keyParam).value
-            : this.returnData;
+          result = this.returnData.find((e) => e.key === keyParam).value;
         }
         break;
       case METHODS[Method.GET_DATA].sig:
