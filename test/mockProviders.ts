@@ -1,5 +1,7 @@
 // This file contains the mock providers used for tests
 
+import AbiCoder from 'web3-eth-abi';
+
 import { METHODS } from '../src/lib/constants';
 import { Method } from '../src/types/Method';
 
@@ -15,6 +17,9 @@ interface HttpProviderPayload {
   }>;
   id: number;
 }
+
+// @ts-ignore
+const abiCoder: AbiCoder.AbiCoder = AbiCoder;
 
 export class HttpProvider {
   public returnData: { key: string; value: string }[];
@@ -40,7 +45,9 @@ export class HttpProvider {
             throw new Error(
               'Mock of support interface not supported in array mode',
             );
+
           case METHODS[Method.GET_DATA_LEGACY].sig:
+            // The legacy method does not support "multi" mode
             {
               const foundResult = this.returnData.find((element) => {
                 // get call param (key)
@@ -57,18 +64,28 @@ export class HttpProvider {
             }
             break;
           case METHODS[Method.GET_DATA].sig:
+            // The new ERC725Y allows requesting multiple items in one call
+            // getData([A]), getData([A, B, C])...
+            //
             {
-              const foundResult = this.returnData.find((element) => {
-                // get call param (key)
-                const keyParam =
-                  '0x' + payload[index].params[0].data.substr(138);
-                return element.key === keyParam;
+              const requestedKeys = abiCoder.decodeParameter(
+                'bytes32[]',
+                payload[index].params[0].data.substr(10),
+              );
+
+              const decodedResult = requestedKeys.map((requestedKey) => {
+                const foundElement = this.returnData.find((element) => {
+                  return element.key === requestedKey;
+                });
+                return foundElement
+                  ? abiCoder.decodeParameter('bytes[]', foundElement.value)[0] // we need to decode the keys as the values provided to the mock are already bytes[] encoded (as it was made for "single item" request mode)
+                  : '0x';
               });
 
               results.push({
                 jsonrpc: '2.0',
                 id: payload[index].id,
-                result: foundResult ? foundResult.value : '0x',
+                result: abiCoder.encodeParameter('bytes[]', decodedResult),
               });
             }
             break;
