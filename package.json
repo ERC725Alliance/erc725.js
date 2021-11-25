@@ -11,7 +11,7 @@
     "build:module": "tsc -p tsconfig.module.json",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=text --reporter=lcov mocha",
     "lint": "eslint . --ext .ts",
-    "release": "standard-version",
+    "release": "standard-version -a",
     "docs:generate": "typedoc --options typedoc.json"
   },
   "repository": {
@@ -72,5 +72,10 @@
   "dependencies": {
     "web3-eth-abi": "^1.5.2",
     "web3-utils": "^1.5.2"
+  },
+  "standard-version": {
+    "scripts": {
+      "postbump": "npm run docs:generate && git add ./docs/technical-reference"
+    }
   }
 }
