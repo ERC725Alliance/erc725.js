@@ -199,7 +199,7 @@ export class EthereumProvider {
         {
           const keyParam = '0x' + payload.params[0].data.substr(10);
 
-          result = this.returnData.find((e) => e.key === keyParam).value;
+          result = this.returnData.find((e) => e.key === keyParam)?.value;
         }
         break;
       case METHODS[Method.GET_DATA].sig:

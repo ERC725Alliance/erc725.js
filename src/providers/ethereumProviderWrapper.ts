@@ -26,6 +26,7 @@ import * as abi from 'web3-eth-abi';
 
 import { ERC725_VERSION, INTERFACE_IDS, METHODS } from '../lib/constants';
 import { decodeResult as decodeResultUtils } from '../lib/provider-wrapper-utils';
+import { JsonRpcEthereumProvider } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 import { ProviderTypes } from '../types/provider';
 
@@ -95,42 +96,20 @@ export class EthereumProviderWrapper {
     );
   }
 
-  async getData(
-    address: string,
-    keyHash: string,
-    providedErc725Version?: ERC725_VERSION,
-  ) {
-    const erc725Version =
-      providedErc725Version ?? (await this.getErc725YVersion(address));
+  async getData(address: string, keyHash: string) {
+    const result = this.getAllData(address, [keyHash]);
 
-    switch (erc725Version) {
-      case 'ERC725':
-        return this.decodeResult(
-          Method.GET_DATA,
-          await this.callContract([
-            this.constructJSONRPC(
-              address,
-              Method.GET_DATA,
-              abiCoder.encodeParameter('bytes32[]', [keyHash]),
-            ),
-          ]),
-        )[0];
-      case 'ERC725_LEGACY':
-        return this.decodeResult(
-          Method.GET_DATA_LEGACY,
-          await this.callContract([
-            this.constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
-          ]),
-        );
-
-      default:
-        throw new Error(
-          `Contract: ${address} does not support ERC725Y interface.`,
-        );
+    try {
+      return result[0].value;
+    } catch {
+      return null;
     }
   }
 
-  async getAllData(address: string, keys: string[]): Promise<GetDataReturn[]> {
+  async getAllData(
+    address: string,
+    keyHashes: string[],
+  ): Promise<GetDataReturn[]> {
     const erc725Version = await this.getErc725YVersion(address);
 
     if (erc725Version === ERC725_VERSION.NOT_ERC725) {
@@ -141,59 +120,52 @@ export class EthereumProviderWrapper {
 
     switch (erc725Version) {
       case ERC725_VERSION.ERC725:
-        return this.getAllDataNonLegacy(address, keys);
+        return this._getAllData(address, keyHashes);
       case ERC725_VERSION.ERC725_LEGACY:
-        return this.getAllDataLegacy(address, keys);
+        return this._getAllDataLegacy(address, keyHashes);
       default:
         return [];
     }
   }
 
-  private async getAllDataNonLegacy(
+  private async _getAllData(
     address: string,
-    keys: string[],
+    keyHashes: string[],
   ): Promise<GetDataReturn[]> {
     const encodedResults = await this.callContract([
       this.constructJSONRPC(
         address,
         Method.GET_DATA,
-        abiCoder.encodeParameter('bytes32[]', keys),
+        abiCoder.encodeParameter('bytes32[]', keyHashes),
       ),
     ]);
 
     const decodedValues = this.decodeResult(Method.GET_DATA, encodedResults);
 
-    return keys.map<GetDataReturn>((key, index) => ({
-      key,
+    return keyHashes.map<GetDataReturn>((keyHash, index) => ({
+      key: keyHash,
       value: decodedValues[index],
     }));
   }
 
-  private async getAllDataLegacy(
+  private async _getAllDataLegacy(
     address: string,
-    keys: string[],
+    keyHashes: string[],
   ): Promise<GetDataReturn[]> {
-    const results: {
-      key: string;
-      value: Record<string, any> | null;
-    }[] = [];
+    // Here we could use `getDataMultiple` instead of sending multiple calls to `getData`
+    // But this is already legacy and it won't be used anymore..
+    const encodedResultsPromises = keyHashes.map((keyHash) =>
+      this.callContract([
+        this.constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
+      ]),
+    );
 
-    for (let index = 0; index < keys.length; index++) {
-      // Here we could use `getDataMultiple` instead of sending multiple calls to `getData`
-      // But this is already legacy and it won't be used anymore...
-      const value = await this.getData(
-        address,
-        keys[index],
-        ERC725_VERSION.ERC725_LEGACY,
-      );
+    const decodedResults = await Promise.all(encodedResultsPromises);
 
-      results.push({
-        key: keys[index],
-        value,
-      });
-    }
-
-    return results;
+    return decodedResults.map((decodedResult, index) => ({
+      key: keyHashes[index],
+      value: this.decodeResult(Method.GET_DATA_LEGACY, decodedResult),
+    }));
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -201,7 +173,7 @@ export class EthereumProviderWrapper {
     address: string,
     method: Method,
     methodParam?: string,
-  ) {
+  ): JsonRpcEthereumProvider {
     const data = methodParam
       ? METHODS[method].sig + methodParam.replace('0x', '')
       : METHODS[method].sig;

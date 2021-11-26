@@ -101,37 +101,19 @@ export class Web3ProviderWrapper {
   }
 
   async getData(address: string, keyHash: string) {
-    const erc725Version = await this.getErc725YVersion(address);
+    const result = await this.getAllData(address, [keyHash]);
 
-    switch (erc725Version) {
-      case 'ERC725': {
-        return decodeResult(
-          Method.GET_DATA,
-          await this.callContract(
-            constructJSONRPC(
-              address,
-              Method.GET_DATA,
-              abiCoder.encodeParameter('bytes32[]', [keyHash]),
-            ),
-          ),
-        )[0];
-      }
-      case 'ERC725_LEGACY': {
-        return decodeResult(
-          Method.GET_DATA_LEGACY,
-          await this.callContract(
-            constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
-          ),
-        );
-      }
-      default:
-        throw new Error(
-          `Contract: ${address} does not support ERC725Y interface.`,
-        );
+    try {
+      return result[0].value;
+    } catch {
+      return null;
     }
   }
 
-  async getAllData(address: string, keys: string[]): Promise<GetDataReturn[]> {
+  async getAllData(
+    address: string,
+    keyHashes: string[],
+  ): Promise<GetDataReturn[]> {
     const erc725Version = await this.getErc725YVersion(address);
 
     if (erc725Version === ERC725_VERSION.NOT_ERC725) {
@@ -142,50 +124,52 @@ export class Web3ProviderWrapper {
 
     switch (erc725Version) {
       case ERC725_VERSION.ERC725:
-        return this.getAllDataNonLegacy(address, keys);
+        return this._getAllData(address, keyHashes);
       case ERC725_VERSION.ERC725_LEGACY:
-        return this.getAllDataLegacy(address, keys);
+        return this._getAllDataLegacy(address, keyHashes);
       default:
         return [];
     }
   }
 
-  private async getAllDataNonLegacy(
+  private async _getAllData(
     address: string,
-    keys: string[],
+    keyHashes: string[],
   ): Promise<GetDataReturn[]> {
     const payload: JsonRpc[] = [
       constructJSONRPC(
         address,
         Method.GET_DATA,
-        abiCoder.encodeParameter('bytes32[]', keys),
+        abiCoder.encodeParameter('bytes32[]', keyHashes),
       ),
     ];
 
     const results: any = await this.callContract(payload);
     const decodedValues = decodeResult(Method.GET_DATA, results[0]);
 
-    return keys.map<GetDataReturn>((key, index) => ({
+    return keyHashes.map<GetDataReturn>((key, index) => ({
       key,
       value: decodedValues[index],
     }));
   }
 
-  private async getAllDataLegacy(
+  private async _getAllDataLegacy(
     address: string,
-    keys: string[],
+    keyHashes: string[],
   ): Promise<GetDataReturn[]> {
     const payload: JsonRpc[] = [];
 
-    for (let index = 0; index < keys.length; index++) {
+    // Here we could use `getDataMultiple` instead of sending multiple calls to `getData`
+    // But this is already legacy and it won't be used anymore..
+    for (let index = 0; index < keyHashes.length; index++) {
       payload.push(
-        constructJSONRPC(address, Method.GET_DATA_LEGACY, keys[index]),
+        constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHashes[index]),
       );
     }
     const results: any = await this.callContract(payload);
 
     return payload.map<GetDataReturn>((payloadCall, index) => ({
-      key: keys[index],
+      key: keyHashes[index],
       value: decodeResult(
         Method.GET_DATA_LEGACY,
         results.find((element) => payloadCall.id === element.id),
