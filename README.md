@@ -46,10 +46,10 @@ import Web3 from 'web3';
 // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
 const schema = [
   {
-    name: 'SupportedStandards:ERC725Account',
-    key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6',
+    name: 'SupportedStandards:LSP3UniversalProfile',
+    key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
     keyType: 'Mapping',
-    valueContent: '0xafdeb5d6',
+    valueContent: '0xabe425d6',
     valueType: 'bytes',
   },
   {
@@ -85,9 +85,9 @@ const erc725 = new ERC725(schema, address, provider, config);
 await erc725.getOwner();
 // > '0x28D25E70819140daF65b724158D00c373D1a18ee'
 
-await erc725.getData('SupportedStandards:ERC725Account');
+await erc725.getData('SupportedStandards:LSP3UniversalProfile');
 /* > {
-  'SupportedStandards:ERC725Account': '0xafdeb5d6'
+  'SupportedStandards:LSP3UniversalProfile': '0xabe425d6'
 }
 */
 
