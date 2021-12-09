@@ -7,7 +7,7 @@ const myERC725 = getInstance();
 const dataAllKeys = await myERC725.getData();
 /*
 {
-  'SupportedStandards:ERC725Account': '0xafdeb5d6',
+  'SupportedStandards:LSP3UniversalProfile': '0xabe425d6',
   LSP3Profile: {
     hashFunction: 'keccak256(utf8)',
     hash: '0xd96ff7776660095f661d16010c4349aa7478a9129ce0670f771596a6ff2d864a',

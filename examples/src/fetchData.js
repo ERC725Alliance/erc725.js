@@ -7,7 +7,7 @@ const myERC725 = getInstance();
 const dataAllKeys = await myERC725.fetchData();
 /*
 {
-  'SupportedStandards:ERC725Account': '0xafdeb5d6',
+  'SupportedStandards:LSP3UniversalProfile': '0xabe425d6',
   LSP3Profile: {
     LSP3Profile: {
       name: 'patrick-mcdowell',

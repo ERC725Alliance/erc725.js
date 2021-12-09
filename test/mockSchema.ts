@@ -18,16 +18,16 @@ export const mockSchema: (ERC725JSONSchema & {
 })[] = [
   // Case 1
   {
-    name: 'SupportedStandards:ERC725Account',
-    key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6',
+    name: 'SupportedStandards:LSP3UniversalProfile',
+    key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
     keyType: 'Mapping',
-    valueContent: '0xafdeb5d6',
+    valueContent: '0xabe425d6',
     valueType: 'bytes',
     // Testing data
-    returnRawData: abiCoder.encodeParameter('bytes', '0xafdeb5d6'),
-    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0xafdeb5d6']),
-    returnGraphData: '0xafdeb5d6',
-    expectedResult: '0xafdeb5d6',
+    returnRawData: abiCoder.encodeParameter('bytes', '0xabe425d6'),
+    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0xabe425d6']),
+    returnGraphData: '0xabe425d6',
+    expectedResult: '0xabe425d6',
   },
 
   // Case 2
@@ -578,25 +578,25 @@ export const mockSchema: (ERC725JSONSchema & {
     name: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
     key: '0x22496f48a493035f00000000cafecafecafecafecafecafecafecafecafecafe',
     keyType: 'Bytes20Mapping',
-    valueContent: '0xafdeb5d6',
+    valueContent: '0xabe425d6',
     valueType: 'bytes',
     // Testing data
-    returnRawData: abiCoder.encodeParameter('bytes', '0xafdeb5d6'),
-    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0xafdeb5d6']),
-    returnGraphData: '0xafdeb5d6',
-    expectedResult: '0xafdeb5d6',
+    returnRawData: abiCoder.encodeParameter('bytes', '0xabe425d6'),
+    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0xabe425d6']),
+    returnGraphData: '0xabe425d6',
+    expectedResult: '0xabe425d6',
   },
   {
     name: 'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
     key: '0x4b80742d0000000082ac0000cafecafecafecafecafecafecafecafecafecafe',
     keyType: 'Bytes20MappingWithGrouping',
-    valueContent: '0xafdeb5d6',
+    valueContent: '0xabe425d6',
     valueType: 'bytes',
     // Testing data
-    returnRawData: abiCoder.encodeParameter('bytes', '0xafdeb5d6'),
-    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0xafdeb5d6']),
-    returnGraphData: '0xafdeb5d6',
-    expectedResult: '0xafdeb5d6',
+    returnRawData: abiCoder.encodeParameter('bytes', '0xabe425d6'),
+    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0xabe425d6']),
+    returnGraphData: '0xabe425d6',
+    expectedResult: '0xabe425d6',
   },
 
   // Nested array tests
