@@ -104,7 +104,7 @@ describe('Running @erc725/erc725.js tests...', () => {
     const LEGACY_ERC725_CONTRACT_ADDRESS =
       '0xb8E120e7e5EAe7bfA629Db5CEFfA69C834F74e99';
     const ERC725_CONTRACT_ADDRESS =
-      '0x6464C9b995DA466a6fcD50C79D7e9FDd84c74b92';
+      '0x320e678bEb3369702EA14555a74414B2C531c510';
 
     it('should return null if the key does not exist in the contract', async () => {
       const erc725 = new ERC725(
@@ -159,10 +159,10 @@ describe('Running @erc725/erc725.js tests...', () => {
         valueType: 'bytes',
       },
       {
-        name: 'SupportedStandards:LSP3UniversalProfile',
-        key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
+        name: 'SupportedStandards:ERC725Account',
+        key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6',
         keyType: 'Singleton',
-        valueContent: '0xabe425d6',
+        valueContent: '0xafdeb5d6',
         valueType: 'bytes',
       },
       {
@@ -177,12 +177,12 @@ describe('Running @erc725/erc725.js tests...', () => {
     const e2eResults = {
       LSP3Profile: {
         hashFunction: 'keccak256(utf8)',
-        hash: '0xa3c2d57fea7b57208cb7c03858559882fc463d3237865a55be405582d3556962',
-        url: 'ipfs://QmTwdTETBgtPfZT23FwjbT4mfVfig7qit77hACC63idYVH',
+        hash: '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
+        url: 'ipfs://QmecrGejUQVXpW4zS948pNvcnQrJ1KiAoM6bdfrVcWZsn5',
       },
-      'SupportedStandards:LSP3UniversalProfile': '0xabe425d6',
+      'SupportedStandards:ERC725Account': '0xafdeb5d6',
       LSP1UniversalReceiverDelegate:
-        '0x428e42Be1a13c49c985F2881111f803390B5bF27',
+        '0x36e4Eb6Ee168EF54B1E8e850ACBE51045214B313',
     };
 
     it('with web3.currentProvider [legacy]', async () => {
@@ -192,7 +192,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         web3.currentProvider,
       );
       const result = await erc725.getData();
-      assert.notDeepStrictEqual(result, e2eResults);
+      assert.deepStrictEqual(result, e2eResults);
     });
 
     it('with web3.currentProvider', async () => {
