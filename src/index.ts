@@ -72,11 +72,6 @@ export class ERC725<Schema extends GenericSchema> {
 
   /**
    * Creates an instance of ERC725.
-   *
-   * ```js reference title="Instantiation"
-   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/instantiation.js#L1-L50
-   * ```
-   *
    * @param {ERC725JSONSchema[]} schema More information available here: [LSP-2-ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md)
    * @param {string} address Address of the ERC725 contract you want to interact with
    * @param {any} provider
@@ -145,18 +140,6 @@ export class ERC725<Schema extends GenericSchema> {
    * :::
    *
    * @returns An object with schema element key names as properties, with corresponding **decoded** data as values.
-   *
-   * ```javascript reference title="getData - all keys from schema"
-   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/getData.js#L7-L30
-   * ```
-   *
-   * ```javascript reference title="getData - one key  "
-   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/getData.js#L32-L41
-   * ```
-   *
-   * ```javascript reference title="getData - many keys"
-   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/getData.js#L43-L56
-   * ```
    */
   async getData(
     keyOrKeys?: string | string[],
@@ -187,18 +170,6 @@ export class ERC725<Schema extends GenericSchema> {
    * @param {string} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
    * @param {ERC725JSONSchema} customSchema An optional custom schema element to use for decoding the returned value. Overrides attached schema of the class instance on this call only.
    * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData
-   *
-   * ```javascript title="getData - all keys from schema"
-   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/fetchData.js#L7-L35
-   * ```
-   *
-   * ```javascript reference title="getData - one key  "
-   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/fetchData.js#L37-L51
-   * ```
-   *
-   * ```javascript reference title="getData - many keys"
-   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/fetchData.js#L53-L71
-   * ```
    */
   async fetchData(
     keyOrKeys?: string | string[],
@@ -268,18 +239,6 @@ export class ERC725<Schema extends GenericSchema> {
    * @param {{ [key: string]: any }} data An object with one or many properties, containing the data that needs to be encoded.
    * @returns An object with the same keys as the object that was passed in as a parameter containing the encoded data, ready to be stored on the blockchain.
    *
-   * ```javascript reference title="Encoding object with one key"
-   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/encodeData.js#L7-L19
-   * ```
-   *
-   * ```javascript reference title="Encoding object with one key"
-   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/encodeData.js#L22-L37
-   * ```
-   *
-   * ```javascript reference title="Encoding object with one key"
-   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/encodeData.js#L39-L67
-   * ```
-   *
    * :::tip
    * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
    * The JSON will be hashed with `keccak256`.
@@ -303,14 +262,6 @@ export class ERC725<Schema extends GenericSchema> {
    *
    * @param {{ [key: string]: any }} data An object with one or many properties.
    * @returns Returns decoded data as defined and expected in the schema:
-   *
-   * ```javascript reference title="Decode one key"
-   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/decodeData.js#L7-L19
-   * ```
-   *
-   * ```javascript reference title="Decode multiple keys"
-   * https://github.com/ERC725Alliance/erc725.js/tree/main/examples/src/decodeData.js#L21-L49
-   * ```
    */
   decodeData(data: { [key: string]: any }): { [key: string]: any };
   decodeData<T extends keyof Schema>(data: {
