@@ -11,10 +11,8 @@
     "build:module": "tsc -p tsconfig.module.json",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=text --reporter=lcov mocha",
     "lint": "eslint . --ext .ts",
-    "version": "standard-version",
-    "docs:generate": "npm run docs:generate:markdown",
-    "docs:generate:markdown": "typedoc --options typedoc.json",
-    "docs:generate:html": "typedoc --options typedoc.html.json"
+    "release": "standard-version -a",
+    "docs:generate": "typedoc --options typedoc.json"
   },
   "repository": {
     "type": "git",
@@ -74,5 +72,10 @@
   "dependencies": {
     "web3-eth-abi": "^1.5.2",
     "web3-utils": "^1.5.2"
+  },
+  "standard-version": {
+    "scripts": {
+      "postbump": "npm run docs:generate && git add ./docs/technical-reference"
+    }
   }
 }

@@ -12,3 +12,11 @@ export interface JsonRpc {
   ];
   id: number;
 }
+
+export interface JsonRpcEthereumProvider {
+  to: string;
+  gas: string;
+  gasPrice: string;
+  value: string;
+  data;
+}

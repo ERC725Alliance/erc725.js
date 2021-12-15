@@ -225,6 +225,11 @@ export class ERC725<Schema extends GenericSchema> {
         );
       })
       .reduce(async (accumulator, [key, dataEntry]) => {
+        if (!dataEntry) {
+          accumulator[key] = null;
+          return accumulator;
+        }
+
         let receivedData;
         try {
           const { url } = this.patchIPFSUrlsIfApplicable(dataEntry);

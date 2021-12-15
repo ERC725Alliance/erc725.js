@@ -206,6 +206,39 @@ describe('Running @erc725/erc725.js tests...', () => {
     });
   });
 
+  describe('Get/fetch edge cases [mock]', () => {
+    it('should return null if the JSONURL is not set [fetchData]', async () => {
+      const provider = new HttpProvider(
+        {
+          returnData: [
+            {
+              key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+              value:
+                '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000',
+            },
+          ],
+        },
+        [INTERFACE_IDS.ERC725Y_LEGACY],
+      );
+      const erc725 = new ERC725(
+        [
+          {
+            name: 'LSP3Profile',
+            key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+            keyType: 'Singleton',
+            valueContent: 'JSONURL',
+            valueType: 'bytes',
+          },
+        ],
+        '0x24464DbA7e7781a21eD86133Ebe88Eb9C0762620', // result is mocked so we can use any address
+        provider,
+      );
+
+      const data = await erc725.fetchData('LSP3Profile');
+      assert.deepStrictEqual(data, { LSP3Profile: null });
+    });
+  });
+
   [
     { name: 'legacy', interface: INTERFACE_IDS.ERC725Y_LEGACY },
     { name: 'latest', interface: INTERFACE_IDS.ERC725Y },

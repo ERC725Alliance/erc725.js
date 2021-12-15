@@ -12,10 +12,10 @@ const IPFS_GATEWAY = 'https://ipfs.lukso.network/ipfs/';
 export function getInstance() {
   const schema = [
     {
-      name: 'SupportedStandards:ERC725Account',
-      key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6',
+      name: 'SupportedStandards:LSP3UniversalProfile',
+      key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
       keyType: 'Mapping',
-      valueContent: '0xafdeb5d6',
+      valueContent: '0xabe425d6',
       valueType: 'bytes',
     },
     {

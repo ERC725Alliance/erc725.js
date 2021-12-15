@@ -1,13 +1,11 @@
+# erc725.js &middot; [![GitHub license](https://img.shields.io/badge/license-Apache-blue.svg)](./LICENSE) [![npm version](https://img.shields.io/npm/v/@erc725/erc725.js.svg?style=flat)](https://www.npmjs.com/package/@erc725/erc725.js)
+
 <p align="center">
  <h2 align="center"><strong>@erc725/erc725.js</strong></h2>
  <p align="center">Allows for interfacing with <a href="https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md">ERC725Y</a> compliant contracts on an EVM blockchain.</p>
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@erc725/erc725.js">
-    <img alt="Version" src="https://badge.fury.io/js/@erc725%2Ferc725.js.svg" />
-  </a>
-  
   <a href="https://github.com/ERC725Alliance/erc725.js/actions">
     <img alt="Tests Passing" src="https://github.com/ERC725Alliance/erc725.js/actions/workflows/lint-test-build.yml/badge.svg" />
   </a>
@@ -48,10 +46,10 @@ import Web3 from 'web3';
 // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
 const schema = [
   {
-    name: 'SupportedStandards:ERC725Account',
-    key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6',
+    name: 'SupportedStandards:LSP3UniversalProfile',
+    key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
     keyType: 'Mapping',
-    valueContent: '0xafdeb5d6',
+    valueContent: '0xabe425d6',
     valueType: 'bytes',
   },
   {
@@ -87,9 +85,9 @@ const erc725 = new ERC725(schema, address, provider, config);
 await erc725.getOwner();
 // > '0x28D25E70819140daF65b724158D00c373D1a18ee'
 
-await erc725.getData('SupportedStandards:ERC725Account');
+await erc725.getData('SupportedStandards:LSP3UniversalProfile');
 /* > {
-  'SupportedStandards:ERC725Account': '0xafdeb5d6'
+  'SupportedStandards:LSP3UniversalProfile': '0xabe425d6'
 }
 */
 
@@ -119,24 +117,10 @@ await erc725.fetchData('LSP3Profile'); // downloads and verifies the linked JSON
 */
 ```
 
-## Building
+## Contributing
 
-```shell script
-$ npm run build
-```
+Please check [CONTRIBUTING](./CONTRIBUTING.md).
 
-This will build the library into `/build`
+### License
 
-## Testing
-
-```shell script
-$ npm test
-```
-
-## Publishing
-
-```shell script
-$ npm run publish
-```
-
-Will build and then publish the package to npm.
+erc725.js is [Apache 2.0 licensed](./LICENSE).
