@@ -1,0 +1,71 @@
+name: Bump version and create release PR
+on:
+  workflow_dispatch:
+    inputs:
+      arguments:
+        description: 'standard-release arguments'
+        required: false
+        default: ''
+
+jobs:
+  bump-version:
+    name: Bump version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure develop branch
+        if: github.ref != 'refs/heads/develop'
+        run: |-
+          echo "Not running on develop - exit"
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+          cache: 'npm'
+
+      - name: 🧰 Install
+        run: npm ci
+
+      - name: ⬆️ Bump package version
+        run: |-
+          git config --global user.email "release@lukso.network"
+          git config --global user.name "Release Bot"
+          npm run release -- ${{ github.event.inputs.arguments }}
+
+      - name: 📝 Set Version
+        run: |-
+          APP_VERSION="v$(node -pe "require('./package.json').version")"
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v3
+        with:
+          branch: bump/${{ env.APP_VERSION }}
+          base: develop
+          delete-branch: true
+          title: ':arrow_up: Bump to ${{ env.APP_VERSION }}'
+          body: |
+            Bump to version: ${{ env.APP_VERSION }}
+          labels: |
+            automated pr
+
+      # The above Action does not push tag...
+      - name: Checkout to PR branch
+        uses: actions/checkout@v2
+        with:
+          ref: bump/${{ env.APP_VERSION }}
+
+      - run: |
+          git push --tags
+
+      - name: Check outputs
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"

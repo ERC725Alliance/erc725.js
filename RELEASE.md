@@ -1,25 +1,36 @@
 # Release Process
 
-Releases are published to NPM when a [GitHub release](https://github.com/ERC725Alliance/erc725.js/releases/new) is created.
+Releases are published to NPM when `develop` is merged into `main` AND when the merged code contains a version bump in the `package.json`.
 
 ## Create and publish a new release:
 
-1. Checkout to a new release branch.
-2. Bump version with [standard-version](https://github.com/conventional-changelog/standard-version):
+### Bump version
+
+You can manually trigger the [Bump version](https://github.com/ERC725Alliance/erc725.js/actions/workflows/bump-version.yml) workflow from the `develop` branch.
+
+To bump locally:
+
+1. Checkout to a new release branch from `develop`.
+2. Bump version with [standard-version](https://github.com/conventional-changelog/standard-version). To create pre-release or specific versions, see below.
 
 ```bash
 npm run release
 ```
 
-3.  Then push the changes to origin, **with tags** and open a PR.
+3. Push the changes to origin, **WITH TAGS**.
 
 ```bash
 git push --follow-tags origin
 ```
 
-4. Merge the PR to main.
-5. Create a new [GitHub release](https://github.com/ERC725Alliance/erc725.js/releases/new) with the tag you just created.
-6. The CI will build and publish to npm.
+4. Open a PR from your release branch to `develop` and merge it.
+
+### Release
+
+- Merge `develop` into `main` through a PR.
+- The CI will create a GitHub release and publish to NPM.
+
+If it fails, you can manually trigger the workflow from the [Actions](https://github.com/ERC725Alliance/erc725.js/actions/workflows/release.yml) tab.
 
 ## Specific Version Increases
 
