@@ -1,0 +1,81 @@
+# If it detects a version bump on main, it will trigger a release.
+# If the workflow is started manually, it will skip the bump detection and attempt to publish.
+name: Release and publish
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  release:
+    name: 📦 Create GitHub release and publish to NPM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure main branch
+        if: github.ref != 'refs/heads/main'
+        run: |-
+          echo "Not running on main - exit"
+          exit 1
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Check if version changed
+        uses: EndBug/version-check@v1
+        if: github.event_name == 'push'
+        id: check
+
+      - name: 🔄 Check if should release
+        run: echo "SHOULD_RELEASE=${{ steps.check.outputs.changed == 'true' || github.event_name == 'workflow_dispatch' }}" >> $GITHUB_ENV
+
+      - name: ⚙️ Setup Node.js v16
+        uses: actions/setup-node@v2
+        if: env.SHOULD_RELEASE == 'true'
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@erc725'
+          cache: 'npm'
+
+      - name: 📝 Set Version
+        if: env.SHOULD_RELEASE == 'true'
+        run: |-
+          APP_VERSION="v$(node -pe "require('./package.json').version")"
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+
+      - name: 🧰 Install
+        if: env.SHOULD_RELEASE == 'true'
+        run: npm ci
+
+      - name: 🎯 Test
+        if: env.SHOULD_RELEASE == 'true'
+        run: npm test
+
+      - name: 🛠 Build
+        if: env.SHOULD_RELEASE == 'true'
+        run: npm run build
+
+      # Create GitHub Release
+      - name: 📝 Extract release notes from CHANGELOG
+        if: env.SHOULD_RELEASE == 'true'
+        id: extract-release-notes
+        uses: ffurrer2/extract-release-notes@v1
+        with:
+          release_notes_file: RELEASENOTES.md
+
+      - name: 🚀 Create GitHub release
+        uses: ncipollo/release-action@v1
+        if: env.SHOULD_RELEASE == 'true'
+        with:
+          bodyFile: 'RELEASENOTES.md'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.APP_VERSION }}
+
+      - name: 📦 Publish to NPM
+        if: env.SHOULD_RELEASE == 'true'
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
