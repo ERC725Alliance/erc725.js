@@ -1,4 +1,4 @@
-name: Bump version
+name: Bump version and create release PR
 on:
   workflow_dispatch:
     inputs:
