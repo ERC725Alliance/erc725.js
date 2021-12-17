@@ -55,11 +55,9 @@ export {
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
 export { flattenEncodedData, encodeData } from './lib/utils';
 /**
- * :::warning
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
- * :::
  *
- * @typeParam Schema **Work in progress, nothing to see here**.
+ * @typeParam Schema
  *
  */
 export class ERC725<Schema extends GenericSchema> {
@@ -132,12 +130,10 @@ export class ERC725<Schema extends GenericSchema> {
    * Gets **decoded data** for one, many or all keys of the specified `ERC725` smart-contract.
    * When omitting the `keyOrKeys` parameter, it will get all the keys (as per {@link ERC725JSONSchema | ERC725JSONSchema} definition).
    *
-   * :::caution
    * Data returned by this function does not contain external data of [`JSONURL`](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl)
    * or [`ASSETURL`](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#asseturl) schema elements.
    *
    * If you would like to receive everything in one go, you can use {@link ERC725.fetchData | `fetchData`} for that.
-   * :::
    *
    * @returns An object with schema element key names as properties, with corresponding **decoded** data as values.
    */
@@ -163,9 +159,7 @@ export class ERC725<Schema extends GenericSchema> {
    * Additionally to the data from the blockchain, `fetchData` also returns data from IPFS or HTTP(s) endpoints
    * stored as [`JSONURL`](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl) or [`ASSETURL`](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#asseturl).
    *
-   * :::info
    * To ensure **data authenticity** `fetchData` compares the `hash` of the fetched JSON with the `hash` stored on the blockchain.
-   * :::
    *
    * @param {string} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
    * @param {ERC725JSONSchema} customSchema An optional custom schema element to use for decoding the returned value. Overrides attached schema of the class instance on this call only.
@@ -239,10 +233,8 @@ export class ERC725<Schema extends GenericSchema> {
    * @param {{ [key: string]: any }} data An object with one or many properties, containing the data that needs to be encoded.
    * @returns An object with the same keys as the object that was passed in as a parameter containing the encoded data, ready to be stored on the blockchain.
    *
-   * :::tip
    * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
    * The JSON will be hashed with `keccak256`.
-   * :::
    */
   encodeData(data: { [key: string]: any }): { [key: string]: any };
   encodeData<T extends keyof Schema>(data: {
@@ -255,10 +247,8 @@ export class ERC725<Schema extends GenericSchema> {
    * In case you are reading the key-value store from an ERC725 smart-contract key-value store
    * without `@erc725/erc725.js` you can use `decodeData` to do the decoding for you.
    *
-   * :::tip
    * It is more convenient to use {@link ERC725.fetchData | `fetchData`}.
    * It does the `decoding` and `fetching` of external references for you automatically.
-   * :::
    *
    * @param {{ [key: string]: any }} data An object with one or many properties.
    * @returns Returns decoded data as defined and expected in the schema:
@@ -279,9 +269,7 @@ export class ERC725<Schema extends GenericSchema> {
    * @param {string} [address]
    * @returns The address of the contract owner as stored in the contract.
    *
-   * :::warning
    *    This method is not yet supported when using the `graph` provider type.
-   * :::
    *
    * ```javascript title="Example"
    * await myERC725.getOwner();
