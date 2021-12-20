@@ -1,5 +1,8 @@
 import { SUPPORTED_HASH_FUNCTIONS } from '../../lib/constants';
 
+/**
+ * @internal
+ */
 export interface KeyValuePair {
   key: string;
   value: any;

@@ -12,7 +12,9 @@
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=text --reporter=lcov mocha",
     "lint": "eslint . --ext .ts",
     "release": "standard-version -a",
-    "docs:generate": "typedoc --options typedoc.json"
+    "docs:generate:markdown": "typedoc --options typedoc.json",
+    "docs:generate:html": "typedoc --options typedoc.html.json",
+    "docs:publish": "gh-pages -m \"[ci skip] Updates\" -d docs/html/technical-reference"
   },
   "repository": {
     "type": "git",
@@ -70,6 +72,7 @@
     "web3-core": "^1.5.2"
   },
   "dependencies": {
+    "gh-pages": "^3.2.3",
     "web3-eth-abi": "^1.5.2",
     "web3-utils": "^1.5.2"
   },
