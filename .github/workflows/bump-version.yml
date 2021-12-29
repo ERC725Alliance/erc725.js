@@ -1,4 +1,4 @@
-name: Bump version and create release PR
+name: Bump version
 on:
   workflow_dispatch:
     inputs:
@@ -56,14 +56,14 @@ jobs:
           labels: |
             automated pr
 
-      # The above Action does not push tag...
       - name: Checkout to PR branch
         uses: actions/checkout@v2
         with:
           ref: bump/${{ env.APP_VERSION }}
 
-      - run: |
-          git push --tags
+      # We purposely not push the tag
+      # The tag will be added when develop is merged into main
+      - run: git push
 
       - name: Check outputs
         run: |

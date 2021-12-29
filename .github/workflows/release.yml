@@ -58,6 +58,16 @@ jobs:
         if: env.SHOULD_RELEASE == 'true'
         run: npm run build
 
+      # We assume this will be always triggered by a merge from develop
+      # Therefore we tag the previous commit (the merge commit won't be on develop)
+      - name: 🏷 Create and push Git Tag
+        if: env.SHOULD_RELEASE == 'true'
+        run: |-
+          git config --global user.email "release@lukso.network"
+          git config --global user.name "LUKSO Bot"
+          git tag -a ${{ env.APP_VERSION }} HEAD~ -m "Release Version ${{ env.APP_VERSION }} [CI]"
+          git push --set-upstream origin tag ${{ env.APP_VERSION }}
+
       # Create GitHub Release
       - name: 📝 Extract release notes from CHANGELOG
         if: env.SHOULD_RELEASE == 'true'
@@ -65,6 +75,17 @@ jobs:
         uses: ffurrer2/extract-release-notes@v1
         with:
           release_notes_file: RELEASENOTES.md
+
+      - uses: jwalton/gh-find-current-pr@v1
+        if: env.SHOULD_RELEASE == 'true'
+        id: findPR
+        with:
+          state: closed
+
+      - name: Add PR body to Release Notes
+        if: env.SHOULD_RELEASE == 'true'
+        run: |-
+          echo ${{ steps.findPR.outputs.body }}|cat - RELEASENOTES.md > /tmp/out && mv /tmp/out RELEASENOTES.md
 
       - name: 🚀 Create GitHub release
         uses: ncipollo/release-action@v1
