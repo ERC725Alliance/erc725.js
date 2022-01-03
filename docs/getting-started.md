@@ -65,14 +65,17 @@ await erc725.getOwner();
 // > '0x28D25E70819140daF65b724158D00c373D1a18ee'
 
 await erc725.getData('SupportedStandards:LSP3UniversalProfile');
-/* > 
+/**
 {
   'SupportedStandards:LSP3UniversalProfile': '0xabe425d6'
 }
 */
 
-await erc725.getData(['LSP3Profile', 'SupportedStandards:LSP3UniversalProfile']);
-/* >
+await erc725.getData([
+  'LSP3Profile',
+  'SupportedStandards:LSP3UniversalProfile',
+]);
+/**
 {
   LSP3Profile: {
     url: 'ipfs://QmXybv2LdJWscy1C6yRKUjvnaj6aqKktZX4g4xmz2nyYj2',
@@ -84,7 +87,7 @@ await erc725.getData(['LSP3Profile', 'SupportedStandards:LSP3UniversalProfile'])
 */
 
 await erc725.fetchData('LSP3Profile'); // downloads and verifies the linked JSON
-/* > 
+/**
 {
   LSP3Profile: {
     LSP3Profile: {
@@ -117,9 +120,9 @@ import ERC725 from 'erc725.js';
 After the instance has been created is is still possible to change settings through the options property.
 
 ```javascript
-    myERC725.options.schema = '<schema>' // change schema
-    myERC725.options.address '<address>' // change address
-    myERC725.options.config.ipfsGateway = '<url>' // used for fetchData(), default: 'https://cloudflare-ipfs.com/ipfs/'
+myERC725.options.schema = '<schema>' // change schema
+myERC725.options.address '<address>' // change address
+myERC725.options.config.ipfsGateway = '<url>' // used for fetchData(), default: 'https://cloudflare-ipfs.com/ipfs/'
 
-    // NOTE: ERC725.provider can not be changed
+// NOTE: ERC725.provider can not be changed
 ```
