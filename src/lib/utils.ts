@@ -23,6 +23,9 @@ import {
   keccak256,
   numberToHex,
   padLeft,
+  hexToNumber,
+  toHex,
+  leftPad,
 } from 'web3-utils';
 
 import { KeyValuePair, JSONURLDataToEncode } from '../types';
@@ -35,6 +38,8 @@ import {
 
 import {
   HASH_FUNCTIONS,
+  LSP6_ALL_PERMISSIONS,
+  LSP6_DEAFULT_PERMISSIONS,
   SUPPORTED_HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTIONS_LIST,
 } from './constants';
@@ -571,4 +576,78 @@ export function flattenEncodedData(encodedData: {
         return a.key > b.key ? 1 : 0;
       })
   );
+}
+
+/**
+ * Encode permissions into a hexidecimal string as defined by the LSP6 KeyManager Standard.
+ *
+ * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+ * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
+ * @returns {*} The permissions encoded as a hexidecimal string as defined by the LSP6 Standard.
+ */
+export function encodePermissions(permissions: {
+  CHANGEOWNER?: boolean;
+  CHANGEPERMISSIONS?: boolean;
+  ADDPERMISSIONS?: boolean;
+  SETDATA?: boolean;
+  CALL?: boolean;
+  STATICCALL?: boolean;
+  DELEGATECALL?: boolean;
+  DEPLOY?: boolean;
+  TRANSFERVALUE?: boolean;
+  SIGN?: boolean;
+}): string {
+  const result = Object.keys(permissions).reduce((previous, key) => {
+    if (permissions[key]) {
+      return previous + hexToNumber(LSP6_DEAFULT_PERMISSIONS[key]);
+    }
+    return previous;
+  }, 0);
+
+  return leftPad(toHex(result), 64);
+}
+
+/**
+ * Decodes permissions from hexidecimal as defined by the LSP6 KeyManager Standard.
+ *
+ * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+ * @param permissionHex The permission hexidecimal value to be decoded.
+ * @returns Object specifying whether default LSP6 permissions are included in provided hexidemical string.
+ */
+export function decodePermission(permissionHex: string) {
+  const result = {
+    CHANGEOWNER: false,
+    CHANGEPERMISSIONS: false,
+    ADDPERMISSIONS: false,
+    SETDATA: false,
+    CALL: false,
+    STATICCALL: false,
+    DELEGATECALL: false,
+    DEPLOY: false,
+    TRANSFERVALUE: false,
+    SIGN: false,
+  };
+
+  const permissionsToTest = Object.keys(LSP6_DEAFULT_PERMISSIONS);
+  if (permissionHex === LSP6_ALL_PERMISSIONS) {
+    permissionsToTest.forEach((testPermission) => {
+      result[testPermission] = true;
+    });
+    return result;
+  }
+
+  const passedPermissionDecimal = hexToNumber(permissionHex);
+
+  permissionsToTest.forEach((testPermission) => {
+    const decimalTestPermission = hexToNumber(
+      LSP6_DEAFULT_PERMISSIONS[testPermission],
+    );
+    const permissionIsIncluded =
+      (passedPermissionDecimal & decimalTestPermission) ===
+      decimalTestPermission;
+
+    result[testPermission] = permissionIsIncluded;
+  });
+
+  return result;
 }
