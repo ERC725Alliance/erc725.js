@@ -1,9 +1,0 @@
-{
-  "entryPoints": ["./src/index.ts"],
-  "out": "docs/html/technical-reference",
-  "includeVersion": true,
-  "plugin": [],
-  "excludePrivate": true,
-  "readme": "none",
-  "exclude": ["**/*+(.spec|.e2e).ts"]
-}

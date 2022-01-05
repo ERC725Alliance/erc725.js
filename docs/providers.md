@@ -21,7 +21,7 @@ const web3provider = new Web3(
 );
 ```
 
-## Ethereum (Metamask)
+## Ethereum (MetaMask)
 
 This is the provider available at `window.ethereum` injected into a
 compatible web browser from the [Metamask plugin](https://metamask.io/).
