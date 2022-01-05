@@ -43,7 +43,7 @@ import {
 
 import { ERC725Config } from './types/Config';
 import { SUPPORTED_HASH_FUNCTION_STRINGS } from './lib/constants';
-import { URLDataWithHash, KeyValuePair, ProviderTypes } from './types';
+import { URLDataWithHash, KeyValuePair } from './types';
 
 export {
   ERC725JSONSchema,
@@ -117,9 +117,6 @@ export class ERC725<Schema extends GenericSchema> {
       typeof providerOrProviderWrapper.send === 'function'
     )
       return new Web3ProviderWrapper(providerOrProviderWrapper);
-
-    if (providerOrProviderWrapper.type === ProviderTypes.GRAPH_QL)
-      return providerOrProviderWrapper;
 
     throw new Error(
       `Incorrect or unsupported provider ${providerOrProviderWrapper}`,
@@ -327,34 +324,16 @@ export class ERC725<Schema extends GenericSchema> {
       }
     }
 
-    if (this.options.provider.type !== ProviderTypes.GRAPH_QL) {
-      try {
-        const arrayElements = await this.options.provider?.getAllData(
-          this.options.address as string,
-          arrayElementKeys,
-        );
-
-        results.push(...arrayElements);
-      } catch (err) {
-        // This case may happen if user requests an array key which does not exist in the contract.
-        // In this case, we simply skip
-      }
-
-      return results;
-    }
-
-    for (let index = 0; index < arrayElementKeys.length; index++) {
-      // GraphQL provider has a different signature for getAllData(), it doesn't support `keys[]` parameter
-
-      const arrayElement = await this.options.provider?.getData(
+    try {
+      const arrayElements = await this.options.provider?.getAllData(
         this.options.address as string,
-        arrayElementKeys[index],
+        arrayElementKeys,
       );
 
-      results.push({
-        key: arrayElementKeys[index],
-        value: arrayElement,
-      });
+      results.push(...arrayElements);
+    } catch (err) {
+      // This case may happen if user requests an array key which does not exist in the contract.
+      // In this case, we simply skip
     }
 
     return results;
@@ -401,17 +380,6 @@ export class ERC725<Schema extends GenericSchema> {
       this.options.address as string,
       keyHashes,
     );
-
-    if (this.options.provider?.type === ProviderTypes.GRAPH_QL) {
-      // If the provider type is a graphql client, we assume it can get ALL keys (including array keys)
-      return allRawData.reduce<{ [key: string]: any }>(
-        (accumulator, current) => {
-          accumulator[current.key] = current.value;
-          return accumulator;
-        },
-        {},
-      );
-    }
 
     const tmpData = allRawData.reduce<{ [key: string]: any }>(
       (accumulator, current) => {

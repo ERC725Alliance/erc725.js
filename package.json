@@ -41,8 +41,6 @@
   },
   "homepage": "https://github.com/ERC725Alliance/erc725.js#readme",
   "devDependencies": {
-    "@erc725/provider-wrappers": "0.0.1",
-    "@types/graphql": "^14.5.0",
     "@types/isomorphic-fetch": "0.0.35",
     "@types/mocha": "^8.2.2",
     "@types/node": "^15.12.2",

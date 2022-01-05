@@ -23,9 +23,6 @@ import assert from 'assert';
 import Web3 from 'web3';
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { GraphProviderWrapper } from '@erc725/provider-wrappers';
-
 import ERC725 from '.';
 import {
   decodeKey,
@@ -35,11 +32,7 @@ import {
   hashData,
 } from './lib/utils';
 import { ERC725JSONSchema } from './types/ERC725JSONSchema';
-import {
-  ApolloClient,
-  EthereumProvider,
-  HttpProvider,
-} from '../test/mockProviders';
+import { EthereumProvider, HttpProvider } from '../test/mockProviders';
 import { mockSchema } from '../test/mockSchema';
 import {
   generateAllData,
@@ -269,21 +262,6 @@ describe('Running @erc725/erc725.js tests...', () => {
         assert.deepStrictEqual(result, fullResults);
       });
 
-      xit('with apollo client', async () => {
-        const allGraphData = generateAllData(mockSchema);
-
-        const provider = new ApolloClient({
-          returnData: allGraphData,
-          getAll: true,
-        });
-        const erc725 = new ERC725(mockSchema, address, {
-          provider,
-          type: 'ApolloClient',
-        });
-        const result = await erc725.getData();
-        assert.deepStrictEqual(result, fullResults);
-      });
-
       it('fetchData JSONURL', async () => {
         // this test does a real request, TODO replace with mock?
         const provider = new HttpProvider(
@@ -431,17 +409,6 @@ describe('Running @erc725/erc725.js tests...', () => {
           INTERFACE_IDS.ERC725Y_LEGACY,
         ]);
         const erc725 = new ERC725(mockSchema, address, provider);
-        const result = await erc725.getData(schemaElement.key);
-        assert.deepStrictEqual(result, {
-          [schemaElement.name]: schemaElement.expectedResult,
-        });
-      });
-
-      it(schemaElement.name + ' with apollo graph provider', async () => {
-        const returnData = generateAllData([schemaElement]);
-        const apolloClient = new ApolloClient({ returnData });
-        const providerWrapper = new GraphProviderWrapper(apolloClient);
-        const erc725 = new ERC725(mockSchema, address, providerWrapper);
         const result = await erc725.getData(schemaElement.key);
         assert.deepStrictEqual(result, {
           [schemaElement.name]: schemaElement.expectedResult,
