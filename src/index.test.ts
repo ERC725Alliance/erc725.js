@@ -837,4 +837,37 @@ describe('Running @erc725/erc725.js tests...', () => {
       });
     });
   });
+
+  describe('getSchema', () => {
+    it('should find key in schema used for instantiation', async () => {
+      const schema: ERC725JSONSchema = {
+        name: 'InstantiationSchema',
+        key: '0xdbc90d23b2e4ff291c111a658864f9723a77b8c1f22b707e51a686413948206d',
+        keyType: 'Singleton',
+        valueContent: 'JSONURL',
+        valueType: 'bytes',
+      };
+
+      const erc725 = new ERC725([schema]);
+
+      const foundSchema = erc725.getSchema(schema.key);
+
+      assert.deepStrictEqual(foundSchema, schema);
+    });
+    it('should find key in schema provided as parameter', async () => {
+      const schema: ERC725JSONSchema = {
+        name: 'ParameterSchema',
+        key: '0x777f55baf2e0c9f73d3bb456dfb8dbf6e609bf557969e3184c17ff925b3c402c',
+        keyType: 'Singleton',
+        valueContent: 'JSONURL',
+        valueType: 'bytes',
+      };
+
+      const erc725 = new ERC725([]);
+
+      const foundSchema = erc725.getSchema(schema.key, [schema]);
+
+      assert.deepStrictEqual(foundSchema, schema);
+    });
+  });
 });
