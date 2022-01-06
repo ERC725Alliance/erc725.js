@@ -33,6 +33,8 @@ import {
   encodeData,
 } from './lib/utils';
 
+import { getSchema } from './lib/schemaParser';
+
 import {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
@@ -178,6 +180,34 @@ export class ERC725<Schema extends GenericSchema> {
       ...dataFromChain,
       ...dataFromExternalSources,
     };
+  }
+
+  /**
+   * Parses a hashed key or a list of hashed keys and will attempt to return its corresponding LSP-2 ERC725YJSONSchema object.
+   * The function will look for a corresponding key within the schemas:
+   *  - in `./schemas` folder
+   *  - provided at initialisation
+   *  - provided in the function call
+   *
+   * @param keyOrKeys The hashed key or array of keys for which you want to find the corresponding LSP-2 ERC725YJSONSchema.
+   * @param providedSchemas If you provide your own ERC725JSONSchemas, the parser will also try to find a key match against these schemas.
+   */
+  getSchema(
+    keyOrKeys: string[],
+    providedSchemas?: ERC725JSONSchema[],
+  ): Record<string, ERC725JSONSchema | null>;
+  getSchema(
+    keyOrKeys: string,
+    providedSchemas?: ERC725JSONSchema[],
+  ): ERC725JSONSchema | null;
+  getSchema(
+    keyOrKeys: string | string[],
+    providedSchemas?: ERC725JSONSchema[],
+  ): ERC725JSONSchema | null | Record<string, ERC725JSONSchema | null> {
+    return getSchema(
+      keyOrKeys,
+      this.options.schema.concat(providedSchemas || []),
+    );
   }
 
   private getDataFromExternalSources(dataFromChain: { [key: string]: any }): {
