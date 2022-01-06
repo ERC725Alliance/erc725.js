@@ -837,37 +837,118 @@ describe('Running @erc725/erc725.js tests...', () => {
       });
     });
   });
+});
 
-  describe('getSchema', () => {
-    it('should find key in schema used for instantiation', async () => {
-      const schema: ERC725JSONSchema = {
-        name: 'InstantiationSchema',
-        key: '0xdbc90d23b2e4ff291c111a658864f9723a77b8c1f22b707e51a686413948206d',
-        keyType: 'Singleton',
-        valueContent: 'JSONURL',
-        valueType: 'bytes',
-      };
+describe('getSchema', () => {
+  it('should find key in schema used for instantiation', async () => {
+    const schema: ERC725JSONSchema = {
+      name: 'InstantiationSchema',
+      key: '0xdbc90d23b2e4ff291c111a658864f9723a77b8c1f22b707e51a686413948206d',
+      keyType: 'Singleton',
+      valueContent: 'JSONURL',
+      valueType: 'bytes',
+    };
 
-      const erc725 = new ERC725([schema]);
+    const erc725 = new ERC725([schema]);
 
-      const foundSchema = erc725.getSchema(schema.key);
+    const foundSchema = erc725.getSchema(schema.key);
 
-      assert.deepStrictEqual(foundSchema, schema);
+    assert.deepStrictEqual(foundSchema, schema);
+  });
+  it('should find key in schema provided as parameter', async () => {
+    const schema: ERC725JSONSchema = {
+      name: 'ParameterSchema',
+      key: '0x777f55baf2e0c9f73d3bb456dfb8dbf6e609bf557969e3184c17ff925b3c402c',
+      keyType: 'Singleton',
+      valueContent: 'JSONURL',
+      valueType: 'bytes',
+    };
+
+    const erc725 = new ERC725([]);
+
+    const foundSchema = erc725.getSchema(schema.key, [schema]);
+
+    assert.deepStrictEqual(foundSchema, schema);
+  });
+});
+
+describe('encodeKeyName', () => {
+  describe('Singleton', () => {
+    it('Encodes MyKeyName correctly', () => {
+      assert.deepStrictEqual(
+        ERC725.encodeKeyName('MyKeyName'),
+        '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2',
+      );
     });
-    it('should find key in schema provided as parameter', async () => {
-      const schema: ERC725JSONSchema = {
-        name: 'ParameterSchema',
-        key: '0x777f55baf2e0c9f73d3bb456dfb8dbf6e609bf557969e3184c17ff925b3c402c',
-        keyType: 'Singleton',
-        valueContent: 'JSONURL',
-        valueType: 'bytes',
-      };
-
-      const erc725 = new ERC725([]);
-
-      const foundSchema = erc725.getSchema(schema.key, [schema]);
-
-      assert.deepStrictEqual(foundSchema, schema);
+    it('Encodes LSP3Profile correctly', () => {
+      assert.deepStrictEqual(
+        ERC725.encodeKeyName('LSP3Profile'),
+        '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+      );
+    });
+  });
+  describe('Array', () => {
+    it('Encodes LSP3IssuedAssets[] correctly', () => {
+      assert.deepStrictEqual(
+        ERC725.encodeKeyName('LSP3IssuedAssets[]'),
+        '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+      );
+    });
+    it('Encodes LSP5ReceivedAssets[] correctly', () => {
+      assert.deepStrictEqual(
+        ERC725.encodeKeyName('LSP5ReceivedAssets[]'),
+        '0x6460ee3c0aac563ccbf76d6e1d07bada78e3a9514e6382b736ed3f478ab7b90b',
+      );
+    });
+  });
+  describe('Mapping', () => {
+    it('Encodes SupportedStandards:ERC725Account correctly', () => {
+      assert.deepStrictEqual(
+        ERC725.encodeKeyName('SupportedStandards:ERC725Account'),
+        '0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6',
+      );
+    });
+    it('Encodes SupportedStandards:LSP3UniversalProfile correctly', () => {
+      assert.deepStrictEqual(
+        ERC725.encodeKeyName('SupportedStandards:LSP3UniversalProfile'),
+        '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
+      );
+    });
+  });
+  describe('Bytes20Mapping', () => {
+    it('Encodes MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe correctly', () => {
+      assert.deepStrictEqual(
+        ERC725.encodeKeyName(
+          'MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe',
+        ),
+        '0x22496f48a493035f00000000cafecafecafecafecafecafecafecafecafecafe',
+      );
+    });
+    it('Encodes LSP3IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147 correctly', () => {
+      assert.deepStrictEqual(
+        ERC725.encodeKeyName(
+          'LSP3IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+        ),
+        '0x83f5e77bfb14241600000000b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+      );
+    });
+  });
+  describe('Bytes20MappingWithGrouping', () => {
+    it('Encodes AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe correctly', () => {
+      assert.deepStrictEqual(
+        ERC725.encodeKeyName(
+          'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
+        ),
+        '0x4b80742d0000000082ac0000cafecafecafecafecafecafecafecafecafecafe',
+      );
+    });
+    it('Encodes AddressPermissions:AllowedAddresses:b74a88C43BCf691bd7A851f6603cb1868f6fc147 correctly', () => {
+      assert.deepStrictEqual(
+        ERC725.encodeKeyName(
+          'AddressPermissions:AllowedAddresses:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+        ),
+        '0x4b80742d00000000c6dd0000b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+      );
     });
   });
 });
