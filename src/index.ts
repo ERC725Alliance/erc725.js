@@ -18,7 +18,7 @@
  * @date 2020
  */
 
-import { isAddress } from 'web3-utils';
+import { hexToNumber, isAddress, leftPad, toHex } from 'web3-utils';
 
 import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
 import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
@@ -42,7 +42,11 @@ import {
 } from './types/ERC725JSONSchema';
 
 import { ERC725Config } from './types/Config';
-import { SUPPORTED_HASH_FUNCTION_STRINGS } from './lib/constants';
+import {
+  LSP6_ALL_PERMISSIONS,
+  LSP6_DEFAULT_PERMISSIONS,
+  SUPPORTED_HASH_FUNCTION_STRINGS,
+} from './lib/constants';
 import { URLDataWithHash, KeyValuePair } from './types';
 
 export {
@@ -53,12 +57,7 @@ export {
 };
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
-export {
-  flattenEncodedData,
-  encodeData,
-  encodePermissions,
-  decodePermission,
-} from './lib/utils';
+export { flattenEncodedData, encodeData } from './lib/utils';
 /**
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
  *
@@ -451,6 +450,79 @@ export class ERC725<Schema extends GenericSchema> {
       address: this.options.address as string,
       provider: this.options.provider,
     };
+  }
+
+  /**
+   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
+   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
+   */
+  static encodePermissions(permissions: {
+    CHANGEOWNER?: boolean;
+    CHANGEPERMISSIONS?: boolean;
+    ADDPERMISSIONS?: boolean;
+    SETDATA?: boolean;
+    CALL?: boolean;
+    STATICCALL?: boolean;
+    DELEGATECALL?: boolean;
+    DEPLOY?: boolean;
+    TRANSFERVALUE?: boolean;
+    SIGN?: boolean;
+  }): string {
+    const result = Object.keys(permissions).reduce((previous, key) => {
+      return permissions[key]
+        ? previous + hexToNumber(LSP6_DEFAULT_PERMISSIONS[key])
+        : previous;
+    }, 0);
+
+    return leftPad(toHex(result), 64);
+  }
+
+  /**
+   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissionHex The permission hexadecimal value to be decoded.
+   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
+   */
+  static decodePermission(permissionHex: string) {
+    const result = {
+      CHANGEOWNER: false,
+      CHANGEPERMISSIONS: false,
+      ADDPERMISSIONS: false,
+      SETDATA: false,
+      CALL: false,
+      STATICCALL: false,
+      DELEGATECALL: false,
+      DEPLOY: false,
+      TRANSFERVALUE: false,
+      SIGN: false,
+    };
+
+    const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);
+    if (permissionHex === LSP6_ALL_PERMISSIONS) {
+      permissionsToTest.forEach((testPermission) => {
+        result[testPermission] = true;
+      });
+      return result;
+    }
+
+    const passedPermissionDecimal = hexToNumber(permissionHex);
+
+    permissionsToTest.forEach((testPermission) => {
+      const decimalTestPermission = hexToNumber(
+        LSP6_DEFAULT_PERMISSIONS[testPermission],
+      );
+      const isPermissionIncluded =
+        (passedPermissionDecimal & decimalTestPermission) ===
+        decimalTestPermission;
+
+      result[testPermission] = isPermissionIncluded;
+    });
+
+    return result;
   }
 }
 

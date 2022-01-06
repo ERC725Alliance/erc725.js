@@ -108,7 +108,7 @@ export const HASH_FUNCTIONS: {
 };
 
 // TODO: These values can be imported from lsp-smartcontracts lib after release
-export const LSP6_DEAFULT_PERMISSIONS = {
+export const LSP6_DEFAULT_PERMISSIONS = {
   CHANGEOWNER:
     '0x0000000000000000000000000000000000000000000000000000000000000001',
 
