@@ -18,7 +18,7 @@
  * @date 2020
  */
 
-import { isAddress } from 'web3-utils';
+import { hexToNumber, isAddress, keccak256, leftPad, toHex } from 'web3-utils';
 
 import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
 import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
@@ -33,6 +33,8 @@ import {
   encodeData,
 } from './lib/utils';
 
+import { getSchema } from './lib/schemaParser';
+
 import {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
@@ -42,8 +44,12 @@ import {
 } from './types/ERC725JSONSchema';
 
 import { ERC725Config } from './types/Config';
-import { SUPPORTED_HASH_FUNCTION_STRINGS } from './lib/constants';
-import { URLDataWithHash, KeyValuePair, ProviderTypes } from './types';
+import {
+  LSP6_ALL_PERMISSIONS,
+  LSP6_DEFAULT_PERMISSIONS,
+  SUPPORTED_HASH_FUNCTION_STRINGS,
+} from './lib/constants';
+import { URLDataWithHash, KeyValuePair } from './types';
 
 export {
   ERC725JSONSchema,
@@ -118,9 +124,6 @@ export class ERC725<Schema extends GenericSchema> {
     )
       return new Web3ProviderWrapper(providerOrProviderWrapper);
 
-    if (providerOrProviderWrapper.type === ProviderTypes.GRAPH_QL)
-      return providerOrProviderWrapper;
-
     throw new Error(
       `Incorrect or unsupported provider ${providerOrProviderWrapper}`,
     );
@@ -177,6 +180,34 @@ export class ERC725<Schema extends GenericSchema> {
       ...dataFromChain,
       ...dataFromExternalSources,
     };
+  }
+
+  /**
+   * Parses a hashed key or a list of hashed keys and will attempt to return its corresponding LSP-2 ERC725YJSONSchema object.
+   * The function will look for a corresponding key within the schemas:
+   *  - in `./schemas` folder
+   *  - provided at initialisation
+   *  - provided in the function call
+   *
+   * @param keyOrKeys The hashed key or array of keys for which you want to find the corresponding LSP-2 ERC725YJSONSchema.
+   * @param providedSchemas If you provide your own ERC725JSONSchemas, the parser will also try to find a key match against these schemas.
+   */
+  getSchema(
+    keyOrKeys: string[],
+    providedSchemas?: ERC725JSONSchema[],
+  ): Record<string, ERC725JSONSchema | null>;
+  getSchema(
+    keyOrKeys: string,
+    providedSchemas?: ERC725JSONSchema[],
+  ): ERC725JSONSchema | null;
+  getSchema(
+    keyOrKeys: string | string[],
+    providedSchemas?: ERC725JSONSchema[],
+  ): ERC725JSONSchema | null | Record<string, ERC725JSONSchema | null> {
+    return getSchema(
+      keyOrKeys,
+      this.options.schema.concat(providedSchemas || []),
+    );
   }
 
   private getDataFromExternalSources(dataFromChain: { [key: string]: any }): {
@@ -327,34 +358,16 @@ export class ERC725<Schema extends GenericSchema> {
       }
     }
 
-    if (this.options.provider.type !== ProviderTypes.GRAPH_QL) {
-      try {
-        const arrayElements = await this.options.provider?.getAllData(
-          this.options.address as string,
-          arrayElementKeys,
-        );
-
-        results.push(...arrayElements);
-      } catch (err) {
-        // This case may happen if user requests an array key which does not exist in the contract.
-        // In this case, we simply skip
-      }
-
-      return results;
-    }
-
-    for (let index = 0; index < arrayElementKeys.length; index++) {
-      // GraphQL provider has a different signature for getAllData(), it doesn't support `keys[]` parameter
-
-      const arrayElement = await this.options.provider?.getData(
+    try {
+      const arrayElements = await this.options.provider?.getAllData(
         this.options.address as string,
-        arrayElementKeys[index],
+        arrayElementKeys,
       );
 
-      results.push({
-        key: arrayElementKeys[index],
-        value: arrayElement,
-      });
+      results.push(...arrayElements);
+    } catch (err) {
+      // This case may happen if user requests an array key which does not exist in the contract.
+      // In this case, we simply skip
     }
 
     return results;
@@ -401,17 +414,6 @@ export class ERC725<Schema extends GenericSchema> {
       this.options.address as string,
       keyHashes,
     );
-
-    if (this.options.provider?.type === ProviderTypes.GRAPH_QL) {
-      // If the provider type is a graphql client, we assume it can get ALL keys (including array keys)
-      return allRawData.reduce<{ [key: string]: any }>(
-        (accumulator, current) => {
-          accumulator[current.key] = current.value;
-          return accumulator;
-        },
-        {},
-      );
-    }
 
     const tmpData = allRawData.reduce<{ [key: string]: any }>(
       (accumulator, current) => {
@@ -478,6 +480,129 @@ export class ERC725<Schema extends GenericSchema> {
       address: this.options.address as string,
       provider: this.options.provider,
     };
+  }
+
+  /**
+   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
+   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
+   */
+  static encodePermissions(permissions: {
+    CHANGEOWNER?: boolean;
+    CHANGEPERMISSIONS?: boolean;
+    ADDPERMISSIONS?: boolean;
+    SETDATA?: boolean;
+    CALL?: boolean;
+    STATICCALL?: boolean;
+    DELEGATECALL?: boolean;
+    DEPLOY?: boolean;
+    TRANSFERVALUE?: boolean;
+    SIGN?: boolean;
+  }): string {
+    const result = Object.keys(permissions).reduce((previous, key) => {
+      return permissions[key]
+        ? previous + hexToNumber(LSP6_DEFAULT_PERMISSIONS[key])
+        : previous;
+    }, 0);
+
+    return leftPad(toHex(result), 64);
+  }
+
+  /**
+   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissionHex The permission hexadecimal value to be decoded.
+   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
+   */
+  static decodePermissions(permissionHex: string) {
+    const result = {
+      CHANGEOWNER: false,
+      CHANGEPERMISSIONS: false,
+      ADDPERMISSIONS: false,
+      SETDATA: false,
+      CALL: false,
+      STATICCALL: false,
+      DELEGATECALL: false,
+      DEPLOY: false,
+      TRANSFERVALUE: false,
+      SIGN: false,
+    };
+
+    const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);
+    if (permissionHex === LSP6_ALL_PERMISSIONS) {
+      permissionsToTest.forEach((testPermission) => {
+        result[testPermission] = true;
+      });
+      return result;
+    }
+
+    const passedPermissionDecimal = hexToNumber(permissionHex);
+
+    permissionsToTest.forEach((testPermission) => {
+      const decimalTestPermission = hexToNumber(
+        LSP6_DEFAULT_PERMISSIONS[testPermission],
+      );
+      const isPermissionIncluded =
+        (passedPermissionDecimal & decimalTestPermission) ===
+        decimalTestPermission;
+
+      result[testPermission] = isPermissionIncluded;
+    });
+
+    return result;
+  }
+
+  /**
+   * Hashes a key name for use on an ERC725Y contract according to LSP2 ERC725Y JSONSchema standard.
+   *
+   * @param keyName The key name you want to encode.
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md ERC725YJsonSchema standard.
+   * @returns {*} The keccak256 hash of the provided key name. This is the key that must be retrievable from the ERC725Y contract via ERC725Y.getData(bytes32 key).
+   */
+  static encodeKeyName(keyName: string): string {
+    const isMapping = keyName.includes(':');
+
+    if (isMapping) {
+      const words = keyName.split(':');
+
+      const isBytes20Mapping = isAddress(words[words.length - 1]);
+      const isMappingWithGrouping = words.length === 3;
+
+      // Mapping
+      if (!isBytes20Mapping && !isMappingWithGrouping) {
+        return (
+          keccak256(words[0]).slice(0, 34) +
+          '0'.repeat(24) +
+          keccak256(words[1]).slice(2).slice(0, 8)
+        );
+      }
+
+      // Bytes20Mapping
+      if (isBytes20Mapping && !isMappingWithGrouping) {
+        return (
+          keccak256(words[0]).slice(0, 18) +
+          '0'.repeat(8) +
+          words[words.length - 1]
+        );
+      }
+
+      // Bytes20MappingWithGrouping
+      if (isBytes20Mapping && isMappingWithGrouping) {
+        return (
+          keccak256(words[0]).slice(0, 10) +
+          '0'.repeat(8) +
+          keccak256(words[1]).slice(2).slice(0, 4) +
+          '0'.repeat(4) +
+          words[words.length - 1]
+        );
+      }
+    }
+
+    // Array + Singleton
+    return keccak256(keyName);
   }
 }
 
