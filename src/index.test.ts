@@ -807,18 +807,18 @@ describe('Running @erc725/erc725.js tests...', () => {
       });
     });
 
-    describe('decodePermission', () => {
+    describe('decodePermissions', () => {
       testCases.forEach((testCase) => {
         it(`Decodes ${testCase.hex} permission correctly`, () => {
           assert.deepStrictEqual(
-            ERC725.decodePermission(testCase.hex),
+            ERC725.decodePermissions(testCase.hex),
             testCase.permissions,
           );
         });
       });
       it(`Decodes 0xfff...fff admin permission correctly`, () => {
         assert.deepStrictEqual(
-          ERC725.decodePermission(
+          ERC725.decodePermissions(
             '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
           ),
           {

@@ -487,7 +487,7 @@ export class ERC725<Schema extends GenericSchema> {
    * @param permissionHex The permission hexadecimal value to be decoded.
    * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
    */
-  static decodePermission(permissionHex: string) {
+  static decodePermissions(permissionHex: string) {
     const result = {
       CHANGEOWNER: false,
       CHANGEPERMISSIONS: false,
