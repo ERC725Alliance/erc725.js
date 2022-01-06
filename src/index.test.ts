@@ -691,4 +691,150 @@ describe('Running @erc725/erc725.js tests...', () => {
       SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
     );
   });
+
+  describe('permissions', () => {
+    const testCases: { hex: string; permissions }[] = [
+      {
+        permissions: {
+          CHANGEOWNER: true,
+          CHANGEPERMISSIONS: true,
+          ADDPERMISSIONS: true,
+          SETDATA: true,
+          CALL: true,
+          STATICCALL: true,
+          DELEGATECALL: true,
+          DEPLOY: true,
+          TRANSFERVALUE: true,
+          SIGN: true,
+        },
+        hex: '0x00000000000000000000000000000000000000000000000000000000000003ff',
+      },
+      {
+        permissions: {
+          CHANGEOWNER: false,
+          CHANGEPERMISSIONS: false,
+          ADDPERMISSIONS: false,
+          SETDATA: false,
+          CALL: false,
+          STATICCALL: false,
+          DELEGATECALL: false,
+          DEPLOY: false,
+          TRANSFERVALUE: false,
+          SIGN: false,
+        },
+        hex: '0x0000000000000000000000000000000000000000000000000000000000000000',
+      },
+      {
+        permissions: {
+          CHANGEOWNER: false,
+          CHANGEPERMISSIONS: false,
+          ADDPERMISSIONS: false,
+          SETDATA: false,
+          CALL: true,
+          STATICCALL: false,
+          DELEGATECALL: false,
+          DEPLOY: false,
+          TRANSFERVALUE: true,
+          SIGN: true,
+        },
+        hex: '0x0000000000000000000000000000000000000000000000000000000000000310',
+      },
+      {
+        permissions: {
+          CHANGEOWNER: false,
+          CHANGEPERMISSIONS: false,
+          ADDPERMISSIONS: false,
+          SETDATA: true,
+          CALL: true,
+          STATICCALL: false,
+          DELEGATECALL: false,
+          DEPLOY: false,
+          TRANSFERVALUE: false,
+          SIGN: false,
+        },
+        hex: '0x0000000000000000000000000000000000000000000000000000000000000018',
+      },
+      {
+        permissions: {
+          CHANGEOWNER: false,
+          CHANGEPERMISSIONS: true,
+          ADDPERMISSIONS: false,
+          SETDATA: true,
+          CALL: false,
+          STATICCALL: false,
+          DELEGATECALL: false,
+          DEPLOY: false,
+          TRANSFERVALUE: false,
+          SIGN: false,
+        },
+        hex: '0x000000000000000000000000000000000000000000000000000000000000000a',
+      },
+      {
+        permissions: {
+          CHANGEOWNER: false,
+          CHANGEPERMISSIONS: false,
+          ADDPERMISSIONS: false,
+          SETDATA: false,
+          CALL: true,
+          STATICCALL: false,
+          DELEGATECALL: false,
+          DEPLOY: false,
+          TRANSFERVALUE: true,
+          SIGN: false,
+        },
+        hex: '0x0000000000000000000000000000000000000000000000000000000000000110',
+      },
+    ];
+
+    describe(`encodePermissions`, () => {
+      testCases.forEach((testCase) => {
+        it(`Encodes ${testCase.hex} permission correctly`, () => {
+          assert.deepStrictEqual(
+            ERC725.encodePermissions(testCase.permissions),
+            testCase.hex,
+          );
+        });
+      });
+
+      it('Defaults permissions to false if not passed', () => {
+        assert.deepStrictEqual(
+          ERC725.encodePermissions({
+            CHANGEPERMISSIONS: true,
+            SETDATA: true,
+          }),
+          '0x000000000000000000000000000000000000000000000000000000000000000a',
+        );
+      });
+    });
+
+    describe('decodePermissions', () => {
+      testCases.forEach((testCase) => {
+        it(`Decodes ${testCase.hex} permission correctly`, () => {
+          assert.deepStrictEqual(
+            ERC725.decodePermissions(testCase.hex),
+            testCase.permissions,
+          );
+        });
+      });
+      it(`Decodes 0xfff...fff admin permission correctly`, () => {
+        assert.deepStrictEqual(
+          ERC725.decodePermissions(
+            '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          ),
+          {
+            CHANGEOWNER: true,
+            CHANGEPERMISSIONS: true,
+            ADDPERMISSIONS: true,
+            SETDATA: true,
+            CALL: true,
+            STATICCALL: true,
+            DELEGATECALL: true,
+            DEPLOY: true,
+            TRANSFERVALUE: true,
+            SIGN: true,
+          },
+        );
+      });
+    });
+  });
 });
