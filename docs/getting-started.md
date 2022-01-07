@@ -4,6 +4,10 @@ sidebar_position: 1.1
 
 # Getting Started
 
+:::caution
+This package is currently in early stages of development, use only for testing or experimentation purposes.
+:::
+
 The `@erc725/erc725.js` package allows you to easily interact with the ERC-725 schemas.
 
 - GitHub repo: https://github.com/ERC725Alliance/erc725.js
@@ -12,7 +16,7 @@ The `@erc725/erc725.js` package allows you to easily interact with the ERC-725 s
 ## Installation
 
 ```bash
-  npm install @erc725/erc725.js
+npm install @erc725/erc725.js
 ```
 
 ## Instantiation
