@@ -4,7 +4,7 @@
     "key": "0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6",
     "keyType": "Mapping",
     "valueContent": "0xabe425d6",
-    "valueType": "bytes"
+    "valueType": "bytes4"
   },
   {
     "name": "LSP3Profile",

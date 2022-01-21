@@ -4,7 +4,7 @@
     "key": "0xeafec4d89fa9619884b6b89135626455000000000000000000000000a4d96624",
     "keyType": "Mapping",
     "valueContent": "0xa4d96624",
-    "valueType": "bytes"
+    "valueType": "bytes4"
   },
   {
     "name": "LSP4TokenName",
