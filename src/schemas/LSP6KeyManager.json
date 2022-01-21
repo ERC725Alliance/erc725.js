@@ -11,7 +11,7 @@
     "key": "0x4b80742d0000000082ac0000<address>",
     "keyType": "Bytes20MappingWithGrouping",
     "valueContent": "BitArray",
-    "valueType": "byte32"
+    "valueType": "bytes32"
   },
   {
     "name": "AddressPermissions:AllowedAddresses:<address>",
