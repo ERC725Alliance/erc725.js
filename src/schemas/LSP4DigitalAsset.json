@@ -33,5 +33,12 @@
     "keyType": "Array",
     "valueContent": "Number",
     "valueType": "uint256"
+  },
+  {
+    "name": "LSP4CreatorsMap:<address>",
+    "key": "0x6de85eaf5d982b4e00000000<address>",
+    "keyType": "Mapping",
+    "valueContent": "Mixed",
+    "valueType": "bytes"
   }
 ]
