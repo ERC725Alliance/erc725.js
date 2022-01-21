@@ -67,7 +67,7 @@ describe('schemaParser getSchema', () => {
         key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
         keyType: 'Mapping',
         valueContent: '0xabe425d6',
-        valueType: 'bytes',
+        valueType: 'bytes4',
       });
     });
 
@@ -82,7 +82,7 @@ describe('schemaParser getSchema', () => {
         key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000f4d7faed',
         keyType: 'Mapping',
         valueContent: '0xabe425d6',
-        valueType: 'bytes',
+        valueType: 'bytes4',
       });
     });
   });
@@ -119,7 +119,7 @@ describe('schemaParser getSchema', () => {
         key,
         keyType: 'Bytes20MappingWithGrouping',
         valueContent: 'BitArray',
-        valueType: 'byte32',
+        valueType: 'bytes32',
       });
     });
   });
