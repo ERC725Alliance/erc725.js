@@ -48,22 +48,24 @@ const findArraySchemaForKey = (
   }
 
   // 2. Subsequent keys
-  const bytes16Key = key.substr(0, 34);
+  const bytes16Key = key.slice(0, 34);
   const arraySchema =
-    schemas.find((schema) => schema.key.substr(0, 34) === bytes16Key) || null;
+    schemas.find((schema) => schema.key.slice(0, 34) === bytes16Key) || null;
 
   if (!arraySchema) {
     return null;
   }
 
-  const elementIndex = parseInt(key.substr(34), 10);
-
-  if (!elementIndex) {
+  // https://stackoverflow.com/a/1779019/651299
+  if (!/^\d+$/.test(key.slice(34))) {
     return null;
   }
 
+  const elementIndex = parseInt(key.slice(34), 10);
+
   return {
     ...arraySchema,
+    key,
     name: arraySchema.name.replace('[]', `[${elementIndex}]`),
     keyType: 'Singleton',
   };
