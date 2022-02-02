@@ -35,16 +35,26 @@ describe('schemaParser getSchema', () => {
       });
     });
     it('finds subsequent key of type Array correctly', () => {
-      const schema = getSchema(
+      const schema = getSchema([
         '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
-      );
+        '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000000',
+      ]);
 
       assert.deepStrictEqual(schema, {
-        name: 'LSP3IssuedAssets[1]',
-        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
-        keyType: 'Singleton',
-        valueContent: 'Address',
-        valueType: 'address',
+        '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001': {
+          name: 'LSP3IssuedAssets[1]',
+          key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
+          keyType: 'Singleton',
+          valueContent: 'Address',
+          valueType: 'address',
+        },
+        '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000000': {
+          name: 'AddressPermissions[0]',
+          key: '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000000',
+          keyType: 'Singleton',
+          valueContent: 'Address',
+          valueType: 'address',
+        },
       });
     });
     it('finds subsequent key of type Array correctly', () => {
@@ -67,7 +77,7 @@ describe('schemaParser getSchema', () => {
         key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
         keyType: 'Mapping',
         valueContent: '0xabe425d6',
-        valueType: 'bytes',
+        valueType: 'bytes4',
       });
     });
 
@@ -82,7 +92,7 @@ describe('schemaParser getSchema', () => {
         key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000f4d7faed',
         keyType: 'Mapping',
         valueContent: '0xabe425d6',
-        valueType: 'bytes',
+        valueType: 'bytes4',
       });
     });
   });
@@ -119,7 +129,7 @@ describe('schemaParser getSchema', () => {
         key,
         keyType: 'Bytes20MappingWithGrouping',
         valueContent: 'BitArray',
-        valueType: 'byte32',
+        valueType: 'bytes32',
       });
     });
   });
