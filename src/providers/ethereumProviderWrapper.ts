@@ -97,7 +97,7 @@ export class EthereumProviderWrapper {
   }
 
   async getData(address: string, keyHash: string) {
-    const result = this.getAllData(address, [keyHash]);
+    const result = await this.getAllData(address, [keyHash]);
 
     try {
       return result[0].value;
