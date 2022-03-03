@@ -84,8 +84,10 @@ jobs:
 
       - name: Add PR body to Release Notes
         if: env.SHOULD_RELEASE == 'true'
+        env:
+          PR_BODY: ${{ steps.findPR.outputs.body }}
         run: |-
-          echo ${{ steps.findPR.outputs.body }}|cat - RELEASENOTES.md > /tmp/out && mv /tmp/out RELEASENOTES.md
+          echo ${PR_BODY}|cat - RELEASENOTES.md > /tmp/out && mv /tmp/out RELEASENOTES.md
 
       - name: 🚀 Create GitHub release
         uses: ncipollo/release-action@v1
