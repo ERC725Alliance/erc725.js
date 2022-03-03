@@ -37,5 +37,29 @@ describe('EthereumProviderWrapper', () => {
         assert.deepStrictEqual(error.message, 'some error');
       }
     });
+
+    it('should return a getData result', async () => {
+      const ethResults = [
+        '0x000000000000000000000000a78e0e7c9b1b36f7e25c5ccdfdba005ec37eadf4',
+        '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000596f357c6aa34e3d9c3d971121a8616f071b07d2f34fce1da803f7c7ce711e73a28520066f697066733a2f2f516d64745753567a5162555a383269695a4d59684d5657414766446b7732665a52486a634a526e424875617a543800000000000000',
+      ];
+      const mockProvider = {
+        request: () => {
+          return new Promise((resolve) => {
+            resolve(ethResults.shift());
+          });
+        },
+      };
+      const ethSource = new EthereumProviderWrapper(mockProvider);
+
+      const result = await ethSource.getData(
+        '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+        '0x7cE38d75e4cC42f2e947DAcebaB8bb882bA6fC68',
+      );
+      assert.deepStrictEqual(
+        result,
+        '0x6f357c6aa34e3d9c3d971121a8616f071b07d2f34fce1da803f7c7ce711e73a28520066f697066733a2f2f516d64745753567a5162555a383269695a4d59684d5657414766446b7732665a52486a634a526e424875617a5438',
+      );
+    });
   });
 });
