@@ -16,11 +16,10 @@ To bump locally:
 ```bash
 npm run release
 ```
-
-3. Push the changes to origin, **WITH TAGS**.
+3. Push the changes to origin. A git tag is created by the release CI so do **not** push tags here.
 
 ```bash
-git push --follow-tags origin
+git push origin
 ```
 
 4. Open a PR from your release branch to `develop` and merge it.
