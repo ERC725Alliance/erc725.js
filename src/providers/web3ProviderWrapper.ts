@@ -100,6 +100,29 @@ export class Web3ProviderWrapper {
     );
   }
 
+  /**
+   * https://eips.ethereum.org/EIPS/eip-1271
+   *
+   * @param address the contract address
+   * @param hash
+   * @param signature
+   */
+  async isValidSignature(address: string, hash: string, signature: string) {
+    const encodedParams = abiCoder.encodeParameters(
+      ['bytes32', 'bytes'],
+      [hash, signature],
+    );
+
+    const results = await this.callContract([
+      constructJSONRPC(address, Method.IS_VALID_SIGNATURE, encodedParams),
+    ]);
+    if (results.error) {
+      throw results.error;
+    }
+
+    return decodeResult(Method.IS_VALID_SIGNATURE, results[0]);
+  }
+
   async getData(address: string, keyHash: string) {
     const result = await this.getAllData(address, [keyHash]);
 
@@ -180,6 +203,7 @@ export class Web3ProviderWrapper {
   private async callContract(payload: JsonRpc[] | JsonRpc): Promise<any> {
     return new Promise((resolve, reject) => {
       // Send old web3 method with callback to resolve promise
+      // This is deprecated: https://docs.metamask.io/guide/ethereum-provider.html#ethereum-send-deprecated
       this.provider.send(payload, (e, r) => {
         if (e) {
           reject(e);

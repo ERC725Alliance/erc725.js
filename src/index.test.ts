@@ -91,6 +91,56 @@ describe('Running @erc725/erc725.js tests...', () => {
     }
   });
 
+  describe('isValidSignature', () => {
+    it('should return true if the signature is valid [mock HttpProvider]', async () => {
+      const provider = new HttpProvider({ returnData: [] }, [], true); // we mock a valid return response (magic number)
+      const erc725 = new ERC725(
+        [],
+        '0xD295E4748c1DFDFE028D7Dd2FEC3e52de2b1EB42', // result is mocked so we can use any address
+        provider,
+      );
+
+      const res = await erc725.isValidSignature(
+        'hello',
+        '0x6c54ad4814ed6de85b9786e79de48ad0d597a243158194fa6b3604254ff58f9c2e4ffcc080e18a68c8e813f720b893c8d47d6f757b9e288a5814263642811c1b1c',
+      );
+
+      assert.deepStrictEqual(res, true);
+    });
+
+    it('should return true if the signature is valid [mock EthereumProvider]', async () => {
+      const provider = new EthereumProvider({ returnData: [] }, [], true); // we mock a valid return response (magic number)
+      const erc725 = new ERC725(
+        [],
+        '0xD295E4748c1DFDFE028D7Dd2FEC3e52de2b1EB42', // result is mocked so we can use any address
+        provider,
+      );
+
+      const res = await erc725.isValidSignature(
+        'hello',
+        '0x6c54ad4814ed6de85b9786e79de48ad0d597a243158194fa6b3604254ff58f9c2e4ffcc080e18a68c8e813f720b893c8d47d6f757b9e288a5814263642811c1b1c',
+      );
+
+      assert.deepStrictEqual(res, true);
+    });
+
+    it('should return false if the signature is valid [mock EthereumProvider]', async () => {
+      const provider = new EthereumProvider({ returnData: [] }, [], false); // we mock a valid return response
+      const erc725 = new ERC725(
+        [],
+        '0xD295E4748c1DFDFE028D7Dd2FEC3e52de2b1EB42', // result is mocked so we can use any address
+        provider,
+      );
+
+      const res = await erc725.isValidSignature(
+        'hello',
+        '0xcafecafecafecafecafe6ce85b786ef79de48a43158194fa6b3604254ff58f9c2e4ffcc080e18a68c8e813f720b893c8d47d6f757b9e288a5814263642811c1b1c',
+      );
+
+      assert.deepStrictEqual(res, false);
+    });
+  });
+
   describe('Getting all data in schema by provider [e2e]', () => {
     const web3 = new Web3('https://rpc.l14.lukso.network');
 

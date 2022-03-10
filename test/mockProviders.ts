@@ -21,22 +21,36 @@ interface HttpProviderPayload {
 // @ts-ignore
 const abiCoder: AbiCoder.AbiCoder = AbiCoder;
 
+const IS_VALID_SIGNATURE_RESPONSE = {
+  valid: '0x1626ba7e00000000000000000000000000000000000000000000000000000000',
+  notValid:
+    '0xffffffff00000000000000000000000000000000000000000000000000000000',
+};
+
 export class HttpProvider {
   public returnData: { key: string; value: string }[];
   public supportsInterfaces: string[];
+  public isValidSignature: boolean;
 
   constructor(
     props: { returnData: { key: string; value: string }[] },
     supportsInterfaces: string[],
+    isValidSignature?: boolean, // to mock isValidSignature call. If set to true, will return magic value.
   ) {
     // clone array
     this.returnData = [...props.returnData];
     this.supportsInterfaces = supportsInterfaces;
+    this.isValidSignature = !!isValidSignature;
   }
 
   send(payload: HttpProviderPayload | HttpProviderPayload[], cb) {
     if (Array.isArray(payload)) {
-      const results: { jsonrpc: '2.0'; id: number; result: string }[] = [];
+      const results: {
+        jsonrpc: '2.0';
+        id: number;
+        result?: string;
+        error?: { code: number; message: string; data: string };
+      }[] = [];
       for (let index = 0; index < payload.length; index++) {
         const methodSignature = payload[index].params[0].data.substr(0, 10);
 
@@ -63,6 +77,16 @@ export class HttpProvider {
               });
             }
             break;
+          case METHODS[Method.IS_VALID_SIGNATURE].sig: {
+            results.push({
+              jsonrpc: '2.0',
+              id: payload[index].id,
+              result: this.isValidSignature
+                ? IS_VALID_SIGNATURE_RESPONSE.valid
+                : IS_VALID_SIGNATURE_RESPONSE.notValid,
+            });
+            break;
+          }
           case METHODS[Method.GET_DATA].sig:
             // The new ERC725Y allows requesting multiple items in one call
             // getData([A]), getData([A, B, C])...
@@ -91,7 +115,7 @@ export class HttpProvider {
             break;
           default:
             throw new Error(
-              `Method signature: ${methodSignature} mock is not supported in HttpProvider mock`,
+              `Method signature: ${methodSignature} mock is not supported in HttpProvider mock [array mode]`,
             );
         }
       }
@@ -134,7 +158,7 @@ export class HttpProvider {
           break;
         default:
           throw new Error(
-            `Method signature: ${methodSignature} mock is not supported in HttpProvider mock`,
+            `Method signature: ${methodSignature} mock is not supported in HttpProvider mock [not array mode]`,
           );
       }
 
@@ -164,14 +188,17 @@ interface EthereumProviderPayload {
 export class EthereumProvider {
   public returnData;
   public supportsInterfaces: string[];
+  public isValidSignature: boolean;
 
   constructor(
     props: { returnData: { key: string; value: string }[] },
     supportsInterfaces: string[],
+    isValidSignature?: boolean, // to mock isValidSignature call. If set to true, will return magic value.
   ) {
     // Deconstruct to create local copy of array
     this.returnData = [...props.returnData];
     this.supportsInterfaces = supportsInterfaces;
+    this.isValidSignature = !!isValidSignature;
   }
 
   request(payload: EthereumProviderPayload) {
@@ -201,6 +228,11 @@ export class EthereumProvider {
 
           result = this.returnData.find((e) => e.key === keyParam)?.value;
         }
+        break;
+      case METHODS[Method.IS_VALID_SIGNATURE].sig:
+        result = this.isValidSignature
+          ? IS_VALID_SIGNATURE_RESPONSE.valid
+          : IS_VALID_SIGNATURE_RESPONSE.notValid;
         break;
       case METHODS[Method.GET_DATA].sig:
         {
