@@ -1,14 +1,14 @@
 export enum Method {
   GET_DATA_LEGACY = 'getDataLegacy', // For legacy ERC725 with interface id: 0x2bd57b73 NOTE: I had to add Legacy at the end so the map keys stays unique
   GET_DATA = 'getData', // For latest ERC725 with interface id: 0x5a988c0f
-  DATA_COUNT = 'dataCount',
-  ALL_DATA = 'allData',
   OWNER = 'owner',
-  SUPPORTS_INTERFACE = 'supportsInterface',
+  SUPPORTS_INTERFACE = 'supportsInterface', // https://eips.ethereum.org/EIPS/eip-165
+  IS_VALID_SIGNATURE = 'isValidSignature', // https://eips.ethereum.org/EIPS/eip-1271
 }
 
 export enum Encoding {
   BYTES = 'bytes',
+  BYTES4 = 'bytes4',
   BOOL = 'bool',
   UINT256 = 'uint256',
   BYTES32_ARRAY = 'bytes32[]',
