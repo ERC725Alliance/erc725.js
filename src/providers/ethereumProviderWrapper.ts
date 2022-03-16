@@ -96,6 +96,30 @@ export class EthereumProviderWrapper {
     );
   }
 
+  /**
+   * https://eips.ethereum.org/EIPS/eip-1271
+   *
+   * @param {string} address the contract address
+   * @param {string} hash
+   * @param {string} signature
+   */
+  async isValidSignature(address: string, hash: string, signature: string) {
+    const encodedParams = abiCoder.encodeParameters(
+      ['bytes32', 'bytes'],
+      [hash, signature],
+    );
+
+    const result = await this.callContract([
+      this.constructJSONRPC(address, Method.IS_VALID_SIGNATURE, encodedParams),
+    ]);
+
+    if (result.error) {
+      throw result.error;
+    }
+
+    return this.decodeResult(Method.IS_VALID_SIGNATURE, result);
+  }
+
   async getData(address: string, keyHash: string) {
     const result = await this.getAllData(address, [keyHash]);
 
