@@ -167,20 +167,33 @@ export class ERC725<Schema extends GenericSchema> {
    *
    * @param {string} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
    * @param {ERC725JSONSchema} customSchema An optional custom schema element to use for decoding the returned value. Overrides attached schema of the class instance on this call only.
-   * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData
+   * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData.
    */
+  async fetchData(keyOrKeys: string): Promise<any>;
+  async fetchData(keyOrKeys: string[]): Promise<{ [key: string]: any }>;
+  async fetchData(keyOrKeys: undefined): Promise<{ [key: string]: any }>;
   async fetchData(
     keyOrKeys?: string | string[],
-  ): Promise<{ [key: string]: any }> {
+  ): Promise<any | { [key: string]: any }> {
     const dataFromChain = await this.getData(keyOrKeys);
     const dataFromExternalSources = await this.getDataFromExternalSources(
       dataFromChain,
     );
 
-    return {
+    const results = {
       ...dataFromChain,
       ...dataFromExternalSources,
     };
+
+    if (typeof keyOrKeys === 'string') {
+      if (Object.prototype.hasOwnProperty.call(results, keyOrKeys)) {
+        return results[keyOrKeys];
+      }
+
+      return null;
+    }
+
+    return results;
   }
 
   /**
