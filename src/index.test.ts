@@ -278,7 +278,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       );
 
       const data = await erc725.fetchData('LSP3Profile');
-      assert.deepStrictEqual(data, { LSP3Profile: null });
+      assert.deepStrictEqual(data, null);
     });
   });
 
@@ -338,7 +338,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           provider,
         );
         const result = await erc725.fetchData('TestJSONURL');
-        assert.deepStrictEqual(result.TestJSONURL, {
+        assert.deepStrictEqual(result, {
           LSP3Profile: {
             backgroundImage:
               'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
@@ -380,7 +380,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           },
         );
         const result = await erc725.fetchData('TestJSONURL');
-        assert.deepStrictEqual(result.TestJSONURL, {
+        assert.deepStrictEqual(result, {
           LSP3Profile: {
             backgroundImage:
               'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
@@ -431,7 +431,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           );
           const result = await erc725.fetchData('TestAssetURL');
           assert.strictEqual(
-            Object.prototype.toString.call(result.TestAssetURL),
+            Object.prototype.toString.call(result),
             '[object Uint8Array]',
           );
         });
