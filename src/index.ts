@@ -68,11 +68,10 @@ export { flattenEncodedData, encodeData } from './lib/utils';
  *
  */
 export class ERC725<Schema extends GenericSchema> {
-  options: {
+  options: ERC725Config & {
     schemas: ERC725JSONSchema[];
     address?: string;
     provider?;
-    config: ERC725Config;
   };
 
   /**
@@ -104,10 +103,8 @@ export class ERC725<Schema extends GenericSchema> {
       schemas,
       address,
       provider: this.initializeProvider(provider),
-      config: {
-        ...defaultConfig,
-        ...config,
-      },
+      ...defaultConfig,
+      ...config,
     };
   }
 
@@ -510,10 +507,7 @@ export class ERC725<Schema extends GenericSchema> {
     ) {
       return {
         ...receivedData,
-        url: receivedData.url.replace(
-          'ipfs://',
-          this.options.config.ipfsGateway,
-        ),
+        url: receivedData.url.replace('ipfs://', this.options.ipfsGateway),
       };
     }
 

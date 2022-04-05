@@ -126,7 +126,7 @@ After the instance has been created is is still possible to change settings thro
 ```javascript
 myERC725.options.schema = '<schema>' // change schema
 myERC725.options.address '<address>' // change address
-myERC725.options.config.ipfsGateway = '<url>' // used for fetchData(), default: 'https://cloudflare-ipfs.com/ipfs/'
+myERC725.options.ipfsGateway = '<url>' // used for fetchData(), default: 'https://cloudflare-ipfs.com/ipfs/'
 
 // NOTE: ERC725.provider can not be changed
 ```
