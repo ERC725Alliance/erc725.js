@@ -139,11 +139,19 @@ export class ERC725<Schema extends GenericSchema> {
    *
    * If you would like to receive everything in one go, you can use {@link ERC725.fetchData | `fetchData`} for that.
    *
-   * @returns An object with schema element key names as properties, with corresponding **decoded** data as values.
+   * @param {(string|string[])} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
+   *
+   * @returns If the input is an array: an object with schema element key names as properties, with corresponding **decoded** data as values. If the input is a string, it directly returns the **decoded** data.
    */
+  async getData(keyOrKeys?: string): Promise<any>;
+  async getData(keyOrKeys?: string[]): Promise<{ [key: string]: any }>;
+  async getData(keyOrKeys?: undefined): Promise<{ [key: string]: any }>;
   async getData(
-    keyOrKeys?: string | string[],
-  ): Promise<{ [key: string]: any }> {
+    keyOrKeys?: string | string[] | undefined,
+  ): Promise<any | { [key: string]: any }>;
+  async getData(
+    keyOrKeys?: string | string[] | undefined,
+  ): Promise<any | { [key: string]: any }> {
     this.getAddressAndProvider();
 
     if (!keyOrKeys) {
@@ -165,17 +173,25 @@ export class ERC725<Schema extends GenericSchema> {
    *
    * To ensure **data authenticity** `fetchData` compares the `hash` of the fetched JSON with the `hash` stored on the blockchain.
    *
-   * @param {string} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
-   * @param {ERC725JSONSchema} customSchema An optional custom schema element to use for decoding the returned value. Overrides attached schema of the class instance on this call only.
+   * @param {(string|string[])} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
+   *
    * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData.
    */
   async fetchData(keyOrKeys: string): Promise<any>;
   async fetchData(keyOrKeys: string[]): Promise<{ [key: string]: any }>;
   async fetchData(keyOrKeys: undefined): Promise<{ [key: string]: any }>;
   async fetchData(
+    keyOrKeys?: string | string[] | undefined,
+  ): Promise<any | { [key: string]: any }>;
+  async fetchData(
     keyOrKeys?: string | string[],
   ): Promise<any | { [key: string]: any }> {
-    const dataFromChain = await this.getData(keyOrKeys);
+    // This is a quick hack to not change the behaviour of the getDataFromExternalSources function.
+    // As it expects an object with the key being the schema key.
+    const keys =
+      Array.isArray(keyOrKeys) || !keyOrKeys ? keyOrKeys : [keyOrKeys];
+
+    const dataFromChain = await this.getData(keys);
     const dataFromExternalSources = await this.getDataFromExternalSources(
       dataFromChain,
     );
@@ -430,17 +446,13 @@ export class ERC725<Schema extends GenericSchema> {
 
       if (arrayValues && arrayValues.length > 0) {
         arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
-        return {
-          [keySchema.name]: decodeKey(keySchema, arrayValues),
-        };
+        return decodeKey(keySchema, arrayValues);
       }
 
-      return { [keySchema.name]: [] }; // return empty object if there are no arrayValues
+      return []; // return empty object if there are no arrayValues
     }
 
-    return {
-      [keySchema.name]: decodeKey(keySchema, rawData),
-    };
+    return decodeKey(keySchema, rawData);
   }
 
   private async getDataMultiple(keyNames: string[]) {
