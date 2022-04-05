@@ -69,7 +69,7 @@ export { flattenEncodedData, encodeData } from './lib/utils';
  */
 export class ERC725<Schema extends GenericSchema> {
   options: {
-    schema: ERC725JSONSchema[];
+    schemas: ERC725JSONSchema[];
     address?: string;
     provider?;
     config: ERC725Config;
@@ -84,7 +84,7 @@ export class ERC725<Schema extends GenericSchema> {
    *
    */
   constructor(
-    schema: ERC725JSONSchema[],
+    schemas: ERC725JSONSchema[],
     address?,
     provider?: any,
     config?: ERC725Config,
@@ -92,7 +92,7 @@ export class ERC725<Schema extends GenericSchema> {
     // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
 
     // TODO: Add check for schema format?
-    if (!schema) {
+    if (!schemas) {
       throw new Error('Missing schema.');
     }
 
@@ -101,7 +101,7 @@ export class ERC725<Schema extends GenericSchema> {
     };
 
     this.options = {
-      schema,
+      schemas,
       address,
       provider: this.initializeProvider(provider),
       config: {
@@ -156,7 +156,7 @@ export class ERC725<Schema extends GenericSchema> {
 
     if (!keyOrKeys) {
       // eslint-disable-next-line no-param-reassign
-      keyOrKeys = this.options.schema.map((element) => element.name);
+      keyOrKeys = this.options.schemas.map((element) => element.name);
     }
 
     if (Array.isArray(keyOrKeys)) {
@@ -236,7 +236,7 @@ export class ERC725<Schema extends GenericSchema> {
   ): ERC725JSONSchema | null | Record<string, ERC725JSONSchema | null> {
     return getSchema(
       keyOrKeys,
-      this.options.schema.concat(providedSchemas || []),
+      this.options.schemas.concat(providedSchemas || []),
     );
   }
 
@@ -245,7 +245,7 @@ export class ERC725<Schema extends GenericSchema> {
   } {
     return Object.entries(dataFromChain)
       .filter(([key]) => {
-        const keySchema = getSchemaElement(this.options.schema, key);
+        const keySchema = getSchemaElement(this.options.schemas, key);
         return ['jsonurl', 'asseturl'].includes(
           keySchema.valueContent.toLowerCase(),
         );
@@ -301,7 +301,7 @@ export class ERC725<Schema extends GenericSchema> {
   encodeData<T extends keyof Schema>(data: {
     [K in T]: Schema[T]['encodeData']['inputTypes'];
   }) {
-    return encodeData<Schema, T>(data, this.options.schema);
+    return encodeData<Schema, T>(data, this.options.schemas);
   }
 
   /**
@@ -320,7 +320,7 @@ export class ERC725<Schema extends GenericSchema> {
   }): {
     [K in T]: Schema[T]['decodeData']['returnValues'];
   } {
-    return decodeData<Schema, T>(data, this.options.schema);
+    return decodeData<Schema, T>(data, this.options.schemas);
   }
 
   /**
@@ -430,7 +430,7 @@ export class ERC725<Schema extends GenericSchema> {
   }
 
   private async getDataSingle(data: string) {
-    const keySchema = getSchemaElement(this.options.schema, data);
+    const keySchema = getSchemaElement(this.options.schemas, data);
     const rawData = await this.options.provider?.getData(
       this.options.address as string,
       keySchema.key,
@@ -457,7 +457,7 @@ export class ERC725<Schema extends GenericSchema> {
 
   private async getDataMultiple(keyNames: string[]) {
     const keyHashes = keyNames.map((keyName) => {
-      const schemaElement = getSchemaElement(this.options.schema, keyName);
+      const schemaElement = getSchemaElement(this.options.schemas, keyName);
       return schemaElement.key;
     });
 
@@ -476,7 +476,7 @@ export class ERC725<Schema extends GenericSchema> {
     );
 
     // Get missing 'Array' fields for all arrays, as necessary
-    const arraySchemas = this.options.schema.filter(
+    const arraySchemas = this.options.schemas.filter(
       (e) => e.keyType.toLowerCase() === 'array',
     );
 
@@ -493,7 +493,7 @@ export class ERC725<Schema extends GenericSchema> {
       }
     }
 
-    return decodeData(tmpData, this.options.schema);
+    return decodeData(tmpData, this.options.schemas);
   }
 
   /**

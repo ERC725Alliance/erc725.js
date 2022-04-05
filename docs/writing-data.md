@@ -23,7 +23,7 @@ This package is not capable of writing or relaying data to the blockchain. Howev
 import Web3 from 'web3';
 import { ERC725 } from '@erc725/erc725.js';
 
-export const schema = [
+export const schemas = [
   {
     name: 'SupportedStandards:LSP3UniversalProfile',
     key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
@@ -62,7 +62,7 @@ const config = {
   ipfsGateway: 'https://ipfs.lukso.network/ipfs/',
 };
 
-const myERC725 = new ERC725(schema, address, provider, config);
+const myERC725 = new ERC725(schemas, address, provider, config);
 ```
 
 </p>
