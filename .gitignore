@@ -5,3 +5,4 @@ docs/html
 .vscode/*
 .nyc_output
 coverage
+*.tgz
