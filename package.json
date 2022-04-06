@@ -1,10 +1,15 @@
 {
   "name": "@erc725/erc725.js",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "description": "Library to interact with ERC725 smart contracts",
-  "main": "build/main/index.js",
-  "typings": "build/main/index.d.ts",
-  "module": "build/module/index.js",
+  "main": "build/main/src/index.js",
+  "typings": "build/main/src/index.d.ts",
+  "module": "build/module/src/index.js",
+  "files": [
+    "build",
+    "schemas",
+    "docs"
+  ],
   "scripts": {
     "build": "run-p build:*",
     "build:main": "tsc -p tsconfig.json",
