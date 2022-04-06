@@ -3,7 +3,7 @@
     "incremental": true,
     "target": "es2017",
     "outDir": "build/main",
-    "rootDir": "src",
+    "rootDirs": ["src", "schemas"],
     "moduleResolution": "node",
     "module": "commonjs",
     "declaration": true,
@@ -29,7 +29,7 @@
     "types": ["mocha", "node"],
     "typeRoots": ["node_modules/@types", "src/types"]
   },
-  "include": ["src"],
+  "include": ["src", "schemas"],
   "exclude": ["node_modules", "tests/*", "**/*.test.ts"],
   "compileOnSave": false
 }

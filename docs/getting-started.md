@@ -27,7 +27,7 @@ import Web3 from 'web3';
 
 // Part of LSP3-UniversalProfile Schema
 // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
-const schema = [
+const schemas = [
   {
     name: 'SupportedStandards:LSP3UniversalProfile',
     key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
@@ -59,7 +59,7 @@ const config = {
   ipfsGateway: 'https://ipfs.lukso.network/ipfs/',
 };
 
-const erc725 = new ERC725(schema, address, provider, config);
+const erc725 = new ERC725(schemas, address, provider, config);
 ```
 
 ## Usage
@@ -126,7 +126,7 @@ After the instance has been created is is still possible to change settings thro
 ```javascript
 myERC725.options.schema = '<schema>' // change schema
 myERC725.options.address '<address>' // change address
-myERC725.options.config.ipfsGateway = '<url>' // used for fetchData(), default: 'https://cloudflare-ipfs.com/ipfs/'
+myERC725.options.ipfsGateway = '<url>' // used for fetchData(), default: 'https://cloudflare-ipfs.com/ipfs/'
 
 // NOTE: ERC725.provider can not be changed
 ```
