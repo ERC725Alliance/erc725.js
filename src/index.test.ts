@@ -165,7 +165,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       );
 
       const data = await erc725.getData('ThisKeyDoesNotExist');
-      assert.deepStrictEqual(data, { ThisKeyDoesNotExist: null });
+      assert.deepStrictEqual(data, null);
 
       const dataArray = await erc725.getData(['ThisKeyDoesNotExist']);
       assert.deepStrictEqual(dataArray, { ThisKeyDoesNotExist: null });
@@ -187,7 +187,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       );
 
       const data = await erc725.getData('NonExistingArray[]');
-      assert.deepStrictEqual(data, { 'NonExistingArray[]': [] });
+      assert.deepStrictEqual(data, []);
 
       const dataArray = await erc725.getData(['NonExistingArray[]']);
       assert.deepStrictEqual(dataArray, { 'NonExistingArray[]': [] });
@@ -448,9 +448,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         ]);
         const erc725 = new ERC725(mockSchema, address, provider);
         const result = await erc725.getData(schemaElement.key);
-        assert.deepStrictEqual(result, {
-          [schemaElement.name]: schemaElement.expectedResult,
-        });
+        assert.deepStrictEqual(result, schemaElement.expectedResult);
       });
 
       it(schemaElement.name + ' with ethereumProvider EIP 1193', async () => {
@@ -460,9 +458,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         ]);
         const erc725 = new ERC725(mockSchema, address, provider);
         const result = await erc725.getData(schemaElement.key);
-        assert.deepStrictEqual(result, {
-          [schemaElement.name]: schemaElement.expectedResult,
-        });
+        assert.deepStrictEqual(result, schemaElement.expectedResult);
       });
     });
   });

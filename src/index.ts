@@ -68,11 +68,10 @@ export { flattenEncodedData, encodeData } from './lib/utils';
  *
  */
 export class ERC725<Schema extends GenericSchema> {
-  options: {
-    schema: ERC725JSONSchema[];
+  options: ERC725Config & {
+    schemas: ERC725JSONSchema[];
     address?: string;
     provider?;
-    config: ERC725Config;
   };
 
   /**
@@ -84,7 +83,7 @@ export class ERC725<Schema extends GenericSchema> {
    *
    */
   constructor(
-    schema: ERC725JSONSchema[],
+    schemas: ERC725JSONSchema[],
     address?,
     provider?: any,
     config?: ERC725Config,
@@ -92,7 +91,7 @@ export class ERC725<Schema extends GenericSchema> {
     // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
 
     // TODO: Add check for schema format?
-    if (!schema) {
+    if (!schemas) {
       throw new Error('Missing schema.');
     }
 
@@ -101,13 +100,11 @@ export class ERC725<Schema extends GenericSchema> {
     };
 
     this.options = {
-      schema,
+      schemas,
       address,
       provider: this.initializeProvider(provider),
-      config: {
-        ...defaultConfig,
-        ...config,
-      },
+      ...defaultConfig,
+      ...config,
     };
   }
 
@@ -139,16 +136,24 @@ export class ERC725<Schema extends GenericSchema> {
    *
    * If you would like to receive everything in one go, you can use {@link ERC725.fetchData | `fetchData`} for that.
    *
-   * @returns An object with schema element key names as properties, with corresponding **decoded** data as values.
+   * @param {(string|string[])} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
+   *
+   * @returns If the input is an array: an object with schema element key names as properties, with corresponding **decoded** data as values. If the input is a string, it directly returns the **decoded** data.
    */
+  async getData(keyOrKeys?: string): Promise<any>;
+  async getData(keyOrKeys?: string[]): Promise<{ [key: string]: any }>;
+  async getData(keyOrKeys?: undefined): Promise<{ [key: string]: any }>;
   async getData(
-    keyOrKeys?: string | string[],
-  ): Promise<{ [key: string]: any }> {
+    keyOrKeys?: string | string[] | undefined,
+  ): Promise<any | { [key: string]: any }>;
+  async getData(
+    keyOrKeys?: string | string[] | undefined,
+  ): Promise<any | { [key: string]: any }> {
     this.getAddressAndProvider();
 
     if (!keyOrKeys) {
       // eslint-disable-next-line no-param-reassign
-      keyOrKeys = this.options.schema.map((element) => element.name);
+      keyOrKeys = this.options.schemas.map((element) => element.name);
     }
 
     if (Array.isArray(keyOrKeys)) {
@@ -165,17 +170,25 @@ export class ERC725<Schema extends GenericSchema> {
    *
    * To ensure **data authenticity** `fetchData` compares the `hash` of the fetched JSON with the `hash` stored on the blockchain.
    *
-   * @param {string} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
-   * @param {ERC725JSONSchema} customSchema An optional custom schema element to use for decoding the returned value. Overrides attached schema of the class instance on this call only.
+   * @param {(string|string[])} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
+   *
    * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData.
    */
   async fetchData(keyOrKeys: string): Promise<any>;
   async fetchData(keyOrKeys: string[]): Promise<{ [key: string]: any }>;
   async fetchData(keyOrKeys: undefined): Promise<{ [key: string]: any }>;
   async fetchData(
+    keyOrKeys?: string | string[] | undefined,
+  ): Promise<any | { [key: string]: any }>;
+  async fetchData(
     keyOrKeys?: string | string[],
   ): Promise<any | { [key: string]: any }> {
-    const dataFromChain = await this.getData(keyOrKeys);
+    // This is a quick hack to not change the behaviour of the getDataFromExternalSources function.
+    // As it expects an object with the key being the schema key.
+    const keys =
+      Array.isArray(keyOrKeys) || !keyOrKeys ? keyOrKeys : [keyOrKeys];
+
+    const dataFromChain = await this.getData(keys);
     const dataFromExternalSources = await this.getDataFromExternalSources(
       dataFromChain,
     );
@@ -220,7 +233,7 @@ export class ERC725<Schema extends GenericSchema> {
   ): ERC725JSONSchema | null | Record<string, ERC725JSONSchema | null> {
     return getSchema(
       keyOrKeys,
-      this.options.schema.concat(providedSchemas || []),
+      this.options.schemas.concat(providedSchemas || []),
     );
   }
 
@@ -229,7 +242,7 @@ export class ERC725<Schema extends GenericSchema> {
   } {
     return Object.entries(dataFromChain)
       .filter(([key]) => {
-        const keySchema = getSchemaElement(this.options.schema, key);
+        const keySchema = getSchemaElement(this.options.schemas, key);
         return ['jsonurl', 'asseturl'].includes(
           keySchema.valueContent.toLowerCase(),
         );
@@ -285,7 +298,7 @@ export class ERC725<Schema extends GenericSchema> {
   encodeData<T extends keyof Schema>(data: {
     [K in T]: Schema[T]['encodeData']['inputTypes'];
   }) {
-    return encodeData<Schema, T>(data, this.options.schema);
+    return encodeData<Schema, T>(data, this.options.schemas);
   }
 
   /**
@@ -304,7 +317,7 @@ export class ERC725<Schema extends GenericSchema> {
   }): {
     [K in T]: Schema[T]['decodeData']['returnValues'];
   } {
-    return decodeData<Schema, T>(data, this.options.schema);
+    return decodeData<Schema, T>(data, this.options.schemas);
   }
 
   /**
@@ -414,7 +427,7 @@ export class ERC725<Schema extends GenericSchema> {
   }
 
   private async getDataSingle(data: string) {
-    const keySchema = getSchemaElement(this.options.schema, data);
+    const keySchema = getSchemaElement(this.options.schemas, data);
     const rawData = await this.options.provider?.getData(
       this.options.address as string,
       keySchema.key,
@@ -430,22 +443,18 @@ export class ERC725<Schema extends GenericSchema> {
 
       if (arrayValues && arrayValues.length > 0) {
         arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
-        return {
-          [keySchema.name]: decodeKey(keySchema, arrayValues),
-        };
+        return decodeKey(keySchema, arrayValues);
       }
 
-      return { [keySchema.name]: [] }; // return empty object if there are no arrayValues
+      return []; // return empty object if there are no arrayValues
     }
 
-    return {
-      [keySchema.name]: decodeKey(keySchema, rawData),
-    };
+    return decodeKey(keySchema, rawData);
   }
 
   private async getDataMultiple(keyNames: string[]) {
     const keyHashes = keyNames.map((keyName) => {
-      const schemaElement = getSchemaElement(this.options.schema, keyName);
+      const schemaElement = getSchemaElement(this.options.schemas, keyName);
       return schemaElement.key;
     });
 
@@ -464,7 +473,7 @@ export class ERC725<Schema extends GenericSchema> {
     );
 
     // Get missing 'Array' fields for all arrays, as necessary
-    const arraySchemas = this.options.schema.filter(
+    const arraySchemas = this.options.schemas.filter(
       (e) => e.keyType.toLowerCase() === 'array',
     );
 
@@ -481,7 +490,7 @@ export class ERC725<Schema extends GenericSchema> {
       }
     }
 
-    return decodeData(tmpData, this.options.schema);
+    return decodeData(tmpData, this.options.schemas);
   }
 
   /**
@@ -498,10 +507,7 @@ export class ERC725<Schema extends GenericSchema> {
     ) {
       return {
         ...receivedData,
-        url: receivedData.url.replace(
-          'ipfs://',
-          this.options.config.ipfsGateway,
-        ),
+        url: receivedData.url.replace('ipfs://', this.options.ipfsGateway),
       };
     }
 
