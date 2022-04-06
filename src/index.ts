@@ -31,6 +31,7 @@ import {
   decodeKey,
   isDataAuthentic,
   encodeData,
+  encodeKeyName,
 } from './lib/utils';
 
 import { getSchema } from './lib/schemaParser';
@@ -100,12 +101,34 @@ export class ERC725<Schema extends GenericSchema> {
     };
 
     this.options = {
-      schemas,
+      schemas: this.validateSchemas(schemas),
       address,
       provider: this.initializeProvider(provider),
       ...defaultConfig,
       ...config,
     };
+  }
+
+  /**
+   * To prevent weird behovior from the lib, we must make sure all the schemas are correct before loading them.
+   *
+   * @param schemas
+   * @returns
+   */
+  // eslint-disable-next-line class-methods-use-this
+  private validateSchemas(schemas: ERC725JSONSchema[]) {
+    return schemas.filter((schema) => {
+      const encodedKeyName = encodeKeyName(schema.name);
+      const isKeyValid = schema.key === encodedKeyName;
+
+      if (!isKeyValid) {
+        console.log(
+          `The schema with keyName: ${schema.key} is skipped because its key hash does not match its key name (expected: ${encodedKeyName}, got: ${schema.key}).`,
+        );
+      }
+
+      return isKeyValid;
+    });
   }
 
   // eslint-disable-next-line class-methods-use-this
