@@ -123,7 +123,7 @@ export function encodeKeyValue(
  * @return The raw bytes key for the array element
  */
 export function encodeArrayKey(key: string, index: number) {
-  return key.substr(0, 34) + padLeft(numberToHex(index), 32).replace('0x', '');
+  return key.slice(0, 34) + padLeft(numberToHex(index), 32).replace('0x', '');
 }
 
 /**
@@ -160,9 +160,10 @@ export function guessKeyTypeFromKeyName(
 
 /**
  *
- * @param name the schema element name
- * @return the name of the key encoded as per specifications
- * @return a string of the encoded schema name
+ * @param name the schema element name.
+ * @return the name of the key encoded as per specifications.
+ *
+ * @return a string of the encoded schema name.
  */
 export function encodeKeyName(name: string) {
   const keyType = guessKeyTypeFromKeyName(name);
@@ -208,16 +209,27 @@ export function encodeKeyName(name: string) {
 
 /**
  *
- * @param schemas An array of ERC725JSONSchema objects
- * @param {string} key A string of either the schema element name, or key
- * @return The requested schema element from the full array of schemas
+ * @param schemas An array of ERC725JSONSchema objects.
+ * @param {string} keyOrKeyName A string of either the schema element name, or key.
+ *
+ * @return The requested schema element from the full array of schemas.
  */
-export function getSchemaElement(schemas: ERC725JSONSchema[], key: string) {
-  const keyHash = key.substr(0, 2) === '0x' ? key : encodeKeyName(key);
+export function getSchemaElement(
+  schemas: ERC725JSONSchema[],
+  keyOrKeyName: string,
+) {
+  const keyHash =
+    keyOrKeyName.slice(0, 2) === '0x'
+      ? keyOrKeyName
+      : encodeKeyName(keyOrKeyName);
   const schemaElement = schemas.find((e) => e.key === keyHash);
   if (!schemaElement) {
     throw new Error(
-      'No matching schema found for key: "' + key + '" (' + keyHash + ').',
+      'No matching schema found for key: "' +
+        keyOrKeyName +
+        '" (' +
+        keyHash +
+        ').',
     );
   }
 
@@ -226,9 +238,10 @@ export function getSchemaElement(schemas: ERC725JSONSchema[], key: string) {
 
 /**
  *
- * @param schema is an object of a schema definitions
- * @param value will be either key-value pairs for a key type of Array, or a single value for type Singleton
- * @return the encoded value for the key as per the supplied schema
+ * @param schema is an object of a schema definitions.
+ * @param value will be either key-value pairs for a key type of Array, or a single value for type Singleton.
+ *
+ * @return the encoded value for the key as per the supplied schema.
  */
 export function encodeKey(
   schema: ERC725JSONSchema,
@@ -297,11 +310,12 @@ export function encodeKey(
 
 /**
  *
- * @param {string} valueContent as per ERC725Schema definition
- * @param {string} valueType as per ERC725Schema definition
- * @param {string} value the encoded value as string
+ * @param {string} valueContent as per ERC725Schema definition.
+ * @param {string} valueType as per ERC725Schema definition.
+ * @param {string} value the encoded value as string.
  * @param {string} [name]
- * @return the decoded value as per the schema
+ *
+ * @return the decoded value as per the schema.
  */
 export function decodeKeyValue(
   valueContent: string,
@@ -364,9 +378,10 @@ export function decodeKeyValue(
 
 /**
  *
- * @param schema is an object of a schema definitions
- * @param value will be either key-value pairs for a key type of Array, or a single value for type Singleton
- * @return the decoded value/values as per the schema definition
+ * @param schema is an object of a schema definitions.
+ * @param value will be either key-value pairs for a key type of Array, or a single value for type Singleton.
+ *
+ * @return the decoded value/values as per the schema definition.
  */
 export function decodeKey(schema: ERC725JSONSchema, value) {
   const lowerCaseKeyType = schema.keyType.toLowerCase();
