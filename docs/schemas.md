@@ -1,16 +1,16 @@
 ---
-sidebar_position: 1.2
+sidebar_position: 2
 ---
 
 # Schemas
 
-The `@erc725/erc725.js` library contains a range standard [LSP ERC725 JSON schemas](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md).
+The `@erc725/erc725.js` library contains a range of standard [LSP ERC725 JSON schemas](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md).
 
 Schemas allow erc725.js to know how to decode and encode data written in an [ERC725Y](https://eips.ethereum.org/EIPS/eip-725) smart contract.
 
-_Quick reference for keys used in schema definitions below see_
-[official
-documentation](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md).
+_A quick reference for keys used in schema definitions can be seen below_
+
+[Official Documentation](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md).
 
 - `name`: An arbitrary name
 - `key`: The sha3 hash of the name
