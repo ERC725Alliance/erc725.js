@@ -1,20 +1,22 @@
 ---
 sidebar_label: Writing Data
-sidebar_position: 1.4
+sidebar_position: 4
 ---
 
-# How to write data to the key-value store of an ERC725Account
+# Writing Data
 
-This package is not capable of writing or relaying data to the blockchain. However it’s utility methods can be used to prepare data for writing to the blockchain. This will provide information that may provide guidance for doing so.
+#### How to write data to the ERC725Account key-value store?
 
-## Example
+The `erc725.js` library cannot write or relay data to the blockchain. However, developers can use its utility methods to prepare data for writing to the blockchain. This section will provide an guide for using such functionality.
 
-1. Encode data using `encodeData`
-2. Flatten encoded data using `flattenEncodedData`
-3. Get a reference to the desired contract, you will need the ABI (jsonInterface)
-4. Iterate on flattenedData and call `setData`
+## Example Flow
 
-<details><summary>Instantiation omitted for brevity, click here to show it</summary>
+1. Encode the data using the `encodeData` function.
+2. Flatten the encoded data using the `flattenEncodedData` function.
+3. Get a ABI (JSON Interface) of the desired contract, in order to reference it.
+4. Iterate on `flattenedData` and call `setData` on the contract.
+
+<details><summary>Extend instantiation of the contract</summary>
 <br/>
 
 <p>
@@ -69,7 +71,7 @@ const myERC725 = new ERC725(schemas, address, provider, config);
 </details>
 
 ```js
-// 1. Encode data using `encodeData`
+// 1. Encode the data using the `encodeData` function.
 const encodedData = myERC725.encodeData({
   LSP3Profile: {
     hashFunction: 'keccak256(utf8)',
@@ -83,10 +85,10 @@ const encodedData = myERC725.encodeData({
   LSP1UniversalReceiverDelegate: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
 });
 
-// 2. Flatten encoded data using `flattenEncodedData`
+// 2. Flatten the encoded data using the `flattenEncodedData` function.
 const dataToSaveOnChain = flattenEncodedData(encodedDataManyKeys);
 
-// 3. Get a reference to the desired contract
+// 3. Get an ABI (JSON Interface) of the desired contract, in order to reference it.
 const erc725Contract = new web3.eth.Contract(
   [
     // NOTE: We are not loading the full contract ABI, only the function we need
@@ -112,7 +114,7 @@ const erc725Contract = new web3.eth.Contract(
   ERC725_ADDRESS, // replace this with the desired value
 );
 
-// 4. Iterate on flattenedData and call `setData`
+// 4. Iterate on `flattenedData` and call `setData` on the smart contract.
 await Promise.all(
   dataToSaveOnChain.map(async ({ key, value }) => {
     return erc725Contract.methods.setData(key, value).send();

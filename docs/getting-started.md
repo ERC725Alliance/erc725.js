@@ -1,14 +1,14 @@
 ---
-sidebar_position: 1.1
+sidebar_position: 1
 ---
 
 # Getting Started
 
 :::caution
-This package is currently in early stages of development, use only for testing or experimentation purposes.
+This package is currently in the early stages of development. Please use it for testing or experimentation purposes only.
 :::
 
-The `@erc725/erc725.js` package allows you to easily interact with the ERC-725 schemas.
+The `@erc725/erc725.js` package allows you to interact with the ERC-725 schemas easily.
 
 - GitHub repo: https://github.com/ERC725Alliance/erc725.js
 - NPM: https://www.npmjs.com/package/@erc725/erc725.js
@@ -108,9 +108,8 @@ await erc725.fetchData('LSP3Profile'); // downloads and verifies the linked JSON
 */
 ```
 
-:::tip Try it
-https://stackblitz.com/edit/erc725js-instantiation?devtoolsheight=66&file=index.js
-:::
+:::tip Try it out
+You can run the code snippit within your browser using the corresponding [StackBlitz example](https://stackblitz.com/edit/erc725js-instantiation?devtoolsheight=66&file=index.js).
 
 :::note
 Whenever you can you should import `ERC725` via the named export. However currently we are also providing a default export.
@@ -121,7 +120,7 @@ import ERC725 from 'erc725.js';
 
 :::
 
-After the instance has been created is is still possible to change settings through the options property.
+After the instance has been created, it is still possible to change settings through the options property.
 
 ```javascript
 myERC725.options.schema = '<schema>' // change schema
