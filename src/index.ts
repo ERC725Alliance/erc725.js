@@ -179,11 +179,9 @@ export class ERC725<Schema extends GenericSchema> {
       keyOrKeys = this.options.schemas.map((element) => element.name);
     }
 
-    if (Array.isArray(keyOrKeys)) {
-      return this.getDataMultiple(keyOrKeys);
-    }
-
-    return this.getDataSingle(keyOrKeys);
+    return Array.isArray(keyOrKeys)
+      ? this.getDataMultiple(keyOrKeys)
+      : this.getDataSingle(keyOrKeys);
   }
 
   /**
