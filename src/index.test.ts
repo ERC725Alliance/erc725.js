@@ -430,6 +430,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             provider,
           );
           const result = await erc725.fetchData('TestAssetURL');
+
           assert.strictEqual(
             Object.prototype.toString.call(result),
             '[object Uint8Array]',
