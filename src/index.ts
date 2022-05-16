@@ -52,6 +52,7 @@ import {
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './lib/constants';
 import { URLDataWithHash, KeyValuePair } from './types';
+import { Permissions } from './types/Method';
 
 export {
   ERC725JSONSchema,
@@ -556,18 +557,7 @@ export class ERC725<Schema extends GenericSchema> {
    * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
    * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
    */
-  static encodePermissions(permissions: {
-    CHANGEOWNER?: boolean;
-    CHANGEPERMISSIONS?: boolean;
-    ADDPERMISSIONS?: boolean;
-    SETDATA?: boolean;
-    CALL?: boolean;
-    STATICCALL?: boolean;
-    DELEGATECALL?: boolean;
-    DEPLOY?: boolean;
-    TRANSFERVALUE?: boolean;
-    SIGN?: boolean;
-  }): string {
+  static encodePermissions(permissions: Permissions): string {
     const result = Object.keys(permissions).reduce((previous, key) => {
       return permissions[key]
         ? previous + hexToNumber(LSP6_DEFAULT_PERMISSIONS[key])
@@ -575,6 +565,17 @@ export class ERC725<Schema extends GenericSchema> {
     }, 0);
 
     return leftPad(toHex(result), 64);
+  }
+
+  /**
+   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
+   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
+   */
+  encodePermissions(permissions: Permissions): string {
+    return ERC725.encodePermissions(permissions);
   }
 
   /**
@@ -620,6 +621,17 @@ export class ERC725<Schema extends GenericSchema> {
     });
 
     return result;
+  }
+
+  /**
+   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissionHex The permission hexadecimal value to be decoded.
+   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
+   */
+  decodePermissions(permissionHex: string) {
+    return ERC725.decodePermissions(permissionHex);
   }
 
   /**
@@ -670,6 +682,17 @@ export class ERC725<Schema extends GenericSchema> {
 
     // Array + Singleton
     return keccak256(keyName);
+  }
+
+  /**
+   * Hashes a key name for use on an ERC725Y contract according to LSP2 ERC725Y JSONSchema standard.
+   *
+   * @param keyName The key name you want to encode.
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md ERC725YJsonSchema standard.
+   * @returns {*} The keccak256 hash of the provided key name. This is the key that must be retrievable from the ERC725Y contract via ERC725Y.getData(bytes32 key).
+   */
+  encodeKeyName(keyName: string): string {
+    return ERC725.encodeKeyName(keyName);
   }
 }
 

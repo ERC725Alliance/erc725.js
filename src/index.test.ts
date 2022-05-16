@@ -376,7 +376,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           address,
           provider,
           {
-            ipfsGateway: 'https://ipfs.lukso.network/ipfs/',
+            ipfsGateway: 'https://ipfs.infura.io/ipfs/',
           },
         );
         const result = await erc725.fetchData('TestJSONURL');
@@ -833,11 +833,17 @@ describe('Running @erc725/erc725.js tests...', () => {
       },
     ];
 
+    const erc725Instance = new ERC725([]);
+
     describe(`encodePermissions`, () => {
       testCases.forEach((testCase) => {
         it(`Encodes ${testCase.hex} permission correctly`, () => {
           assert.deepStrictEqual(
             ERC725.encodePermissions(testCase.permissions),
+            testCase.hex,
+          );
+          assert.deepStrictEqual(
+            erc725Instance.encodePermissions(testCase.permissions),
             testCase.hex,
           );
         });
@@ -846,6 +852,13 @@ describe('Running @erc725/erc725.js tests...', () => {
       it('Defaults permissions to false if not passed', () => {
         assert.deepStrictEqual(
           ERC725.encodePermissions({
+            CHANGEPERMISSIONS: true,
+            SETDATA: true,
+          }),
+          '0x000000000000000000000000000000000000000000000000000000000000000a',
+        );
+        assert.deepStrictEqual(
+          erc725Instance.encodePermissions({
             CHANGEPERMISSIONS: true,
             SETDATA: true,
           }),
@@ -861,11 +874,32 @@ describe('Running @erc725/erc725.js tests...', () => {
             ERC725.decodePermissions(testCase.hex),
             testCase.permissions,
           );
+          assert.deepStrictEqual(
+            erc725Instance.decodePermissions(testCase.hex),
+            testCase.permissions,
+          );
         });
       });
       it(`Decodes 0xfff...fff admin permission correctly`, () => {
         assert.deepStrictEqual(
           ERC725.decodePermissions(
+            '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+          ),
+          {
+            CHANGEOWNER: true,
+            CHANGEPERMISSIONS: true,
+            ADDPERMISSIONS: true,
+            SETDATA: true,
+            CALL: true,
+            STATICCALL: true,
+            DELEGATECALL: true,
+            DEPLOY: true,
+            TRANSFERVALUE: true,
+            SIGN: true,
+          },
+        );
+        assert.deepStrictEqual(
+          erc725Instance.decodePermissions(
             '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
           ),
           {
@@ -920,16 +954,26 @@ describe('getSchema', () => {
 });
 
 describe('encodeKeyName', () => {
+  const erc725Instance = new ERC725([]);
+
   describe('Singleton', () => {
     it('Encodes MyKeyName correctly', () => {
       assert.deepStrictEqual(
         ERC725.encodeKeyName('MyKeyName'),
         '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2',
       );
+      assert.deepStrictEqual(
+        erc725Instance.encodeKeyName('MyKeyName'),
+        '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2',
+      );
     });
     it('Encodes LSP3Profile correctly', () => {
       assert.deepStrictEqual(
         ERC725.encodeKeyName('LSP3Profile'),
+        '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+      );
+      assert.deepStrictEqual(
+        erc725Instance.encodeKeyName('LSP3Profile'),
         '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
       );
     });
@@ -940,10 +984,18 @@ describe('encodeKeyName', () => {
         ERC725.encodeKeyName('LSP3IssuedAssets[]'),
         '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
       );
+      assert.deepStrictEqual(
+        erc725Instance.encodeKeyName('LSP3IssuedAssets[]'),
+        '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+      );
     });
     it('Encodes LSP5ReceivedAssets[] correctly', () => {
       assert.deepStrictEqual(
         ERC725.encodeKeyName('LSP5ReceivedAssets[]'),
+        '0x6460ee3c0aac563ccbf76d6e1d07bada78e3a9514e6382b736ed3f478ab7b90b',
+      );
+      assert.deepStrictEqual(
+        erc725Instance.encodeKeyName('LSP5ReceivedAssets[]'),
         '0x6460ee3c0aac563ccbf76d6e1d07bada78e3a9514e6382b736ed3f478ab7b90b',
       );
     });
@@ -954,10 +1006,18 @@ describe('encodeKeyName', () => {
         ERC725.encodeKeyName('SupportedStandards:ERC725Account'),
         '0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6',
       );
+      assert.deepStrictEqual(
+        erc725Instance.encodeKeyName('SupportedStandards:ERC725Account'),
+        '0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6',
+      );
     });
     it('Encodes SupportedStandards:LSP3UniversalProfile correctly', () => {
       assert.deepStrictEqual(
         ERC725.encodeKeyName('SupportedStandards:LSP3UniversalProfile'),
+        '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
+      );
+      assert.deepStrictEqual(
+        erc725Instance.encodeKeyName('SupportedStandards:LSP3UniversalProfile'),
         '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
       );
     });
@@ -970,10 +1030,22 @@ describe('encodeKeyName', () => {
         ),
         '0x22496f48a493035f00000000cafecafecafecafecafecafecafecafecafecafe',
       );
+      assert.deepStrictEqual(
+        erc725Instance.encodeKeyName(
+          'MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe',
+        ),
+        '0x22496f48a493035f00000000cafecafecafecafecafecafecafecafecafecafe',
+      );
     });
     it('Encodes LSP3IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147 correctly', () => {
       assert.deepStrictEqual(
         ERC725.encodeKeyName(
+          'LSP3IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+        ),
+        '0x83f5e77bfb14241600000000b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+      );
+      assert.deepStrictEqual(
+        erc725Instance.encodeKeyName(
           'LSP3IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
         ),
         '0x83f5e77bfb14241600000000b74a88C43BCf691bd7A851f6603cb1868f6fc147',
@@ -988,10 +1060,22 @@ describe('encodeKeyName', () => {
         ),
         '0x4b80742d0000000082ac0000cafecafecafecafecafecafecafecafecafecafe',
       );
+      assert.deepStrictEqual(
+        erc725Instance.encodeKeyName(
+          'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
+        ),
+        '0x4b80742d0000000082ac0000cafecafecafecafecafecafecafecafecafecafe',
+      );
     });
     it('Encodes AddressPermissions:AllowedAddresses:b74a88C43BCf691bd7A851f6603cb1868f6fc147 correctly', () => {
       assert.deepStrictEqual(
         ERC725.encodeKeyName(
+          'AddressPermissions:AllowedAddresses:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+        ),
+        '0x4b80742d00000000c6dd0000b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+      );
+      assert.deepStrictEqual(
+        erc725Instance.encodeKeyName(
           'AddressPermissions:AllowedAddresses:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
         ),
         '0x4b80742d00000000c6dd0000b74a88C43BCf691bd7A851f6603cb1868f6fc147',
