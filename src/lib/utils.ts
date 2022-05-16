@@ -20,6 +20,8 @@
 import {
   checkAddressChecksum,
   isAddress,
+  isHex,
+  isHexStrict,
   keccak256,
   numberToHex,
   padLeft,
@@ -210,23 +212,30 @@ export function encodeKeyName(name: string) {
 /**
  *
  * @param schemas An array of ERC725JSONSchema objects.
- * @param {string} keyOrKeyName A string of either the schema element name, or key.
+ * @param {string} namedOrHashedKey A string of either the schema element name, or hashed key (with or without the 0x prefix).
  *
  * @return The requested schema element from the full array of schemas.
  */
 export function getSchemaElement(
   schemas: ERC725JSONSchema[],
-  keyOrKeyName: string,
+  namedOrHashedKey: string,
 ) {
-  const keyHash =
-    keyOrKeyName.slice(0, 2) === '0x'
-      ? keyOrKeyName
-      : encodeKeyName(keyOrKeyName);
+  let keyHash: string;
+
+  if (isHexStrict(namedOrHashedKey)) {
+    keyHash = namedOrHashedKey;
+  } else if (isHex(namedOrHashedKey)) {
+    keyHash = `0x${namedOrHashedKey}`;
+  } else {
+    keyHash = encodeKeyName(namedOrHashedKey);
+  }
+
   const schemaElement = schemas.find((e) => e.key === keyHash);
+
   if (!schemaElement) {
     throw new Error(
       'No matching schema found for key: "' +
-        keyOrKeyName +
+        namedOrHashedKey +
         '" (' +
         keyHash +
         ').',

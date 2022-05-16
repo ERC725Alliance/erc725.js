@@ -18,6 +18,7 @@ import {
   decodeKeyValue,
   encodeKey,
   decodeKey,
+  encodeData,
 } from './utils';
 
 describe('utils', () => {
@@ -317,6 +318,67 @@ describe('utils', () => {
 
       expectedValues.forEach((expectedValue, index) => {
         assert.strictEqual(encodeArrayKey(key, index), expectedValue);
+      });
+    });
+  });
+
+  describe('encodeData', () => {
+    const schemas: ERC725JSONSchema[] = [
+      {
+        name: 'LSP1UniversalReceiverDelegate',
+        key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
+        keyType: 'Singleton',
+        valueType: 'address',
+        valueContent: 'Address',
+      },
+    ];
+
+    const expectedResult = {
+      value: '0x1183790f29be3cdfd0a102862fea1a4a30b3adab',
+      key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
+    };
+
+    it('encode data with named key', () => {
+      const encodedDataByNamedKey = encodeData(
+        {
+          LSP1UniversalReceiverDelegate:
+            '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+        },
+        schemas,
+      );
+      assert.deepStrictEqual(encodedDataByNamedKey, {
+        LSP1UniversalReceiverDelegate: expectedResult,
+      });
+    });
+
+    it('encode data with hashed key', () => {
+      const hashedKey =
+        '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
+
+      const encodedDataByHashKey = encodeData(
+        {
+          [hashedKey]: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+        },
+        schemas,
+      );
+      assert.deepStrictEqual(encodedDataByHashKey, {
+        [hashedKey]: expectedResult,
+      });
+    });
+
+    it('encode data with hashed key without 0x prefix', () => {
+      const hashedKey =
+        '0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
+
+      const encodedDataByHashKeyWithout0xPrefix = encodeData(
+        {
+          [hashedKey]: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+        },
+        schemas,
+      );
+
+      assert.deepStrictEqual(encodedDataByHashKeyWithout0xPrefix, {
+        [hashedKey]: expectedResult,
       });
     });
   });
