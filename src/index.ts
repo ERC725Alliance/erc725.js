@@ -52,6 +52,7 @@ import {
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './lib/constants';
 import { URLDataWithHash, KeyValuePair } from './types';
+import { Permissions } from './types/Method';
 
 export {
   ERC725JSONSchema,
@@ -556,18 +557,7 @@ export class ERC725<Schema extends GenericSchema> {
    * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
    * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
    */
-  static encodePermissions(permissions: {
-    CHANGEOWNER?: boolean;
-    CHANGEPERMISSIONS?: boolean;
-    ADDPERMISSIONS?: boolean;
-    SETDATA?: boolean;
-    CALL?: boolean;
-    STATICCALL?: boolean;
-    DELEGATECALL?: boolean;
-    DEPLOY?: boolean;
-    TRANSFERVALUE?: boolean;
-    SIGN?: boolean;
-  }): string {
+  static encodePermissions(permissions: Permissions): string {
     const result = Object.keys(permissions).reduce((previous, key) => {
       return permissions[key]
         ? previous + hexToNumber(LSP6_DEFAULT_PERMISSIONS[key])
@@ -584,18 +574,7 @@ export class ERC725<Schema extends GenericSchema> {
    * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
    * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
    */
-  encodePermissions(permissions: {
-    CHANGEOWNER?: boolean;
-    CHANGEPERMISSIONS?: boolean;
-    ADDPERMISSIONS?: boolean;
-    SETDATA?: boolean;
-    CALL?: boolean;
-    STATICCALL?: boolean;
-    DELEGATECALL?: boolean;
-    DEPLOY?: boolean;
-    TRANSFERVALUE?: boolean;
-    SIGN?: boolean;
-  }): string {
+  encodePermissions(permissions: Permissions): string {
     return ERC725.encodePermissions(permissions);
   }
 
