@@ -376,7 +376,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           address,
           provider,
           {
-            ipfsGateway: 'https://ipfs.lukso.network/ipfs/',
+            ipfsGateway: 'https://ipfs.infura.io/ipfs/',
           },
         );
         const result = await erc725.fetchData('TestJSONURL');
