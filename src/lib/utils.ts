@@ -509,16 +509,26 @@ export function encodeData<
   data: { [K in T]: Schema[T]['encodeData']['inputTypes'] },
   schema: ERC725JSONSchema[],
 ): { [K in T]: Schema[T]['encodeData']['returnValues'] } {
-  return Object.entries(data).reduce((accumulator, [key, value]) => {
-    const schemaElement = getSchemaElement(schema, key);
+  return Object.entries(data).reduce(
+    (accumulator, [key, value]) => {
+      const schemaElement = getSchemaElement(schema, key);
 
-    accumulator[key] = {
-      value: encodeKey(schemaElement, value as any),
-      key: schemaElement.key,
-    };
+      const encodedValue = encodeKey(schemaElement, value as any);
 
-    return accumulator;
-  }, {} as any);
+      if (typeof encodedValue === 'string') {
+        accumulator.keys.push(schemaElement.key);
+        accumulator.values.push(encodedValue);
+      } else {
+        encodedValue.forEach((keyValuePair) => {
+          accumulator.keys.push(keyValuePair.key);
+          accumulator.values.push(keyValuePair.value);
+        });
+      }
+
+      return accumulator;
+    },
+    { keys: [], values: [] } as any,
+  );
 }
 
 export function getHashFunction(hashFunctionNameOrHash: string) {
