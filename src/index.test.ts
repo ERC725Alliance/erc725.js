@@ -376,7 +376,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           address,
           provider,
           {
-            ipfsGateway: 'https://ipfs.infura.io/ipfs/',
+            ipfsGateway: 'https://2eff.lukso.dev/ipfs/',
           },
         );
         const result = await erc725.fetchData('TestJSONURL');
@@ -577,21 +577,27 @@ describe('Running @erc725/erc725.js tests...', () => {
             const data = generateAllResults([schemaElement])[
               schemaElement.name
             ];
-            const intendedResults = allGraphData.filter(
+
+            const keyValuePairs = allGraphData.filter(
               (e) => e.key.substr(0, 34) === schemaElement.key.substr(0, 34),
             );
+
+            const intendedResult: { keys: string[]; values: string[] } = {
+              keys: [],
+              values: [],
+            };
+
+            keyValuePairs.forEach((keyValuePair) => {
+              intendedResult.keys.push(keyValuePair.key);
+              intendedResult.values.push(keyValuePair.value);
+            });
+
             const erc725 = new ERC725([schemaElement]);
-            // handle '0x'....
-            // intendedResults = intendedResults.filter(e => e !== '0x' && e.value !== '0x')
+
             const results = erc725.encodeData({
               [schemaElement.name]: data,
             });
-            assert.deepStrictEqual(results, {
-              [schemaElement.name]: {
-                key: schemaElement.key,
-                value: intendedResults,
-              },
-            });
+            assert.deepStrictEqual(results, intendedResult);
           },
         );
 
@@ -642,10 +648,8 @@ describe('Running @erc725/erc725.js tests...', () => {
             [schemaElement.name]: schemaElement.expectedResult,
           });
           assert.deepStrictEqual(result, {
-            [schemaElement.name]: {
-              key: schemaElement.key,
-              value: schemaElement.returnGraphData,
-            },
+            keys: [schemaElement.key],
+            values: [schemaElement.returnGraphData],
           });
         });
 
@@ -722,7 +726,7 @@ describe('Running @erc725/erc725.js tests...', () => {
     });
 
     const decodedData = myERC725.decodeData({
-      LSP3Profile: encodedData.LSP3Profile.value,
+      LSP3Profile: encodedData.values[0],
     });
 
     assert.deepStrictEqual(
