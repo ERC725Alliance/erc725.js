@@ -79,14 +79,14 @@ describe('Running @erc725/erc725.js tests...', () => {
     const erc725 = new ERC725(mockSchema);
     try {
       await erc725.getData('LSP3Profile');
-    } catch (error) {
+    } catch (error: any) {
       assert.deepStrictEqual(error.message, 'Missing ERC725 contract address.');
     }
 
     try {
       erc725.options.address = address;
       await erc725.getData('LSP3Profile');
-    } catch (error) {
+    } catch (error: any) {
       assert.deepStrictEqual(error.message, 'Missing provider.');
     }
   });
