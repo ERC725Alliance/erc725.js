@@ -1,6 +1,6 @@
 {
   "extension": ["ts"],
-  "spec": "**/*.test.ts",
+  "spec": "src/**/*.test.ts",
   "require": "ts-node/register",
   "timeout": 20000
 }

@@ -27,13 +27,14 @@ describe('EthereumProviderWrapper', () => {
     it('should throw when promise was rejected', async () => {
       const provider = {
         request: () =>
+          // eslint-disable-next-line no-promise-executor-return
           new Promise((_resolve, reject) => reject(new Error('some error'))),
       };
       const ethSource = new EthereumProviderWrapper(provider);
 
       try {
         await ethSource.getOwner(erc725AccountAddress);
-      } catch (error) {
+      } catch (error: any) {
         assert.deepStrictEqual(error.message, 'some error');
       }
     });

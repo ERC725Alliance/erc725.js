@@ -26,6 +26,7 @@ import {
   numberToHex,
   padLeft,
 } from 'web3-utils';
+import { arrToBufArr } from 'ethereumjs-util';
 
 import { KeyValuePair, JSONURLDataToEncode } from '../types';
 import {
@@ -546,7 +547,7 @@ export function getHashFunction(hashFunctionNameOrHash: string) {
 }
 
 export function hashData(
-  data: unknown,
+  data: string | Uint8Array | Record<string, any>,
   hashFunctionNameOrHash: SUPPORTED_HASH_FUNCTIONS,
 ): string {
   const hashFunction = getHashFunction(hashFunctionNameOrHash);
@@ -559,15 +560,21 @@ export function hashData(
  * and compares the result with the provided hash.
  */
 export function isDataAuthentic(
-  data,
+  data: string | Uint8Array,
   expectedHash: string,
   lowerCaseHashFunction: SUPPORTED_HASH_FUNCTIONS,
 ): boolean {
-  const dataHash = hashData(data, lowerCaseHashFunction);
+  let dataHash: string;
+
+  if (data instanceof Uint8Array) {
+    dataHash = hashData(arrToBufArr(data), lowerCaseHashFunction);
+  } else {
+    dataHash = hashData(data, lowerCaseHashFunction);
+  }
 
   if (dataHash !== expectedHash) {
     console.error(
-      `Hash mismatch, returned JSON hash ("${dataHash}") is different from expected hash "${expectedHash}"`,
+      `Hash mismatch, returned JSON hash ("${dataHash}") is different from expected hash: "${expectedHash}"`,
     );
     return false;
   }
