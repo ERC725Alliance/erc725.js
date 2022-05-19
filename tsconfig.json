@@ -10,7 +10,8 @@
     "strict": true,
     "noImplicitAny": false, //TODO: this should be removed
     "esModuleInterop": true,
-    "inlineSourceMap": true,
+    "inlineSourceMap": false,
+    "sourceMap": true,
     "resolveJsonModule": true /* Include modules imported with .json extension. */,
 
     /* Additional Checks */
