@@ -1,3 +1,5 @@
+/* eslint-disable import/no-extraneous-dependencies */
+
 /*
     This file is part of @erc725/erc725.js.
     @erc725/erc725.js is free software: you can redistribute it and/or modify
@@ -19,8 +21,8 @@
 
 // Tests for the @erc725/erc725.js package
 import assert from 'assert';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import Web3 from 'web3';
+import * as sinon from 'sinon';
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
 
 import ERC725 from '.';
@@ -313,7 +315,6 @@ describe('Running @erc725/erc725.js tests...', () => {
       });
 
       it('fetchData JSONURL', async () => {
-        // this test does a real request, TODO replace with mock?
         const provider = new HttpProvider(
           {
             returnData: allRawData.filter(
@@ -337,22 +338,17 @@ describe('Running @erc725/erc725.js tests...', () => {
           address,
           provider,
         );
+
+        const jsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
+
+        const fetchStub = sinon.stub(global, 'fetch');
+        fetchStub.onCall(0).returns(Promise.resolve(new Response(jsonString)));
         const result = await erc725.fetchData('TestJSONURL');
-        assert.deepStrictEqual(result, {
-          LSP3Profile: {
-            backgroundImage:
-              'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
-            description:
-              "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
-            profileImage:
-              'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
-          },
-        });
+        assert.deepStrictEqual(result, JSON.parse(jsonString));
+        fetchStub.restore();
       });
 
       it('fetchData JSONURL with custom config.ipfsGateway', async () => {
-        // this test does a real request, TODO replace with mock?
-
         const provider = new HttpProvider(
           {
             returnData: allRawData.filter(
@@ -363,6 +359,9 @@ describe('Running @erc725/erc725.js tests...', () => {
           },
           [contractVersion.interface],
         );
+
+        const ipfsGateway = 'https://2eff.lukso.dev/ipfs/';
+
         const erc725 = new ERC725(
           [
             {
@@ -376,26 +375,32 @@ describe('Running @erc725/erc725.js tests...', () => {
           address,
           provider,
           {
-            ipfsGateway: 'https://2eff.lukso.dev/ipfs/',
+            ipfsGateway,
           },
         );
+
+        const jsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
+
+        const fetchStub = sinon.stub(global, 'fetch');
+        fetchStub.onCall(0).returns(Promise.resolve(new Response(jsonString)));
         const result = await erc725.fetchData('TestJSONURL');
-        assert.deepStrictEqual(result, {
-          LSP3Profile: {
-            backgroundImage:
-              'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
-            description:
-              "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
-            profileImage:
-              'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
-          },
-        });
+        assert.deepStrictEqual(result, JSON.parse(jsonString));
+
+        assert.ok(
+          fetchStub.calledWith(
+            `${ipfsGateway}QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd`, // this value comes from the mockSchema
+          ),
+        );
+
+        fetchStub.restore();
       });
 
       if (contractVersion.interface === INTERFACE_IDS.ERC725Y_LEGACY) {
-        // We run this broken test only on legacy for now until it is fixed
         it('fetchData AssetURL', async () => {
-          // this test does a real request, TODO replace with mock?
+          const fetchStub = sinon.stub(global, 'fetch');
+          fetchStub
+            .onCall(0)
+            .returns(Promise.resolve(new Response(new Uint8Array(5))));
 
           const provider = new HttpProvider(
             {
@@ -403,13 +408,13 @@ describe('Running @erc725/erc725.js tests...', () => {
                 {
                   key: '0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee',
                   value:
-                    '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000598019f9b1ea67779f76db55facacfe81114abcd56b36fe15d63223aba7e5fc8251f68139f697066733a2f2f516d596f387967347a7a6d647532364e537674736f4b6555356f56523668326f686d6f61324378356939316d506600000000000000',
+                    '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000598019f9b1c41589e7559804ea4a2080dad19d876a024ccb05117835447d72ce08c1d020ec697066733a2f2f516d596f387967347a7a6d647532364e537674736f4b6555356f56523668326f686d6f61324378356939316d506600000000000000',
                 },
 
                 // Encoded value of:
                 // {
                 //   hashFunction: 'keccak256(bytes)', // 0x8019f9b1
-                //   hash: '0xea67779f76db55facacfe81114abcd56b36fe15d63223aba7e5fc8251f68139f',
+                //   hash: '0xc41589e7559804ea4a2080dad19d876a024ccb05117835447d72ce08c1d020ec',
                 //   url: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
                 // },
               ],
@@ -435,6 +440,8 @@ describe('Running @erc725/erc725.js tests...', () => {
             Object.prototype.toString.call(result),
             '[object Uint8Array]',
           );
+
+          fetchStub.restore();
         });
       }
     });
