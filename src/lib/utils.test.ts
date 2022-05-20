@@ -19,6 +19,7 @@ import {
   encodeKey,
   decodeKey,
   encodeData,
+  convertIPFSGatewayUrl,
 } from './utils';
 
 describe('utils', () => {
@@ -563,6 +564,35 @@ describe('utils', () => {
       it(`encodes ${testCase.keyName} key name correctly`, () => {
         assert.deepStrictEqual(encodeKeyName(testCase.keyName), testCase.key);
       });
+    });
+  });
+
+  describe('convertIPFSGatewayUrl', () => {
+    const expectedIPFSGateway = 'https://cloudflare-ipfs.com/ipfs/';
+
+    it('converts when missing /ipfs/', () => {
+      assert.deepStrictEqual(
+        convertIPFSGatewayUrl('https://cloudflare-ipfs.com'),
+        expectedIPFSGateway,
+      );
+    });
+    it('converts when missing /', () => {
+      assert.deepStrictEqual(
+        convertIPFSGatewayUrl('https://cloudflare-ipfs.com/ipfs'),
+        expectedIPFSGateway,
+      );
+    });
+    it('converts when missing ipfs/', () => {
+      assert.deepStrictEqual(
+        convertIPFSGatewayUrl('https://cloudflare-ipfs.com/'),
+        expectedIPFSGateway,
+      );
+    });
+    it('does not convert when passed correctly', () => {
+      assert.deepStrictEqual(
+        convertIPFSGatewayUrl('https://cloudflare-ipfs.com/ipfs/'),
+        expectedIPFSGateway,
+      );
     });
   });
 });

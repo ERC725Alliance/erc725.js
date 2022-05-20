@@ -613,3 +613,23 @@ export function flattenEncodedData(encodedData: {
       })
   );
 }
+
+/**
+ * Transforms passed ipfsGateway url to correct format for fetching IPFS data
+ *
+ * @param ipfsGateway
+ * @return {*}  string converted IPFS gateway URL
+ */
+export function convertIPFSGatewayUrl(ipfsGateway: string) {
+  let convertedIPFSGateway = ipfsGateway;
+
+  if (ipfsGateway.endsWith('/') && !ipfsGateway.endsWith('/ipfs/')) {
+    convertedIPFSGateway = ipfsGateway + 'ipfs/';
+  } else if (ipfsGateway.endsWith('/ipfs')) {
+    convertedIPFSGateway = ipfsGateway + '/';
+  } else if (!ipfsGateway.endsWith('/ipfs/')) {
+    convertedIPFSGateway = ipfsGateway + '/ipfs/';
+  }
+
+  return convertedIPFSGateway;
+}
