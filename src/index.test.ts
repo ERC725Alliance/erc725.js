@@ -23,7 +23,7 @@ import assert from 'assert';
 import Web3 from 'web3';
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
 
-import { ERC725 } from '.';
+import ERC725 from '.';
 import {
   decodeKey,
   decodeKeyValue,
@@ -351,53 +351,42 @@ describe('Running @erc725/erc725.js tests...', () => {
       });
 
       it('fetchData JSONURL with custom config.ipfsGateway', async () => {
-        // this test does a real request, TODO replace with mock?
-
-        const ipfsURLFormats = [
-          'https://2eff.lukso.dev/ipfs/',
-          'https://2eff.lukso.dev/ipfs',
-          'https://2eff.lukso.dev/',
-          'https://2eff.lukso.dev',
-        ];
-
-        ipfsURLFormats.forEach(async (ipfsGateway) => {
-          const provider = new HttpProvider(
+        const provider = new HttpProvider(
+          {
+            returnData: allRawData.filter(
+              (rawData) =>
+                rawData.key ===
+                '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+            ),
+          },
+          [contractVersion.interface],
+        );
+        const erc725 = new ERC725(
+          [
             {
-              returnData: allRawData.filter(
-                (rawData) =>
-                  rawData.key ===
-                  '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
-              ),
+              name: 'TestJSONURL',
+              key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+              keyType: 'Singleton',
+              valueContent: 'JSONURL',
+              valueType: 'bytes',
             },
-            [contractVersion.interface],
-          );
-          const erc725 = new ERC725(
-            [
-              {
-                name: 'TestJSONURL',
-                key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
-                keyType: 'Singleton',
-                valueContent: 'JSONURL',
-                valueType: 'bytes',
-              },
-            ],
-            address,
-            provider,
-            {
-              ipfsGateway,
-            },
-          );
-          const result = await erc725.fetchData('TestJSONURL');
-          assert.deepStrictEqual(result, {
-            LSP3Profile: {
-              backgroundImage:
-                'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
-              description:
-                "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
-              profileImage:
-                'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
-            },
-          });
+          ],
+          address,
+          provider,
+          {
+            ipfsGateway: 'https://2eff.lukso.dev',
+          },
+        );
+        const result = await erc725.fetchData('TestJSONURL');
+        assert.deepStrictEqual(result, {
+          LSP3Profile: {
+            backgroundImage:
+              'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
+            description:
+              "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
+            profileImage:
+              'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
+          },
         });
       });
 

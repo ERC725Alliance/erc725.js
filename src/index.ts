@@ -697,3 +697,5 @@ export class ERC725<Schema extends GenericSchema> {
     return ERC725.encodeKeyName(keyName);
   }
 }
+
+export default ERC725;
