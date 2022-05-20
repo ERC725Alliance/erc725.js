@@ -45,7 +45,6 @@ import {
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'isomorphic-fetch';
 
-import { Schema } from '../test/generatedSchema';
 import {
   INTERFACE_IDS,
   SUPPORTED_HASH_FUNCTION_STRINGS,
@@ -231,7 +230,7 @@ describe('Running @erc725/erc725.js tests...', () => {
     };
 
     it('with web3.currentProvider [legacy]', async () => {
-      const erc725 = new ERC725<Schema>(
+      const erc725 = new ERC725(
         e2eSchema,
         LEGACY_ERC725_CONTRACT_ADDRESS,
         web3.currentProvider,
@@ -241,7 +240,7 @@ describe('Running @erc725/erc725.js tests...', () => {
     });
 
     it('with web3.currentProvider', async () => {
-      const erc725 = new ERC725<Schema>(
+      const erc725 = new ERC725(
         e2eSchema,
         ERC725_CONTRACT_ADDRESS,
         web3.currentProvider,
@@ -300,7 +299,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         const provider = new HttpProvider({ returnData: allRawData }, [
           contractVersion.interface,
         ]);
-        const erc725 = new ERC725<Schema>(mockSchema, address, provider);
+        const erc725 = new ERC725(mockSchema, address, provider);
         const result = await erc725.getData();
         assert.deepStrictEqual(result, fullResults);
       });
@@ -684,7 +683,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       },
     ];
 
-    const myERC725 = new ERC725<Schema>(schema);
+    const myERC725 = new ERC725(schema);
 
     const json = {
       name: 'rryter',

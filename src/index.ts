@@ -42,7 +42,6 @@ import {
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
-  GenericSchema,
 } from './types/ERC725JSONSchema';
 
 import { ERC725Config } from './types/Config';
@@ -51,7 +50,7 @@ import {
   LSP6_DEFAULT_PERMISSIONS,
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './lib/constants';
-import { URLDataWithHash, KeyValuePair } from './types';
+import { URLDataWithHash, KeyValuePair, EncodeDataInput } from './types';
 import { Permissions } from './types/Method';
 
 export {
@@ -69,7 +68,7 @@ export { flattenEncodedData, encodeData } from './lib/utils';
  * @typeParam Schema
  *
  */
-export class ERC725<Schema extends GenericSchema> {
+export class ERC725 {
   options: ERC725Config & {
     schemas: ERC725JSONSchema[];
     address?: string;
@@ -311,16 +310,33 @@ export class ERC725<Schema extends GenericSchema> {
    * To be able to store your data on the blockchain, you need to encode it according to your {@link ERC725JSONSchema}.
    *
    * @param {{ [key: string]: any }} data An object with one or many properties, containing the data that needs to be encoded.
-   * @returns An object with the same keys as the object that was passed in as a parameter containing the encoded data, ready to be stored on the blockchain.
+   * @param schemas Additionnal ERC725JSONSchemas which will be concatenated with the schemas provided on init.
+   *
+   * @returns An object with hashed keys and encoded values.
    *
    * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
    * The JSON will be hashed with `keccak256`.
    */
-  encodeData(data: { [key: string]: any }): { [key: string]: any };
-  encodeData<T extends keyof Schema>(data: {
-    [K in T]: Schema[T]['encodeData']['inputTypes'];
-  }) {
-    return encodeData<Schema, T>(data, this.options.schemas);
+  encodeData(data: EncodeDataInput, schemas?: ERC725JSONSchema[]) {
+    return encodeData(
+      data,
+      Array.prototype.concat(this.options.schemas, schemas),
+    );
+  }
+
+  /**
+   * To be able to store your data on the blockchain, you need to encode it according to your {@link ERC725JSONSchema}.
+   *
+   * @param {{ [key: string]: any }} data An object with one or many properties, containing the data that needs to be encoded.
+   * @param schemas ERC725JSONSchemas which will be used to encode the keys.
+   *
+   * @returns An object with hashed keys and encoded values.
+   *
+   * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
+   * The JSON will be hashed with `keccak256`.
+   */
+  static encodeData(data: EncodeDataInput, schemas: ERC725JSONSchema[]) {
+    return encodeData(data, schemas);
   }
 
   /**
@@ -333,13 +349,8 @@ export class ERC725<Schema extends GenericSchema> {
    * @param {{ [key: string]: any }} data An object with one or many properties.
    * @returns Returns decoded data as defined and expected in the schema:
    */
-  decodeData(data: { [key: string]: any }): { [key: string]: any };
-  decodeData<T extends keyof Schema>(data: {
-    [K in T]: Schema[T]['decodeData']['inputTypes'];
-  }): {
-    [K in T]: Schema[T]['decodeData']['returnValues'];
-  } {
-    return decodeData<Schema, T>(data, this.options.schemas);
+  decodeData(data: { [key: string]: any }): { [key: string]: any } {
+    return decodeData(data, this.options.schemas);
   }
 
   /**

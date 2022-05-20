@@ -28,10 +28,14 @@ import {
 } from 'web3-utils';
 import { arrToBufArr } from 'ethereumjs-util';
 
-import { KeyValuePair, JSONURLDataToEncode } from '../types';
+import {
+  KeyValuePair,
+  JSONURLDataToEncode,
+  EncodeDataInput,
+  EncodeDataReturn,
+} from '../types';
 import {
   ERC725JSONSchema,
-  GenericSchema,
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueType,
 } from '../types/ERC725JSONSchema';
@@ -474,42 +478,33 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
 }
 
 /**
- *
  * @param schema schema is an array of objects of schema definitions
  * @param data data is an array of objects of key-value pairs
+ *
  * @return: all decoded data as per required by the schema and provided data
  */
-export function decodeData<
-  Schema extends GenericSchema,
-  T extends keyof Schema,
->(
-  data: { [K in T]: Schema[T]['decodeData']['inputTypes'] },
+export function decodeData(
+  data: Record<string, any>,
   schema: ERC725JSONSchema[],
-): { [K in T]: Schema[T]['decodeData']['returnValues'] } {
+) {
   return Object.entries(data).reduce((decodedData, [key, value]) => {
     const schemaElement = getSchemaElement(schema, key);
 
     return {
       ...decodedData,
-      [schemaElement.name]: decodeKey(
-        schemaElement,
-        value,
-      ) as Schema[T]['decodeData']['returnValues'],
+      [schemaElement.name]: decodeKey(schemaElement, value),
     };
-  }, {} as any);
+  }, {});
 }
 
 /**
  * @param schema an array of schema definitions as per ${@link ERC725JSONSchema}
  * @param data an object of key-value pairs
  */
-export function encodeData<
-  Schema extends GenericSchema,
-  T extends keyof Schema,
->(
-  data: { [K in T]: Schema[T]['encodeData']['inputTypes'] },
+export function encodeData(
+  data: EncodeDataInput,
   schema: ERC725JSONSchema[],
-): { [K in T]: Schema[T]['encodeData']['returnValues'] } {
+): EncodeDataReturn {
   return Object.entries(data).reduce(
     (accumulator, [key, value]) => {
       const schemaElement = getSchemaElement(schema, key);
@@ -528,7 +523,7 @@ export function encodeData<
 
       return accumulator;
     },
-    { keys: [], values: [] } as any,
+    { keys: [], values: [] } as EncodeDataReturn,
   );
 }
 
