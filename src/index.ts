@@ -32,6 +32,7 @@ import {
   isDataAuthentic,
   encodeData,
   encodeKeyName,
+  convertIPFSGatewayUrl,
 } from './lib/utils';
 
 import { getSchema } from './lib/schemaParser';
@@ -105,8 +106,9 @@ export class ERC725<Schema extends GenericSchema> {
       schemas: this.validateSchemas(schemas),
       address,
       provider: this.initializeProvider(provider),
-      ...defaultConfig,
-      ...config,
+      ipfsGateway: config?.ipfsGateway
+        ? convertIPFSGatewayUrl(config?.ipfsGateway)
+        : defaultConfig.ipfsGateway,
     };
   }
 

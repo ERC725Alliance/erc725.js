@@ -360,7 +360,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           [contractVersion.interface],
         );
 
-        const ipfsGateway = 'https://2eff.lukso.dev/ipfs/';
+        const ipfsGateway = 'https://2eff.lukso.dev';
 
         const erc725 = new ERC725(
           [
@@ -388,7 +388,7 @@ describe('Running @erc725/erc725.js tests...', () => {
 
         assert.ok(
           fetchStub.calledWith(
-            `${ipfsGateway}QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd`, // this value comes from the mockSchema
+            `${ipfsGateway}/ipfs/QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd`, // this value comes from the mockSchema
           ),
         );
 
