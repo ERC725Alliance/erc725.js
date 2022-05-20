@@ -20,10 +20,13 @@
 import {
   checkAddressChecksum,
   isAddress,
+  isHex,
+  isHexStrict,
   keccak256,
   numberToHex,
   padLeft,
 } from 'web3-utils';
+import { arrToBufArr } from 'ethereumjs-util';
 
 import { KeyValuePair, JSONURLDataToEncode } from '../types';
 import {
@@ -210,23 +213,30 @@ export function encodeKeyName(name: string) {
 /**
  *
  * @param schemas An array of ERC725JSONSchema objects.
- * @param {string} keyOrKeyName A string of either the schema element name, or key.
+ * @param {string} namedOrHashedKey A string of either the schema element name, or hashed key (with or without the 0x prefix).
  *
  * @return The requested schema element from the full array of schemas.
  */
 export function getSchemaElement(
   schemas: ERC725JSONSchema[],
-  keyOrKeyName: string,
+  namedOrHashedKey: string,
 ) {
-  const keyHash =
-    keyOrKeyName.slice(0, 2) === '0x'
-      ? keyOrKeyName
-      : encodeKeyName(keyOrKeyName);
+  let keyHash: string;
+
+  if (isHexStrict(namedOrHashedKey)) {
+    keyHash = namedOrHashedKey;
+  } else if (isHex(namedOrHashedKey)) {
+    keyHash = `0x${namedOrHashedKey}`;
+  } else {
+    keyHash = encodeKeyName(namedOrHashedKey);
+  }
+
   const schemaElement = schemas.find((e) => e.key === keyHash);
+
   if (!schemaElement) {
     throw new Error(
       'No matching schema found for key: "' +
-        keyOrKeyName +
+        namedOrHashedKey +
         '" (' +
         keyHash +
         ').',
@@ -500,16 +510,26 @@ export function encodeData<
   data: { [K in T]: Schema[T]['encodeData']['inputTypes'] },
   schema: ERC725JSONSchema[],
 ): { [K in T]: Schema[T]['encodeData']['returnValues'] } {
-  return Object.entries(data).reduce((accumulator, [key, value]) => {
-    const schemaElement = getSchemaElement(schema, key);
+  return Object.entries(data).reduce(
+    (accumulator, [key, value]) => {
+      const schemaElement = getSchemaElement(schema, key);
 
-    accumulator[key] = {
-      value: encodeKey(schemaElement, value as any),
-      key: schemaElement.key,
-    };
+      const encodedValue = encodeKey(schemaElement, value as any);
 
-    return accumulator;
-  }, {} as any);
+      if (typeof encodedValue === 'string') {
+        accumulator.keys.push(schemaElement.key);
+        accumulator.values.push(encodedValue);
+      } else {
+        encodedValue.forEach((keyValuePair) => {
+          accumulator.keys.push(keyValuePair.key);
+          accumulator.values.push(keyValuePair.value);
+        });
+      }
+
+      return accumulator;
+    },
+    { keys: [], values: [] } as any,
+  );
 }
 
 export function getHashFunction(hashFunctionNameOrHash: string) {
@@ -527,7 +547,7 @@ export function getHashFunction(hashFunctionNameOrHash: string) {
 }
 
 export function hashData(
-  data: unknown,
+  data: string | Uint8Array | Record<string, any>,
   hashFunctionNameOrHash: SUPPORTED_HASH_FUNCTIONS,
 ): string {
   const hashFunction = getHashFunction(hashFunctionNameOrHash);
@@ -540,15 +560,21 @@ export function hashData(
  * and compares the result with the provided hash.
  */
 export function isDataAuthentic(
-  data,
+  data: string | Uint8Array,
   expectedHash: string,
   lowerCaseHashFunction: SUPPORTED_HASH_FUNCTIONS,
 ): boolean {
-  const dataHash = hashData(data, lowerCaseHashFunction);
+  let dataHash: string;
+
+  if (data instanceof Uint8Array) {
+    dataHash = hashData(arrToBufArr(data), lowerCaseHashFunction);
+  } else {
+    dataHash = hashData(data, lowerCaseHashFunction);
+  }
 
   if (dataHash !== expectedHash) {
     console.error(
-      `Hash mismatch, returned JSON hash ("${dataHash}") is different from expected hash "${expectedHash}"`,
+      `Hash mismatch, returned JSON hash ("${dataHash}") is different from expected hash: "${expectedHash}"`,
     );
     return false;
   }

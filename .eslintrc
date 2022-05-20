@@ -38,6 +38,7 @@
     "@typescript-eslint/ban-ts-ignore": "off",
     "@typescript-eslint/ban-ts-comment": "off",
     // OTHER
+    "class-methods-use-this": "off",
     "no-shadow": "off",
     "no-console": "off",
     "import/extensions": ["error", "always", { "ts": "never", "js": "never" }],

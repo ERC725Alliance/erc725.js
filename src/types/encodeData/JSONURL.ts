@@ -21,7 +21,7 @@ export interface URLDataWithHash extends URLData {
 export interface URLDataWithJson extends URLData {
   hash?: never;
   hashFunction?: never;
-  json: unknown;
+  json: Record<string, any>;
 }
 
 export type JSONURLDataToEncode = URLDataWithHash | URLDataWithJson;

@@ -12,8 +12,6 @@ docs
 examples
 .nyc_output/
 generatedSchema.ts
-typedoc.html.json
-typedoc.json
 .mocharc.json
 .prettierrc
 .node-version

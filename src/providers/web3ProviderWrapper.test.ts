@@ -34,7 +34,7 @@ describe('Web3ProviderWrapper', () => {
 
       try {
         await ethSource.getOwner(erc725AccountAddress);
-      } catch (error) {
+      } catch (error: any) {
         assert.deepStrictEqual(error.message, 'some error');
       }
     });
@@ -51,7 +51,7 @@ describe('Web3ProviderWrapper', () => {
 
       try {
         await ethSource.getOwner(erc725AccountAddress);
-      } catch (error) {
+      } catch (error: any) {
         assert.deepStrictEqual(error.message, 'some error');
       }
     });

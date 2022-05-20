@@ -18,6 +18,7 @@ import {
   decodeKeyValue,
   encodeKey,
   decodeKey,
+  encodeData,
 } from './utils';
 
 describe('utils', () => {
@@ -317,6 +318,137 @@ describe('utils', () => {
 
       expectedValues.forEach((expectedValue, index) => {
         assert.strictEqual(encodeArrayKey(key, index), expectedValue);
+      });
+    });
+  });
+
+  describe('encodeData', () => {
+    const schemas: ERC725JSONSchema[] = [
+      {
+        name: 'LSP3IssuedAssets[]',
+        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+        keyType: 'Array',
+        valueContent: 'Address',
+        valueType: 'address',
+      },
+      {
+        name: 'LSP1UniversalReceiverDelegate',
+        key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
+        keyType: 'Singleton',
+        valueType: 'address',
+        valueContent: 'Address',
+      },
+
+      {
+        name: 'LSP3Profile',
+        key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+        keyType: 'Singleton',
+        valueType: 'bytes',
+        valueContent: 'JSONURL',
+      },
+    ];
+
+    const expectedResult = {
+      keys: [
+        '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
+      ],
+      values: ['0x1183790f29be3cdfd0a102862fea1a4a30b3adab'],
+    };
+
+    it('encode data with named key', () => {
+      const encodedDataByNamedKey = encodeData(
+        {
+          LSP1UniversalReceiverDelegate:
+            '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+        },
+        schemas,
+      );
+      assert.deepStrictEqual(encodedDataByNamedKey, expectedResult);
+    });
+
+    it('encode data with hashed key', () => {
+      const hashedKey =
+        '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
+
+      const encodedDataByHashKey = encodeData(
+        {
+          [hashedKey]: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+        },
+        schemas,
+      );
+      assert.deepStrictEqual(encodedDataByHashKey, expectedResult);
+    });
+
+    it('encode data with hashed key without 0x prefix', () => {
+      const hashedKey =
+        '0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
+
+      const encodedDataByHashKeyWithout0xPrefix = encodeData(
+        {
+          [hashedKey]: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+        },
+        schemas,
+      );
+
+      assert.deepStrictEqual(
+        encodedDataByHashKeyWithout0xPrefix,
+        expectedResult,
+      );
+    });
+
+    it('encode array', () => {
+      const encodedDataWithMultipleKeys = encodeData(
+        {
+          'LSP3IssuedAssets[]': ['0xa3e6F38477D45727F6e6f853Cdb479b0D60c0aC9'],
+        },
+        schemas,
+      );
+
+      assert.deepStrictEqual(encodedDataWithMultipleKeys, {
+        keys: [
+          '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
+        ],
+        values: [
+          '0x0000000000000000000000000000000000000000000000000000000000000001',
+          '0xa3e6f38477d45727f6e6f853cdb479b0d60c0ac9',
+        ],
+      });
+    });
+
+    it('encode multiple keys', () => {
+      const encodedMultipleKeys = encodeData(
+        {
+          LSP3Profile: {
+            hashFunction: 'keccak256(utf8)',
+            hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+            url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+          },
+          'LSP3IssuedAssets[]': [
+            '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
+            '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826',
+          ],
+          LSP1UniversalReceiverDelegate:
+            '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+        },
+        schemas,
+      );
+
+      assert.deepStrictEqual(encodedMultipleKeys, {
+        keys: [
+          '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+          '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
+          '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
+        ],
+        values: [
+          '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+          '0x0000000000000000000000000000000000000000000000000000000000000002',
+          '0xd94353d9b005b3c0a9da169b768a31c57844e490',
+          '0xdaea594e385fc724449e3118b2db7e86dfba1826',
+          '0x1183790f29be3cdfd0a102862fea1a4a30b3adab',
+        ],
       });
     });
   });
