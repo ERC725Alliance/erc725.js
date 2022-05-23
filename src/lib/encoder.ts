@@ -35,6 +35,7 @@ import {
 } from 'web3-utils';
 
 import { JSONURLDataToEncode, URLDataWithHash } from '../types';
+import { AssetURLEncode } from '../types/encodeData';
 
 import {
   SUPPORTED_HASH_FUNCTIONS,
@@ -127,22 +128,23 @@ const valueTypeEncodingMap = {
 
 // Use enum for type bellow
 // Is it this enum ERC725JSONSchemaValueType? (If so, custom is missing from enum)
+
 export const valueContentEncodingMap = {
   Keccak256: {
     type: 'bytes32',
-    encode: (value) => value,
-    decode: (value) => value,
+    encode: (value: string) => value,
+    decode: (value: string) => value,
   },
   // NOTE: Deprecated. For reference/testing in future
   ArrayLength: {
     type: 'uint256',
-    encode: (value) => padLeft(numberToHex(value), 64),
-    decode: (value) => hexToNumber(value),
+    encode: (value: number | string) => padLeft(numberToHex(value), 64),
+    decode: (value: string) => hexToNumber(value),
   },
   Number: {
     type: 'uint256',
     // NOTE: extra logic is to handle and always return a string number
-    encode: (value) => {
+    encode: (value: string) => {
       let parsedValue: number;
       try {
         parsedValue = parseInt(value, 10);
@@ -183,11 +185,8 @@ export const valueContentEncodingMap = {
   },
   AssetURL: {
     type: 'custom',
-    encode: (value: {
-      hashFunction: SUPPORTED_HASH_FUNCTIONS;
-      hash: string;
-      url: string;
-    }) => encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
+    encode: (value: AssetURLEncode) =>
+      encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
     decode: (value: string) => decodeDataSourceWithHash(value),
   },
   // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
@@ -250,29 +249,15 @@ export function decodeValueType(type: string, value: string) {
 
 export function encodeValueContent(
   type: string,
-  value:
-    | string
-    | {
-        hashFunction: SUPPORTED_HASH_FUNCTIONS;
-        hash: string;
-        url: string;
-      }
-    | JSONURLDataToEncode,
-):
-  | string
-  | {
-      hashFunction: SUPPORTED_HASH_FUNCTIONS;
-      hash: string;
-      url: string;
-    }
-  | false {
+  value: string | AssetURLEncode | JSONURLDataToEncode,
+): string | false {
   if (!valueContentEncodingMap[type] && type.slice(0, 2) !== '0x') {
     throw new Error('Could not encode valueContent: "' + type + '".');
   } else if (type.slice(0, 2) === '0x') {
     return type === value ? value : false;
   }
 
-  return value ? valueContentEncodingMap[type].encode(value) : '0x';
+  return value ? (valueContentEncodingMap[type].encode(value) as string) : '0x';
 }
 
 export function decodeValueContent(
