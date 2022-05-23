@@ -52,6 +52,7 @@ import {
   encodeValueType,
   valueContentEncodingMap as valueContentMap,
 } from './encoder';
+import { AssetURLEncode } from '../types/encodeData';
 
 /**
  *
@@ -67,7 +68,7 @@ export function encodeKeyValue(
   valueType: ERC725JSONSchemaValueType,
   value: string | string[] | JSONURLDataToEncode | JSONURLDataToEncode[],
   name?: string,
-) {
+): string | false {
   const isSupportedValueContent =
     valueContentMap[valueContent] || valueContent.slice(0, 2) === '0x';
 
@@ -78,47 +79,42 @@ export function encodeKeyValue(
     );
   }
 
-  let result;
-  const sameEncoding =
+  const isValueTypeArray = valueType.slice(valueType.length - 2) === '[]';
+
+  if (!isValueTypeArray && !Array.isArray(value)) {
+    // Straight forward encode
+    return encodeValueContent(valueContent, value);
+  }
+
+  const isSameEncoding =
     valueContentMap[valueContent] &&
     valueContentMap[valueContent].type === valueType.split('[]')[0];
-  const isArray = valueType.slice(valueType.length - 2) === '[]';
+
+  let result;
 
   // We only loop if the valueType done by abi.encodeParameter can not handle it directly
-  if (Array.isArray(value) && !sameEncoding) {
+  if (Array.isArray(value)) {
     // value type encoding will handle it?
 
     // we handle an array element encoding
-    const results: (
-      | string
-      | {
-          hashFunction: SUPPORTED_HASH_FUNCTIONS;
-          hash: string;
-          url: string;
-        }
-      | false
-    )[] = [];
+    const results: Array<string | AssetURLEncode | false> = [];
     for (let index = 0; index < value.length; index++) {
       const element = value[index];
       results.push(encodeValueContent(valueContent, element));
     }
+
     result = results;
-  } else if (!isArray && !Array.isArray(value)) {
-    // Straight forward encode
-    result = encodeValueContent(valueContent, value);
-  } else if (sameEncoding) {
-    result = value; // leaving this for below
   }
 
   if (
     // and we only skip bytes regardless
     valueType !== 'bytes' &&
     // Requires encoding because !sameEncoding means both encodings are required
-    !sameEncoding
+    !isSameEncoding
   ) {
     result = encodeValueType(valueType, result);
-  } else if (isArray && sameEncoding) {
-    result = encodeValueType(valueType, result);
+  } else if (isValueTypeArray && isSameEncoding) {
+    result = encodeValueType(valueType, value as any);
   }
 
   return result;
@@ -286,7 +282,7 @@ export function encodeKey(
               'uint256',
               value.length.toString(),
               schema.name,
-            ),
+            ) as string,
           });
         }
 
@@ -297,7 +293,7 @@ export function encodeKey(
             schema.valueType,
             dataElement,
             schema.name,
-          ),
+          ) as string,
         });
       }
 
@@ -515,7 +511,7 @@ export function encodeData(
       if (typeof encodedValue === 'string') {
         accumulator.keys.push(schemaElement.key);
         accumulator.values.push(encodedValue);
-      } else {
+      } else if (encodedValue !== false && encodedValue !== null) {
         encodedValue.forEach((keyValuePair) => {
           accumulator.keys.push(keyValuePair.key);
           accumulator.values.push(keyValuePair.value);

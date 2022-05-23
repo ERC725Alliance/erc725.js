@@ -99,7 +99,7 @@ describe('utils', () => {
     });
   });
 
-  describe('encodeKey', () => {
+  describe('encodeKey/decodeKey', () => {
     it('encodes/decodes keyType Array', () => {
       const testCases = [
         {

@@ -497,7 +497,7 @@ describe('Running @erc725/erc725.js tests...', () => {
                 schemaElement.valueType,
                 schemaElement.expectedResult[i],
                 schemaElement.name,
-              ),
+              ) as string,
             );
           } // end for loop
           assert.deepStrictEqual(results, schemaElement.returnGraphData);
