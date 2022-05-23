@@ -86,7 +86,7 @@ const findMappingSchemaForKey = (
 
   // 2. "Semi defined mappings" i.e. "SupportedStandards:??????"
   keySchema =
-    schemas.find((schema) => schema.key.substr(0, 58) === key.substr(0, 58)) ||
+    schemas.find((schema) => schema.key.slice(0, 58) === key.slice(0, 58)) ||
     null;
 
   if (!keySchema) {
@@ -105,16 +105,16 @@ const findBytes20MappingSchemaForKey = (
   schemas: ERC725JSONSchema[],
 ): ERC725JSONSchema | null => {
   const keySchema =
-    schemas.find((schema) => schema.key.substr(0, 26) === key.substr(0, 26)) ||
+    schemas.find((schema) => schema.key.slice(0, 26) === key.slice(0, 26)) ||
     null;
 
-  const address = key.substr(26);
+  const address = key.slice(26);
 
   if (keySchema) {
     return {
       ...keySchema,
       key,
-      name: `${keySchema.name.substr(
+      name: `${keySchema.name.slice(
         0,
         keySchema.name.lastIndexOf(':'),
       )}:${address}`,
@@ -129,16 +129,16 @@ const findBytes20MappingWithGroupingSchemaForKey = (
   schemas: ERC725JSONSchema[],
 ): ERC725JSONSchema | null => {
   const keySchema =
-    schemas.find((schema) => schema.key.substr(0, 26) === key.substr(0, 26)) ||
+    schemas.find((schema) => schema.key.slice(0, 26) === key.slice(0, 26)) ||
     null;
 
-  const address = key.substr(26);
+  const address = key.slice(26);
 
   if (keySchema) {
     return {
       ...keySchema,
       key,
-      name: `${keySchema.name.substr(
+      name: `${keySchema.name.slice(
         0,
         keySchema.name.lastIndexOf(':'),
       )}:${address}`,

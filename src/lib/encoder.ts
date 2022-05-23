@@ -50,9 +50,9 @@ const encodeDataSourceWithHash = (
   const hashFunction = getHashFunction(hashType);
 
   return (
-    keccak256(hashFunction.name).substr(0, 10) +
-    dataHash.substr(2) +
-    utf8ToHex(dataSource).substr(2)
+    keccak256(hashFunction.name).slice(0, 10) +
+    dataHash.slice(2) +
+    utf8ToHex(dataSource).slice(2)
   );
 };
 
@@ -61,12 +61,12 @@ const encodeDataSourceWithHash = (
 const abiCoder: AbiCoder.AbiCoder = AbiCoder;
 
 const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
-  const hashFunctionSig = value.substr(0, 10);
+  const hashFunctionSig = value.slice(0, 10);
   const hashFunction = getHashFunction(hashFunctionSig);
 
-  const encodedData = value.replace('0x', '').substr(8); // Rest of data string after function hash
-  const dataHash = '0x' + encodedData.substr(0, 64); // Get jsonHash 32 bytes
-  const dataSource = hexToUtf8('0x' + encodedData.substr(64)); // Get remainder as URI
+  const encodedData = value.replace('0x', '').slice(8); // Rest of data string after function hash
+  const dataHash = '0x' + encodedData.slice(0, 64); // Get jsonHash 32 bytes
+  const dataSource = hexToUtf8('0x' + encodedData.slice(64)); // Get remainder as URI
 
   return { hashFunction: hashFunction.name, hash: dataHash, url: dataSource };
 };
@@ -266,9 +266,9 @@ export function encodeValueContent(
       url: string;
     }
   | false {
-  if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
+  if (!valueContentEncodingMap[type] && type.slice(0, 2) !== '0x') {
     throw new Error('Could not encode valueContent: "' + type + '".');
-  } else if (type.substr(0, 2) === '0x') {
+  } else if (type.slice(0, 2) === '0x') {
     return type === value ? value : false;
   }
 
@@ -279,9 +279,9 @@ export function decodeValueContent(
   type: string,
   value: string,
 ): string | false {
-  if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
+  if (!valueContentEncodingMap[type] && type.slice(0, 2) !== '0x') {
     throw new Error('Could not decode valueContent: "' + type + '".');
-  } else if (type.substr(0, 2) === '0x') {
+  } else if (type.slice(0, 2) === '0x') {
     return type === value ? value : false;
   }
 
