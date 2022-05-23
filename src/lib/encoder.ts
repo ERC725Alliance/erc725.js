@@ -217,7 +217,8 @@ export const valueContentEncodingMap = {
       }
 
       return encodeDataSourceWithHash(
-        hashFunction || SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+        (hashFunction as SUPPORTED_HASH_FUNCTION_STRINGS) ||
+          SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
         hashedJson,
         url,
       );
