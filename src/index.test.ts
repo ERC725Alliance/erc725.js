@@ -552,7 +552,7 @@ describe('Running @erc725/erc725.js tests...', () => {
               schemaElement.name
             ];
             const intendedResults = allGraphData.filter(
-              (e) => e.key.substr(0, 34) === schemaElement.key.substr(0, 34),
+              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
             );
             // handle '0x'....
             // intendedResults = intendedResults.filter(e => e !== '0x' && e.value !== '0x')
@@ -566,7 +566,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             schemaElement.name,
           async () => {
             const values = allGraphData.filter(
-              (e) => e.key.substr(0, 34) === schemaElement.key.substr(0, 34),
+              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
             );
             const intendedResults = generateAllResults([schemaElement])[
               schemaElement.name
@@ -585,7 +585,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             ];
 
             const keyValuePairs = allGraphData.filter(
-              (e) => e.key.substr(0, 34) === schemaElement.key.substr(0, 34),
+              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
             );
 
             const intendedResult: { keys: string[]; values: string[] } = {
@@ -612,7 +612,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             schemaElement.name,
           async () => {
             const values = allGraphData.filter(
-              (e) => e.key.substr(0, 34) === schemaElement.key.substr(0, 34),
+              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
             );
             const intendedResults = generateAllResults([schemaElement])[
               schemaElement.name

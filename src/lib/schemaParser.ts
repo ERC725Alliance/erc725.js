@@ -48,20 +48,21 @@ const findArraySchemaForKey = (
   }
 
   // 2. Subsequent keys
-  const bytes16Key = key.slice(0, 34);
+  const bytes16Key = key.substring(0, 34);
   const arraySchema =
-    schemas.find((schema) => schema.key.slice(0, 34) === bytes16Key) || null;
+    schemas.find((schema) => schema.key.substring(0, 34) === bytes16Key) ||
+    null;
 
   if (!arraySchema) {
     return null;
   }
 
   // https://stackoverflow.com/a/1779019/651299
-  if (!/^\d+$/.test(key.slice(34))) {
+  if (!/^\d+$/.test(key.substring(34))) {
     return null;
   }
 
-  const elementIndex = parseInt(key.slice(34), 10);
+  const elementIndex = parseInt(key.substring(34), 10);
 
   return {
     ...arraySchema,
@@ -86,8 +87,9 @@ const findMappingSchemaForKey = (
 
   // 2. "Semi defined mappings" i.e. "SupportedStandards:??????"
   keySchema =
-    schemas.find((schema) => schema.key.substr(0, 58) === key.substr(0, 58)) ||
-    null;
+    schemas.find(
+      (schema) => schema.key.substring(0, 58) === key.substring(0, 58),
+    ) || null;
 
   if (!keySchema) {
     return null;
@@ -105,16 +107,17 @@ const findBytes20MappingSchemaForKey = (
   schemas: ERC725JSONSchema[],
 ): ERC725JSONSchema | null => {
   const keySchema =
-    schemas.find((schema) => schema.key.substr(0, 26) === key.substr(0, 26)) ||
-    null;
+    schemas.find(
+      (schema) => schema.key.substring(0, 26) === key.substring(0, 26),
+    ) || null;
 
-  const address = key.substr(26);
+  const address = key.substring(26);
 
   if (keySchema) {
     return {
       ...keySchema,
       key,
-      name: `${keySchema.name.substr(
+      name: `${keySchema.name.substring(
         0,
         keySchema.name.lastIndexOf(':'),
       )}:${address}`,
@@ -129,16 +132,17 @@ const findBytes20MappingWithGroupingSchemaForKey = (
   schemas: ERC725JSONSchema[],
 ): ERC725JSONSchema | null => {
   const keySchema =
-    schemas.find((schema) => schema.key.substr(0, 26) === key.substr(0, 26)) ||
-    null;
+    schemas.find(
+      (schema) => schema.key.substring(0, 26) === key.substring(0, 26),
+    ) || null;
 
-  const address = key.substr(26);
+  const address = key.substring(26);
 
   if (keySchema) {
     return {
       ...keySchema,
       key,
-      name: `${keySchema.name.substr(
+      name: `${keySchema.name.substring(
         0,
         keySchema.name.lastIndexOf(':'),
       )}:${address}`,
