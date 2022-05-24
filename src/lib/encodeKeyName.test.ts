@@ -22,8 +22,21 @@ describe('encodeKeyName', () => {
       key: '0x22496f48a493035f00000000cafecafecafecafecafecafecafecafecafecafe',
     },
     {
+      keyName: 'MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe',
+      key: '0x22496f48a493035f00000000cafecafecafecafecafecafecafecafecafecafe',
+    },
+    {
+      keyName: 'LSP3IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+      key: '0x83f5e77bfb14241600000000b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+    },
+    {
       keyName:
         'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
+      key: '0x4b80742d0000000082ac0000cafecafecafecafecafecafecafecafecafecafe',
+    },
+    {
+      keyName:
+        'AddressPermissions:Permissions:0xcafecafecafecafecafecafecafecafecafecafe',
       key: '0x4b80742d0000000082ac0000cafecafecafecafecafecafecafecafecafecafe',
     },
   ];

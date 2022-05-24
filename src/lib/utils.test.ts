@@ -518,9 +518,18 @@ describe('utils', () => {
         keyName: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
       },
       {
+        keyType: 'Bytes20Mapping',
+        keyName: 'MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe',
+      },
+      {
         keyType: 'Bytes20MappingWithGrouping',
         keyName:
           'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
+      },
+      {
+        keyType: 'Bytes20MappingWithGrouping',
+        keyName:
+          'AddressPermissions:Permissions:0xcafecafecafecafecafecafecafecafecafecafe',
       },
     ];
 

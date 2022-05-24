@@ -148,7 +148,7 @@ export function guessKeyTypeFromKeyName(
   }
 
   if (splittedKeyName.length === 2) {
-    if (splittedKeyName[1].slice(0, 2) === '0x') {
+    if (isAddress(splittedKeyName[1])) {
       return 'Bytes20Mapping';
     }
 

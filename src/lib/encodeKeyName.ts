@@ -21,7 +21,7 @@ export function encodeKeyName(name: string) {
         '00000000' +
         keccak256(keyNameSplit[1]).slice(2, 6) +
         '0000' +
-        keyNameSplit[2].slice(0, 40)
+        keyNameSplit[2].replace('0x', '').slice(0, 40)
       );
     }
     case 'Bytes20Mapping': {
@@ -30,7 +30,7 @@ export function encodeKeyName(name: string) {
       return (
         keccak256(keyNameSplit[0]).slice(0, 18) +
         '00000000' +
-        keyNameSplit[1].slice(2, 42)
+        keyNameSplit[1].replace('0x', '').slice(0, 40)
       );
     }
 

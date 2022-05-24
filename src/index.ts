@@ -18,7 +18,7 @@
  * @date 2020
  */
 
-import { hexToNumber, isAddress, keccak256, leftPad, toHex } from 'web3-utils';
+import { hexToNumber, isAddress, leftPad, toHex } from 'web3-utils';
 
 import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
 import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
@@ -651,62 +651,23 @@ export class ERC725 {
   /**
    * Hashes a key name for use on an ERC725Y contract according to LSP2 ERC725Y JSONSchema standard.
    *
-   * @param keyName The key name you want to encode.
+   * @param {string} keyName The key name you want to encode.
    * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md ERC725YJsonSchema standard.
-   * @returns {*} The keccak256 hash of the provided key name. This is the key that must be retrievable from the ERC725Y contract via ERC725Y.getData(bytes32 key).
+   * @returns {string} The keccak256 hash of the provided key name. This is the key that must be retrievable from the ERC725Y contract via ERC725Y.getData(bytes32 key).
    */
   static encodeKeyName(keyName: string): string {
-    const isMapping = keyName.includes(':');
-
-    if (isMapping) {
-      const words = keyName.split(':');
-
-      const isBytes20Mapping = isAddress(words[words.length - 1]);
-      const isMappingWithGrouping = words.length === 3;
-
-      // Mapping
-      if (!isBytes20Mapping && !isMappingWithGrouping) {
-        return (
-          keccak256(words[0]).slice(0, 34) +
-          '0'.repeat(24) +
-          keccak256(words[1]).slice(2).slice(0, 8)
-        );
-      }
-
-      // Bytes20Mapping
-      if (isBytes20Mapping && !isMappingWithGrouping) {
-        return (
-          keccak256(words[0]).slice(0, 18) +
-          '0'.repeat(8) +
-          words[words.length - 1]
-        );
-      }
-
-      // Bytes20MappingWithGrouping
-      if (isBytes20Mapping && isMappingWithGrouping) {
-        return (
-          keccak256(words[0]).slice(0, 10) +
-          '0'.repeat(8) +
-          keccak256(words[1]).slice(2).slice(0, 4) +
-          '0'.repeat(4) +
-          words[words.length - 1]
-        );
-      }
-    }
-
-    // Array + Singleton
-    return keccak256(keyName);
+    return encodeKeyName(keyName);
   }
 
   /**
    * Hashes a key name for use on an ERC725Y contract according to LSP2 ERC725Y JSONSchema standard.
    *
-   * @param keyName The key name you want to encode.
+   * @param {string} keyName The key name you want to encode.
    * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md ERC725YJsonSchema standard.
-   * @returns {*} The keccak256 hash of the provided key name. This is the key that must be retrievable from the ERC725Y contract via ERC725Y.getData(bytes32 key).
+   * @returns {string} The keccak256 hash of the provided key name. This is the key that must be retrievable from the ERC725Y contract via ERC725Y.getData(bytes32 key).
    */
   encodeKeyName(keyName: string): string {
-    return ERC725.encodeKeyName(keyName);
+    return encodeKeyName(keyName);
   }
 }
 
