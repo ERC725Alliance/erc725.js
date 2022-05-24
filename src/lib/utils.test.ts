@@ -99,7 +99,7 @@ describe('utils', () => {
     });
   });
 
-  describe('encodeKey', () => {
+  describe('encodeKey/decodeKey', () => {
     it('encodes/decodes keyType Array', () => {
       const testCases = [
         {
@@ -356,7 +356,7 @@ describe('utils', () => {
       values: ['0x1183790f29be3cdfd0a102862fea1a4a30b3adab'],
     };
 
-    it('encode data with named key', () => {
+    it('encodes data with named key', () => {
       const encodedDataByNamedKey = encodeData(
         {
           LSP1UniversalReceiverDelegate:
@@ -367,7 +367,7 @@ describe('utils', () => {
       assert.deepStrictEqual(encodedDataByNamedKey, expectedResult);
     });
 
-    it('encode data with hashed key', () => {
+    it('encodes data with hashed key', () => {
       const hashedKey =
         '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
 
@@ -380,7 +380,7 @@ describe('utils', () => {
       assert.deepStrictEqual(encodedDataByHashKey, expectedResult);
     });
 
-    it('encode data with hashed key without 0x prefix', () => {
+    it('encodes data with hashed key without 0x prefix', () => {
       const hashedKey =
         '0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
 
@@ -397,7 +397,7 @@ describe('utils', () => {
       );
     });
 
-    it('encode array', () => {
+    it('encodes array', () => {
       const encodedDataWithMultipleKeys = encodeData(
         {
           'LSP3IssuedAssets[]': ['0xa3e6F38477D45727F6e6f853Cdb479b0D60c0aC9'],
@@ -417,7 +417,7 @@ describe('utils', () => {
       });
     });
 
-    it('encode multiple keys', () => {
+    it('encodes multiple keys', () => {
       const encodedMultipleKeys = encodeData(
         {
           LSP3Profile: {

@@ -52,6 +52,7 @@ import {
   encodeValueType,
   valueContentEncodingMap as valueContentMap,
 } from './encoder';
+import { AssetURLEncode } from '../types/encodeData';
 
 /**
  *
@@ -59,6 +60,7 @@ import {
  * @param {string} valueType as per ERC725Schema definition
  * @param value can contain single value, an array, or an object as required by schema (JSONURL, or ASSETURL)
  * @param {string} [name]
+ *
  * @return the encoded value as per the schema
  */
 export function encodeKeyValue(
@@ -66,9 +68,9 @@ export function encodeKeyValue(
   valueType: ERC725JSONSchemaValueType,
   value: string | string[] | JSONURLDataToEncode | JSONURLDataToEncode[],
   name?: string,
-) {
+): string | false {
   const isSupportedValueContent =
-    valueContentMap[valueContent] || valueContent.substr(0, 2) === '0x';
+    valueContentMap[valueContent] || valueContent.slice(0, 2) === '0x';
 
   if (!isSupportedValueContent) {
     throw new Error(
@@ -77,47 +79,42 @@ export function encodeKeyValue(
     );
   }
 
-  let result;
-  const sameEncoding =
+  const isValueTypeArray = valueType.slice(valueType.length - 2) === '[]';
+
+  if (!isValueTypeArray && !Array.isArray(value)) {
+    // Straight forward encode
+    return encodeValueContent(valueContent, value);
+  }
+
+  const isSameEncoding =
     valueContentMap[valueContent] &&
     valueContentMap[valueContent].type === valueType.split('[]')[0];
-  const isArray = valueType.substr(valueType.length - 2) === '[]';
+
+  let result;
 
   // We only loop if the valueType done by abi.encodeParameter can not handle it directly
-  if (Array.isArray(value) && !sameEncoding) {
+  if (Array.isArray(value)) {
     // value type encoding will handle it?
 
     // we handle an array element encoding
-    const results: (
-      | string
-      | {
-          hashFunction: SUPPORTED_HASH_FUNCTIONS;
-          hash: string;
-          url: string;
-        }
-      | false
-    )[] = [];
+    const results: Array<string | AssetURLEncode | false> = [];
     for (let index = 0; index < value.length; index++) {
       const element = value[index];
       results.push(encodeValueContent(valueContent, element));
     }
+
     result = results;
-  } else if (!isArray && !Array.isArray(value)) {
-    // Straight forward encode
-    result = encodeValueContent(valueContent, value);
-  } else if (sameEncoding) {
-    result = value; // leaving this for below
   }
 
   if (
     // and we only skip bytes regardless
     valueType !== 'bytes' &&
     // Requires encoding because !sameEncoding means both encodings are required
-    !sameEncoding
+    !isSameEncoding
   ) {
     result = encodeValueType(valueType, result);
-  } else if (isArray && sameEncoding) {
-    result = encodeValueType(valueType, result);
+  } else if (isValueTypeArray && isSameEncoding) {
+    result = encodeValueType(valueType, value as any);
   }
 
   return result;
@@ -151,7 +148,7 @@ export function guessKeyTypeFromKeyName(
   }
 
   if (splittedKeyName.length === 2) {
-    if (splittedKeyName[1].substr(0, 2) === '0x') {
+    if (splittedKeyName[1].slice(0, 2) === '0x') {
       return 'Bytes20Mapping';
     }
 
@@ -180,20 +177,20 @@ export function encodeKeyName(name: string) {
       // bytes4(keccak256(FirstWord)) + bytes4(0) + bytes2(keccak256(SecondWord)) + bytes2(0) + bytes20(address)
       const keyNameSplit = name.split(':');
       return (
-        keccak256(keyNameSplit[0]).substr(0, 10) +
+        keccak256(keyNameSplit[0]).slice(0, 10) +
         '00000000' +
-        keccak256(keyNameSplit[1]).substr(2, 4) +
+        keccak256(keyNameSplit[1]).slice(2, 6) +
         '0000' +
-        keyNameSplit[2].substr(0, 40)
+        keyNameSplit[2].slice(0, 40)
       );
     }
     case 'Bytes20Mapping': {
       // bytes8(keccak256(FirstWord)) + bytes4(0) + bytes20(address)
       const keyNameSplit = name.split(':');
       return (
-        keccak256(keyNameSplit[0]).substr(0, 18) +
+        keccak256(keyNameSplit[0]).slice(0, 18) +
         '00000000' +
-        keyNameSplit[1].substr(2, 40)
+        keyNameSplit[1].slice(2, 42)
       );
     }
 
@@ -201,9 +198,9 @@ export function encodeKeyName(name: string) {
       // bytes16(keccak256(FirstWord)) + bytes12(0) + bytes4(keccak256(LastWord))
       const keyNameSplit = name.split(':');
       return (
-        keccak256(keyNameSplit[0]).substr(0, 34) +
+        keccak256(keyNameSplit[0]).slice(0, 34) +
         '000000000000000000000000' +
-        keccak256(keyNameSplit[1]).substr(2, 8)
+        keccak256(keyNameSplit[1]).slice(2, 10)
       );
     }
     case 'Array': // Warning: this can not correctly encode subsequent keys of array, only the initial Array key will work
@@ -285,7 +282,7 @@ export function encodeKey(
               'uint256',
               value.length.toString(),
               schema.name,
-            ),
+            ) as string,
           });
         }
 
@@ -296,7 +293,7 @@ export function encodeKey(
             schema.valueType,
             dataElement,
             schema.name,
-          ),
+          ) as string,
         });
       }
 
@@ -338,7 +335,7 @@ export function decodeKeyValue(
   name?: string,
 ) {
   // Check for the missing map.
-  if (!valueContentMap[valueContent] && valueContent.substr(0, 2) !== '0x') {
+  if (!valueContentMap[valueContent] && valueContent.slice(0, 2) !== '0x') {
     throw new Error(
       'The valueContent "' +
         valueContent +
@@ -351,7 +348,7 @@ export function decodeKeyValue(
   let sameEncoding =
     valueContentMap[valueContent] &&
     valueContentMap[valueContent].type === valueType.split('[]')[0];
-  const isArray = valueType.substr(valueType.length - 2) === '[]';
+  const isArray = valueType.substring(valueType.length - 2) === '[]';
 
   // VALUE TYPE
   if (
@@ -514,7 +511,7 @@ export function encodeData(
       if (typeof encodedValue === 'string') {
         accumulator.keys.push(schemaElement.key);
         accumulator.values.push(encodedValue);
-      } else {
+      } else if (encodedValue !== false && encodedValue !== null) {
         encodedValue.forEach((keyValuePair) => {
           accumulator.keys.push(keyValuePair.key);
           accumulator.values.push(keyValuePair.value);

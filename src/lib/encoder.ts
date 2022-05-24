@@ -35,6 +35,7 @@ import {
 } from 'web3-utils';
 
 import { JSONURLDataToEncode, URLDataWithHash } from '../types';
+import { AssetURLEncode } from '../types/encodeData';
 
 import {
   SUPPORTED_HASH_FUNCTIONS,
@@ -50,9 +51,9 @@ const encodeDataSourceWithHash = (
   const hashFunction = getHashFunction(hashType);
 
   return (
-    keccak256(hashFunction.name).substr(0, 10) +
-    dataHash.substr(2) +
-    utf8ToHex(dataSource).substr(2)
+    keccak256(hashFunction.name).slice(0, 10) +
+    dataHash.slice(2) +
+    utf8ToHex(dataSource).slice(2)
   );
 };
 
@@ -61,12 +62,12 @@ const encodeDataSourceWithHash = (
 const abiCoder: AbiCoder.AbiCoder = AbiCoder;
 
 const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
-  const hashFunctionSig = value.substr(0, 10);
+  const hashFunctionSig = value.slice(0, 10);
   const hashFunction = getHashFunction(hashFunctionSig);
 
-  const encodedData = value.replace('0x', '').substr(8); // Rest of data string after function hash
-  const dataHash = '0x' + encodedData.substr(0, 64); // Get jsonHash 32 bytes
-  const dataSource = hexToUtf8('0x' + encodedData.substr(64)); // Get remainder as URI
+  const encodedData = value.replace('0x', '').slice(8); // Rest of data string after function hash
+  const dataHash = '0x' + encodedData.slice(0, 64); // Get jsonHash 32 bytes
+  const dataSource = hexToUtf8('0x' + encodedData.slice(64)); // Get remainder as URI
 
   return { hashFunction: hashFunction.name, hash: dataHash, url: dataSource };
 };
@@ -127,22 +128,23 @@ const valueTypeEncodingMap = {
 
 // Use enum for type bellow
 // Is it this enum ERC725JSONSchemaValueType? (If so, custom is missing from enum)
+
 export const valueContentEncodingMap = {
   Keccak256: {
     type: 'bytes32',
-    encode: (value) => value,
-    decode: (value) => value,
+    encode: (value: string) => value,
+    decode: (value: string) => value,
   },
   // NOTE: Deprecated. For reference/testing in future
   ArrayLength: {
     type: 'uint256',
-    encode: (value) => padLeft(numberToHex(value), 64),
-    decode: (value) => hexToNumber(value),
+    encode: (value: number | string) => padLeft(numberToHex(value), 64),
+    decode: (value: string) => hexToNumber(value),
   },
   Number: {
     type: 'uint256',
     // NOTE: extra logic is to handle and always return a string number
-    encode: (value) => {
+    encode: (value: string) => {
       let parsedValue: number;
       try {
         parsedValue = parseInt(value, 10);
@@ -183,11 +185,8 @@ export const valueContentEncodingMap = {
   },
   AssetURL: {
     type: 'custom',
-    encode: (value: {
-      hashFunction: SUPPORTED_HASH_FUNCTIONS;
-      hash: string;
-      url: string;
-    }) => encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
+    encode: (value: AssetURLEncode) =>
+      encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
     decode: (value: string) => decodeDataSourceWithHash(value),
   },
   // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
@@ -250,38 +249,24 @@ export function decodeValueType(type: string, value: string) {
 
 export function encodeValueContent(
   type: string,
-  value:
-    | string
-    | {
-        hashFunction: SUPPORTED_HASH_FUNCTIONS;
-        hash: string;
-        url: string;
-      }
-    | JSONURLDataToEncode,
-):
-  | string
-  | {
-      hashFunction: SUPPORTED_HASH_FUNCTIONS;
-      hash: string;
-      url: string;
-    }
-  | false {
-  if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
+  value: string | AssetURLEncode | JSONURLDataToEncode,
+): string | false {
+  if (!valueContentEncodingMap[type] && type.slice(0, 2) !== '0x') {
     throw new Error('Could not encode valueContent: "' + type + '".');
-  } else if (type.substr(0, 2) === '0x') {
+  } else if (type.slice(0, 2) === '0x') {
     return type === value ? value : false;
   }
 
-  return value ? valueContentEncodingMap[type].encode(value) : '0x';
+  return value ? (valueContentEncodingMap[type].encode(value) as string) : '0x';
 }
 
 export function decodeValueContent(
   type: string,
   value: string,
 ): string | false {
-  if (!valueContentEncodingMap[type] && type.substr(0, 2) !== '0x') {
+  if (!valueContentEncodingMap[type] && type.slice(0, 2) !== '0x') {
     throw new Error('Could not decode valueContent: "' + type + '".');
-  } else if (type.substr(0, 2) === '0x') {
+  } else if (type.slice(0, 2) === '0x') {
     return type === value ? value : false;
   }
 
