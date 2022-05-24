@@ -100,7 +100,7 @@ await erc725.getData('LSP3Profile');
   }
 }
 */
-
+TEST;
 await erc725.fetchData('LSP3Profile'); // downloads and verifies the linked JSON
 /* > {
   LSP3Profile: { // key of the schema
