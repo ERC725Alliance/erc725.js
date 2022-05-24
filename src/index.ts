@@ -31,7 +31,6 @@ import {
   decodeKey,
   isDataAuthentic,
   encodeData,
-  encodeKeyName,
   convertIPFSGatewayUrl,
 } from './lib/utils';
 
@@ -39,20 +38,22 @@ import { getSchema } from './lib/schemaParser';
 import { isValidSignature } from './lib/isValidSignature';
 
 import {
+  LSP6_ALL_PERMISSIONS,
+  LSP6_DEFAULT_PERMISSIONS,
+  SUPPORTED_HASH_FUNCTION_STRINGS,
+} from './lib/constants';
+import { encodeKeyName } from './lib/encodeKeyName';
+
+// Types
+import { URLDataWithHash, KeyValuePair, EncodeDataInput } from './types';
+import { ERC725Config } from './types/Config';
+import { Permissions } from './types/Method';
+import {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
 } from './types/ERC725JSONSchema';
-
-import { ERC725Config } from './types/Config';
-import {
-  LSP6_ALL_PERMISSIONS,
-  LSP6_DEFAULT_PERMISSIONS,
-  SUPPORTED_HASH_FUNCTION_STRINGS,
-} from './lib/constants';
-import { URLDataWithHash, KeyValuePair, EncodeDataInput } from './types';
-import { Permissions } from './types/Method';
 
 export {
   ERC725JSONSchema,
