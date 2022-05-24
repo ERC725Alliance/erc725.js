@@ -23,12 +23,12 @@ describe('schemaParser getSchema', () => {
   describe('Array', () => {
     it('finds initial key of type Array correctly', () => {
       const schema = getSchema(
-        '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+        '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
       );
 
       assert.deepStrictEqual(schema, {
-        name: 'LSP3IssuedAssets[]',
-        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+        name: 'LSP12IssuedAssets[]',
+        key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
         keyType: 'Array',
         valueContent: 'Address',
         valueType: 'address',
@@ -36,14 +36,14 @@ describe('schemaParser getSchema', () => {
     });
     it('finds subsequent key of type Array correctly', () => {
       const schema = getSchema([
-        '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
+        '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000001',
         '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000000',
       ]);
 
       assert.deepStrictEqual(schema, {
-        '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001': {
-          name: 'LSP3IssuedAssets[1]',
-          key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
+        '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000001': {
+          name: 'LSP12IssuedAssets[1]',
+          key: '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000001',
           keyType: 'Singleton',
           valueContent: 'Address',
           valueType: 'address',
