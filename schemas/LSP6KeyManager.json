@@ -33,5 +33,12 @@
     "keyType": "MappingWithGrouping",
     "valueType": "bytes4[]",
     "valueContent": "Bytes4"
+  },
+  {
+    "name": "AddressPermissions:AllowedERC725YKeys:<address>",
+    "key": "0x4b80742de2bf90b8b4850000<address>",
+    "keyType": "MappingWithGrouping",
+    "valueType": "bytes4[]",
+    "valueContent": "Bytes4"
   }
 ]
