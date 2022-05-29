@@ -8,29 +8,29 @@
   },
   {
     "name": "AddressPermissions:Permissions:<address>",
-    "key": "0x4b80742d0000000082ac0000<address>",
-    "keyType": "Bytes20MappingWithGrouping",
+    "key": "0x4b80742de2bf82acb3630000<address>",
+    "keyType": "MappingWithGrouping",
     "valueType": "bytes32",
     "valueContent": "BitArray"
   },
   {
     "name": "AddressPermissions:AllowedAddresses:<address>",
-    "key": "0x4b80742d00000000c6dd0000<address>",
-    "keyType": "Bytes20MappingWithGrouping",
+    "key": "0x4b80742de2bfc6dd6b3c0000<address>",
+    "keyType": "MappingWithGrouping",
     "valueType": "address[]",
     "valueContent": "Address"
   },
   {
     "name": "AddressPermissions:AllowedFunctions:<address>",
-    "key": "0x4b80742d000000008efe0000<address>",
-    "keyType": "Bytes20MappingWithGrouping",
+    "key": "0x4b80742de2bf8efea1e80000<address>",
+    "keyType": "MappingWithGrouping",
     "valueType": "bytes4[]",
     "valueContent": "Bytes4"
   },
   {
     "name": "AddressPermissions:AllowedStandards:<address>",
-    "key": "0x4b80742d000000003efa0000<address>",
-    "keyType": "Bytes20MappingWithGrouping",
+    "key": "0x4b80742de2bf3efa94a30000<address>",
+    "keyType": "MappingWithGrouping",
     "valueType": "bytes4[]",
     "valueContent": "Bytes4"
   }
