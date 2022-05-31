@@ -514,20 +514,20 @@ describe('utils', () => {
         keyName: 'SupportedStandards:LSP3UniversalProfile',
       },
       {
-        keyType: 'Bytes20Mapping',
+        keyType: 'Mapping',
         keyName: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
       },
       {
-        keyType: 'Bytes20Mapping',
+        keyType: 'Mapping',
         keyName: 'MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe',
       },
       {
-        keyType: 'Bytes20MappingWithGrouping',
+        keyType: 'MappingWithGrouping',
         keyName:
           'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
       },
       {
-        keyType: 'Bytes20MappingWithGrouping',
+        keyType: 'MappingWithGrouping',
         keyName:
           'AddressPermissions:Permissions:0xcafecafecafecafecafecafecafecafecafecafe',
       },

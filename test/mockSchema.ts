@@ -19,7 +19,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 1
   {
     name: 'SupportedStandards:LSP3UniversalProfile',
-    key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
+    key: '0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38',
     keyType: 'Mapping',
     valueContent: '0xabe425d6',
     valueType: 'bytes',
@@ -576,8 +576,8 @@ export const mockSchema: (ERC725JSONSchema & {
 
   {
     name: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
-    key: '0x22496f48a493035f00000000cafecafecafecafecafecafecafecafecafecafe',
-    keyType: 'Bytes20Mapping',
+    key: '0x22496f48a493035f0ab40000cafecafecafecafecafecafecafecafecafecafe',
+    keyType: 'Mapping',
     valueContent: '0xabe425d6',
     valueType: 'bytes',
     // Testing data
@@ -588,8 +588,8 @@ export const mockSchema: (ERC725JSONSchema & {
   },
   {
     name: 'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
-    key: '0x4b80742d0000000082ac0000cafecafecafecafecafecafecafecafecafecafe',
-    keyType: 'Bytes20MappingWithGrouping',
+    key: '0x4b80742de2bf82acb3630000cafecafecafecafecafecafecafecafecafecafe',
+    keyType: 'MappingWithGrouping',
     valueContent: '0xabe425d6',
     valueType: 'bytes',
     // Testing data

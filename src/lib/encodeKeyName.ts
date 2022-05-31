@@ -1,4 +1,4 @@
-import { keccak256 } from 'web3-utils';
+import { isAddress, keccak256 } from 'web3-utils';
 
 import { guessKeyTypeFromKeyName } from './utils';
 
@@ -13,34 +13,31 @@ export function encodeKeyName(name: string) {
   const keyType = guessKeyTypeFromKeyName(name);
 
   switch (keyType) {
-    case 'Bytes20MappingWithGrouping': {
-      // bytes4(keccak256(FirstWord)) + bytes4(0) + bytes2(keccak256(SecondWord)) + bytes2(0) + bytes20(address)
+    case 'MappingWithGrouping': {
+      // bytes10(keccak256(FirstWord)) + bytes4(keccak256(SecondWord)) + bytes2(0) + bytes20(AnyKey)
       const keyNameSplit = name.split(':');
       return (
-        keccak256(keyNameSplit[0]).slice(0, 10) +
-        '00000000' +
-        keccak256(keyNameSplit[1]).slice(2, 6) +
+        keccak256(keyNameSplit[0]).slice(0, 14) +
+        keccak256(keyNameSplit[1]).slice(2, 10) +
         '0000' +
         keyNameSplit[2].replace('0x', '').slice(0, 40)
       );
     }
-    case 'Bytes20Mapping': {
-      // bytes8(keccak256(FirstWord)) + bytes4(0) + bytes20(address)
-      const keyNameSplit = name.split(':');
-      return (
-        keccak256(keyNameSplit[0]).slice(0, 18) +
-        '00000000' +
-        keyNameSplit[1].replace('0x', '').slice(0, 40)
-      );
-    }
 
     case 'Mapping': {
-      // bytes16(keccak256(FirstWord)) + bytes12(0) + bytes4(keccak256(LastWord))
+      // bytes10(keccak256(FirstWord)) + bytes2(0) + bytes20(AnyKey)
       const keyNameSplit = name.split(':');
+      if (isAddress(keyNameSplit[1])) {
+        return (
+          keccak256(keyNameSplit[0]).slice(0, 22) +
+          '0000' +
+          keyNameSplit[1].replace('0x', '')
+        );
+      }
       return (
-        keccak256(keyNameSplit[0]).slice(0, 34) +
-        '000000000000000000000000' +
-        keccak256(keyNameSplit[1]).slice(2, 10)
+        keccak256(keyNameSplit[0]).slice(0, 22) +
+        '0000' +
+        keccak256(keyNameSplit[1]).slice(2, 42)
       );
     }
     case 'Array': // Warning: this can not correctly encode subsequent keys of array, only the initial Array key will work
