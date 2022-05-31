@@ -1,7 +1,7 @@
 [
   {
     "name": "SupportedStandards:LSP4DigitalAsset",
-    "key": "0xeafec4d89fa9619884b6b89135626455000000000000000000000000a4d96624",
+    "key": "0xeafec4d89fa9619884b60000a4d96624a38f7ac2d8d9a604ecf07c12c77e480c",
     "keyType": "Mapping",
     "valueType": "bytes4",
     "valueContent": "0xa4d96624"
@@ -36,7 +36,7 @@
   },
   {
     "name": "LSP4CreatorsMap:<address>",
-    "key": "0x6de85eaf5d982b4e00000000<address>",
+    "key": "0x6de85eaf5d982b4e5da00000<address>",
     "keyType": "Mapping",
     "valueType": "bytes",
     "valueContent": "Mixed"

@@ -28,7 +28,7 @@ import { ERC725 } from '@erc725/erc725.js';
 export const schemas = [
   {
     name: 'SupportedStandards:LSP3UniversalProfile',
-    key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
+    key: '0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38',
     keyType: 'Mapping',
     valueContent: '0xabe425d6',
     valueType: 'bytes',
@@ -48,8 +48,8 @@ export const schemas = [
     valueType: 'address',
   },
   {
-    name: 'LSP3IssuedAssets[]',
-    key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+    name: 'LSP12IssuedAssets[]',
+    key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
     keyType: 'Array',
     valueContent: 'Address',
     valueType: 'address',
@@ -78,7 +78,7 @@ const encodedData = myERC725.encodeData({
     hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
     url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
   },
-  'LSP3IssuedAssets[]': [
+  'LSP12IssuedAssets[]': [
     '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
     '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826',
   ],

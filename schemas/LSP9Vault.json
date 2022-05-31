@@ -1,0 +1,9 @@
+[
+  {
+    "name": "SupportedStandards:LSP9Vault",
+    "key": "0xeafec4d89fa9619884b600007c0334a14085fefa8b51ae5a40895018882bdb90",
+    "keyType": "Mapping",
+    "valueType": "bytes4",
+    "valueContent": "0x7c0334a1"
+  }
+]
