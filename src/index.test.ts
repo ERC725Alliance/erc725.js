@@ -203,13 +203,6 @@ describe('Running @erc725/erc725.js tests...', () => {
         valueType: 'bytes',
       },
       {
-        name: 'SupportedStandards:ERC725Account',
-        key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6',
-        keyType: 'Singleton',
-        valueContent: '0xafdeb5d6',
-        valueType: 'bytes',
-      },
-      {
         name: 'LSP1UniversalReceiverDelegate',
         key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
         keyType: 'Singleton',
@@ -224,7 +217,6 @@ describe('Running @erc725/erc725.js tests...', () => {
         hash: '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
         url: 'ipfs://QmecrGejUQVXpW4zS948pNvcnQrJ1KiAoM6bdfrVcWZsn5',
       },
-      'SupportedStandards:ERC725Account': '0xafdeb5d6',
       LSP1UniversalReceiverDelegate:
         '0x36e4Eb6Ee168EF54B1E8e850ACBE51045214B313',
     };

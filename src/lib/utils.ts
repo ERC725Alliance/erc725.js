@@ -144,14 +144,10 @@ export function guessKeyTypeFromKeyName(
   const splittedKeyName = keyName.split(':');
 
   if (splittedKeyName.length === 3) {
-    return 'Bytes20MappingWithGrouping';
+    return 'MappingWithGrouping';
   }
 
   if (splittedKeyName.length === 2) {
-    if (isAddress(splittedKeyName[1])) {
-      return 'Bytes20Mapping';
-    }
-
     return 'Mapping';
   }
 
@@ -250,8 +246,7 @@ export function encodeKey(
 
       return results;
     }
-    case 'bytes20mapping':
-    case 'bytes20mappingwithgrouping':
+    case 'mappingwithgrouping':
     case 'singleton':
     case 'mapping':
       return encodeKeyValue(
@@ -387,8 +382,7 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
 
       return results;
     }
-    case 'bytes20mapping':
-    case 'bytes20mappingwithgrouping':
+    case 'mappingwithgrouping':
     case 'singleton':
     case 'mapping': {
       if (Array.isArray(value)) {
