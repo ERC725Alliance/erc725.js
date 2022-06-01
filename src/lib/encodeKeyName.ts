@@ -16,9 +16,6 @@ const dynamicTypes = ['<string>', '<address>', '<bool>'];
 // https://docs.soliditylang.org/en/v0.8.14/abi-spec.html#types
 const dynamicTypesRegex = /<(uint|int|bytes)(\d+)>/;
 
-const MAPPING_FIRST_WORD_HASH_LENGTH = 22;
-const MAPPINGWITHGROUPING_FIRST_WORD_HASH_LENGTH = 14;
-
 /**
  *
  * @param type <string>, <uintM>, <intM>, <bool>, <bytesM>, <address>.
@@ -91,7 +88,7 @@ export const encodeDynamicKeyPart = (
     }
     case 'int':
       // TODO:
-      throw new Error('TODO');
+      throw new Error('The encoding of <intM> has not been implemented yet.');
     case 'bytes': {
       const valueWithoutPrefix = value.replace('0x', '');
       if (valueWithoutPrefix.length !== size * 2) {
@@ -131,6 +128,86 @@ export function isDynamicKeyName(name: string) {
   return false;
 }
 
+/**
+ * Encodes a MappingWithGrouping with dynamic values, according to LSP-2 ERC725YJSONSchema.
+ * https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#mapping
+ * bytes10:bytes2(0):bytes20
+ *
+ *
+ * @param name Ex: MyKeyName:<address>
+ * @param dynamicKeyParts ['0xcafecafecafecafecafecafecafecafecafecafe']
+ * @returns the encoded key
+ */
+const encodeDynamicMapping = (name: string, dynamicKeyParts: string[]) => {
+  if (dynamicKeyParts.length !== 1) {
+    throw new Error(
+      `Dynamic key of type: Mapping expects exactly 1 variable. Got: ${dynamicKeyParts.length} (${dynamicKeyParts})`,
+    );
+  }
+
+  const keyNameSplit = name.split(':'); // LSP5ReceivedAssetsMap:<address>
+
+  const encodedKey = keccak256(keyNameSplit[0]).slice(0, 22);
+
+  return `${encodedKey}0000${encodeDynamicKeyPart(
+    keyNameSplit[1],
+    dynamicKeyParts[0],
+    20,
+  )}`;
+};
+
+/**
+ * Encodes a MappingWithGrouping with dynamic values, according to LSP-2 ERC725YJSONSchema.
+ * https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#mappingwithgrouping
+ * bytes6:bytes4:bytes2(0):bytes20
+ *
+ * @param name
+ * @param dynamicKeyParts
+ * @returns the encoded key
+ */
+const encodeDynamicMappingWithGrouping = (
+  name: string,
+  dynamicKeyParts: string[],
+) => {
+  const keyNameSplit = name.split(':'); // MyGroup:<string>:<address>
+
+  let numberOfVariables = 0;
+  if (isDynamicKeyName(keyNameSplit[1])) {
+    numberOfVariables += 1;
+  }
+  if (isDynamicKeyName(keyNameSplit[2])) {
+    numberOfVariables += 1;
+  }
+
+  if (numberOfVariables !== dynamicKeyParts.length) {
+    throw new Error(
+      `Can not encode dynamic key of type: MappingWithGrouping. Wrong number of arguments. Expects exactly ${numberOfVariables} variable(s), got: ${dynamicKeyParts.length} (${dynamicKeyParts})`,
+    );
+  }
+
+  const firstPart = keccak256(keyNameSplit[0]).slice(0, 14);
+
+  let secondPart = '';
+  if (isDynamicKeyName(keyNameSplit[1])) {
+    secondPart = encodeDynamicKeyPart(keyNameSplit[1], dynamicKeyParts[0], 4);
+  } else {
+    secondPart = keccak256(keyNameSplit[1]).slice(2, 2 + 4 * 2);
+  }
+
+  let lastPart = '';
+  if (isDynamicKeyName(keyNameSplit[2])) {
+    lastPart = encodeDynamicKeyPart(
+      keyNameSplit[2],
+      dynamicKeyParts[dynamicKeyParts.length - 1],
+      20,
+    );
+  } else {
+    lastPart = keccak256(keyNameSplit[2]).slice(2, 2 + 20 * 2);
+  }
+
+  return `${firstPart}${secondPart}0000${lastPart}`;
+};
+
 function encodeDynamicKeyName(
   name: string,
   dynamicKeyParts?: string | string[],
@@ -147,82 +224,10 @@ function encodeDynamicKeyName(
   const keyType = guessKeyTypeFromKeyName(name);
 
   switch (keyType) {
-    case 'Mapping': {
-      // https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#mappingwithgrouping
-      /**
-       * bytes10:bytes2(0):bytes20
-       */
-
-      // Mapping expects only 1 dynamic key
-      if (dynamicKeyPartsArray.length !== 1) {
-        throw new Error(
-          `Dynamic key of type: Mapping expects exactly 1 variable. Got: ${dynamicKeyPartsArray.length} (${dynamicKeyPartsArray})`,
-        );
-      }
-
-      const keyNameSplit = name.split(':'); // LSP5ReceivedAssetsMap:<address>
-
-      const encodedKey = keccak256(keyNameSplit[0]).slice(
-        0,
-        MAPPING_FIRST_WORD_HASH_LENGTH,
-      );
-
-      return `${encodedKey}0000${encodeDynamicKeyPart(
-        keyNameSplit[1],
-        dynamicKeyPartsArray[0],
-        20,
-      )}`;
-    }
-    case 'MappingWithGrouping': {
-      // https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#mappingwithgrouping
-      // bytes6(keccak256("MyKeyName")) + bytes4(keccak256("MyMapName") or <mixed type>) + bytes2(0) + bytes20(keccak256("MySubMapName") or <mixed type>)
-      // bytes6:bytes4:bytes2(0):bytes20
-
-      const keyNameSplit = name.split(':'); // MyGroup:<string>:<address>
-
-      let numberOfVariables = 0;
-      if (isDynamicKeyName(keyNameSplit[1])) {
-        numberOfVariables += 1;
-      }
-      if (isDynamicKeyName(keyNameSplit[2])) {
-        numberOfVariables += 1;
-      }
-
-      if (numberOfVariables !== dynamicKeyPartsArray.length) {
-        throw new Error(
-          `Can not encode dynamic key of type: MappingWithGrouping. Wrong number of arguments. Expects exactly ${numberOfVariables} variable(s), got: ${dynamicKeyPartsArray.length} (${dynamicKeyPartsArray})`,
-        );
-      }
-
-      const firstPart = keccak256(keyNameSplit[0]).slice(
-        0,
-        MAPPINGWITHGROUPING_FIRST_WORD_HASH_LENGTH,
-      );
-
-      let secondPart = '';
-      if (isDynamicKeyName(keyNameSplit[1])) {
-        secondPart = encodeDynamicKeyPart(
-          keyNameSplit[1],
-          dynamicKeyPartsArray[0],
-          4,
-        );
-      } else {
-        secondPart = keccak256(keyNameSplit[1]).slice(2, 2 + 4 * 2);
-      }
-
-      let lastPart = '';
-      if (isDynamicKeyName(keyNameSplit[2])) {
-        lastPart = encodeDynamicKeyPart(
-          keyNameSplit[2],
-          dynamicKeyPartsArray[dynamicKeyPartsArray.length - 1],
-          20,
-        );
-      } else {
-        lastPart = keccak256(keyNameSplit[2]).slice(2, 2 + 20 * 2);
-      }
-
-      return `${firstPart}${secondPart}0000${lastPart}`;
-    }
+    case 'Mapping':
+      return encodeDynamicMapping(name, dynamicKeyPartsArray);
+    case 'MappingWithGrouping':
+      return encodeDynamicMappingWithGrouping(name, dynamicKeyPartsArray);
     default:
       throw new Error(
         `Could not encode dynamic key: ${name} of type: ${keyType}`,
@@ -249,34 +254,25 @@ export function encodeKeyName(
 
   switch (keyType) {
     case 'MappingWithGrouping': {
-      // bytes10(keccak256(FirstWord)) + bytes4(keccak256(SecondWord)) + bytes2(0) + bytes20(AnyKey)
       const keyNameSplit = name.split(':');
-      return (
-        keccak256(keyNameSplit[0]).slice(
-          0,
-          MAPPINGWITHGROUPING_FIRST_WORD_HASH_LENGTH,
-        ) +
-        keccak256(keyNameSplit[1]).slice(2, 10) +
-        '0000' +
-        keyNameSplit[2].replace('0x', '').slice(0, 40)
+
+      return encodeDynamicMappingWithGrouping(
+        `${keyNameSplit[0]}:<string>:<address>`,
+        [keyNameSplit[1], keyNameSplit[2]],
       );
     }
 
     case 'Mapping': {
-      // bytes10(keccak256(FirstWord)) + bytes2(0) + bytes20(AnyKey)
       const keyNameSplit = name.split(':');
       if (isAddress(keyNameSplit[1])) {
-        return (
-          keccak256(keyNameSplit[0]).slice(0, MAPPING_FIRST_WORD_HASH_LENGTH) +
-          '0000' +
-          keyNameSplit[1].replace('0x', '')
-        );
+        return encodeDynamicMapping(`${keyNameSplit[0]}:<address>`, [
+          keyNameSplit[1],
+        ]);
       }
-      return (
-        keccak256(keyNameSplit[0]).slice(0, MAPPING_FIRST_WORD_HASH_LENGTH) +
-        '0000' +
-        keccak256(keyNameSplit[1]).slice(2, 42)
-      );
+
+      return encodeDynamicMapping(`${keyNameSplit[0]}:<string>`, [
+        keyNameSplit[1],
+      ]);
     }
     case 'Array': // Warning: this can not correctly encode subsequent keys of array, only the initial Array key will work
     case 'Singleton':
