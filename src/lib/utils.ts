@@ -22,7 +22,6 @@ import {
   isAddress,
   isHex,
   isHexStrict,
-  keccak256,
   numberToHex,
   padLeft,
 } from 'web3-utils';
@@ -53,6 +52,7 @@ import {
   valueContentEncodingMap as valueContentMap,
 } from './encoder';
 import { AssetURLEncode } from '../types/encodeData';
+import { encodeKeyName } from './encodeKeyName';
 
 /**
  *
@@ -144,14 +144,10 @@ export function guessKeyTypeFromKeyName(
   const splittedKeyName = keyName.split(':');
 
   if (splittedKeyName.length === 3) {
-    return 'Bytes20MappingWithGrouping';
+    return 'MappingWithGrouping';
   }
 
   if (splittedKeyName.length === 2) {
-    if (splittedKeyName[1].slice(0, 2) === '0x') {
-      return 'Bytes20Mapping';
-    }
-
     return 'Mapping';
   }
 
@@ -160,55 +156,6 @@ export function guessKeyTypeFromKeyName(
   }
 
   return 'Singleton';
-}
-
-/**
- *
- * @param name the schema element name.
- * @return the name of the key encoded as per specifications.
- *
- * @return a string of the encoded schema name.
- */
-export function encodeKeyName(name: string) {
-  const keyType = guessKeyTypeFromKeyName(name);
-
-  switch (keyType) {
-    case 'Bytes20MappingWithGrouping': {
-      // bytes4(keccak256(FirstWord)) + bytes4(0) + bytes2(keccak256(SecondWord)) + bytes2(0) + bytes20(address)
-      const keyNameSplit = name.split(':');
-      return (
-        keccak256(keyNameSplit[0]).slice(0, 10) +
-        '00000000' +
-        keccak256(keyNameSplit[1]).slice(2, 6) +
-        '0000' +
-        keyNameSplit[2].slice(0, 40)
-      );
-    }
-    case 'Bytes20Mapping': {
-      // bytes8(keccak256(FirstWord)) + bytes4(0) + bytes20(address)
-      const keyNameSplit = name.split(':');
-      return (
-        keccak256(keyNameSplit[0]).slice(0, 18) +
-        '00000000' +
-        keyNameSplit[1].slice(2, 42)
-      );
-    }
-
-    case 'Mapping': {
-      // bytes16(keccak256(FirstWord)) + bytes12(0) + bytes4(keccak256(LastWord))
-      const keyNameSplit = name.split(':');
-      return (
-        keccak256(keyNameSplit[0]).slice(0, 34) +
-        '000000000000000000000000' +
-        keccak256(keyNameSplit[1]).slice(2, 10)
-      );
-    }
-    case 'Array': // Warning: this can not correctly encode subsequent keys of array, only the initial Array key will work
-    case 'Singleton':
-      return keccak256(name);
-    default:
-      return keccak256(name);
-  }
 }
 
 /**
@@ -299,8 +246,7 @@ export function encodeKey(
 
       return results;
     }
-    case 'bytes20mapping':
-    case 'bytes20mappingwithgrouping':
+    case 'mappingwithgrouping':
     case 'singleton':
     case 'mapping':
       return encodeKeyValue(
@@ -436,8 +382,7 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
 
       return results;
     }
-    case 'bytes20mapping':
-    case 'bytes20mappingwithgrouping':
+    case 'mappingwithgrouping':
     case 'singleton':
     case 'mapping': {
       if (Array.isArray(value)) {
