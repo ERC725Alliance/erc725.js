@@ -52,7 +52,7 @@ export class HttpProvider {
         error?: { code: number; message: string; data: string };
       }[] = [];
       for (let index = 0; index < payload.length; index++) {
-        const methodSignature = payload[index].params[0].data.substr(0, 10);
+        const methodSignature = payload[index].params[0].data.slice(0, 10);
 
         switch (methodSignature) {
           case METHODS[Method.SUPPORTS_INTERFACE].sig:
@@ -65,8 +65,7 @@ export class HttpProvider {
             {
               const foundResult = this.returnData.find((element) => {
                 // get call param (key)
-                const keyParam =
-                  '0x' + payload[index].params[0].data.substr(10);
+                const keyParam = '0x' + payload[index].params[0].data.slice(10);
                 return element.key === keyParam;
               });
 
@@ -94,7 +93,7 @@ export class HttpProvider {
             {
               const requestedKeys = abiCoder.decodeParameter(
                 'bytes32[]',
-                payload[index].params[0].data.substr(10),
+                payload[index].params[0].data.slice(10),
               );
 
               const decodedResult = requestedKeys.map((requestedKey) => {
@@ -124,14 +123,14 @@ export class HttpProvider {
     } else {
       let result: string;
 
-      const methodSignature = payload.params[0].data.substr(0, 10);
+      const methodSignature = payload.params[0].data.slice(0, 10);
 
       switch (methodSignature) {
         case METHODS[Method.SUPPORTS_INTERFACE].sig:
           {
-            const requestedInterface = `0x${payload.params[0].data.substr(
+            const requestedInterface = `0x${payload.params[0].data.slice(
               10,
-              8,
+              18,
             )}`;
             if (this.supportsInterfaces.includes(requestedInterface)) {
               result =
@@ -144,14 +143,14 @@ export class HttpProvider {
           break;
         case METHODS[Method.GET_DATA_LEGACY].sig:
           {
-            const keyParam = '0x' + payload.params[0].data.substr(10);
+            const keyParam = '0x' + payload.params[0].data.slice(10);
             const foundResult = this.returnData.find((e) => e.key === keyParam);
             result = foundResult ? foundResult.value : '0x';
           }
           break;
         case METHODS[Method.GET_DATA].sig:
           {
-            const keyParam = '0x' + payload.params[0].data.substr(138);
+            const keyParam = '0x' + payload.params[0].data.slice(138);
             const foundResult = this.returnData.find((e) => e.key === keyParam);
             result = foundResult ? foundResult.value : '0x';
           }
@@ -204,14 +203,14 @@ export class EthereumProvider {
   request(payload: EthereumProviderPayload) {
     let result: string;
 
-    const methodSignature = payload.params[0].data.substr(0, 10);
+    const methodSignature = payload.params[0].data.slice(0, 10);
 
     switch (methodSignature) {
       case METHODS[Method.SUPPORTS_INTERFACE].sig:
         {
-          const requestedInterface = `0x${payload.params[0].data.substr(
+          const requestedInterface = `0x${payload.params[0].data.slice(
             10,
-            8,
+            18,
           )}`;
           if (this.supportsInterfaces.includes(requestedInterface)) {
             result =
@@ -224,7 +223,7 @@ export class EthereumProvider {
         break;
       case METHODS[Method.GET_DATA_LEGACY].sig:
         {
-          const keyParam = '0x' + payload.params[0].data.substr(10);
+          const keyParam = '0x' + payload.params[0].data.slice(10);
 
           result = this.returnData.find((e) => e.key === keyParam)?.value;
         }
@@ -239,7 +238,7 @@ export class EthereumProvider {
           // Duplicated logic with HttpProvider
           const requestedKeys = abiCoder.decodeParameter(
             'bytes32[]',
-            payload.params[0].data.substr(10),
+            payload.params[0].data.slice(10),
           );
 
           const decodedResult = requestedKeys.map((requestedKey) => {

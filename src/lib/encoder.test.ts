@@ -257,12 +257,13 @@ describe('encoder', () => {
       it('throws when the hashFunction of JSON of JSONURL to encode is not keccak256(utf8)', () => {
         assert.throws(
           () => {
+            // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
             valueContentEncodingMap.JSONURL.encode({
-              // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
               hashFunction: 'whatever',
               url: 'https://file-desination.com/file-name',
+              hash: '0x321',
               json: {
-                test: true,
+                hello: 'mario',
               },
             });
           },
@@ -275,8 +276,8 @@ describe('encoder', () => {
       it('throws when JSONURL encode a JSON without json or hash key', () => {
         assert.throws(
           () => {
+            // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
             valueContentEncodingMap.JSONURL.encode({
-              // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
               hashFunction: 'keccak256(utf8)',
               url: 'https://file-desination.com/file-name',
             });

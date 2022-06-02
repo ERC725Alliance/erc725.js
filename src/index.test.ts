@@ -1,3 +1,5 @@
+/* eslint-disable import/no-extraneous-dependencies */
+
 /*
     This file is part of @erc725/erc725.js.
     @erc725/erc725.js is free software: you can redistribute it and/or modify
@@ -19,8 +21,8 @@
 
 // Tests for the @erc725/erc725.js package
 import assert from 'assert';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import Web3 from 'web3';
+import * as sinon from 'sinon';
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
 
 import ERC725 from '.';
@@ -43,7 +45,6 @@ import {
 // eslint-disable-next-line import/no-extraneous-dependencies
 import 'isomorphic-fetch';
 
-import { Schema } from '../test/generatedSchema';
 import {
   INTERFACE_IDS,
   SUPPORTED_HASH_FUNCTION_STRINGS,
@@ -202,13 +203,6 @@ describe('Running @erc725/erc725.js tests...', () => {
         valueType: 'bytes',
       },
       {
-        name: 'SupportedStandards:ERC725Account',
-        key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6',
-        keyType: 'Singleton',
-        valueContent: '0xafdeb5d6',
-        valueType: 'bytes',
-      },
-      {
         name: 'LSP1UniversalReceiverDelegate',
         key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
         keyType: 'Singleton',
@@ -223,13 +217,12 @@ describe('Running @erc725/erc725.js tests...', () => {
         hash: '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
         url: 'ipfs://QmecrGejUQVXpW4zS948pNvcnQrJ1KiAoM6bdfrVcWZsn5',
       },
-      'SupportedStandards:ERC725Account': '0xafdeb5d6',
       LSP1UniversalReceiverDelegate:
         '0x36e4Eb6Ee168EF54B1E8e850ACBE51045214B313',
     };
 
     it('with web3.currentProvider [legacy]', async () => {
-      const erc725 = new ERC725<Schema>(
+      const erc725 = new ERC725(
         e2eSchema,
         LEGACY_ERC725_CONTRACT_ADDRESS,
         web3.currentProvider,
@@ -239,7 +232,7 @@ describe('Running @erc725/erc725.js tests...', () => {
     });
 
     it('with web3.currentProvider', async () => {
-      const erc725 = new ERC725<Schema>(
+      const erc725 = new ERC725(
         e2eSchema,
         ERC725_CONTRACT_ADDRESS,
         web3.currentProvider,
@@ -298,7 +291,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         const provider = new HttpProvider({ returnData: allRawData }, [
           contractVersion.interface,
         ]);
-        const erc725 = new ERC725<Schema>(mockSchema, address, provider);
+        const erc725 = new ERC725(mockSchema, address, provider);
         const result = await erc725.getData();
         assert.deepStrictEqual(result, fullResults);
       });
@@ -313,7 +306,6 @@ describe('Running @erc725/erc725.js tests...', () => {
       });
 
       it('fetchData JSONURL', async () => {
-        // this test does a real request, TODO replace with mock?
         const provider = new HttpProvider(
           {
             returnData: allRawData.filter(
@@ -337,22 +329,17 @@ describe('Running @erc725/erc725.js tests...', () => {
           address,
           provider,
         );
+
+        const jsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
+
+        const fetchStub = sinon.stub(global, 'fetch');
+        fetchStub.onCall(0).returns(Promise.resolve(new Response(jsonString)));
         const result = await erc725.fetchData('TestJSONURL');
-        assert.deepStrictEqual(result, {
-          LSP3Profile: {
-            backgroundImage:
-              'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
-            description:
-              "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
-            profileImage:
-              'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
-          },
-        });
+        assert.deepStrictEqual(result, JSON.parse(jsonString));
+        fetchStub.restore();
       });
 
       it('fetchData JSONURL with custom config.ipfsGateway', async () => {
-        // this test does a real request, TODO replace with mock?
-
         const provider = new HttpProvider(
           {
             returnData: allRawData.filter(
@@ -363,6 +350,9 @@ describe('Running @erc725/erc725.js tests...', () => {
           },
           [contractVersion.interface],
         );
+
+        const ipfsGateway = 'https://2eff.lukso.dev';
+
         const erc725 = new ERC725(
           [
             {
@@ -376,26 +366,32 @@ describe('Running @erc725/erc725.js tests...', () => {
           address,
           provider,
           {
-            ipfsGateway: 'https://2eff.lukso.dev/ipfs/',
+            ipfsGateway,
           },
         );
+
+        const jsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
+
+        const fetchStub = sinon.stub(global, 'fetch');
+        fetchStub.onCall(0).returns(Promise.resolve(new Response(jsonString)));
         const result = await erc725.fetchData('TestJSONURL');
-        assert.deepStrictEqual(result, {
-          LSP3Profile: {
-            backgroundImage:
-              'ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew',
-            description:
-              "Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. ",
-            profileImage:
-              'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
-          },
-        });
+        assert.deepStrictEqual(result, JSON.parse(jsonString));
+
+        assert.ok(
+          fetchStub.calledWith(
+            `${ipfsGateway}/ipfs/QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd`, // this value comes from the mockSchema
+          ),
+        );
+
+        fetchStub.restore();
       });
 
       if (contractVersion.interface === INTERFACE_IDS.ERC725Y_LEGACY) {
-        // We run this broken test only on legacy for now until it is fixed
         it('fetchData AssetURL', async () => {
-          // this test does a real request, TODO replace with mock?
+          const fetchStub = sinon.stub(global, 'fetch');
+          fetchStub
+            .onCall(0)
+            .returns(Promise.resolve(new Response(new Uint8Array(5))));
 
           const provider = new HttpProvider(
             {
@@ -403,13 +399,13 @@ describe('Running @erc725/erc725.js tests...', () => {
                 {
                   key: '0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee',
                   value:
-                    '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000598019f9b1ea67779f76db55facacfe81114abcd56b36fe15d63223aba7e5fc8251f68139f697066733a2f2f516d596f387967347a7a6d647532364e537674736f4b6555356f56523668326f686d6f61324378356939316d506600000000000000',
+                    '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000598019f9b1c41589e7559804ea4a2080dad19d876a024ccb05117835447d72ce08c1d020ec697066733a2f2f516d596f387967347a7a6d647532364e537674736f4b6555356f56523668326f686d6f61324378356939316d506600000000000000',
                 },
 
                 // Encoded value of:
                 // {
                 //   hashFunction: 'keccak256(bytes)', // 0x8019f9b1
-                //   hash: '0xea67779f76db55facacfe81114abcd56b36fe15d63223aba7e5fc8251f68139f',
+                //   hash: '0xc41589e7559804ea4a2080dad19d876a024ccb05117835447d72ce08c1d020ec',
                 //   url: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
                 // },
               ],
@@ -435,6 +431,8 @@ describe('Running @erc725/erc725.js tests...', () => {
             Object.prototype.toString.call(result),
             '[object Uint8Array]',
           );
+
+          fetchStub.restore();
         });
       }
     });
@@ -491,7 +489,7 @@ describe('Running @erc725/erc725.js tests...', () => {
                 schemaElement.valueType,
                 schemaElement.expectedResult[i],
                 schemaElement.name,
-              ),
+              ) as string,
             );
           } // end for loop
           assert.deepStrictEqual(results, schemaElement.returnGraphData);
@@ -546,7 +544,7 @@ describe('Running @erc725/erc725.js tests...', () => {
               schemaElement.name
             ];
             const intendedResults = allGraphData.filter(
-              (e) => e.key.substr(0, 34) === schemaElement.key.substr(0, 34),
+              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
             );
             // handle '0x'....
             // intendedResults = intendedResults.filter(e => e !== '0x' && e.value !== '0x')
@@ -560,7 +558,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             schemaElement.name,
           async () => {
             const values = allGraphData.filter(
-              (e) => e.key.substr(0, 34) === schemaElement.key.substr(0, 34),
+              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
             );
             const intendedResults = generateAllResults([schemaElement])[
               schemaElement.name
@@ -579,7 +577,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             ];
 
             const keyValuePairs = allGraphData.filter(
-              (e) => e.key.substr(0, 34) === schemaElement.key.substr(0, 34),
+              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
             );
 
             const intendedResult: { keys: string[]; values: string[] } = {
@@ -606,7 +604,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             schemaElement.name,
           async () => {
             const values = allGraphData.filter(
-              (e) => e.key.substr(0, 34) === schemaElement.key.substr(0, 34),
+              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
             );
             const intendedResults = generateAllResults([schemaElement])[
               schemaElement.name
@@ -677,7 +675,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       },
     ];
 
-    const myERC725 = new ERC725<Schema>(schema);
+    const myERC725 = new ERC725(schema);
 
     const json = {
       name: 'rryter',
@@ -960,130 +958,14 @@ describe('getSchema', () => {
 describe('encodeKeyName', () => {
   const erc725Instance = new ERC725([]);
 
-  describe('Singleton', () => {
-    it('Encodes MyKeyName correctly', () => {
-      assert.deepStrictEqual(
-        ERC725.encodeKeyName('MyKeyName'),
-        '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2',
-      );
-      assert.deepStrictEqual(
-        erc725Instance.encodeKeyName('MyKeyName'),
-        '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2',
-      );
-    });
-    it('Encodes LSP3Profile correctly', () => {
-      assert.deepStrictEqual(
-        ERC725.encodeKeyName('LSP3Profile'),
-        '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-      );
-      assert.deepStrictEqual(
-        erc725Instance.encodeKeyName('LSP3Profile'),
-        '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-      );
-    });
-  });
-  describe('Array', () => {
-    it('Encodes LSP3IssuedAssets[] correctly', () => {
-      assert.deepStrictEqual(
-        ERC725.encodeKeyName('LSP3IssuedAssets[]'),
-        '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
-      );
-      assert.deepStrictEqual(
-        erc725Instance.encodeKeyName('LSP3IssuedAssets[]'),
-        '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
-      );
-    });
-    it('Encodes LSP5ReceivedAssets[] correctly', () => {
-      assert.deepStrictEqual(
-        ERC725.encodeKeyName('LSP5ReceivedAssets[]'),
-        '0x6460ee3c0aac563ccbf76d6e1d07bada78e3a9514e6382b736ed3f478ab7b90b',
-      );
-      assert.deepStrictEqual(
-        erc725Instance.encodeKeyName('LSP5ReceivedAssets[]'),
-        '0x6460ee3c0aac563ccbf76d6e1d07bada78e3a9514e6382b736ed3f478ab7b90b',
-      );
-    });
-  });
-  describe('Mapping', () => {
-    it('Encodes SupportedStandards:ERC725Account correctly', () => {
-      assert.deepStrictEqual(
-        ERC725.encodeKeyName('SupportedStandards:ERC725Account'),
-        '0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6',
-      );
-      assert.deepStrictEqual(
-        erc725Instance.encodeKeyName('SupportedStandards:ERC725Account'),
-        '0xeafec4d89fa9619884b6b89135626455000000000000000000000000afdeb5d6',
-      );
-    });
-    it('Encodes SupportedStandards:LSP3UniversalProfile correctly', () => {
-      assert.deepStrictEqual(
-        ERC725.encodeKeyName('SupportedStandards:LSP3UniversalProfile'),
-        '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
-      );
-      assert.deepStrictEqual(
-        erc725Instance.encodeKeyName('SupportedStandards:LSP3UniversalProfile'),
-        '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
-      );
-    });
-  });
-  describe('Bytes20Mapping', () => {
-    it('Encodes MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe correctly', () => {
-      assert.deepStrictEqual(
-        ERC725.encodeKeyName(
-          'MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe',
-        ),
-        '0x22496f48a493035f00000000cafecafecafecafecafecafecafecafecafecafe',
-      );
-      assert.deepStrictEqual(
-        erc725Instance.encodeKeyName(
-          'MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe',
-        ),
-        '0x22496f48a493035f00000000cafecafecafecafecafecafecafecafecafecafe',
-      );
-    });
-    it('Encodes LSP3IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147 correctly', () => {
-      assert.deepStrictEqual(
-        ERC725.encodeKeyName(
-          'LSP3IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
-        ),
-        '0x83f5e77bfb14241600000000b74a88C43BCf691bd7A851f6603cb1868f6fc147',
-      );
-      assert.deepStrictEqual(
-        erc725Instance.encodeKeyName(
-          'LSP3IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
-        ),
-        '0x83f5e77bfb14241600000000b74a88C43BCf691bd7A851f6603cb1868f6fc147',
-      );
-    });
-  });
-  describe('Bytes20MappingWithGrouping', () => {
-    it('Encodes AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe correctly', () => {
-      assert.deepStrictEqual(
-        ERC725.encodeKeyName(
-          'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
-        ),
-        '0x4b80742d0000000082ac0000cafecafecafecafecafecafecafecafecafecafe',
-      );
-      assert.deepStrictEqual(
-        erc725Instance.encodeKeyName(
-          'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
-        ),
-        '0x4b80742d0000000082ac0000cafecafecafecafecafecafecafecafecafecafe',
-      );
-    });
-    it('Encodes AddressPermissions:AllowedAddresses:b74a88C43BCf691bd7A851f6603cb1868f6fc147 correctly', () => {
-      assert.deepStrictEqual(
-        ERC725.encodeKeyName(
-          'AddressPermissions:AllowedAddresses:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
-        ),
-        '0x4b80742d00000000c6dd0000b74a88C43BCf691bd7A851f6603cb1868f6fc147',
-      );
-      assert.deepStrictEqual(
-        erc725Instance.encodeKeyName(
-          'AddressPermissions:AllowedAddresses:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
-        ),
-        '0x4b80742d00000000c6dd0000b74a88C43BCf691bd7A851f6603cb1868f6fc147',
-      );
-    });
+  it('is available on instance and class', () => {
+    assert.deepStrictEqual(
+      ERC725.encodeKeyName('MyKeyName'),
+      '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2',
+    );
+    assert.deepStrictEqual(
+      erc725Instance.encodeKeyName('MyKeyName'),
+      '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2',
+    );
   });
 });

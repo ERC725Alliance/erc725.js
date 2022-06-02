@@ -22,16 +22,19 @@ import {
   isAddress,
   isHex,
   isHexStrict,
-  keccak256,
   numberToHex,
   padLeft,
 } from 'web3-utils';
 import { arrToBufArr } from 'ethereumjs-util';
 
-import { KeyValuePair, JSONURLDataToEncode } from '../types';
+import {
+  KeyValuePair,
+  JSONURLDataToEncode,
+  EncodeDataInput,
+  EncodeDataReturn,
+} from '../types';
 import {
   ERC725JSONSchema,
-  GenericSchema,
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueType,
 } from '../types/ERC725JSONSchema';
@@ -48,6 +51,8 @@ import {
   encodeValueType,
   valueContentEncodingMap as valueContentMap,
 } from './encoder';
+import { AssetURLEncode } from '../types/encodeData';
+import { encodeKeyName } from './encodeKeyName';
 
 /**
  *
@@ -55,6 +60,7 @@ import {
  * @param {string} valueType as per ERC725Schema definition
  * @param value can contain single value, an array, or an object as required by schema (JSONURL, or ASSETURL)
  * @param {string} [name]
+ *
  * @return the encoded value as per the schema
  */
 export function encodeKeyValue(
@@ -62,9 +68,9 @@ export function encodeKeyValue(
   valueType: ERC725JSONSchemaValueType,
   value: string | string[] | JSONURLDataToEncode | JSONURLDataToEncode[],
   name?: string,
-) {
+): string | false {
   const isSupportedValueContent =
-    valueContentMap[valueContent] || valueContent.substr(0, 2) === '0x';
+    valueContentMap[valueContent] || valueContent.slice(0, 2) === '0x';
 
   if (!isSupportedValueContent) {
     throw new Error(
@@ -73,47 +79,42 @@ export function encodeKeyValue(
     );
   }
 
-  let result;
-  const sameEncoding =
+  const isValueTypeArray = valueType.slice(valueType.length - 2) === '[]';
+
+  if (!isValueTypeArray && !Array.isArray(value)) {
+    // Straight forward encode
+    return encodeValueContent(valueContent, value);
+  }
+
+  const isSameEncoding =
     valueContentMap[valueContent] &&
     valueContentMap[valueContent].type === valueType.split('[]')[0];
-  const isArray = valueType.substr(valueType.length - 2) === '[]';
+
+  let result;
 
   // We only loop if the valueType done by abi.encodeParameter can not handle it directly
-  if (Array.isArray(value) && !sameEncoding) {
+  if (Array.isArray(value)) {
     // value type encoding will handle it?
 
     // we handle an array element encoding
-    const results: (
-      | string
-      | {
-          hashFunction: SUPPORTED_HASH_FUNCTIONS;
-          hash: string;
-          url: string;
-        }
-      | false
-    )[] = [];
+    const results: Array<string | AssetURLEncode | false> = [];
     for (let index = 0; index < value.length; index++) {
       const element = value[index];
       results.push(encodeValueContent(valueContent, element));
     }
+
     result = results;
-  } else if (!isArray && !Array.isArray(value)) {
-    // Straight forward encode
-    result = encodeValueContent(valueContent, value);
-  } else if (sameEncoding) {
-    result = value; // leaving this for below
   }
 
   if (
     // and we only skip bytes regardless
     valueType !== 'bytes' &&
     // Requires encoding because !sameEncoding means both encodings are required
-    !sameEncoding
+    !isSameEncoding
   ) {
     result = encodeValueType(valueType, result);
-  } else if (isArray && sameEncoding) {
-    result = encodeValueType(valueType, result);
+  } else if (isValueTypeArray && isSameEncoding) {
+    result = encodeValueType(valueType, value as any);
   }
 
   return result;
@@ -143,14 +144,10 @@ export function guessKeyTypeFromKeyName(
   const splittedKeyName = keyName.split(':');
 
   if (splittedKeyName.length === 3) {
-    return 'Bytes20MappingWithGrouping';
+    return 'MappingWithGrouping';
   }
 
   if (splittedKeyName.length === 2) {
-    if (splittedKeyName[1].substr(0, 2) === '0x') {
-      return 'Bytes20Mapping';
-    }
-
     return 'Mapping';
   }
 
@@ -159,55 +156,6 @@ export function guessKeyTypeFromKeyName(
   }
 
   return 'Singleton';
-}
-
-/**
- *
- * @param name the schema element name.
- * @return the name of the key encoded as per specifications.
- *
- * @return a string of the encoded schema name.
- */
-export function encodeKeyName(name: string) {
-  const keyType = guessKeyTypeFromKeyName(name);
-
-  switch (keyType) {
-    case 'Bytes20MappingWithGrouping': {
-      // bytes4(keccak256(FirstWord)) + bytes4(0) + bytes2(keccak256(SecondWord)) + bytes2(0) + bytes20(address)
-      const keyNameSplit = name.split(':');
-      return (
-        keccak256(keyNameSplit[0]).substr(0, 10) +
-        '00000000' +
-        keccak256(keyNameSplit[1]).substr(2, 4) +
-        '0000' +
-        keyNameSplit[2].substr(0, 40)
-      );
-    }
-    case 'Bytes20Mapping': {
-      // bytes8(keccak256(FirstWord)) + bytes4(0) + bytes20(address)
-      const keyNameSplit = name.split(':');
-      return (
-        keccak256(keyNameSplit[0]).substr(0, 18) +
-        '00000000' +
-        keyNameSplit[1].substr(2, 40)
-      );
-    }
-
-    case 'Mapping': {
-      // bytes16(keccak256(FirstWord)) + bytes12(0) + bytes4(keccak256(LastWord))
-      const keyNameSplit = name.split(':');
-      return (
-        keccak256(keyNameSplit[0]).substr(0, 34) +
-        '000000000000000000000000' +
-        keccak256(keyNameSplit[1]).substr(2, 8)
-      );
-    }
-    case 'Array': // Warning: this can not correctly encode subsequent keys of array, only the initial Array key will work
-    case 'Singleton':
-      return keccak256(name);
-    default:
-      return keccak256(name);
-  }
 }
 
 /**
@@ -281,7 +229,7 @@ export function encodeKey(
               'uint256',
               value.length.toString(),
               schema.name,
-            ),
+            ) as string,
           });
         }
 
@@ -292,14 +240,13 @@ export function encodeKey(
             schema.valueType,
             dataElement,
             schema.name,
-          ),
+          ) as string,
         });
       }
 
       return results;
     }
-    case 'bytes20mapping':
-    case 'bytes20mappingwithgrouping':
+    case 'mappingwithgrouping':
     case 'singleton':
     case 'mapping':
       return encodeKeyValue(
@@ -334,7 +281,7 @@ export function decodeKeyValue(
   name?: string,
 ) {
   // Check for the missing map.
-  if (!valueContentMap[valueContent] && valueContent.substr(0, 2) !== '0x') {
+  if (!valueContentMap[valueContent] && valueContent.slice(0, 2) !== '0x') {
     throw new Error(
       'The valueContent "' +
         valueContent +
@@ -347,7 +294,7 @@ export function decodeKeyValue(
   let sameEncoding =
     valueContentMap[valueContent] &&
     valueContentMap[valueContent].type === valueType.split('[]')[0];
-  const isArray = valueType.substr(valueType.length - 2) === '[]';
+  const isArray = valueType.substring(valueType.length - 2) === '[]';
 
   // VALUE TYPE
   if (
@@ -435,8 +382,7 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
 
       return results;
     }
-    case 'bytes20mapping':
-    case 'bytes20mappingwithgrouping':
+    case 'mappingwithgrouping':
     case 'singleton':
     case 'mapping': {
       if (Array.isArray(value)) {
@@ -474,42 +420,33 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
 }
 
 /**
- *
  * @param schema schema is an array of objects of schema definitions
  * @param data data is an array of objects of key-value pairs
+ *
  * @return: all decoded data as per required by the schema and provided data
  */
-export function decodeData<
-  Schema extends GenericSchema,
-  T extends keyof Schema,
->(
-  data: { [K in T]: Schema[T]['decodeData']['inputTypes'] },
+export function decodeData(
+  data: Record<string, any>,
   schema: ERC725JSONSchema[],
-): { [K in T]: Schema[T]['decodeData']['returnValues'] } {
+) {
   return Object.entries(data).reduce((decodedData, [key, value]) => {
     const schemaElement = getSchemaElement(schema, key);
 
     return {
       ...decodedData,
-      [schemaElement.name]: decodeKey(
-        schemaElement,
-        value,
-      ) as Schema[T]['decodeData']['returnValues'],
+      [schemaElement.name]: decodeKey(schemaElement, value),
     };
-  }, {} as any);
+  }, {});
 }
 
 /**
  * @param schema an array of schema definitions as per ${@link ERC725JSONSchema}
  * @param data an object of key-value pairs
  */
-export function encodeData<
-  Schema extends GenericSchema,
-  T extends keyof Schema,
->(
-  data: { [K in T]: Schema[T]['encodeData']['inputTypes'] },
+export function encodeData(
+  data: EncodeDataInput,
   schema: ERC725JSONSchema[],
-): { [K in T]: Schema[T]['encodeData']['returnValues'] } {
+): EncodeDataReturn {
   return Object.entries(data).reduce(
     (accumulator, [key, value]) => {
       const schemaElement = getSchemaElement(schema, key);
@@ -519,7 +456,7 @@ export function encodeData<
       if (typeof encodedValue === 'string') {
         accumulator.keys.push(schemaElement.key);
         accumulator.values.push(encodedValue);
-      } else {
+      } else if (encodedValue !== false && encodedValue !== null) {
         encodedValue.forEach((keyValuePair) => {
           accumulator.keys.push(keyValuePair.key);
           accumulator.values.push(keyValuePair.value);
@@ -528,7 +465,7 @@ export function encodeData<
 
       return accumulator;
     },
-    { keys: [], values: [] } as any,
+    { keys: [], values: [] } as EncodeDataReturn,
   );
 }
 
@@ -612,4 +549,24 @@ export function flattenEncodedData(encodedData: {
         return a.key > b.key ? 1 : 0;
       })
   );
+}
+
+/**
+ * Transforms passed ipfsGateway url to correct format for fetching IPFS data
+ *
+ * @param ipfsGateway
+ * @return {*}  string converted IPFS gateway URL
+ */
+export function convertIPFSGatewayUrl(ipfsGateway: string) {
+  let convertedIPFSGateway = ipfsGateway;
+
+  if (ipfsGateway.endsWith('/') && !ipfsGateway.endsWith('/ipfs/')) {
+    convertedIPFSGateway = ipfsGateway + 'ipfs/';
+  } else if (ipfsGateway.endsWith('/ipfs')) {
+    convertedIPFSGateway = ipfsGateway + '/';
+  } else if (!ipfsGateway.endsWith('/ipfs/')) {
+    convertedIPFSGateway = ipfsGateway + '/ipfs/';
+  }
+
+  return convertedIPFSGateway;
 }

@@ -9,7 +9,6 @@ import {
 import { SUPPORTED_HASH_FUNCTION_STRINGS } from './constants';
 import {
   flattenEncodedData,
-  encodeKeyName,
   guessKeyTypeFromKeyName,
   isDataAuthentic,
   getSchemaElement,
@@ -19,6 +18,7 @@ import {
   encodeKey,
   decodeKey,
   encodeData,
+  convertIPFSGatewayUrl,
 } from './utils';
 
 describe('utils', () => {
@@ -98,7 +98,7 @@ describe('utils', () => {
     });
   });
 
-  describe('encodeKey', () => {
+  describe('encodeKey/decodeKey', () => {
     it('encodes/decodes keyType Array', () => {
       const testCases = [
         {
@@ -355,7 +355,7 @@ describe('utils', () => {
       values: ['0x1183790f29be3cdfd0a102862fea1a4a30b3adab'],
     };
 
-    it('encode data with named key', () => {
+    it('encodes data with named key', () => {
       const encodedDataByNamedKey = encodeData(
         {
           LSP1UniversalReceiverDelegate:
@@ -366,7 +366,7 @@ describe('utils', () => {
       assert.deepStrictEqual(encodedDataByNamedKey, expectedResult);
     });
 
-    it('encode data with hashed key', () => {
+    it('encodes data with hashed key', () => {
       const hashedKey =
         '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
 
@@ -379,7 +379,7 @@ describe('utils', () => {
       assert.deepStrictEqual(encodedDataByHashKey, expectedResult);
     });
 
-    it('encode data with hashed key without 0x prefix', () => {
+    it('encodes data with hashed key without 0x prefix', () => {
       const hashedKey =
         '0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
 
@@ -396,7 +396,7 @@ describe('utils', () => {
       );
     });
 
-    it('encode array', () => {
+    it('encodes array', () => {
       const encodedDataWithMultipleKeys = encodeData(
         {
           'LSP3IssuedAssets[]': ['0xa3e6F38477D45727F6e6f853Cdb479b0D60c0aC9'],
@@ -416,7 +416,7 @@ describe('utils', () => {
       });
     });
 
-    it('encode multiple keys', () => {
+    it('encodes multiple keys', () => {
       const encodedMultipleKeys = encodeData(
         {
           LSP3Profile: {
@@ -514,13 +514,22 @@ describe('utils', () => {
         keyName: 'SupportedStandards:LSP3UniversalProfile',
       },
       {
-        keyType: 'Bytes20Mapping',
+        keyType: 'Mapping',
         keyName: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
       },
       {
-        keyType: 'Bytes20MappingWithGrouping',
+        keyType: 'Mapping',
+        keyName: 'MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe',
+      },
+      {
+        keyType: 'MappingWithGrouping',
         keyName:
           'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
+      },
+      {
+        keyType: 'MappingWithGrouping',
+        keyName:
+          'AddressPermissions:Permissions:0xcafecafecafecafecafecafecafecafecafecafe',
       },
     ];
 
@@ -534,35 +543,32 @@ describe('utils', () => {
     });
   });
 
-  describe('encodeKeyName', () => {
-    const testCases: { keyName: string; key: string }[] = [
-      {
-        keyName: 'MyKeyName',
-        key: keccak256('MyKeyName'),
-      },
-      {
-        keyName: 'LSP3IssuedAssets[]',
-        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
-      },
-      {
-        keyName: 'SupportedStandards:LSP3UniversalProfile',
-        key: '0xeafec4d89fa9619884b6b89135626455000000000000000000000000abe425d6',
-      },
-      {
-        keyName: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
-        key: '0x22496f48a493035f00000000cafecafecafecafecafecafecafecafecafecafe',
-      },
-      {
-        keyName:
-          'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
-        key: '0x4b80742d0000000082ac0000cafecafecafecafecafecafecafecafecafecafe',
-      },
-    ];
+  describe('convertIPFSGatewayUrl', () => {
+    const expectedIPFSGateway = 'https://cloudflare-ipfs.com/ipfs/';
 
-    testCases.forEach((testCase) => {
-      it(`encodes ${testCase.keyName} key name correctly`, () => {
-        assert.deepStrictEqual(encodeKeyName(testCase.keyName), testCase.key);
-      });
+    it('converts when missing /ipfs/', () => {
+      assert.deepStrictEqual(
+        convertIPFSGatewayUrl('https://cloudflare-ipfs.com'),
+        expectedIPFSGateway,
+      );
+    });
+    it('converts when missing /', () => {
+      assert.deepStrictEqual(
+        convertIPFSGatewayUrl('https://cloudflare-ipfs.com/ipfs'),
+        expectedIPFSGateway,
+      );
+    });
+    it('converts when missing ipfs/', () => {
+      assert.deepStrictEqual(
+        convertIPFSGatewayUrl('https://cloudflare-ipfs.com/'),
+        expectedIPFSGateway,
+      );
+    });
+    it('does not convert when passed correctly', () => {
+      assert.deepStrictEqual(
+        convertIPFSGatewayUrl('https://cloudflare-ipfs.com/ipfs/'),
+        expectedIPFSGateway,
+      );
     });
   });
 });

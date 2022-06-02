@@ -4,8 +4,8 @@ export type ERC725JSONSchemaKeyType =
   | 'Singleton'
   | 'Mapping'
   | 'Array'
-  | 'Bytes20Mapping'
-  | 'Bytes20MappingWithGrouping';
+  | 'Mapping'
+  | 'MappingWithGrouping';
 
 export type ERC725JSONSchemaValueContent =
   | 'Number'
@@ -49,20 +49,4 @@ export interface ERC725JSONSchema {
   keyType: ERC725JSONSchemaKeyType; // Types that determine how the values should be interpreted.
   valueContent: ERC725JSONSchemaValueContent | string; // string holds '0x1345ABCD...' If the value content are specific bytes, than the returned value is expected to equal those bytes.
   valueType: ERC725JSONSchemaValueType;
-}
-
-export interface GenericSchema {
-  [key: string]: {
-    encodeData: {
-      inputTypes: any;
-      returnValues: any;
-    };
-    decodeData: {
-      inputTypes: any;
-      returnValues: any;
-    };
-    getData: {
-      returnValues: any;
-    };
-  };
 }
