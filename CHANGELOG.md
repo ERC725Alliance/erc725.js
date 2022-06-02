@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.13.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.12.0...v0.13.0) (2022-06-02)
+
+### ⚠ BREAKING CHANGES
+
+- remove old LSP2 Key Types (Bytes20..)
+
+### Features
+
+- add dynamic keys for encodeKeyName ([#168](https://github.com/ERC725Alliance/erc725.js/issues/168)) ([fc614b0](https://github.com/ERC725Alliance/erc725.js/commit/fc614b0b92d3b5c7b86586f4be7e3200ea9680cf))
+
+### improvement
+
+- change fetchData output to non object ([1d4d570](https://github.com/ERC725Alliance/erc725.js/commit/1d4d57077a7766b3490477efb20f194fc4e00da4))
+- remove old LSP2 Key Types (Bytes20..) ([1e1cd43](https://github.com/ERC725Alliance/erc725.js/commit/1e1cd43e7693db5f12200aef6e282fa14e655ec3))
+
 ## [0.12.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.11.1...v0.12.0) (2022-05-19)
 
 ### ⚠ BREAKING CHANGES
