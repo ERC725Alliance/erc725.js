@@ -121,16 +121,28 @@ export class ERC725 {
   // eslint-disable-next-line class-methods-use-this
   private validateSchemas(schemas: ERC725JSONSchema[]) {
     return schemas.filter((schema) => {
-      const encodedKeyName = encodeKeyName(schema.name);
-      const isKeyValid = schema.key === encodedKeyName;
+      try {
+        const encodedKeyName = encodeKeyName(schema.name);
 
-      if (!isKeyValid) {
-        console.log(
-          `The schema with keyName: ${schema.key} is skipped because its key hash does not match its key name (expected: ${encodedKeyName}, got: ${schema.key}).`,
-        );
+        const isKeyValid = schema.key === encodedKeyName;
+
+        if (!isKeyValid) {
+          console.log(
+            `The schema with keyName: ${schema.key} is skipped because its key hash does not match its key name (expected: ${encodedKeyName}, got: ${schema.key}).`,
+          );
+        }
+
+        return isKeyValid;
+      } catch (err: any) {
+        // We could not encodeKeyName, probably because the key is dynamic (Mapping or MappingWithGrouping).
+
+        // TODO: make sure the dynamic key name is valid:
+        // - has max 2 variables
+        // - variables are correct (<string>, <bool>, etc.)
+
+        // Keeping dynamic keys may be an issue for getData / fetchData functions.
+        return true;
       }
-
-      return isKeyValid;
     });
   }
 
