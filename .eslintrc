@@ -44,6 +44,14 @@
     "import/extensions": ["error", "always", { "ts": "never", "js": "never" }],
     "max-classes-per-file": ["error", 3],
     "no-underscore-dangle": ["error", { "allowAfterThis": true }],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": true,
+        "optionalDependencies": false,
+        "peerDependencies": false
+      }
+    ],
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
     "lines-between-class-members": "off",
     "prefer-template": 0, // Allow simple string concatenation
