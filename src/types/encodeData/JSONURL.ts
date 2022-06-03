@@ -1,4 +1,5 @@
 import { SUPPORTED_HASH_FUNCTIONS } from '../../lib/constants';
+import { DynamicKeyPartInput } from '../dynamicKeys';
 
 export interface KeyValuePair {
   key: string;
@@ -23,9 +24,11 @@ export interface URLDataWithJson extends URLData {
 
 export type JSONURLDataToEncode = URLDataWithHash | URLDataWithJson;
 
+export type EncodeDataType = string | string[] | JSONURLDataToEncode;
+
 export type EncodeDataInput = Record<
   string,
-  string | string[] | JSONURLDataToEncode
+  EncodeDataType | DynamicKeyPartInput
 >;
 
 export interface EncodeDataReturn {

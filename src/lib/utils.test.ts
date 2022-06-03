@@ -451,24 +451,116 @@ describe('utils', () => {
         ],
       });
     });
+
+    it('encodes dynamic keys', () => {
+      const address = '0x78c964cd805233eb39f2db152340079088809725';
+
+      const encodedDynamicKeys = encodeData(
+        {
+          'DynamicKey:<address>': {
+            dynamicKeyParts: [address],
+            value: '0xc57390642767fc9adb0e4211fac735abe2edcfde',
+          },
+          'DynamicKey:<bytes4>:<string>': {
+            dynamicKeyParts: ['0x11223344', 'Summer'],
+            value: '0x5bed9e061cea8b4be17d3b5ea85de62f483a40fd',
+          },
+        },
+        [
+          {
+            name: 'DynamicKey:<address>',
+            key: '0x0fb367364e1852abc5f20000<address>',
+            keyType: 'Mapping',
+            valueType: 'bytes',
+            valueContent: 'Address',
+          },
+          {
+            name: 'DynamicKey:<bytes4>:<string>',
+            key: '0xForDynamicKeysThisFieldIsIrrelevantAndWillBeOverwriten',
+            keyType: 'Mapping',
+            valueType: 'bytes',
+            valueContent: 'Address',
+          },
+        ],
+      );
+
+      assert.deepStrictEqual(encodedDynamicKeys, {
+        keys: [
+          `0x0fb367364e1852abc5f20000${address.replace('0x', '')}`,
+          '0x0fb367364e181122334400007746e4c8ba6f946d9f51a1c9e539fb62598962aa',
+        ],
+        values: [
+          '0xc57390642767fc9adb0e4211fac735abe2edcfde',
+          '0x5bed9e061cea8b4be17d3b5ea85de62f483a40fd',
+        ],
+      });
+    });
   });
 
   describe('getSchemaElement', () => {
-    it('gets the schemaElement correctly', () => {
-      const key =
-        '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5';
-
+    it('gets the schemaElement from key name and key hash (with and without 0x prefix) correctly', () => {
       const schemas: ERC725JSONSchema[] = [
         {
           name: 'LSP3Profile',
-          key,
+          key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
           keyType: 'Singleton',
           valueContent: 'JSONURL',
           valueType: 'bytes',
         },
       ];
 
-      assert.strictEqual(getSchemaElement(schemas, key), schemas[0]);
+      assert.strictEqual(
+        getSchemaElement(schemas, schemas[0].name),
+        schemas[0],
+      );
+      assert.strictEqual(getSchemaElement(schemas, schemas[0].key), schemas[0]);
+      assert.strictEqual(
+        getSchemaElement(schemas, schemas[0].key.slice(2)),
+        schemas[0],
+      );
+    });
+
+    const schemasWithDynamicKey: ERC725JSONSchema[] = [
+      {
+        name: 'LSP12IssuedAssetsMap:<address>',
+        key: '0x74ac2555c10b9349e78f0000<address>',
+        keyType: 'Mapping',
+        valueType: 'bytes',
+        valueContent: 'Mixed',
+      },
+      {
+        name: 'ARandomKey',
+        key: '0x7cf0c8053453d0353fdbad6a48e68966b35dd13cb3a62e7b75009dc5035b80c0',
+        keyType: 'Singleton',
+        valueContent: 'JSONURL',
+        valueType: 'bytes',
+      },
+    ];
+
+    it('throws is attempt to get a dynamic key without dynamicKeyParts', () => {
+      assert.throws(() =>
+        getSchemaElement(
+          schemasWithDynamicKey,
+          'LSP12IssuedAssetsMap:<address>',
+        ),
+      );
+    });
+
+    it('gets the schemeElement for a dynamic key correctly', () => {
+      assert.deepStrictEqual(
+        getSchemaElement(
+          schemasWithDynamicKey,
+          'LSP12IssuedAssetsMap:<address>',
+          ['0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac'],
+        ),
+        {
+          name: 'LSP12IssuedAssetsMap:2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
+          key: '0x74ac2555c10b9349e78f00002ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
+          keyType: 'Mapping',
+          valueType: 'bytes',
+          valueContent: 'Mixed',
+        },
+      );
     });
   });
 

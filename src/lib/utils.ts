@@ -52,7 +52,12 @@ import {
   valueContentEncodingMap as valueContentMap,
 } from './encoder';
 import { AssetURLEncode } from '../types/encodeData';
-import { encodeKeyName } from './encodeKeyName';
+import {
+  encodeKeyName,
+  generateDynamicKeyName,
+  isDynamicKeyName,
+} from './encodeKeyName';
+import { DynamicKeyPartInput, DynamicKeyParts } from '../types/dynamicKeys';
 
 /**
  *
@@ -160,21 +165,70 @@ export function guessKeyTypeFromKeyName(
 
 /**
  *
+ * @param schemas
+ * @param namedDynamicKey
+ * @param dynamicKeyParts
+ * @returns
+ */
+const getSchemaElementForDynamicKeyName = (
+  schemas: ERC725JSONSchema[],
+  namedDynamicKey: string,
+  dynamicKeyParts: DynamicKeyParts,
+): ERC725JSONSchema => {
+  // In that case, we will generate a new schema element with the final computed name and encoded key hash.
+
+  const schemaElement = schemas.find((e) => e.name === namedDynamicKey);
+
+  if (!schemaElement) {
+    throw new Error(
+      `No matching schema found for dynamic key: ${namedDynamicKey}`,
+    );
+  }
+
+  // once we have the schemaElement with dynamic parts, we need to replace the name and the key:
+
+  const key = encodeKeyName(namedDynamicKey, dynamicKeyParts);
+  const name = generateDynamicKeyName(namedDynamicKey, dynamicKeyParts);
+
+  return {
+    ...schemaElement,
+    key,
+    name,
+  };
+};
+
+/**
+ *
  * @param schemas An array of ERC725JSONSchema objects.
  * @param {string} namedOrHashedKey A string of either the schema element name, or hashed key (with or without the 0x prefix).
+ * @param dynamicKeyParts if a dynamic named key is given, you should also set the dynamicKeyParts.
  *
  * @return The requested schema element from the full array of schemas.
  */
 export function getSchemaElement(
   schemas: ERC725JSONSchema[],
   namedOrHashedKey: string,
-) {
+  dynamicKeyParts?: DynamicKeyParts,
+): ERC725JSONSchema {
   let keyHash: string;
 
-  if (isHexStrict(namedOrHashedKey)) {
-    keyHash = namedOrHashedKey;
-  } else if (isHex(namedOrHashedKey)) {
-    keyHash = `0x${namedOrHashedKey}`;
+  if (isDynamicKeyName(namedOrHashedKey)) {
+    if (!dynamicKeyParts) {
+      throw new Error(
+        `Can't getSchemaElement for dynamic key: ${namedOrHashedKey} without dynamicKeyParts.`,
+      );
+    }
+    return getSchemaElementForDynamicKeyName(
+      schemas,
+      namedOrHashedKey,
+      dynamicKeyParts,
+    );
+  }
+
+  if (isHex(namedOrHashedKey)) {
+    keyHash = isHexStrict(namedOrHashedKey)
+      ? namedOrHashedKey
+      : `0x${namedOrHashedKey}`;
   } else {
     keyHash = encodeKeyName(namedOrHashedKey);
   }
@@ -183,11 +237,7 @@ export function getSchemaElement(
 
   if (!schemaElement) {
     throw new Error(
-      'No matching schema found for key: "' +
-        namedOrHashedKey +
-        '" (' +
-        keyHash +
-        ').',
+      `No matching schema found for key: ${namedOrHashedKey} (${keyHash}).`,
     );
   }
 
@@ -449,9 +499,43 @@ export function encodeData(
 ): EncodeDataReturn {
   return Object.entries(data).reduce(
     (accumulator, [key, value]) => {
-      const schemaElement = getSchemaElement(schema, key);
+      let schemaElement: ERC725JSONSchema | null = null;
+      let encodedValue; // would be nice to type this
 
-      const encodedValue = encodeKey(schemaElement, value as any);
+      // Switch between non dynamic and dynamic keys:
+      if (isDynamicKeyName(key)) {
+        // In case of a dynamic key, we need to check if the value is of type DynamicKeyPartIntput.
+        if (typeof value === 'string') {
+          throw new Error(
+            `Can't encodeData for dynamic key: ${key} with non dynamic values. Got string: ${value}, expected object.`,
+          );
+        }
+        if (Array.isArray(value)) {
+          throw new Error(
+            `Can't encodeData for dynamic key: ${key} with non dynamic values. Got array: ${value}, expected object.`,
+          );
+        }
+
+        if (
+          !Object.prototype.hasOwnProperty.call(value, 'dynamicKeyParts') ||
+          !Object.prototype.hasOwnProperty.call(value, 'value')
+        ) {
+          throw new Error(
+            `Can't encodeData for dynamic key: ${key} with non dynamic values. Got object: ${value}, expected object with keys: dynamicKeyParts and value.`,
+          );
+        }
+
+        const dynamicDataInput = value as DynamicKeyPartInput;
+        schemaElement = getSchemaElement(
+          schema,
+          key,
+          dynamicDataInput.dynamicKeyParts,
+        );
+        encodedValue = encodeKey(schemaElement, dynamicDataInput.value);
+      } else {
+        schemaElement = getSchemaElement(schema, key);
+        encodedValue = encodeKey(schemaElement, value as any);
+      }
 
       if (typeof encodedValue === 'string') {
         accumulator.keys.push(schemaElement.key);
