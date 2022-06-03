@@ -25,7 +25,6 @@ import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
 
 import {
   encodeArrayKey,
-  getSchemaElement,
   decodeData,
   decodeKeyValue,
   decodeKey,
@@ -54,6 +53,7 @@ import {
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
 } from './types/ERC725JSONSchema';
+import { getSchemaElement } from './lib/getSchemaElement';
 
 export {
   ERC725JSONSchema,
