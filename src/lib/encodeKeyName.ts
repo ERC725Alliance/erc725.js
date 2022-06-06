@@ -8,6 +8,7 @@ import {
 } from 'web3-utils';
 
 import { guessKeyTypeFromKeyName } from './utils';
+import { DynamicKeyParts } from '../types/dynamicKeys';
 
 // https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#mapping
 
@@ -30,7 +31,7 @@ export const encodeDynamicKeyPart = (
   let baseType = '';
   let size = 0;
 
-  if (['<string>', '<bool>', '<address>'].includes(type)) {
+  if (dynamicTypes.includes(type)) {
     baseType = type.slice(1, -1);
   } else {
     const regexMatch = type.match(dynamicTypesRegex);
@@ -210,7 +211,7 @@ const encodeDynamicMappingWithGrouping = (
 
 function encodeDynamicKeyName(
   name: string,
-  dynamicKeyParts?: string | string[],
+  dynamicKeyParts?: DynamicKeyParts,
 ): string {
   if (!dynamicKeyParts) {
     throw new Error(
@@ -238,14 +239,11 @@ function encodeDynamicKeyName(
 /**
  *
  * @param name the schema element name.
- * @return the name of the key encoded as per specifications.
+ * @param dynamicKeyParts
  *
- * @return a string of the encoded schema name.
+ * @return the name of the key encoded as per specifications.
  */
-export function encodeKeyName(
-  name: string,
-  dynamicKeyParts?: string | string[],
-) {
+export function encodeKeyName(name: string, dynamicKeyParts?: DynamicKeyParts) {
   if (isDynamicKeyName(name)) {
     return encodeDynamicKeyName(name, dynamicKeyParts);
   }
@@ -281,3 +279,43 @@ export function encodeKeyName(
       return keccak256(name);
   }
 }
+
+export const generateDynamicKeyName = (
+  name: string,
+  dynamicKeyParts: DynamicKeyParts,
+) => {
+  let dynamicKeyPartsIndex = 0;
+  const dynamicKeyPartsArray =
+    typeof dynamicKeyParts === 'string' ? [dynamicKeyParts] : dynamicKeyParts;
+
+  return name
+    .split(':')
+    .map((keyNamePart) => {
+      if (!isDynamicKeyName(keyNamePart)) {
+        return keyNamePart;
+      }
+
+      // We could add more checks to make sure the variable in dynamicKeyParts[i] is matching the type in the keyName
+      if (!dynamicKeyPartsArray[dynamicKeyPartsIndex]) {
+        throw new Error(
+          `Can not generate key name: ${name}. Missing/not enough dynamicKeyParts: ${dynamicKeyPartsArray}`,
+        );
+      }
+
+      const dynamicKeyPart = dynamicKeyPartsArray[dynamicKeyPartsIndex];
+
+      if (keyNamePart === '<address>') {
+        if (!isAddress(dynamicKeyPart)) {
+          throw new Error(
+            `Dynamic key is expecting an <address> but got: ${dynamicKeyPart}`,
+          );
+        }
+      }
+      // Add more checks for bytes, etc.
+
+      dynamicKeyPartsIndex += 1;
+
+      return dynamicKeyPart.replace('0x', '');
+    })
+    .join(':');
+};

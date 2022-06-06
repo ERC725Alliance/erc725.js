@@ -11,7 +11,6 @@ import {
   flattenEncodedData,
   guessKeyTypeFromKeyName,
   isDataAuthentic,
-  getSchemaElement,
   encodeArrayKey,
   encodeKeyValue,
   decodeKeyValue,
@@ -451,24 +450,49 @@ describe('utils', () => {
         ],
       });
     });
-  });
 
-  describe('getSchemaElement', () => {
-    it('gets the schemaElement correctly', () => {
-      const key =
-        '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5';
+    it('encodes dynamic keys', () => {
+      const address = '0x78c964cd805233eb39f2db152340079088809725';
 
-      const schemas: ERC725JSONSchema[] = [
+      const encodedDynamicKeys = encodeData(
         {
-          name: 'LSP3Profile',
-          key,
-          keyType: 'Singleton',
-          valueContent: 'JSONURL',
-          valueType: 'bytes',
+          'DynamicKey:<address>': {
+            dynamicKeyParts: [address],
+            value: '0xc57390642767fc9adb0e4211fac735abe2edcfde',
+          },
+          'DynamicKey:<bytes4>:<string>': {
+            dynamicKeyParts: ['0x11223344', 'Summer'],
+            value: '0x5bed9e061cea8b4be17d3b5ea85de62f483a40fd',
+          },
         },
-      ];
+        [
+          {
+            name: 'DynamicKey:<address>',
+            key: '0x0fb367364e1852abc5f20000<address>',
+            keyType: 'Mapping',
+            valueType: 'bytes',
+            valueContent: 'Address',
+          },
+          {
+            name: 'DynamicKey:<bytes4>:<string>',
+            key: '0xForDynamicKeysThisFieldIsIrrelevantAndWillBeOverwriten',
+            keyType: 'Mapping',
+            valueType: 'bytes',
+            valueContent: 'Address',
+          },
+        ],
+      );
 
-      assert.strictEqual(getSchemaElement(schemas, key), schemas[0]);
+      assert.deepStrictEqual(encodedDynamicKeys, {
+        keys: [
+          `0x0fb367364e1852abc5f20000${address.replace('0x', '')}`,
+          '0x0fb367364e181122334400007746e4c8ba6f946d9f51a1c9e539fb62598962aa',
+        ],
+        values: [
+          '0xc57390642767fc9adb0e4211fac735abe2edcfde',
+          '0x5bed9e061cea8b4be17d3b5ea85de62f483a40fd',
+        ],
+      });
     });
   });
 

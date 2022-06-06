@@ -4,6 +4,7 @@ import { keccak256 } from 'web3-utils';
 import {
   encodeDynamicKeyPart,
   encodeKeyName,
+  generateDynamicKeyName,
   isDynamicKeyName,
 } from './encodeKeyName';
 
@@ -341,6 +342,53 @@ describe('encodeDynamicKeyPart', () => {
   it('throws if <bytesM> is called with wrong number of bytes', () => {
     assert.throws(() =>
       encodeDynamicKeyPart('<bytes8>', '0xd1b2917d26eeeaad1234', 20),
+    );
+  });
+});
+
+describe('generateDynamicKeyName', () => {
+  const testCases = [
+    {
+      keyName: 'MyKey:<string>',
+      dynamicKeyParts: 'HelloHowAreYou',
+      expectedKeyName: 'MyKey:HelloHowAreYou',
+    },
+    {
+      keyName: 'MyKey:Grouping:<string>',
+      dynamicKeyParts: 'HelloHowAreYou',
+      expectedKeyName: 'MyKey:Grouping:HelloHowAreYou',
+    },
+
+    {
+      keyName: 'MyKey:<bytes4>:<address>',
+      dynamicKeyParts: [
+        '0x11223344',
+        '0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
+      ],
+      expectedKeyName:
+        'MyKey:11223344:2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
+    },
+    {
+      keyName: 'Addresses:<address>',
+      dynamicKeyParts: [
+        '2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac', // without 0x in the address
+      ],
+      expectedKeyName: 'Addresses:2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
+    },
+  ];
+
+  testCases.forEach((testCase) => {
+    it(`generates key name: ${testCase.keyName} correctly`, () => {
+      assert.deepStrictEqual(
+        generateDynamicKeyName(testCase.keyName, testCase.dynamicKeyParts),
+        testCase.expectedKeyName,
+      );
+    });
+  });
+
+  it('throws if encoding with wrong number of dynamic values', () => {
+    assert.throws(() =>
+      generateDynamicKeyName('Addresses:<bytes4>:<address>', '0x11223344'),
     );
   });
 });
