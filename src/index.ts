@@ -44,7 +44,7 @@ import {
 import { encodeKeyName } from './lib/encodeKeyName';
 
 // Types
-import { URLDataWithHash, KeyValuePair, EncodeDataInput } from './types';
+import { URLDataWithHash, KeyValuePair } from './types';
 import { ERC725Config } from './types/Config';
 import { Permissions } from './types/Method';
 import {
@@ -54,7 +54,7 @@ import {
   ERC725JSONSchemaValueType,
 } from './types/ERC725JSONSchema';
 import { getSchemaElement } from './lib/getSchemaElement';
-import { DecodeDataInput } from './types/decodeData';
+import { DecodeDataInput, EncodeDataInput } from './types/decodeData';
 
 export {
   ERC725JSONSchema,
@@ -333,7 +333,7 @@ export class ERC725 {
    * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
    * The JSON will be hashed with `keccak256`.
    */
-  encodeData(data: EncodeDataInput, schemas?: ERC725JSONSchema[]) {
+  encodeData(data: EncodeDataInput[], schemas?: ERC725JSONSchema[]) {
     return encodeData(
       data,
       Array.prototype.concat(this.options.schemas, schemas),
@@ -351,7 +351,7 @@ export class ERC725 {
    * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
    * The JSON will be hashed with `keccak256`.
    */
-  static encodeData(data: EncodeDataInput, schemas: ERC725JSONSchema[]) {
+  static encodeData(data: EncodeDataInput[], schemas: ERC725JSONSchema[]) {
     return encodeData(data, schemas);
   }
 

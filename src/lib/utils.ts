@@ -25,12 +25,7 @@ import {
 } from 'web3-utils';
 import { arrToBufArr } from 'ethereumjs-util';
 
-import {
-  KeyValuePair,
-  JSONURLDataToEncode,
-  EncodeDataInput,
-  EncodeDataReturn,
-} from '../types';
+import { KeyValuePair, JSONURLDataToEncode, EncodeDataReturn } from '../types';
 import {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
@@ -53,7 +48,7 @@ import { AssetURLEncode } from '../types/encodeData';
 import { isDynamicKeyName } from './encodeKeyName';
 import { DynamicKeyPartInput } from '../types/dynamicKeys';
 import { getSchemaElement } from './getSchemaElement';
-import { DecodeDataInput } from '../types/decodeData';
+import { DecodeDataInput, EncodeDataInput } from '../types/decodeData';
 
 /**
  *
@@ -425,46 +420,27 @@ export function decodeData(data: DecodeDataInput, schema: ERC725JSONSchema[]) {
  * @param data an object of key-value pairs
  */
 export function encodeData(
-  data: EncodeDataInput,
+  data: EncodeDataInput[],
   schema: ERC725JSONSchema[],
 ): EncodeDataReturn {
-  return Object.entries(data).reduce(
-    (accumulator, [key, value]) => {
+  return data.reduce(
+    (accumulator, { keyName, value, dynamicKeyParts }) => {
       let schemaElement: ERC725JSONSchema | null = null;
       let encodedValue; // would be nice to type this
 
       // Switch between non dynamic and dynamic keys:
-      if (isDynamicKeyName(key)) {
+      if (isDynamicKeyName(keyName)) {
         // In case of a dynamic key, we need to check if the value is of type DynamicKeyPartIntput.
-        if (typeof value === 'string') {
+        if (!dynamicKeyParts) {
           throw new Error(
-            `Can't encodeData for dynamic key: ${key} with non dynamic values. Got string: ${value}, expected object.`,
-          );
-        }
-        if (Array.isArray(value)) {
-          throw new Error(
-            `Can't encodeData for dynamic key: ${key} with non dynamic values. Got array: ${value}, expected object.`,
+            `Can't encodeData for dynamic key: ${keyName} with non dynamic values. Got: ${value}, expected object.`,
           );
         }
 
-        if (
-          !Object.prototype.hasOwnProperty.call(value, 'dynamicKeyParts') ||
-          !Object.prototype.hasOwnProperty.call(value, 'value')
-        ) {
-          throw new Error(
-            `Can't encodeData for dynamic key: ${key} with non dynamic values. Got object: ${value}, expected object with keys: dynamicKeyParts and value.`,
-          );
-        }
-
-        const dynamicDataInput = value as DynamicKeyPartInput;
-        schemaElement = getSchemaElement(
-          schema,
-          key,
-          dynamicDataInput.dynamicKeyParts,
-        );
-        encodedValue = encodeKey(schemaElement, dynamicDataInput.value);
+        schemaElement = getSchemaElement(schema, keyName, dynamicKeyParts);
+        encodedValue = encodeKey(schemaElement, value);
       } else {
-        schemaElement = getSchemaElement(schema, key);
+        schemaElement = getSchemaElement(schema, keyName);
         encodedValue = encodeKey(schemaElement, value as any);
       }
 

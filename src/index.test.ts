@@ -589,9 +589,12 @@ describe('Running @erc725/erc725.js tests...', () => {
 
             const erc725 = new ERC725([schemaElement]);
 
-            const results = erc725.encodeData({
-              [schemaElement.name]: data,
-            });
+            const results = erc725.encodeData([
+              {
+                keyName: schemaElement.name,
+                value: data,
+              },
+            ]);
             assert.deepStrictEqual(results, intendedResult);
           },
         );
@@ -637,18 +640,21 @@ describe('Running @erc725/erc725.js tests...', () => {
           assert.deepStrictEqual(result, schemaElement.expectedResult);
         });
 
-        it('Encode data value from naked class instance!', async () => {
+        it('Encode data value from naked class instance', async () => {
           const erc725 = new ERC725([schemaElement]);
-          const result = erc725.encodeData({
-            [schemaElement.name]: schemaElement.expectedResult,
-          });
+          const result = erc725.encodeData([
+            {
+              keyName: schemaElement.name,
+              value: schemaElement.expectedResult,
+            },
+          ]);
           assert.deepStrictEqual(result, {
             keys: [schemaElement.key],
             values: [schemaElement.returnGraphData],
           });
         });
 
-        it('Decode data value from naked class instance!', async () => {
+        it('Decode data value from naked class instance', async () => {
           const erc725 = new ERC725([schemaElement]);
           const result = erc725.decodeData({
             [schemaElement.name]: schemaElement.returnGraphData,
@@ -713,12 +719,15 @@ describe('Running @erc725/erc725.js tests...', () => {
       links: [],
     };
 
-    const encodedData = myERC725.encodeData({
-      LSP3Profile: {
-        json,
-        url: 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
+    const encodedData = myERC725.encodeData([
+      {
+        keyName: 'LSP3Profile',
+        value: {
+          json,
+          url: 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
+        },
       },
-    });
+    ]);
 
     const decodedData = myERC725.decodeData({
       LSP3Profile: encodedData.values[0],

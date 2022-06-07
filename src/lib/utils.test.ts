@@ -431,10 +431,12 @@ describe('utils', () => {
 
     it('encodes data with named key', () => {
       const encodedDataByNamedKey = encodeData(
-        {
-          LSP1UniversalReceiverDelegate:
-            '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
-        },
+        [
+          {
+            keyName: 'LSP1UniversalReceiverDelegate',
+            value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+          },
+        ],
         schemas,
       );
       assert.deepStrictEqual(encodedDataByNamedKey, expectedResult);
@@ -445,9 +447,12 @@ describe('utils', () => {
         '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
 
       const encodedDataByHashKey = encodeData(
-        {
-          [hashedKey]: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
-        },
+        [
+          {
+            keyName: hashedKey,
+            value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+          },
+        ],
         schemas,
       );
       assert.deepStrictEqual(encodedDataByHashKey, expectedResult);
@@ -458,9 +463,12 @@ describe('utils', () => {
         '0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
 
       const encodedDataByHashKeyWithout0xPrefix = encodeData(
-        {
-          [hashedKey]: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
-        },
+        [
+          {
+            keyName: hashedKey,
+            value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+          },
+        ],
         schemas,
       );
 
@@ -472,9 +480,12 @@ describe('utils', () => {
 
     it('encodes array', () => {
       const encodedDataWithMultipleKeys = encodeData(
-        {
-          'LSP3IssuedAssets[]': ['0xa3e6F38477D45727F6e6f853Cdb479b0D60c0aC9'],
-        },
+        [
+          {
+            keyName: 'LSP3IssuedAssets[]',
+            value: ['0xa3e6F38477D45727F6e6f853Cdb479b0D60c0aC9'],
+          },
+        ],
         schemas,
       );
 
@@ -492,19 +503,27 @@ describe('utils', () => {
 
     it('encodes multiple keys', () => {
       const encodedMultipleKeys = encodeData(
-        {
-          LSP3Profile: {
-            hashFunction: 'keccak256(utf8)',
-            hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
-            url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+        [
+          {
+            keyName: 'LSP3Profile',
+            value: {
+              hashFunction: 'keccak256(utf8)',
+              hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+              url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+            },
           },
-          'LSP3IssuedAssets[]': [
-            '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
-            '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826',
-          ],
-          LSP1UniversalReceiverDelegate:
-            '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
-        },
+          {
+            keyName: 'LSP3IssuedAssets[]',
+            value: [
+              '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
+              '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826',
+            ],
+          },
+          {
+            keyName: 'LSP1UniversalReceiverDelegate',
+            value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+          },
+        ],
         schemas,
       );
 
@@ -530,16 +549,18 @@ describe('utils', () => {
       const address = '0x78c964cd805233eb39f2db152340079088809725';
 
       const encodedDynamicKeys = encodeData(
-        {
-          'DynamicKey:<address>': {
+        [
+          {
+            keyName: 'DynamicKey:<address>',
             dynamicKeyParts: [address],
             value: '0xc57390642767fc9adb0e4211fac735abe2edcfde',
           },
-          'DynamicKey:<bytes4>:<string>': {
+          {
+            keyName: 'DynamicKey:<bytes4>:<string>',
             dynamicKeyParts: ['0x11223344', 'Summer'],
             value: '0x5bed9e061cea8b4be17d3b5ea85de62f483a40fd',
           },
-        },
+        ],
         [
           {
             name: 'DynamicKey:<address>',
