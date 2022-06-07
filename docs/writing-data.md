@@ -76,7 +76,7 @@ const encodedData = myERC725.encodeData({
   LSP3Profile: {
     hashFunction: 'keccak256(utf8)',
     hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
-    url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+    url: 'ipfs://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
   },
   'LSP12IssuedAssets[]': [
     '0xD94353D9B005B3c0A9Da169b768a31C57844e490',

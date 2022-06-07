@@ -724,7 +724,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         keyName: 'LSP3Profile',
         value: {
           json,
-          url: 'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
+          url: 'ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
         },
       },
     ]);
@@ -735,7 +735,7 @@ describe('Running @erc725/erc725.js tests...', () => {
 
     assert.deepStrictEqual(
       decodedData.LSP3Profile.url,
-      'ifps://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
+      'ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
     );
     assert.deepStrictEqual(
       decodedData.LSP3Profile.hash,
