@@ -610,12 +610,13 @@ describe('Running @erc725/erc725.js tests...', () => {
               schemaElement.name
             ];
             const erc725 = new ERC725([schemaElement]);
-            const results = erc725.decodeData({
-              [schemaElement.name]: values,
-            });
-            assert.deepStrictEqual(results, {
-              [schemaElement.name]: intendedResults,
-            });
+            const results = erc725.decodeData([
+              {
+                keyName: schemaElement.name,
+                value: values,
+              },
+            ]);
+            assert.deepStrictEqual(results[0].value, intendedResults);
           },
         );
       } else {
@@ -656,12 +657,13 @@ describe('Running @erc725/erc725.js tests...', () => {
 
         it('Decode data value from naked class instance', async () => {
           const erc725 = new ERC725([schemaElement]);
-          const result = erc725.decodeData({
-            [schemaElement.name]: schemaElement.returnGraphData,
-          });
-          assert.deepStrictEqual(result, {
-            [schemaElement.name]: schemaElement.expectedResult,
-          });
+          const result = erc725.decodeData([
+            {
+              keyName: schemaElement.name,
+              value: schemaElement.returnGraphData,
+            },
+          ]);
+          assert.deepStrictEqual(result[0].value, schemaElement.expectedResult);
         });
       }
     }
@@ -729,20 +731,23 @@ describe('Running @erc725/erc725.js tests...', () => {
       },
     ]);
 
-    const decodedData = myERC725.decodeData({
-      LSP3Profile: encodedData.values[0],
-    });
+    const decodedData = myERC725.decodeData([
+      {
+        keyName: 'LSP3Profile',
+        value: encodedData.values[0],
+      },
+    ]);
 
     assert.deepStrictEqual(
-      decodedData.LSP3Profile.url,
+      decodedData[0].value.url,
       'ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
     );
     assert.deepStrictEqual(
-      decodedData.LSP3Profile.hash,
+      decodedData[0].value.hash,
       hashData(json, SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8),
     );
     assert.deepStrictEqual(
-      decodedData.LSP3Profile.hashFunction,
+      decodedData[0].value.hashFunction,
       SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
     );
   });

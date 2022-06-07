@@ -1,10 +1,4 @@
-import { DynamicKeyPartInput } from './dynamicKeys';
-import { EncodeDataType } from './encodeData/JSONURL';
-
-export type DecodeDataInput = Record<
-  string,
-  string | { key: string; value: string } | DynamicKeyPartInput
->;
+import { EncodeDataType, URLDataWithHash } from './encodeData/JSONURL';
 
 export interface DataInput {
   keyName: string; // can be the name or the hex/hash
@@ -16,10 +10,12 @@ export interface EncodeDataInput extends DataInput {
   value: EncodeDataType;
 }
 
-// export interface DecodeDataInput extends DataInput {
-//   value: string;
-// }
+export interface DecodeDataInput extends DataInput {
+  value: string | { key: string; value: string };
+}
 
-// decodeData
-// fetchData
-// getData
+export interface DecodeDataOutput {
+  value: string | string[] | URLDataWithHash;
+  name: string;
+  key: string;
+}

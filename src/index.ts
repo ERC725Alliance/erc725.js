@@ -368,7 +368,7 @@ export class ERC725 {
    * @returns Returns decoded data as defined and expected in the schema:
    */
   decodeData(
-    data: DecodeDataInput,
+    data: DecodeDataInput[],
     schemas?: ERC725JSONSchema[],
   ): { [key: string]: any } {
     return decodeData(
@@ -390,7 +390,7 @@ export class ERC725 {
    * @returns Returns decoded data as defined and expected in the schema:
    */
   static decodeData(
-    data: DecodeDataInput,
+    data: DecodeDataInput[],
     schemas: ERC725JSONSchema[],
   ): { [key: string]: any } {
     return decodeData(data, schemas);
@@ -566,7 +566,21 @@ export class ERC725 {
       }
     }
 
-    return decodeData(tmpData, this.options.schemas);
+    // NOTE: temp fix to make this work with new decodeData signature
+    const decodedData = decodeData(
+      Object.keys(tmpData).map((key) => {
+        return {
+          keyName: key,
+          value: tmpData[key],
+          // TODO: add dynamicKey support
+        };
+      }),
+      this.options.schemas,
+    );
+
+    return decodedData.reduce((acc, { name, value }) => {
+      return { ...acc, [name]: value };
+    }, {});
   }
 
   /**

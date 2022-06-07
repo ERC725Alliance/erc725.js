@@ -358,19 +358,27 @@ describe('utils', () => {
 
     it('decodes each key', () => {
       const decodedData = decodeData(
-        {
-          KeyOne: '0x1111',
-          KeyTwo: '0x2222',
-        },
+        [
+          {
+            keyName: 'KeyOne',
+            value: '0x1111',
+          },
+          {
+            keyName: 'KeyTwo',
+            value: '0x2222',
+          },
+        ],
         schemas,
       );
-      expect(decodedData).to.have.all.keys(['KeyOne', 'KeyTwo']);
+
+      expect(decodedData.map(({ name }) => name)).to.eql(['KeyOne', 'KeyTwo']);
     });
 
     it('decodes dynamic keys', () => {
       const decodedData = decodeData(
-        {
-          'MyKeyName:<bytes32>:<bool>': {
+        [
+          {
+            keyName: 'MyKeyName:<bytes32>:<bool>',
             dynamicKeyParts: [
               '0xaaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa',
               'true',
@@ -378,17 +386,21 @@ describe('utils', () => {
             value:
               '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
           },
-          'MyDynamicKey:<address>': {
+          {
+            keyName: 'MyDynamicKey:<address>',
             dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
             value:
               '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
           },
-          KeyTwo: '0x2222',
-        },
+          {
+            keyName: 'KeyTwo',
+            value: '0x2222',
+          },
+        ],
         schemas,
       );
 
-      expect(decodedData).to.have.all.keys([
+      expect(decodedData.map(({ name }) => name)).to.eql([
         'MyKeyName:aaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa:true',
         'MyDynamicKey:cafecafecafecafecafecafecafecafecafecafe',
         'KeyTwo',
