@@ -54,6 +54,7 @@ import {
   ERC725JSONSchemaValueType,
 } from './types/ERC725JSONSchema';
 import { getSchemaElement } from './lib/getSchemaElement';
+import { DecodeDataInput } from './types/decodeData';
 
 export {
   ERC725JSONSchema,
@@ -362,10 +363,37 @@ export class ERC725 {
    * It does the `decoding` and `fetching` of external references for you automatically.
    *
    * @param {{ [key: string]: any }} data An object with one or many properties.
+   * @param schemas ERC725JSONSchemas which will be used to encode the keys.
+   *
    * @returns Returns decoded data as defined and expected in the schema:
    */
-  decodeData(data: { [key: string]: any }): { [key: string]: any } {
-    return decodeData(data, this.options.schemas);
+  decodeData(
+    data: DecodeDataInput,
+    schemas?: ERC725JSONSchema[],
+  ): { [key: string]: any } {
+    return decodeData(
+      data,
+      Array.prototype.concat(this.options.schemas, schemas),
+    );
+  }
+
+  /**
+   * In case you are reading the key-value store from an ERC725 smart-contract key-value store
+   * without `@erc725/erc725.js` you can use `decodeData` to do the decoding for you.
+   *
+   * It is more convenient to use {@link ERC725.fetchData | `fetchData`}.
+   * It does the `decoding` and `fetching` of external references for you automatically.
+   *
+   * @param {{ [key: string]: any }} data An object with one or many properties.
+   * @param schemas ERC725JSONSchemas which will be used to encode the keys.
+   *
+   * @returns Returns decoded data as defined and expected in the schema:
+   */
+  static decodeData(
+    data: DecodeDataInput,
+    schemas: ERC725JSONSchema[],
+  ): { [key: string]: any } {
+    return decodeData(data, schemas);
   }
 
   /**

@@ -1,4 +1,6 @@
+import { expect } from 'chai';
 import assert from 'assert';
+
 import { keccak256, utf8ToHex } from 'web3-utils';
 import {
   ERC725JSONSchema,
@@ -18,6 +20,7 @@ import {
   decodeKey,
   encodeData,
   convertIPFSGatewayUrl,
+  decodeData,
 } from './utils';
 
 describe('utils', () => {
@@ -318,6 +321,78 @@ describe('utils', () => {
       expectedValues.forEach((expectedValue, index) => {
         assert.strictEqual(encodeArrayKey(key, index), expectedValue);
       });
+    });
+  });
+
+  describe('decodeData', () => {
+    const schemas: ERC725JSONSchema[] = [
+      {
+        name: 'KeyOne',
+        key: '0x0f4e1c48ef0a593fadd83075e26a9418949fca5ebd47f3224508df4dab7584d9',
+        keyType: 'Singleton',
+        valueType: 'bytes',
+        valueContent: '0x1111',
+      },
+      {
+        name: 'KeyTwo',
+        key: '0x13e32c6169bcd9107cb714c65a5cc4dbd09d437bee789d0c735467d3af8dc3b0',
+        keyType: 'Singleton',
+        valueType: 'bytes',
+        valueContent: '0x2222',
+      },
+      {
+        name: 'MyKeyName:<bytes32>:<bool>',
+        key: '0x',
+        keyType: 'Singleton',
+        valueType: 'bytes',
+        valueContent: 'JSONURL',
+      },
+      {
+        name: 'MyDynamicKey:<address>',
+        key: '0x',
+        keyType: 'Singleton',
+        valueType: 'bytes',
+        valueContent: 'JSONURL',
+      },
+    ];
+
+    it('decodes each key', () => {
+      const decodedData = decodeData(
+        {
+          KeyOne: '0x1111',
+          KeyTwo: '0x2222',
+        },
+        schemas,
+      );
+      expect(decodedData).to.have.all.keys(['KeyOne', 'KeyTwo']);
+    });
+
+    it('decodes dynamic keys', () => {
+      const decodedData = decodeData(
+        {
+          'MyKeyName:<bytes32>:<bool>': {
+            dynamicKeyParts: [
+              '0xaaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa',
+              'true',
+            ],
+            value:
+              '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+          },
+          'MyDynamicKey:<address>': {
+            dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
+            value:
+              '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+          },
+          KeyTwo: '0x2222',
+        },
+        schemas,
+      );
+
+      expect(decodedData).to.have.all.keys([
+        'MyKeyName:aaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa:true',
+        'MyDynamicKey:cafecafecafecafecafecafecafecafecafecafe',
+        'KeyTwo',
+      ]);
     });
   });
 

@@ -1,5 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-
 /*
     This file is part of @erc725/erc725.js.
     @erc725/erc725.js is free software: you can redistribute it and/or modify
@@ -42,7 +40,6 @@ import {
   generateAllResults,
 } from '../test/testHelpers';
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import 'isomorphic-fetch';
 
 import {

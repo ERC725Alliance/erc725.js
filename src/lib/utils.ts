@@ -53,6 +53,7 @@ import { AssetURLEncode } from '../types/encodeData';
 import { isDynamicKeyName } from './encodeKeyName';
 import { DynamicKeyPartInput } from '../types/dynamicKeys';
 import { getSchemaElement } from './getSchemaElement';
+import { DecodeDataInput } from '../types/decodeData';
 
 /**
  *
@@ -389,12 +390,28 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
  *
  * @return: all decoded data as per required by the schema and provided data
  */
-export function decodeData(
-  data: Record<string, any>,
-  schema: ERC725JSONSchema[],
-) {
+export function decodeData(data: DecodeDataInput, schema: ERC725JSONSchema[]) {
   return Object.entries(data).reduce((decodedData, [key, value]) => {
-    const schemaElement = getSchemaElement(schema, key);
+    const isDynamic = isDynamicKeyName(key);
+
+    let schemaElement: ERC725JSONSchema;
+    if (isDynamic) {
+      const dynamicValue = value as DynamicKeyPartInput;
+      schemaElement = getSchemaElement(
+        schema,
+        key,
+        dynamicValue.dynamicKeyParts,
+      );
+
+      // NOTE: it might be confusing to use as the output will contain other keys as the ones used
+      // for the input
+      return {
+        ...decodedData,
+        [schemaElement.name]: decodeKey(schemaElement, dynamicValue.value),
+      };
+    }
+
+    schemaElement = getSchemaElement(schema, key);
 
     return {
       ...decodedData,
