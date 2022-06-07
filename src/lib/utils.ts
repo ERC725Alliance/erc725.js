@@ -392,7 +392,26 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
  */
 export function decodeData(data: DecodeDataInput, schema: ERC725JSONSchema[]) {
   return Object.entries(data).reduce((decodedData, [key, value]) => {
-    const schemaElement = getSchemaElement(schema, key);
+    const isDynamic = isDynamicKeyName(key);
+
+    let schemaElement: ERC725JSONSchema;
+    if (isDynamic) {
+      const dynamicValue = value as DynamicKeyPartInput;
+      schemaElement = getSchemaElement(
+        schema,
+        key,
+        dynamicValue.dynamicKeyParts,
+      );
+
+      // NOTE: it might be confusing to use as the output will contain other keys as the ones used
+      // for the input
+      return {
+        ...decodedData,
+        [schemaElement.name]: decodeKey(schemaElement, dynamicValue.value),
+      };
+    }
+
+    schemaElement = getSchemaElement(schema, key);
 
     return {
       ...decodedData,
