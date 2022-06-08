@@ -297,6 +297,19 @@ describe('utils', () => {
       expect(decodedData.map(({ name }) => name)).to.eql(['KeyOne', 'KeyTwo']);
     });
 
+    it('parses non array input correctly', () => {
+      const decodedData = decodeData(
+        {
+          keyName: 'KeyOne',
+          value: '0x1111',
+        },
+
+        schemas,
+      );
+
+      expect(decodedData.name).to.eql('KeyOne');
+    });
+
     it('decodes dynamic keys', () => {
       const decodedData = decodeData(
         [

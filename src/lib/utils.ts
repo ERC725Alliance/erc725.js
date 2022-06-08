@@ -391,8 +391,20 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
 export function decodeData(
   data: DecodeDataInput[],
   schema: ERC725JSONSchema[],
-): DecodeDataOutput[] {
-  return data.map(({ keyName, dynamicKeyParts, value }) => {
+): DecodeDataOutput[];
+export function decodeData(
+  data: DecodeDataInput,
+  schema: ERC725JSONSchema[],
+): DecodeDataOutput;
+export function decodeData(
+  data: DecodeDataInput | DecodeDataInput[],
+  schema: ERC725JSONSchema[],
+): DecodeDataOutput | DecodeDataOutput[] {
+  const processDataInput = ({
+    keyName,
+    dynamicKeyParts,
+    value,
+  }: DecodeDataInput) => {
     const isDynamic = isDynamicKeyName(keyName);
 
     let schemaElement: ERC725JSONSchema;
@@ -415,7 +427,13 @@ export function decodeData(
       name: schemaElement.name,
       value: decodeKey(schemaElement, value),
     };
-  });
+  };
+
+  if (Array.isArray(data)) {
+    return data.map((dataInput) => processDataInput(dataInput));
+  }
+
+  return processDataInput(data);
 }
 
 /**
