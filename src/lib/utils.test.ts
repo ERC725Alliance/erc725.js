@@ -441,7 +441,7 @@ describe('utils', () => {
       values: ['0x1183790f29be3cdfd0a102862fea1a4a30b3adab'],
     };
 
-    it('encodes data with named key', () => {
+    it('encodes data with named key - [array input]', () => {
       const encodedDataByNamedKey = encodeData(
         [
           {
@@ -449,6 +449,18 @@ describe('utils', () => {
             value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
           },
         ],
+        schemas,
+      );
+      assert.deepStrictEqual(encodedDataByNamedKey, expectedResult);
+    });
+
+    it('encodes data with named key - [non array input]', () => {
+      const encodedDataByNamedKey = encodeData(
+        {
+          keyName: 'LSP1UniversalReceiverDelegate',
+          value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+        },
+
         schemas,
       );
       assert.deepStrictEqual(encodedDataByNamedKey, expectedResult);

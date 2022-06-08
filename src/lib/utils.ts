@@ -423,10 +423,12 @@ export function decodeData(
  * @param data an object of key-value pairs
  */
 export function encodeData(
-  data: EncodeDataInput[],
+  data: EncodeDataInput | EncodeDataInput[],
   schema: ERC725JSONSchema[],
 ): EncodeDataReturn {
-  return data.reduce(
+  const dataAsArray = Array.isArray(data) ? data : [data];
+
+  return dataAsArray.reduce(
     (accumulator, { keyName, value, dynamicKeyParts }) => {
       let schemaElement: ERC725JSONSchema | null = null;
       let encodedValue; // would be nice to type this
