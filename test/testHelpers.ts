@@ -98,11 +98,14 @@ export function generateAllData(schema) {
 
 /**
  * Takes the test schema/cases and builds full expected results.
+ * Removes dynamic keys.
  */
-export function generateAllResults(schema) {
+export function generateAllResults(schemas) {
   const results = {};
-  schema.forEach((e) => {
-    results[e.name] = e.expectedResult;
-  });
+  schemas
+    .filter((schema) => !schema.dynamicKeyParts)
+    .forEach((schema) => {
+      results[schema.name] = schema.expectedResult;
+    });
   return results;
 }

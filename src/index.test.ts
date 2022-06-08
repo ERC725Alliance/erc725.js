@@ -443,7 +443,14 @@ describe('Running @erc725/erc725.js tests...', () => {
           INTERFACE_IDS.ERC725Y_LEGACY,
         ]);
         const erc725 = new ERC725(mockSchema, address, provider);
-        const result = await erc725.getData(schemaElement.key);
+        const result = await erc725.getData(
+          schemaElement.dynamicKeyParts
+            ? {
+                keyName: schemaElement.key,
+                dynamicKeyParts: schemaElement.dynamicKeyParts,
+              }
+            : schemaElement.key,
+        );
         assert.deepStrictEqual(result, schemaElement.expectedResult);
       });
 
@@ -453,7 +460,14 @@ describe('Running @erc725/erc725.js tests...', () => {
           INTERFACE_IDS.ERC725Y_LEGACY,
         ]);
         const erc725 = new ERC725(mockSchema, address, provider);
-        const result = await erc725.getData(schemaElement.key);
+        const result = await erc725.getData(
+          schemaElement.dynamicKeyParts
+            ? {
+                keyName: schemaElement.key,
+                dynamicKeyParts: schemaElement.dynamicKeyParts,
+              }
+            : schemaElement.key,
+        );
         assert.deepStrictEqual(result, schemaElement.expectedResult);
       });
     });
@@ -620,7 +634,12 @@ describe('Running @erc725/erc725.js tests...', () => {
           },
         );
       } else {
-        // SINGLETON type: This is not an array, assumed 'Singleton
+        if (schemaElement.dynamicKeyParts) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
+        // SINGLETON type: This is not an array, assumed 'Singleton'
         it('Encode data value for: ' + schemaElement.name, async () => {
           const result = encodeKeyValue(
             schemaElement.valueContent,
@@ -641,7 +660,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           assert.deepStrictEqual(result, schemaElement.expectedResult);
         });
 
-        it('Encode data value from naked class instance', async () => {
+        it(`Encode data value from naked class instance for ${schemaElement.name}`, async () => {
           const erc725 = new ERC725([schemaElement]);
           const result = erc725.encodeData([
             {
@@ -655,12 +674,13 @@ describe('Running @erc725/erc725.js tests...', () => {
           });
         });
 
-        it('Decode data value from naked class instance', async () => {
+        it(`Decode data value from naked class instance for ${schemaElement.name}`, async () => {
           const erc725 = new ERC725([schemaElement]);
           const result = erc725.decodeData([
             {
               keyName: schemaElement.name,
               value: schemaElement.returnGraphData,
+              dynamicKeyParts: schemaElement.dynamicKeyParts,
             },
           ]);
           assert.deepStrictEqual(result[0].value, schemaElement.expectedResult);

@@ -40,7 +40,7 @@ import {
   LSP6_DEFAULT_PERMISSIONS,
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './lib/constants';
-import { encodeKeyName } from './lib/encodeKeyName';
+import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types
 import { URLDataWithHash, KeyValuePair } from './types';
@@ -54,6 +54,7 @@ import {
 } from './types/ERC725JSONSchema';
 import { getSchemaElement } from './lib/getSchemaElement';
 import { DecodeDataInput, EncodeDataInput } from './types/decodeData';
+import { GetDataDynamicKey, GetDataInput } from './types/GetData';
 
 export {
   ERC725JSONSchema,
@@ -178,20 +179,16 @@ export class ERC725 {
    *
    * @returns If the input is an array: an object with schema element key names as properties, with corresponding **decoded** data as values. If the input is a string, it directly returns the **decoded** data.
    */
-  async getData(keyOrKeys?: string): Promise<any>;
-  async getData(keyOrKeys?: string[]): Promise<{ [key: string]: any }>;
-  async getData(keyOrKeys?: undefined): Promise<{ [key: string]: any }>;
   async getData(
-    keyOrKeys?: string | string[] | undefined,
-  ): Promise<any | { [key: string]: any }>;
-  async getData(
-    keyOrKeys?: string | string[] | undefined,
+    keyOrKeys?: GetDataInput | undefined,
   ): Promise<any | { [key: string]: any }> {
     this.getAddressAndProvider();
 
     if (!keyOrKeys) {
       // eslint-disable-next-line no-param-reassign
-      keyOrKeys = this.options.schemas.map((element) => element.name);
+      keyOrKeys = this.options.schemas
+        .map((element) => element.name)
+        .filter((key) => !isDynamicKeyName(key));
     }
 
     if (Array.isArray(keyOrKeys)) {
@@ -509,19 +506,25 @@ export class ERC725 {
     return results;
   }
 
-  private async getDataMultiple(keyNames: string[]) {
-    const keyHashes = keyNames.map((keyName) => {
-      const schemaElement = getSchemaElement(this.options.schemas, keyName);
-      return schemaElement.key;
+  private async getDataMultiple(keyNames: Array<string | GetDataDynamicKey>) {
+    const schemas = keyNames.map((keyName) => {
+      if (typeof keyName === 'string') {
+        return getSchemaElement(this.options.schemas, keyName);
+      }
+      return getSchemaElement(
+        this.options.schemas,
+        keyName.keyName,
+        keyName.dynamicKeyParts,
+      );
     });
 
     // Get all the raw data from the provider based on schema key hashes
     const allRawData: KeyValuePair[] = await this.options.provider?.getAllData(
       this.options.address as string,
-      keyHashes,
+      schemas.map((schema) => schema.key),
     );
 
-    const tmpData = allRawData.reduce<{ [key: string]: any }>(
+    const keyValueMap = allRawData.reduce<{ [key: string]: any }>(
       (accumulator, current) => {
         accumulator[current.key] = current.value;
         return accumulator;
@@ -529,34 +532,44 @@ export class ERC725 {
       {},
     );
 
+    const schemasWithValue = schemas.map((schema) => {
+      return { ...schema, value: keyValueMap[schema.key] || null };
+    });
+
+    // ------- BEGIN ARRAY HANDLER -------
     // Get missing 'Array' fields for all arrays, as necessary
+
     const arraySchemas = this.options.schemas.filter(
       (e) => e.keyType.toLowerCase() === 'array',
     );
 
+    // Looks like it gets array even if not requested as it gets the arrays from the this.options.schemas?
     // eslint-disable-next-line no-restricted-syntax
     for (const keySchema of arraySchemas) {
       const dataKeyValue = {
-        [keySchema.key]: { key: keySchema.key, value: tmpData[keySchema.key] },
+        [keySchema.key]: {
+          key: keySchema.key,
+          value: keyValueMap[keySchema.key],
+        },
       };
       const arrayValues = await this.getArrayValues(keySchema, dataKeyValue);
 
       if (arrayValues && arrayValues.length > 0) {
         arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
-        tmpData[keySchema.key] = arrayValues;
+        schemasWithValue.push({ ...keySchema, value: arrayValues });
       }
     }
+    // ------- END ARRAY HANDLER -------
 
-    // NOTE: temp fix to make this work with new decodeData signature
     const decodedData = decodeData(
-      Object.keys(tmpData).map((key) => {
+      schemasWithValue.map(({ key, value }) => {
         return {
           keyName: key,
-          value: tmpData[key],
-          // TODO: add dynamicKey support
+          value,
+          // no need to add dynamic key parts here as the schemas object below already holds the "generated" schemas for the dynamic keys
         };
       }),
-      this.options.schemas,
+      schemas,
     );
 
     return decodedData.reduce((acc, { name, value }) => {
