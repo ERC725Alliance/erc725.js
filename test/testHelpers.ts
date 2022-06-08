@@ -101,11 +101,13 @@ export function generateAllData(schema) {
  * Removes dynamic keys.
  */
 export function generateAllResults(schemas) {
-  const results = {};
-  schemas
+  return schemas
     .filter((schema) => !schema.dynamicKeyParts)
-    .forEach((schema) => {
-      results[schema.name] = schema.expectedResult;
+    .map((schema) => {
+      return {
+        name: schema.name,
+        key: schema.key,
+        value: schema.expectedResult,
+      };
     });
-  return results;
 }

@@ -310,6 +310,45 @@ describe('utils', () => {
       expect(decodedData.name).to.eql('KeyOne');
     });
 
+    it('parses type Array correctly', () => {
+      const decodedData = decodeData(
+        {
+          keyName: 'LSP12IssuedAssets[]',
+          value: [
+            {
+              key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
+              value:
+                '0x0000000000000000000000000000000000000000000000000000000000000002',
+            },
+            {
+              key: '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000000',
+              value: '0xd94353d9b005b3c0a9da169b768a31c57844e490',
+            },
+            {
+              key: '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000001',
+              value: '0xdaea594e385fc724449e3118b2db7e86dfba1826',
+            },
+          ],
+        },
+
+        [
+          {
+            name: 'LSP12IssuedAssets[]',
+            key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
+            keyType: 'Array',
+            valueContent: 'Address',
+            valueType: 'address',
+          },
+        ],
+      );
+
+      expect(decodedData.name).to.eql('LSP12IssuedAssets[]');
+      expect(decodedData.value).to.eql([
+        '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
+        '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826',
+      ]);
+    });
+
     it('decodes dynamic keys', () => {
       const decodedData = decodeData(
         [

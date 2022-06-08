@@ -163,10 +163,17 @@ describe('Running @erc725/erc725.js tests...', () => {
       );
 
       const data = await erc725.getData('ThisKeyDoesNotExist');
-      assert.deepStrictEqual(data, null);
+
+      const expectedResult = {
+        name: 'ThisKeyDoesNotExist',
+        key: '0xb12a0af5f83066646eb63c96bf29dcb827024d9a33189f5a61652a03951d1fbe',
+        value: null,
+      };
+
+      assert.deepStrictEqual(data, expectedResult);
 
       const dataArray = await erc725.getData(['ThisKeyDoesNotExist']);
-      assert.deepStrictEqual(dataArray, { ThisKeyDoesNotExist: null });
+      assert.deepStrictEqual(dataArray, [expectedResult]);
     });
 
     it('should return [] if the key of type Array does not exist in the contract', async () => {
@@ -185,10 +192,20 @@ describe('Running @erc725/erc725.js tests...', () => {
       );
 
       const data = await erc725.getData('NonExistingArray[]');
-      assert.deepStrictEqual(data, []);
+      assert.deepStrictEqual(data, {
+        name: 'NonExistingArray[]',
+        key: '0xd6cbdbfc8d25c9ce4720b5fe6fa8fc536803944271617bf5425b4bd579195840',
+        value: [],
+      });
 
       const dataArray = await erc725.getData(['NonExistingArray[]']);
-      assert.deepStrictEqual(dataArray, { 'NonExistingArray[]': [] });
+      assert.deepStrictEqual(dataArray, [
+        {
+          name: 'NonExistingArray[]',
+          key: '0xd6cbdbfc8d25c9ce4720b5fe6fa8fc536803944271617bf5425b4bd579195840',
+          value: [],
+        },
+      ]);
     });
 
     const e2eSchema: any = [
@@ -208,15 +225,22 @@ describe('Running @erc725/erc725.js tests...', () => {
       },
     ];
 
-    const e2eResults = {
-      LSP3Profile: {
-        hashFunction: 'keccak256(utf8)',
-        hash: '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
-        url: 'ipfs://QmecrGejUQVXpW4zS948pNvcnQrJ1KiAoM6bdfrVcWZsn5',
+    const e2eResults = [
+      {
+        name: 'LSP3Profile',
+        key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+        value: {
+          hashFunction: 'keccak256(utf8)',
+          hash: '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
+          url: 'ipfs://QmecrGejUQVXpW4zS948pNvcnQrJ1KiAoM6bdfrVcWZsn5',
+        },
       },
-      LSP1UniversalReceiverDelegate:
-        '0x36e4Eb6Ee168EF54B1E8e850ACBE51045214B313',
-    };
+      {
+        name: 'LSP1UniversalReceiverDelegate',
+        key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
+        value: '0x36e4Eb6Ee168EF54B1E8e850ACBE51045214B313',
+      },
+    ];
 
     it('with web3.currentProvider [legacy]', async () => {
       const erc725 = new ERC725(
@@ -259,7 +283,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             name: 'LSP3Profile',
             key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
             keyType: 'Singleton',
-            valueContent: 'JSONURL',
+            valueContent: 'URL',
             valueType: 'bytes',
           },
         ],
@@ -268,7 +292,90 @@ describe('Running @erc725/erc725.js tests...', () => {
       );
 
       const data = await erc725.fetchData('LSP3Profile');
-      assert.deepStrictEqual(data, null);
+      assert.deepStrictEqual(data, {
+        name: 'LSP3Profile',
+        key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+        value: null,
+      });
+    });
+
+    it('should getData with multiple kind of input', async () => {
+      // "Manual test" which checks if it handles well multiple kind of keys
+      const provider = new HttpProvider(
+        {
+          returnData: [
+            {
+              key: '0x48643a15ac5407a175674ab0f8c92df5ae90694dac72ebf0a058fb2599e3b06a', // MyURL
+              value:
+                '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000035697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a62640000000000000000000000',
+            },
+            {
+              key: '0x74ac2555c10b9349e78f0000b74a88c43bcf691bd7a851f6603cb1868f6fc147', // LSP12IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147
+              value:
+                '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000141098603b193d276f5fa176cc02007b609f9dae6b000000000000000000000000',
+            },
+            {
+              key: '0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38', // SupportedStandards:LSP3UniversalProfile
+              value:
+                '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000004abe425d600000000000000000000000000000000000000000000000000000000',
+            },
+          ],
+        },
+        [INTERFACE_IDS.ERC725Y],
+      );
+      const erc725 = new ERC725(
+        [
+          {
+            name: 'MyURL',
+            key: '0x48643a15ac5407a175674ab0f8c92df5ae90694dac72ebf0a058fb2599e3b06a',
+            keyType: 'Singleton',
+            valueContent: 'URL',
+            valueType: 'bytes',
+          },
+          {
+            name: 'SupportedStandards:LSP3UniversalProfile',
+            key: '0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38',
+            keyType: 'Mapping',
+            valueContent: '0xabe425d6',
+            valueType: 'bytes',
+          },
+          {
+            name: 'LSP12IssuedAssetsMap:<address>',
+            key: '0x74ac2555c10b9349e78f0000<address>',
+            keyType: 'Mapping',
+            valueContent: 'Address',
+            valueType: 'address',
+          },
+        ],
+        '0x24464DbA7e7781a21eD86133Ebe88Eb9C0762620', // result is mocked so we can use any address
+        provider,
+      );
+
+      const data = await erc725.getData([
+        'MyURL',
+        {
+          keyName: 'LSP12IssuedAssetsMap:<address>',
+          dynamicKeyParts: '0xb74a88C43BCf691bd7A851f6603cb1868f6fc147',
+        },
+        'SupportedStandards:LSP3UniversalProfile',
+      ]);
+      assert.deepStrictEqual(data, [
+        {
+          key: '0x48643a15ac5407a175674ab0f8c92df5ae90694dac72ebf0a058fb2599e3b06a',
+          name: 'MyURL',
+          value: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
+        },
+        {
+          key: '0x74ac2555c10b9349e78f0000b74a88c43bcf691bd7a851f6603cb1868f6fc147',
+          name: 'LSP12IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+          value: '0x1098603B193d276f5fA176CC02007B609F9DAE6b',
+        },
+        {
+          key: '0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38',
+          name: 'SupportedStandards:LSP3UniversalProfile',
+          value: '0xabe425d6',
+        },
+      ]);
     });
   });
 
@@ -451,7 +558,11 @@ describe('Running @erc725/erc725.js tests...', () => {
               }
             : schemaElement.key,
         );
-        assert.deepStrictEqual(result, schemaElement.expectedResult);
+        assert.deepStrictEqual(result, {
+          name: schemaElement.name,
+          key: schemaElement.key,
+          value: schemaElement.expectedResult,
+        });
       });
 
       it(schemaElement.name + ' with ethereumProvider EIP 1193', async () => {
@@ -468,7 +579,11 @@ describe('Running @erc725/erc725.js tests...', () => {
               }
             : schemaElement.key,
         );
-        assert.deepStrictEqual(result, schemaElement.expectedResult);
+        assert.deepStrictEqual(result, {
+          name: schemaElement.name,
+          key: schemaElement.key,
+          value: schemaElement.expectedResult,
+        });
       });
     });
   });
@@ -506,7 +621,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           assert.deepStrictEqual(results, schemaElement.returnGraphData);
         });
 
-        it('Decode data values in array: ' + schemaElement.name, async () => {
+        it('decodes data values in array: ' + schemaElement.name, async () => {
           const results: any[] = [];
 
           // decode array loop
@@ -547,92 +662,68 @@ describe('Running @erc725/erc725.js tests...', () => {
           } // end for loop
         });
 
-        it(
-          'Encode all data values for keyType "Array" in:: ' +
-            schemaElement.name,
-          async () => {
-            const data = generateAllResults([schemaElement])[
-              schemaElement.name
-            ];
-            const intendedResults = allGraphData.filter(
-              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
-            );
-            // handle '0x'....
-            // intendedResults = intendedResults.filter(e => e !== '0x' && e.value !== '0x')
-            const results = encodeKey(schemaElement, data);
-            assert.deepStrictEqual(results, intendedResults);
-          },
-        );
+        it(`encodes all data values for keyType "Array" in: ${schemaElement.name}`, async () => {
+          const data = schemaElement.expectedResult;
+          const intendedResults = allGraphData.filter(
+            (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
+          );
+          // handle '0x'....
+          // intendedResults = intendedResults.filter(e => e !== '0x' && e.value !== '0x')
+          const results = encodeKey(schemaElement, data);
+          assert.deepStrictEqual(results, intendedResults);
+        });
 
-        it(
-          'Decode all data values for keyType "Array" in: ' +
-            schemaElement.name,
-          async () => {
-            const values = allGraphData.filter(
-              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
-            );
-            const intendedResults = generateAllResults([schemaElement])[
-              schemaElement.name
-            ];
-            const results = decodeKey(schemaElement, values);
-            assert.deepStrictEqual(results, intendedResults);
-          },
-        );
+        it(`decodes all data values for keyType "Array" in: ${schemaElement.name}`, async () => {
+          const values = allGraphData.filter(
+            (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
+          );
+          const intendedResults = schemaElement.expectedResult;
+          const results = decodeKey(schemaElement, values);
+          assert.deepStrictEqual(results, intendedResults);
+        });
 
-        it(
-          'Encode all data values for keyType "Array" in naked class instance: ' +
-            schemaElement.name,
-          async () => {
-            const data = generateAllResults([schemaElement])[
-              schemaElement.name
-            ];
+        it(`encodes all data values for keyType "Array" in naked class instance: ${schemaElement.name}`, async () => {
+          const data = schemaElement.expectedResult;
 
-            const keyValuePairs = allGraphData.filter(
-              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
-            );
+          const keyValuePairs = allGraphData.filter(
+            (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
+          );
 
-            const intendedResult: { keys: string[]; values: string[] } = {
-              keys: [],
-              values: [],
-            };
+          const intendedResult: { keys: string[]; values: string[] } = {
+            keys: [],
+            values: [],
+          };
 
-            keyValuePairs.forEach((keyValuePair) => {
-              intendedResult.keys.push(keyValuePair.key);
-              intendedResult.values.push(keyValuePair.value);
-            });
+          keyValuePairs.forEach((keyValuePair) => {
+            intendedResult.keys.push(keyValuePair.key);
+            intendedResult.values.push(keyValuePair.value);
+          });
 
-            const erc725 = new ERC725([schemaElement]);
+          const erc725 = new ERC725([schemaElement]);
 
-            const results = erc725.encodeData([
-              {
-                keyName: schemaElement.name,
-                value: data,
-              },
-            ]);
-            assert.deepStrictEqual(results, intendedResult);
-          },
-        );
+          const results = erc725.encodeData([
+            {
+              keyName: schemaElement.name,
+              value: data,
+            },
+          ]);
+          assert.deepStrictEqual(results, intendedResult);
+        });
 
-        it(
-          'Decode all data values for keyType "Array" in naked class instance: ' +
-            schemaElement.name,
-          async () => {
-            const values = allGraphData.filter(
-              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
-            );
-            const intendedResults = generateAllResults([schemaElement])[
-              schemaElement.name
-            ];
-            const erc725 = new ERC725([schemaElement]);
-            const results = erc725.decodeData([
-              {
-                keyName: schemaElement.name,
-                value: values,
-              },
-            ]);
-            assert.deepStrictEqual(results[0].value, intendedResults);
-          },
-        );
+        it(`decode all data values for keyType "Array" in naked class instance: ${schemaElement.name}`, async () => {
+          const values = allGraphData.filter(
+            (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
+          );
+          const intendedResults = schemaElement.expectedResult;
+          const erc725 = new ERC725([schemaElement]);
+          const results = erc725.decodeData([
+            {
+              keyName: schemaElement.name,
+              value: values,
+            },
+          ]);
+          assert.deepStrictEqual(results[0].value, intendedResults);
+        });
       } else {
         if (schemaElement.dynamicKeyParts) {
           // eslint-disable-next-line no-continue
@@ -640,7 +731,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         }
 
         // SINGLETON type: This is not an array, assumed 'Singleton'
-        it('Encode data value for: ' + schemaElement.name, async () => {
+        it('encodes data value for: ' + schemaElement.name, async () => {
           const result = encodeKeyValue(
             schemaElement.valueContent,
             schemaElement.valueType,
@@ -650,7 +741,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           assert.deepStrictEqual(result, schemaElement.returnGraphData);
         });
 
-        it('Decode data value for: ' + schemaElement.name, async () => {
+        it('decodes data value for: ' + schemaElement.name, async () => {
           const result = decodeKeyValue(
             schemaElement.valueContent,
             schemaElement.valueType,

@@ -11,7 +11,7 @@ export interface EncodeDataInput extends DataInput {
 }
 
 export interface DecodeDataInput extends DataInput {
-  value: string | { key: string; value: string };
+  value: string | { key: string; value: string | null }[];
 }
 
 export interface DecodeDataOutput {

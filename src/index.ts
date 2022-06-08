@@ -197,11 +197,7 @@ export class ERC725 {
 
     const data = await this.getDataMultiple([keyOrKeys]);
 
-    if (Object.keys(data).length > 0) {
-      return data[Object.keys(data)[0]];
-    }
-
-    return data;
+    return data[0];
   }
 
   /**
@@ -539,7 +535,7 @@ export class ERC725 {
     // ------- BEGIN ARRAY HANDLER -------
     // Get missing 'Array' fields for all arrays, as necessary
 
-    const arraySchemas = this.options.schemas.filter(
+    const arraySchemas = schemas.filter(
       (e) => e.keyType.toLowerCase() === 'array',
     );
 
@@ -556,12 +552,15 @@ export class ERC725 {
 
       if (arrayValues && arrayValues.length > 0) {
         arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
-        schemasWithValue.push({ ...keySchema, value: arrayValues });
+
+        schemasWithValue[
+          schemasWithValue.findIndex((schema) => schema.key === keySchema.key)
+        ] = { ...keySchema, value: arrayValues };
       }
     }
     // ------- END ARRAY HANDLER -------
 
-    const decodedData = decodeData(
+    return decodeData(
       schemasWithValue.map(({ key, value }) => {
         return {
           keyName: key,
@@ -571,10 +570,6 @@ export class ERC725 {
       }),
       schemas,
     );
-
-    return decodedData.reduce((acc, { name, value }) => {
-      return { ...acc, [name]: value };
-    }, {});
   }
 
   /**
