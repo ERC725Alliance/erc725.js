@@ -27,7 +27,6 @@ import {
   encodeArrayKey,
   decodeData,
   decodeKeyValue,
-  decodeKey,
   isDataAuthentic,
   encodeData,
   convertIPFSGatewayUrl,
@@ -195,9 +194,17 @@ export class ERC725 {
       keyOrKeys = this.options.schemas.map((element) => element.name);
     }
 
-    return Array.isArray(keyOrKeys)
-      ? this.getDataMultiple(keyOrKeys)
-      : this.getDataSingle(keyOrKeys);
+    if (Array.isArray(keyOrKeys)) {
+      return this.getDataMultiple(keyOrKeys);
+    }
+
+    const data = await this.getDataMultiple([keyOrKeys]);
+
+    if (Object.keys(data).length > 0) {
+      return data[Object.keys(data)[0]];
+    }
+
+    return data;
   }
 
   /**
@@ -500,32 +507,6 @@ export class ERC725 {
     }
 
     return results;
-  }
-
-  private async getDataSingle(data: string) {
-    const keySchema = getSchemaElement(this.options.schemas, data);
-    const rawData = await this.options.provider?.getData(
-      this.options.address as string,
-      keySchema.key,
-    );
-
-    // Decode and return the data
-    if (keySchema.keyType.toLowerCase() === 'array') {
-      const dataKeyValue = {
-        [keySchema.key]: { key: keySchema.key, value: rawData },
-      };
-
-      const arrayValues = await this.getArrayValues(keySchema, dataKeyValue);
-
-      if (arrayValues && arrayValues.length > 0) {
-        arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
-        return decodeKey(keySchema, arrayValues);
-      }
-
-      return []; // return empty object if there are no arrayValues
-    }
-
-    return decodeKey(keySchema, rawData);
   }
 
   private async getDataMultiple(keyNames: string[]) {
