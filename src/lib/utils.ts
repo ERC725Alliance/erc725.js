@@ -25,7 +25,7 @@ import {
 } from 'web3-utils';
 import { arrToBufArr } from 'ethereumjs-util';
 
-import { KeyValuePair, JSONURLDataToEncode, EncodeDataReturn } from '../types';
+import { JSONURLDataToEncode, EncodeDataReturn } from '../types';
 import {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
@@ -513,38 +513,6 @@ export function isDataAuthentic(
   }
 
   return true;
-}
-
-/**
- * Transform the object containing the encoded data into an array ordered by keys,
- * for easier handling when writing the data to the blockchain.
- *
- * @param {{
- *   [key: string]: any;
- * }} encodedData This is essentially the object you receive when calling `encodeData(...)`
- * @return {*}  KeyValuePair[] An array of key-value objects
- */
-export function flattenEncodedData(encodedData: {
-  [key: string]: any;
-}): KeyValuePair[] {
-  return (
-    Object.entries(encodedData)
-      .reduce((keyValuePairs: any[], [, encodedDataElement]) => {
-        if (Array.isArray(encodedDataElement.value)) {
-          return keyValuePairs.concat(encodedDataElement.value);
-        }
-        keyValuePairs.push({
-          key: encodedDataElement.key,
-          value: encodedDataElement.value,
-        });
-        return keyValuePairs;
-      }, [])
-      // sort array of objects by keys, to not be dependent on the order of the object's keys
-      .sort((a, b) => {
-        if (a.key < b.key) return -1;
-        return a.key > b.key ? 1 : 0;
-      })
-  );
 }
 
 /**

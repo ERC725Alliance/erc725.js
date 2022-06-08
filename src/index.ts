@@ -64,7 +64,7 @@ export {
 };
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
-export { flattenEncodedData, encodeData } from './lib/utils';
+export { encodeData } from './lib/utils';
 /**
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
  *
