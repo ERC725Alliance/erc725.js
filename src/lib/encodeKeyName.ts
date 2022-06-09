@@ -64,10 +64,13 @@ export const encodeDynamicKeyPart = (
       }
 
       if (bytes > 20) {
-        return leftPad(value.replace('0x', ''), bytes * 2);
+        return leftPad(value.replace('0x', ''), bytes * 2).toLowerCase();
       }
 
-      return value.replace('0x', '').slice(0, bytes * 2);
+      return value
+        .replace('0x', '')
+        .slice(0, bytes * 2)
+        .toLowerCase();
     }
     case 'uint': {
       if (size > 256 || size % 8 !== 0) {
@@ -108,7 +111,7 @@ export const encodeDynamicKeyPart = (
         return valueWithoutPrefix.slice(0, bytes * 2); // right cut
       }
 
-      return leftPad(valueWithoutPrefix, bytes * 2);
+      return leftPad(valueWithoutPrefix, bytes * 2).toLowerCase();
     }
     default:
       throw new Error(`Dynamic key: ${type} is not supported`);

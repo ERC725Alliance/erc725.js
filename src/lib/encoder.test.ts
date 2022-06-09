@@ -198,7 +198,7 @@ describe('encoder', () => {
 
     it('encodes/decodes: JSONURL', () => {
       const dataToEncode: JSONURLDataToEncode = {
-        url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+        url: 'ipfs://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
         json: {
           myProperty: 'is a string',
           anotherProperty: {

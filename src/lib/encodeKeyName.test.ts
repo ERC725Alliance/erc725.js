@@ -41,7 +41,7 @@ describe('encodeKeyName', () => {
     {
       keyName: 'LSP12IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
       expectedKey:
-        '0x74ac2555c10b9349e78f0000b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+        '0x74ac2555c10b9349e78f0000b74a88c43bcf691bd7a851f6603cb1868f6fc147',
     },
     {
       keyName:
@@ -126,6 +126,13 @@ describe('encodeKeyName', () => {
         '0x35e6950bc8d275060e3c0000cafecafecafecafecafecafecafecafecafecafe',
       // |-- bytes6 --||------||--||------------ bytes20 -----------------|
       dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
+    },
+    {
+      keyName: 'MyKeyName:MyMapName:<address>',
+      expectedKey:
+        '0x35e6950bc8d275060e3c00004c6f947ae67f572afa4ae0730947de7c874f95ef',
+      // |-- bytes6 --||------||--||------------ bytes20 -----------------|
+      dynamicKeyParts: '0x4c6f947Ae67F572afa4ae0730947DE7C874F95Ef', // address is checksummed -> expected key should be lowercase
     },
     {
       keyName: 'MyKeyName:<bytes2>:<uint32>',
@@ -285,6 +292,12 @@ describe('encodeDynamicKeyPart', () => {
       value: '0x7f268357a8c2552623316e2562d90e642bb538e5',
       bytes: 5,
       expectedEncoding: '7f268357a8', // right-cut if larger than bytes
+    },
+    {
+      type: '<address>',
+      value: '0x1FdCD4dD0E164bCbd32DbF983c9903F4eD10356d',
+      bytes: 5,
+      expectedEncoding: '1FdCD4dD0E'.toLowerCase(), // should return lowercase
     },
     {
       type: '<address>',

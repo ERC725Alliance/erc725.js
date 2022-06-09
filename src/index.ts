@@ -14,7 +14,7 @@
 
 /**
  * @file index.ts
- * @author Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
+ * @author Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>, Hugo Masclet <@Hugoo>
  * @date 2020
  */
 
@@ -25,12 +25,11 @@ import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
 
 import {
   encodeArrayKey,
-  decodeData,
   decodeKeyValue,
-  decodeKey,
   isDataAuthentic,
   encodeData,
   convertIPFSGatewayUrl,
+  generateSchemasFromDynamicKeys,
 } from './lib/utils';
 
 import { getSchema } from './lib/schemaParser';
@@ -39,12 +38,13 @@ import { isValidSignature } from './lib/isValidSignature';
 import {
   LSP6_ALL_PERMISSIONS,
   LSP6_DEFAULT_PERMISSIONS,
+  SUPPORTED_HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './lib/constants';
-import { encodeKeyName } from './lib/encodeKeyName';
+import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types
-import { URLDataWithHash, KeyValuePair, EncodeDataInput } from './types';
+import { KeyValuePair, URLDataWithHash } from './types';
 import { ERC725Config } from './types/Config';
 import { Permissions } from './types/Method';
 import {
@@ -53,8 +53,14 @@ import {
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
 } from './types/ERC725JSONSchema';
-import { getSchemaElement } from './lib/getSchemaElement';
-import { DecodeDataInput } from './types/decodeData';
+import {
+  DecodeDataInput,
+  DecodeDataOutput,
+  EncodeDataInput,
+  GetDataExternalSourcesOutput,
+} from './types/decodeData';
+import { GetDataDynamicKey, GetDataInput } from './types/GetData';
+import { decodeData } from './lib/decodeData';
 
 export {
   ERC725JSONSchema,
@@ -64,7 +70,7 @@ export {
 };
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
-export { flattenEncodedData, encodeData } from './lib/utils';
+export { encodeData } from './lib/utils';
 /**
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
  *
@@ -175,29 +181,35 @@ export class ERC725 {
    *
    * If you would like to receive everything in one go, you can use {@link ERC725.fetchData | `fetchData`} for that.
    *
-   * @param {(string|string[])} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
+   * @param {*} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
    *
    * @returns If the input is an array: an object with schema element key names as properties, with corresponding **decoded** data as values. If the input is a string, it directly returns the **decoded** data.
    */
-  async getData(keyOrKeys?: string): Promise<any>;
-  async getData(keyOrKeys?: string[]): Promise<{ [key: string]: any }>;
-  async getData(keyOrKeys?: undefined): Promise<{ [key: string]: any }>;
   async getData(
-    keyOrKeys?: string | string[] | undefined,
-  ): Promise<any | { [key: string]: any }>;
+    keyOrKeys?: Array<string | GetDataDynamicKey>,
+  ): Promise<DecodeDataOutput[]>;
   async getData(
-    keyOrKeys?: string | string[] | undefined,
-  ): Promise<any | { [key: string]: any }> {
+    keyOrKeys?: string | GetDataDynamicKey,
+  ): Promise<DecodeDataOutput>;
+  async getData(
+    keyOrKeys?: GetDataInput,
+  ): Promise<DecodeDataOutput | DecodeDataOutput[]> {
     this.getAddressAndProvider();
 
     if (!keyOrKeys) {
       // eslint-disable-next-line no-param-reassign
-      keyOrKeys = this.options.schemas.map((element) => element.name);
+      keyOrKeys = this.options.schemas
+        .map((element) => element.name)
+        .filter((key) => !isDynamicKeyName(key));
     }
 
-    return Array.isArray(keyOrKeys)
-      ? this.getDataMultiple(keyOrKeys)
-      : this.getDataSingle(keyOrKeys);
+    if (Array.isArray(keyOrKeys)) {
+      return this.getDataMultiple(keyOrKeys);
+    }
+
+    const data = await this.getDataMultiple([keyOrKeys]);
+
+    return data[0];
   }
 
   /**
@@ -207,43 +219,55 @@ export class ERC725 {
    *
    * To ensure **data authenticity** `fetchData` compares the `hash` of the fetched JSON with the `hash` stored on the blockchain.
    *
-   * @param {(string|string[])} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
+   * @param {*} keyOrKeys The name (or the encoded name as the schema ‘key’) of the schema element in the class instance’s schema.
    *
    * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData.
    */
-  async fetchData(keyOrKeys: string): Promise<any>;
-  async fetchData(keyOrKeys: string[]): Promise<{ [key: string]: any }>;
-  async fetchData(keyOrKeys: undefined): Promise<{ [key: string]: any }>;
-  async fetchData(
-    keyOrKeys?: string | string[] | undefined,
-  ): Promise<any | { [key: string]: any }>;
-  async fetchData(
-    keyOrKeys?: string | string[],
-  ): Promise<any | { [key: string]: any }> {
-    // This is a quick hack to not change the behaviour of the getDataFromExternalSources function.
-    // As it expects an object with the key being the schema key.
-    const keys =
-      Array.isArray(keyOrKeys) || !keyOrKeys ? keyOrKeys : [keyOrKeys];
 
-    const dataFromChain = await this.getData(keys);
+  async fetchData(
+    keyOrKeys?: Array<string | GetDataDynamicKey>,
+  ): Promise<DecodeDataOutput[]>;
+  async fetchData(
+    keyOrKeys?: string | GetDataDynamicKey,
+  ): Promise<DecodeDataOutput>;
+  async fetchData(
+    keyOrKeys?: GetDataInput,
+  ): Promise<DecodeDataOutput | DecodeDataOutput[]> {
+    let keyNames: Array<string | GetDataDynamicKey>;
+
+    if (Array.isArray(keyOrKeys)) {
+      keyNames = keyOrKeys;
+    } else if (!keyOrKeys) {
+      keyNames = this.options.schemas
+        .map((element) => element.name)
+        .filter((key) => !isDynamicKeyName(key));
+    } else {
+      keyNames = [keyOrKeys];
+    }
+
+    const dataFromChain = await this.getData(keyNames);
+
+    // NOTE: this step is executed in getData function above
+    // We can optimize by computing it only once.
+    const schemas = generateSchemasFromDynamicKeys(
+      keyNames,
+      this.options.schemas,
+    );
+
     const dataFromExternalSources = await this.getDataFromExternalSources(
+      schemas,
       dataFromChain,
     );
 
-    const results = {
-      ...dataFromChain,
-      ...dataFromExternalSources,
-    };
-
-    if (typeof keyOrKeys === 'string') {
-      if (Object.prototype.hasOwnProperty.call(results, keyOrKeys)) {
-        return results[keyOrKeys];
-      }
-
-      return null;
+    if (
+      keyOrKeys &&
+      !Array.isArray(keyOrKeys) &&
+      dataFromExternalSources.length > 0
+    ) {
+      return dataFromExternalSources[0];
     }
 
-    return results;
+    return dataFromExternalSources;
   }
 
   /**
@@ -274,52 +298,77 @@ export class ERC725 {
     );
   }
 
-  private getDataFromExternalSources(dataFromChain: { [key: string]: any }): {
-    [key: string]: any;
-  } {
-    return Object.entries(dataFromChain)
-      .filter(([key]) => {
-        const keySchema = getSchemaElement(this.options.schemas, key);
-        return ['jsonurl', 'asseturl'].includes(
-          keySchema.valueContent.toLowerCase(),
-        );
-      })
-      .reduce(async (accumulator, [key, dataEntry]) => {
-        if (!dataEntry) {
-          accumulator[key] = null;
-          return accumulator;
-        }
+  private getDataFromExternalSources(
+    schemas: ERC725JSONSchema[],
+    dataFromChain: DecodeDataOutput[],
+  ): Promise<GetDataExternalSourcesOutput[]> {
+    const promises = dataFromChain.map(async (dataEntry) => {
+      const schemaElement = schemas.find(
+        (schema) => schema.key === dataEntry.key,
+      );
 
-        let receivedData;
-        try {
-          const { url } = this.patchIPFSUrlsIfApplicable(dataEntry);
-          receivedData = await fetch(url).then(async (response) => {
-            if (
-              dataEntry.hashFunction ===
-              SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_BYTES
-            ) {
-              return response
-                .arrayBuffer()
-                .then((buffer) => new Uint8Array(buffer));
-            }
+      if (!schemaElement) {
+        // It is weird if we can't find the schema element for the key...
+        // Let's simply ignore and return it...
+        return dataEntry;
+      }
 
-            return response.json();
-          });
-        } catch (error) {
-          console.error(error, `GET request to ${dataEntry.url} failed`);
-          throw error;
-        }
-
-        accumulator[key] = isDataAuthentic(
-          receivedData,
-          dataEntry.hash,
-          dataEntry.hashFunction,
+      if (
+        !['jsonurl', 'asseturl'].includes(
+          schemaElement.valueContent.toLowerCase(),
         )
-          ? receivedData
-          : null;
+      ) {
+        return dataEntry;
+      }
 
-        return accumulator;
-      }, {});
+      // At this stage, value should be of type jsonurl or asseturl
+      if (typeof dataEntry.value === 'string') {
+        console.error(
+          `Value of key: ${dataEntry.name} (${dataEntry.value}) is string but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,
+        );
+        return dataEntry;
+      }
+
+      if (Array.isArray(dataEntry.value)) {
+        console.error(
+          `Value of key: ${dataEntry.name} (${dataEntry.value}) is string[] but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,
+        );
+        return dataEntry;
+      }
+
+      const urlDataWithHash = dataEntry.value; // Type URLDataWithHash
+
+      let receivedData;
+      try {
+        const { url } = this.patchIPFSUrlsIfApplicable(urlDataWithHash);
+
+        receivedData = await fetch(url).then(async (response) => {
+          if (
+            urlDataWithHash.hashFunction ===
+            SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_BYTES
+          ) {
+            return response
+              .arrayBuffer()
+              .then((buffer) => new Uint8Array(buffer));
+          }
+
+          return response.json();
+        });
+      } catch (error) {
+        console.error(error, `GET request to ${urlDataWithHash.url} failed`);
+        throw error;
+      }
+
+      return isDataAuthentic(
+        receivedData,
+        urlDataWithHash.hash,
+        urlDataWithHash.hashFunction as SUPPORTED_HASH_FUNCTIONS,
+      )
+        ? { ...dataEntry, value: receivedData }
+        : { ...dataEntry, value: null };
+    });
+
+    return Promise.all(promises);
   }
 
   /**
@@ -333,7 +382,7 @@ export class ERC725 {
    * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
    * The JSON will be hashed with `keccak256`.
    */
-  encodeData(data: EncodeDataInput, schemas?: ERC725JSONSchema[]) {
+  encodeData(data: EncodeDataInput[], schemas?: ERC725JSONSchema[]) {
     return encodeData(
       data,
       Array.prototype.concat(this.options.schemas, schemas),
@@ -351,7 +400,7 @@ export class ERC725 {
    * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
    * The JSON will be hashed with `keccak256`.
    */
-  static encodeData(data: EncodeDataInput, schemas: ERC725JSONSchema[]) {
+  static encodeData(data: EncodeDataInput[], schemas: ERC725JSONSchema[]) {
     return encodeData(data, schemas);
   }
 
@@ -368,7 +417,7 @@ export class ERC725 {
    * @returns Returns decoded data as defined and expected in the schema:
    */
   decodeData(
-    data: DecodeDataInput,
+    data: DecodeDataInput[],
     schemas?: ERC725JSONSchema[],
   ): { [key: string]: any } {
     return decodeData(
@@ -390,7 +439,7 @@ export class ERC725 {
    * @returns Returns decoded data as defined and expected in the schema:
    */
   static decodeData(
-    data: DecodeDataInput,
+    data: DecodeDataInput[],
     schemas: ERC725JSONSchema[],
   ): { [key: string]: any } {
     return decodeData(data, schemas);
@@ -502,45 +551,19 @@ export class ERC725 {
     return results;
   }
 
-  private async getDataSingle(data: string) {
-    const keySchema = getSchemaElement(this.options.schemas, data);
-    const rawData = await this.options.provider?.getData(
-      this.options.address as string,
-      keySchema.key,
+  private async getDataMultiple(keyNames: Array<string | GetDataDynamicKey>) {
+    const schemas = generateSchemasFromDynamicKeys(
+      keyNames,
+      this.options.schemas,
     );
-
-    // Decode and return the data
-    if (keySchema.keyType.toLowerCase() === 'array') {
-      const dataKeyValue = {
-        [keySchema.key]: { key: keySchema.key, value: rawData },
-      };
-
-      const arrayValues = await this.getArrayValues(keySchema, dataKeyValue);
-
-      if (arrayValues && arrayValues.length > 0) {
-        arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
-        return decodeKey(keySchema, arrayValues);
-      }
-
-      return []; // return empty object if there are no arrayValues
-    }
-
-    return decodeKey(keySchema, rawData);
-  }
-
-  private async getDataMultiple(keyNames: string[]) {
-    const keyHashes = keyNames.map((keyName) => {
-      const schemaElement = getSchemaElement(this.options.schemas, keyName);
-      return schemaElement.key;
-    });
 
     // Get all the raw data from the provider based on schema key hashes
     const allRawData: KeyValuePair[] = await this.options.provider?.getAllData(
       this.options.address as string,
-      keyHashes,
+      schemas.map((schema) => schema.key),
     );
 
-    const tmpData = allRawData.reduce<{ [key: string]: any }>(
+    const keyValueMap = allRawData.reduce<{ [key: string]: any }>(
       (accumulator, current) => {
         accumulator[current.key] = current.value;
         return accumulator;
@@ -548,25 +571,48 @@ export class ERC725 {
       {},
     );
 
+    const schemasWithValue = schemas.map((schema) => {
+      return { ...schema, value: keyValueMap[schema.key] || null };
+    });
+
+    // ------- BEGIN ARRAY HANDLER -------
     // Get missing 'Array' fields for all arrays, as necessary
-    const arraySchemas = this.options.schemas.filter(
+
+    const arraySchemas = schemas.filter(
       (e) => e.keyType.toLowerCase() === 'array',
     );
 
+    // Looks like it gets array even if not requested as it gets the arrays from the this.options.schemas?
     // eslint-disable-next-line no-restricted-syntax
     for (const keySchema of arraySchemas) {
       const dataKeyValue = {
-        [keySchema.key]: { key: keySchema.key, value: tmpData[keySchema.key] },
+        [keySchema.key]: {
+          key: keySchema.key,
+          value: keyValueMap[keySchema.key],
+        },
       };
       const arrayValues = await this.getArrayValues(keySchema, dataKeyValue);
 
       if (arrayValues && arrayValues.length > 0) {
         arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
-        tmpData[keySchema.key] = arrayValues;
+
+        schemasWithValue[
+          schemasWithValue.findIndex((schema) => schema.key === keySchema.key)
+        ] = { ...keySchema, value: arrayValues };
       }
     }
+    // ------- END ARRAY HANDLER -------
 
-    return decodeData(tmpData, this.options.schemas);
+    return decodeData(
+      schemasWithValue.map(({ key, value }) => {
+        return {
+          keyName: key,
+          value,
+          // no need to add dynamic key parts here as the schemas object below already holds the "generated" schemas for the dynamic keys
+        };
+      }),
+      schemas,
+    );
   }
 
   /**

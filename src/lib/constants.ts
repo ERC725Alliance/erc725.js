@@ -6,7 +6,8 @@ import { MethodData, Encoding, Method } from '../types/Method';
 // https://github.com/ERC725Alliance/ERC725/blob/develop/docs/ERC-725.md#specification
 export const INTERFACE_IDS = {
   ERC725Y_LEGACY: '0x2bd57b73',
-  ERC725Y: '0x5a988c0f',
+  ERC725Y_v200: '0x5a988c0f', // introduced in v0.2.0
+  ERC725Y: '0x714df77c', // introduced in v0.6.0
 };
 
 export enum ERC725_VERSION {
