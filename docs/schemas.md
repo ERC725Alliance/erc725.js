@@ -27,10 +27,13 @@ Current provided LSPs are:
 ```
 LSP1UniversalReceiverDelegate.json
 LSP3UniversalProfileMetadata.json
-LSP4DigitalAsset.json
 LSP4DigitalAssetLegacy.json
+LSP4DigitalAsset.json
 LSP5ReceivedAssets.json
 LSP6KeyManager.json
+LSP9Vault.json
+LSP10ReceivedVaults.json           
+LSP12IssuedAssets.json            
 ```
 
 You can import them from:

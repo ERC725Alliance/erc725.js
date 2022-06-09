@@ -4,6 +4,7 @@ import { keccak256 } from 'web3-utils';
 import {
   encodeDynamicKeyPart,
   encodeKeyName,
+  generateDynamicKeyName,
   isDynamicKeyName,
 } from './encodeKeyName';
 
@@ -40,7 +41,7 @@ describe('encodeKeyName', () => {
     {
       keyName: 'LSP12IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
       expectedKey:
-        '0x74ac2555c10b9349e78f0000b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+        '0x74ac2555c10b9349e78f0000b74a88c43bcf691bd7a851f6603cb1868f6fc147',
     },
     {
       keyName:
@@ -125,6 +126,13 @@ describe('encodeKeyName', () => {
         '0x35e6950bc8d275060e3c0000cafecafecafecafecafecafecafecafecafecafe',
       // |-- bytes6 --||------||--||------------ bytes20 -----------------|
       dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
+    },
+    {
+      keyName: 'MyKeyName:MyMapName:<address>',
+      expectedKey:
+        '0x35e6950bc8d275060e3c00004c6f947ae67f572afa4ae0730947de7c874f95ef',
+      // |-- bytes6 --||------||--||------------ bytes20 -----------------|
+      dynamicKeyParts: '0x4c6f947Ae67F572afa4ae0730947DE7C874F95Ef', // address is checksummed -> expected key should be lowercase
     },
     {
       keyName: 'MyKeyName:<bytes2>:<uint32>',
@@ -287,6 +295,12 @@ describe('encodeDynamicKeyPart', () => {
     },
     {
       type: '<address>',
+      value: '0x1FdCD4dD0E164bCbd32DbF983c9903F4eD10356d',
+      bytes: 5,
+      expectedEncoding: '1FdCD4dD0E'.toLowerCase(), // should return lowercase
+    },
+    {
+      type: '<address>',
       value: '7f268357a8c2552623316e2562d90e642bb538e5',
       bytes: 21,
       expectedEncoding: '007f268357a8c2552623316e2562d90e642bb538e5', // left padded
@@ -341,6 +355,53 @@ describe('encodeDynamicKeyPart', () => {
   it('throws if <bytesM> is called with wrong number of bytes', () => {
     assert.throws(() =>
       encodeDynamicKeyPart('<bytes8>', '0xd1b2917d26eeeaad1234', 20),
+    );
+  });
+});
+
+describe('generateDynamicKeyName', () => {
+  const testCases = [
+    {
+      keyName: 'MyKey:<string>',
+      dynamicKeyParts: 'HelloHowAreYou',
+      expectedKeyName: 'MyKey:HelloHowAreYou',
+    },
+    {
+      keyName: 'MyKey:Grouping:<string>',
+      dynamicKeyParts: 'HelloHowAreYou',
+      expectedKeyName: 'MyKey:Grouping:HelloHowAreYou',
+    },
+
+    {
+      keyName: 'MyKey:<bytes4>:<address>',
+      dynamicKeyParts: [
+        '0x11223344',
+        '0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
+      ],
+      expectedKeyName:
+        'MyKey:11223344:2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
+    },
+    {
+      keyName: 'Addresses:<address>',
+      dynamicKeyParts: [
+        '2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac', // without 0x in the address
+      ],
+      expectedKeyName: 'Addresses:2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
+    },
+  ];
+
+  testCases.forEach((testCase) => {
+    it(`generates key name: ${testCase.keyName} correctly`, () => {
+      assert.deepStrictEqual(
+        generateDynamicKeyName(testCase.keyName, testCase.dynamicKeyParts),
+        testCase.expectedKeyName,
+      );
+    });
+  });
+
+  it('throws if encoding with wrong number of dynamic values', () => {
+    assert.throws(() =>
+      generateDynamicKeyName('Addresses:<bytes4>:<address>', '0x11223344'),
     );
   });
 });

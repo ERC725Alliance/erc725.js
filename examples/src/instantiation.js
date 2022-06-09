@@ -3,7 +3,6 @@ import { ERC725 } from '@erc725/erc725.js';
 
 // this is needed because node does not support `fetch` out of the box
 // isomorphic-fetch is not needed in a browser environment
-// eslint-disable-next-line import/no-extraneous-dependencies
 import 'isomorphic-fetch';
 
 const RPC_ENDPOINT = 'https://rpc.l14.lukso.network';

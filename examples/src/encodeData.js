@@ -7,7 +7,7 @@ const myERC725 = getInstance();
 const encodedDataOneKey = myERC725.encodeData({
   LSP3Profile: {
     json: profileJson, // check instantiation.js to see the actual JSON
-    url: 'ifps://QmQTqheBLZFnQUxu5RDs8tA9JtkxfZqMBcmGd9sukXxwRm',
+    url: 'ipfs://QmQTqheBLZFnQUxu5RDs8tA9JtkxfZqMBcmGd9sukXxwRm',
   },
 });
 /**
@@ -23,14 +23,14 @@ const encodedDataOneKeyV2 = myERC725.encodeData({
   LSP3Profile: {
     hashFunction: 'keccak256(utf8)',
     hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
-    url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+    url: 'ipfs://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
   },
 });
 /**
 {
   LSP3Profile: {
     value:
-      '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+      '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
     key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
   },
 }
@@ -40,7 +40,7 @@ const encodedDataManyKeys = myERC725.encodeData({
   LSP3Profile: {
     hashFunction: 'keccak256(utf8)',
     hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
-    url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+    url: 'ipfs://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
   },
   'LSP3IssuedAssets[]': [
     '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
@@ -52,7 +52,7 @@ const encodedDataManyKeys = myERC725.encodeData({
 {
   LSP3Profile: {
     value:
-      '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+      '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
     key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
   },
   'LSP3IssuedAssets[]': {

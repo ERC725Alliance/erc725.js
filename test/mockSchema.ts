@@ -11,9 +11,10 @@ import { ERC725JSONSchema } from '../src/types/ERC725JSONSchema';
 const abiCoder: AbiCoder.AbiCoder = AbiCoder;
 
 export const mockSchema: (ERC725JSONSchema & {
-  returnRawData?;
+  returnRawData?: string | string[];
   returnRawDataArray?; // Used for the array version of getData()
   returnGraphData?;
+  dynamicKeyParts?: string | string[];
   expectedResult?;
 })[] = [
   // Case 1
@@ -597,6 +598,28 @@ export const mockSchema: (ERC725JSONSchema & {
     returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0xabe425d6']),
     returnGraphData: '0xabe425d6',
     expectedResult: '0xabe425d6',
+  },
+  {
+    name: 'Hello:<address>',
+    key: '0x06b3dfaec148fb1bb2b00000cafecafecafecafecafecafecafecafecafecafe', // encoded for cafecafe... address - parameters are bellow
+    dynamicKeyParts: ['0xcafecafecafecafecafecafecafecafecafecafe'],
+    keyType: 'Singleton',
+    valueContent: 'AssetURL',
+    valueType: 'bytes',
+    // Testing data
+    returnRawData: abiCoder.encodeParameter(
+      'bytes',
+      '0x6f357c6aa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
+    ),
+    returnRawDataArray: abiCoder.encodeParameter('bytes[]', [
+      '0x6f357c6aa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
+    ]),
+    returnGraphData: '0x0c03fba782b07bcf810deb3b7f0595024a444f4e',
+    expectedResult: {
+      hashFunction: 'keccak256(utf8)',
+      hash: '0xa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81', // hash of address '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
+      url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd', // FAKE. just used from above TODO: fix this is not an asset URL but a JSON url !!
+    },
   },
 
   // Nested array tests

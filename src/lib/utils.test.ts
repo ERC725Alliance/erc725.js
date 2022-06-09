@@ -1,103 +1,32 @@
+/* eslint-disable no-unused-expressions */
+
+import { expect } from 'chai';
 import assert from 'assert';
+
 import { keccak256, utf8ToHex } from 'web3-utils';
 import {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueType,
 } from '../types/ERC725JSONSchema';
+import { GetDataDynamicKey } from '../types/GetData';
 
 import { SUPPORTED_HASH_FUNCTION_STRINGS } from './constants';
 import {
-  flattenEncodedData,
   guessKeyTypeFromKeyName,
   isDataAuthentic,
-  getSchemaElement,
   encodeArrayKey,
   encodeKeyValue,
   decodeKeyValue,
   encodeKey,
-  decodeKey,
   encodeData,
   convertIPFSGatewayUrl,
+  generateSchemasFromDynamicKeys,
 } from './utils';
+import { isDynamicKeyName } from './encodeKeyName';
+import { decodeKey } from './decodeData';
 
 describe('utils', () => {
-  describe('#flattenEncodedData', () => {
-    it('should flatten encodedData (with one key)', () => {
-      const encodedData = {
-        LSP3Profile: {
-          value:
-            '0x6f357c6a2404a2866f05e53e141eb61382a045e53c2fc54831daca9d9e1e039a11f739e1696670733a2f2f516d5154716865424c5a466e5155787535524473387441394a746b78665a714d42636d47643973756b587877526d',
-          key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-        },
-      };
-
-      assert.deepStrictEqual(flattenEncodedData(encodedData), [
-        {
-          value: encodedData.LSP3Profile.value,
-          key: encodedData.LSP3Profile.key,
-        },
-      ]);
-    });
-
-    it('should flatten encodedData (with multiple keys)', () => {
-      const encodedDataManyKeys = {
-        item1: {
-          key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-          value:
-            '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
-        },
-        item2: {
-          key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
-          value: '0x1183790f29be3cdfd0a102862fea1a4a30b3adab',
-        },
-        item3: {
-          key: 'array',
-          value: [
-            {
-              key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
-              value:
-                '0x0000000000000000000000000000000000000000000000000000000000000002',
-            },
-            {
-              key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
-              value: '0xd94353d9b005b3c0a9da169b768a31c57844e490',
-            },
-            {
-              key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
-              value: '0xdaea594e385fc724449e3118b2db7e86dfba1826',
-            },
-          ],
-        },
-      };
-
-      const flattenedEncodedData = flattenEncodedData(encodedDataManyKeys);
-
-      assert.deepStrictEqual(flattenedEncodedData, [
-        {
-          key: encodedDataManyKeys.item2.key,
-          value: encodedDataManyKeys.item2.value,
-        },
-        {
-          key: encodedDataManyKeys.item3.value[1].key,
-          value: encodedDataManyKeys.item3.value[1].value,
-        },
-        {
-          key: encodedDataManyKeys.item3.value[2].key,
-          value: encodedDataManyKeys.item3.value[2].value,
-        },
-        {
-          key: encodedDataManyKeys.item3.value[0].key,
-          value: encodedDataManyKeys.item3.value[0].value,
-        },
-        {
-          key: encodedDataManyKeys.item1.key,
-          value: encodedDataManyKeys.item1.value,
-        },
-      ]);
-    });
-  });
-
   describe('encodeKey/decodeKey', () => {
     it('encodes/decodes keyType Array', () => {
       const testCases = [
@@ -355,12 +284,26 @@ describe('utils', () => {
       values: ['0x1183790f29be3cdfd0a102862fea1a4a30b3adab'],
     };
 
-    it('encodes data with named key', () => {
+    it('encodes data with named key - [array input]', () => {
+      const encodedDataByNamedKey = encodeData(
+        [
+          {
+            keyName: 'LSP1UniversalReceiverDelegate',
+            value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+          },
+        ],
+        schemas,
+      );
+      assert.deepStrictEqual(encodedDataByNamedKey, expectedResult);
+    });
+
+    it('encodes data with named key - [non array input]', () => {
       const encodedDataByNamedKey = encodeData(
         {
-          LSP1UniversalReceiverDelegate:
-            '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+          keyName: 'LSP1UniversalReceiverDelegate',
+          value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
         },
+
         schemas,
       );
       assert.deepStrictEqual(encodedDataByNamedKey, expectedResult);
@@ -371,9 +314,12 @@ describe('utils', () => {
         '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
 
       const encodedDataByHashKey = encodeData(
-        {
-          [hashedKey]: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
-        },
+        [
+          {
+            keyName: hashedKey,
+            value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+          },
+        ],
         schemas,
       );
       assert.deepStrictEqual(encodedDataByHashKey, expectedResult);
@@ -384,9 +330,12 @@ describe('utils', () => {
         '0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
 
       const encodedDataByHashKeyWithout0xPrefix = encodeData(
-        {
-          [hashedKey]: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
-        },
+        [
+          {
+            keyName: hashedKey,
+            value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+          },
+        ],
         schemas,
       );
 
@@ -398,9 +347,12 @@ describe('utils', () => {
 
     it('encodes array', () => {
       const encodedDataWithMultipleKeys = encodeData(
-        {
-          'LSP3IssuedAssets[]': ['0xa3e6F38477D45727F6e6f853Cdb479b0D60c0aC9'],
-        },
+        [
+          {
+            keyName: 'LSP3IssuedAssets[]',
+            value: ['0xa3e6F38477D45727F6e6f853Cdb479b0D60c0aC9'],
+          },
+        ],
         schemas,
       );
 
@@ -418,19 +370,27 @@ describe('utils', () => {
 
     it('encodes multiple keys', () => {
       const encodedMultipleKeys = encodeData(
-        {
-          LSP3Profile: {
-            hashFunction: 'keccak256(utf8)',
-            hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
-            url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+        [
+          {
+            keyName: 'LSP3Profile',
+            value: {
+              hashFunction: 'keccak256(utf8)',
+              hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+              url: 'ipfs://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+            },
           },
-          'LSP3IssuedAssets[]': [
-            '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
-            '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826',
-          ],
-          LSP1UniversalReceiverDelegate:
-            '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
-        },
+          {
+            keyName: 'LSP3IssuedAssets[]',
+            value: [
+              '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
+              '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826',
+            ],
+          },
+          {
+            keyName: 'LSP1UniversalReceiverDelegate',
+            value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+          },
+        ],
         schemas,
       );
 
@@ -443,7 +403,7 @@ describe('utils', () => {
           '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
         ],
         values: [
-          '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+          '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
           '0x0000000000000000000000000000000000000000000000000000000000000002',
           '0xd94353d9b005b3c0a9da169b768a31c57844e490',
           '0xdaea594e385fc724449e3118b2db7e86dfba1826',
@@ -451,24 +411,51 @@ describe('utils', () => {
         ],
       });
     });
-  });
 
-  describe('getSchemaElement', () => {
-    it('gets the schemaElement correctly', () => {
-      const key =
-        '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5';
+    it('encodes dynamic keys', () => {
+      const address = '0x78c964cd805233eb39f2db152340079088809725';
 
-      const schemas: ERC725JSONSchema[] = [
-        {
-          name: 'LSP3Profile',
-          key,
-          keyType: 'Singleton',
-          valueContent: 'JSONURL',
-          valueType: 'bytes',
-        },
-      ];
+      const encodedDynamicKeys = encodeData(
+        [
+          {
+            keyName: 'DynamicKey:<address>',
+            dynamicKeyParts: [address],
+            value: '0xc57390642767fc9adb0e4211fac735abe2edcfde',
+          },
+          {
+            keyName: 'DynamicKey:<bytes4>:<string>',
+            dynamicKeyParts: ['0x11223344', 'Summer'],
+            value: '0x5bed9e061cea8b4be17d3b5ea85de62f483a40fd',
+          },
+        ],
+        [
+          {
+            name: 'DynamicKey:<address>',
+            key: '0x0fb367364e1852abc5f20000<address>',
+            keyType: 'Mapping',
+            valueType: 'bytes',
+            valueContent: 'Address',
+          },
+          {
+            name: 'DynamicKey:<bytes4>:<string>',
+            key: '0xForDynamicKeysThisFieldIsIrrelevantAndWillBeOverwriten',
+            keyType: 'Mapping',
+            valueType: 'bytes',
+            valueContent: 'Address',
+          },
+        ],
+      );
 
-      assert.strictEqual(getSchemaElement(schemas, key), schemas[0]);
+      assert.deepStrictEqual(encodedDynamicKeys, {
+        keys: [
+          `0x0fb367364e1852abc5f20000${address.replace('0x', '')}`,
+          '0x0fb367364e181122334400007746e4c8ba6f946d9f51a1c9e539fb62598962aa',
+        ],
+        values: [
+          '0xc57390642767fc9adb0e4211fac735abe2edcfde',
+          '0x5bed9e061cea8b4be17d3b5ea85de62f483a40fd',
+        ],
+      });
     });
   });
 
@@ -569,6 +556,53 @@ describe('utils', () => {
         convertIPFSGatewayUrl('https://cloudflare-ipfs.com/ipfs/'),
         expectedIPFSGateway,
       );
+    });
+  });
+
+  describe('generateSchemasFromDynamicKeys', () => {
+    it('generates a non dynamic schema correctly', () => {
+      const schemas: ERC725JSONSchema[] = [
+        {
+          name: 'AddressPermissions:AllowedFunctions:<address>',
+          key: '0x4b80742de2bf8efea1e80000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: 'bytes4[]',
+          valueContent: 'Bytes4',
+        },
+        {
+          name: 'AddressPermissions[]',
+          key: '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3',
+          keyType: 'Array',
+          valueType: 'address',
+          valueContent: 'Address',
+        },
+        {
+          name: 'LSP4CreatorsMap:<address>',
+          key: '0x6de85eaf5d982b4e5da00000<address>',
+          keyType: 'Mapping',
+          valueType: 'bytes',
+          valueContent: 'Bytes4',
+        },
+      ];
+
+      const keys: Array<string | GetDataDynamicKey> = [
+        'AddressPermissions[]',
+        {
+          keyName: 'LSP4CreatorsMap:<address>',
+          dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
+        },
+      ];
+
+      const generatedSchemas = generateSchemasFromDynamicKeys(keys, schemas);
+
+      expect(generatedSchemas.length).to.equal(keys.length);
+
+      generatedSchemas.forEach((schema) => {
+        expect(
+          isDynamicKeyName(schema.name),
+          'generated schema key should not be dynamic',
+        ).to.be.false;
+      });
     });
   });
 });

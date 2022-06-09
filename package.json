@@ -1,6 +1,6 @@
 {
   "name": "@erc725/erc725.js",
-  "version": "0.13.0",
+  "version": "0.14.0-beta.0",
   "description": "Library to interact with ERC725 smart contracts",
   "main": "build/main/src/index.js",
   "typings": "build/main/src/index.d.ts",
@@ -51,6 +51,7 @@
   },
   "homepage": "https://github.com/ERC725Alliance/erc725.js#readme",
   "devDependencies": {
+    "@types/chai": "^4.3.1",
     "@types/isomorphic-fetch": "^0.0.36",
     "@types/mocha": "^9.1.1",
     "@types/node": "^15.12.2",
@@ -58,6 +59,7 @@
     "@typescript-eslint/eslint-plugin": "^5.25.0",
     "@typescript-eslint/parser": "^5.25.0",
     "assert": "^2.0.0",
+    "chai": "^4.3.6",
     "eslint": "^8.15.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.5.0",

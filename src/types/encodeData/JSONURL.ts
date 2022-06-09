@@ -23,10 +23,7 @@ export interface URLDataWithJson extends URLData {
 
 export type JSONURLDataToEncode = URLDataWithHash | URLDataWithJson;
 
-export type EncodeDataInput = Record<
-  string,
-  string | string[] | JSONURLDataToEncode
->;
+export type EncodeDataType = string | string[] | JSONURLDataToEncode;
 
 export interface EncodeDataReturn {
   keys: string[];

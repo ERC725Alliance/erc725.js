@@ -20,19 +20,12 @@
 import {
   checkAddressChecksum,
   isAddress,
-  isHex,
-  isHexStrict,
   numberToHex,
   padLeft,
 } from 'web3-utils';
 import { arrToBufArr } from 'ethereumjs-util';
 
-import {
-  KeyValuePair,
-  JSONURLDataToEncode,
-  EncodeDataInput,
-  EncodeDataReturn,
-} from '../types';
+import { JSONURLDataToEncode, EncodeDataReturn } from '../types';
 import {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
@@ -52,7 +45,10 @@ import {
   valueContentEncodingMap as valueContentMap,
 } from './encoder';
 import { AssetURLEncode } from '../types/encodeData';
-import { encodeKeyName } from './encodeKeyName';
+import { isDynamicKeyName } from './encodeKeyName';
+import { getSchemaElement } from './getSchemaElement';
+import { EncodeDataInput } from '../types/decodeData';
+import { GetDataDynamicKey } from '../types/GetData';
 
 /**
  *
@@ -156,42 +152,6 @@ export function guessKeyTypeFromKeyName(
   }
 
   return 'Singleton';
-}
-
-/**
- *
- * @param schemas An array of ERC725JSONSchema objects.
- * @param {string} namedOrHashedKey A string of either the schema element name, or hashed key (with or without the 0x prefix).
- *
- * @return The requested schema element from the full array of schemas.
- */
-export function getSchemaElement(
-  schemas: ERC725JSONSchema[],
-  namedOrHashedKey: string,
-) {
-  let keyHash: string;
-
-  if (isHexStrict(namedOrHashedKey)) {
-    keyHash = namedOrHashedKey;
-  } else if (isHex(namedOrHashedKey)) {
-    keyHash = `0x${namedOrHashedKey}`;
-  } else {
-    keyHash = encodeKeyName(namedOrHashedKey);
-  }
-
-  const schemaElement = schemas.find((e) => e.key === keyHash);
-
-  if (!schemaElement) {
-    throw new Error(
-      'No matching schema found for key: "' +
-        namedOrHashedKey +
-        '" (' +
-        keyHash +
-        ').',
-    );
-  }
-
-  return schemaElement;
 }
 
 /**
@@ -334,124 +294,35 @@ export function decodeKeyValue(
 }
 
 /**
- *
- * @param schema is an object of a schema definitions.
- * @param value will be either key-value pairs for a key type of Array, or a single value for type Singleton.
- *
- * @return the decoded value/values as per the schema definition.
- */
-export function decodeKey(schema: ERC725JSONSchema, value) {
-  const lowerCaseKeyType = schema.keyType.toLowerCase();
-
-  switch (lowerCaseKeyType) {
-    case 'array': {
-      const results: any[] = [];
-
-      // If user has requested a key which does not exist in the contract, value will be: 0x and value.find() will fail.
-      if (!value || typeof value === 'string') {
-        return results;
-      }
-
-      const valueElement = value.find((e) => e.key === schema.key);
-      // Handle empty/non-existent array
-      if (!valueElement) {
-        return results;
-      }
-
-      const arrayLength =
-        decodeKeyValue('Number', 'uint256', valueElement.value, schema.name) ||
-        0;
-
-      // This will not run if no match or arrayLength
-      for (let index = 0; index < arrayLength; index++) {
-        const dataElement = value.find(
-          (e) => e.key === encodeArrayKey(schema.key, index),
-        );
-
-        if (dataElement) {
-          results.push(
-            decodeKeyValue(
-              schema.valueContent,
-              schema.valueType,
-              dataElement.value,
-              schema.name,
-            ),
-          );
-        }
-      } // end for loop
-
-      return results;
-    }
-    case 'mappingwithgrouping':
-    case 'singleton':
-    case 'mapping': {
-      if (Array.isArray(value)) {
-        const newValue = value.find((e) => e.key === schema.key);
-
-        // Handle empty or non-values
-        if (!newValue) {
-          return null;
-        }
-
-        return decodeKeyValue(
-          schema.valueContent,
-          schema.valueType,
-          newValue.value,
-          schema.name,
-        );
-      }
-
-      return decodeKeyValue(
-        schema.valueContent,
-        schema.valueType,
-        value,
-        schema.name,
-      );
-    }
-    default: {
-      console.error(
-        'Incorrect data match or keyType in schema from decodeKey(): "' +
-          schema.keyType +
-          '"',
-      );
-      return null;
-    }
-  }
-}
-
-/**
- * @param schema schema is an array of objects of schema definitions
- * @param data data is an array of objects of key-value pairs
- *
- * @return: all decoded data as per required by the schema and provided data
- */
-export function decodeData(
-  data: Record<string, any>,
-  schema: ERC725JSONSchema[],
-) {
-  return Object.entries(data).reduce((decodedData, [key, value]) => {
-    const schemaElement = getSchemaElement(schema, key);
-
-    return {
-      ...decodedData,
-      [schemaElement.name]: decodeKey(schemaElement, value),
-    };
-  }, {});
-}
-
-/**
  * @param schema an array of schema definitions as per ${@link ERC725JSONSchema}
  * @param data an object of key-value pairs
  */
 export function encodeData(
-  data: EncodeDataInput,
+  data: EncodeDataInput | EncodeDataInput[],
   schema: ERC725JSONSchema[],
 ): EncodeDataReturn {
-  return Object.entries(data).reduce(
-    (accumulator, [key, value]) => {
-      const schemaElement = getSchemaElement(schema, key);
+  const dataAsArray = Array.isArray(data) ? data : [data];
 
-      const encodedValue = encodeKey(schemaElement, value as any);
+  return dataAsArray.reduce(
+    (accumulator, { keyName, value, dynamicKeyParts }) => {
+      let schemaElement: ERC725JSONSchema | null = null;
+      let encodedValue; // would be nice to type this
+
+      // Switch between non dynamic and dynamic keys:
+      if (isDynamicKeyName(keyName)) {
+        // In case of a dynamic key, we need to check if the value is of type DynamicKeyPartIntput.
+        if (!dynamicKeyParts) {
+          throw new Error(
+            `Can't encodeData for dynamic key: ${keyName} with non dynamic values. Got: ${value}, expected object.`,
+          );
+        }
+
+        schemaElement = getSchemaElement(schema, keyName, dynamicKeyParts);
+        encodedValue = encodeKey(schemaElement, value);
+      } else {
+        schemaElement = getSchemaElement(schema, keyName);
+        encodedValue = encodeKey(schemaElement, value as any);
+      }
 
       if (typeof encodedValue === 'string') {
         accumulator.keys.push(schemaElement.key);
@@ -520,38 +391,6 @@ export function isDataAuthentic(
 }
 
 /**
- * Transform the object containing the encoded data into an array ordered by keys,
- * for easier handling when writing the data to the blockchain.
- *
- * @param {{
- *   [key: string]: any;
- * }} encodedData This is essentially the object you receive when calling `encodeData(...)`
- * @return {*}  KeyValuePair[] An array of key-value objects
- */
-export function flattenEncodedData(encodedData: {
-  [key: string]: any;
-}): KeyValuePair[] {
-  return (
-    Object.entries(encodedData)
-      .reduce((keyValuePairs: any[], [, encodedDataElement]) => {
-        if (Array.isArray(encodedDataElement.value)) {
-          return keyValuePairs.concat(encodedDataElement.value);
-        }
-        keyValuePairs.push({
-          key: encodedDataElement.key,
-          value: encodedDataElement.value,
-        });
-        return keyValuePairs;
-      }, [])
-      // sort array of objects by keys, to not be dependent on the order of the object's keys
-      .sort((a, b) => {
-        if (a.key < b.key) return -1;
-        return a.key > b.key ? 1 : 0;
-      })
-  );
-}
-
-/**
  * Transforms passed ipfsGateway url to correct format for fetching IPFS data
  *
  * @param ipfsGateway
@@ -570,3 +409,19 @@ export function convertIPFSGatewayUrl(ipfsGateway: string) {
 
   return convertedIPFSGateway;
 }
+
+/**
+ * Given a list of keys (dynamic or not) and a list of schemas with dynamic keys, it will
+ * generate a "final"/non dynamic schemas list.
+ */
+export const generateSchemasFromDynamicKeys = (
+  keyNames: Array<string | GetDataDynamicKey>,
+  schemas: ERC725JSONSchema[],
+) => {
+  return keyNames.map((keyName) => {
+    if (typeof keyName === 'string') {
+      return getSchemaElement(schemas, keyName);
+    }
+    return getSchemaElement(schemas, keyName.keyName, keyName.dynamicKeyParts);
+  });
+};
