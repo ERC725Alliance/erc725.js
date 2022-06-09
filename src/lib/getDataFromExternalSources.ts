@@ -41,6 +41,10 @@ export const getDataFromExternalSources = (
       return dataEntry;
     }
 
+    if (!dataEntry.value) {
+      return dataEntry;
+    }
+
     if (Array.isArray(dataEntry.value)) {
       console.error(
         `Value of key: ${dataEntry.name} (${dataEntry.value}) is string[] but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,
