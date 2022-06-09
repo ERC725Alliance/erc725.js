@@ -25,7 +25,6 @@ import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
 
 import ERC725 from '.';
 import {
-  decodeKey,
   decodeKeyValue,
   encodeKey,
   encodeKeyValue,
@@ -46,6 +45,7 @@ import {
   INTERFACE_IDS,
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './lib/constants';
+import { decodeKey } from './lib/decodeData';
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
 

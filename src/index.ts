@@ -25,7 +25,6 @@ import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
 
 import {
   encodeArrayKey,
-  decodeData,
   decodeKeyValue,
   isDataAuthentic,
   encodeData,
@@ -61,6 +60,7 @@ import {
   GetDataExternalSourcesOutput,
 } from './types/decodeData';
 import { GetDataDynamicKey, GetDataInput } from './types/GetData';
+import { decodeData } from './lib/decodeData';
 
 export {
   ERC725JSONSchema,
