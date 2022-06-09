@@ -409,6 +409,14 @@ describe('Running @erc725/erc725.js tests...', () => {
         assert.deepStrictEqual(result, fullResults);
       });
 
+      const testJSONURLSchema: ERC725JSONSchema = {
+        name: 'TestJSONURL',
+        key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+        keyType: 'Singleton',
+        valueContent: 'JSONURL',
+        valueType: 'bytes',
+      };
+
       it('fetchData JSONURL', async () => {
         const provider = new HttpProvider(
           {
@@ -420,27 +428,21 @@ describe('Running @erc725/erc725.js tests...', () => {
           },
           [contractVersion.interface],
         );
-        const erc725 = new ERC725(
-          [
-            {
-              name: 'TestJSONURL',
-              key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
-              keyType: 'Singleton',
-              valueContent: 'JSONURL',
-              valueType: 'bytes',
-            },
-          ],
-          address,
-          provider,
-        );
+
+        const erc725 = new ERC725([testJSONURLSchema], address, provider);
 
         const jsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
 
         const fetchStub = sinon.stub(global, 'fetch');
         fetchStub.onCall(0).returns(Promise.resolve(new Response(jsonString)));
         const result = await erc725.fetchData('TestJSONURL');
-        assert.deepStrictEqual(result, JSON.parse(jsonString));
         fetchStub.restore();
+
+        assert.deepStrictEqual(result, {
+          key: testJSONURLSchema.key,
+          name: testJSONURLSchema.name,
+          value: JSON.parse(jsonString),
+        });
       });
 
       it('fetchData JSONURL with custom config.ipfsGateway', async () => {
@@ -457,38 +459,75 @@ describe('Running @erc725/erc725.js tests...', () => {
 
         const ipfsGateway = 'https://2eff.lukso.dev';
 
-        const erc725 = new ERC725(
-          [
-            {
-              name: 'TestJSONURL',
-              key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
-              keyType: 'Singleton',
-              valueContent: 'JSONURL',
-              valueType: 'bytes',
-            },
-          ],
-          address,
-          provider,
-          {
-            ipfsGateway,
-          },
-        );
+        const erc725 = new ERC725([testJSONURLSchema], address, provider, {
+          ipfsGateway,
+        });
 
         const jsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
 
         const fetchStub = sinon.stub(global, 'fetch');
         fetchStub.onCall(0).returns(Promise.resolve(new Response(jsonString)));
         const result = await erc725.fetchData('TestJSONURL');
-        assert.deepStrictEqual(result, JSON.parse(jsonString));
+        assert.deepStrictEqual(result, {
+          key: testJSONURLSchema.key,
+          name: testJSONURLSchema.name,
+          value: JSON.parse(jsonString),
+        });
+        fetchStub.restore();
 
         assert.ok(
           fetchStub.calledWith(
             `${ipfsGateway}/ipfs/QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd`, // this value comes from the mockSchema
           ),
         );
-
-        fetchStub.restore();
       });
+
+      if (contractVersion.interface === INTERFACE_IDS.ERC725Y) {
+        it('fetchData JSONURL with dynamic key', async () => {
+          const provider = new HttpProvider(
+            {
+              returnData: [
+                {
+                  key: '0x84b02f6e50a0a0819a4f0000cafecafecafecafecafecafecafecafecafecafe',
+                  value:
+                    '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000596f357c6a733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a626400000000000000',
+                },
+              ],
+            },
+            [contractVersion.interface],
+          );
+          const erc725 = new ERC725(
+            [
+              {
+                name: 'JSONForAddress:<address>',
+                key: '0x84b02f6e50a0a0819a4f0000cafecafecafecafecafecafecafecafecafecafe',
+                keyType: 'Singleton',
+                valueContent: 'JSONURL',
+                valueType: 'bytes',
+              },
+            ],
+            address,
+            provider,
+          );
+
+          const jsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
+
+          const fetchStub = sinon.stub(global, 'fetch');
+          fetchStub
+            .onCall(0)
+            .returns(Promise.resolve(new Response(jsonString)));
+          const result = await erc725.fetchData({
+            keyName: 'JSONForAddress:<address>',
+            dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
+          });
+          fetchStub.restore();
+          assert.deepStrictEqual(result, {
+            name: 'JSONForAddress:cafecafecafecafecafecafecafecafecafecafe',
+            key: '0x84b02f6e50a0a0819a4f0000cafecafecafecafecafecafecafecafecafecafe',
+            value: JSON.parse(jsonString),
+          });
+        });
+      }
 
       if (contractVersion.interface === INTERFACE_IDS.ERC725Y_LEGACY) {
         it('fetchData AssetURL', async () => {
@@ -516,6 +555,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             },
             [contractVersion.interface],
           );
+
           const erc725 = new ERC725(
             [
               {
@@ -531,12 +571,12 @@ describe('Running @erc725/erc725.js tests...', () => {
           );
           const result = await erc725.fetchData('TestAssetURL');
 
+          fetchStub.restore();
+
           assert.strictEqual(
-            Object.prototype.toString.call(result),
+            Object.prototype.toString.call(result.value),
             '[object Uint8Array]',
           );
-
-          fetchStub.restore();
         });
       }
     });

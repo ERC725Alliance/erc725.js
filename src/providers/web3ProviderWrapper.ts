@@ -68,6 +68,17 @@ export class Web3ProviderWrapper {
       return ERC725_VERSION.ERC725;
     }
 
+    const isErc725Yv200 = await this.supportsInterface(
+      address,
+      INTERFACE_IDS.ERC725Y_v200,
+    );
+
+    if (isErc725Yv200) {
+      return ERC725_VERSION.ERC725;
+    }
+
+    // v0.2.0 and v0.6.0 have the same function signatures for getData, only versions before v0.2.0 requires a different call
+
     const isErc725YLegacy = await this.supportsInterface(
       address,
       INTERFACE_IDS.ERC725Y_LEGACY,

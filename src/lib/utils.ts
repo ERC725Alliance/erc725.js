@@ -52,6 +52,7 @@ import {
   DecodeDataOutput,
   EncodeDataInput,
 } from '../types/decodeData';
+import { GetDataDynamicKey } from '../types/GetData';
 
 /**
  *
@@ -552,3 +553,19 @@ export function convertIPFSGatewayUrl(ipfsGateway: string) {
 
   return convertedIPFSGateway;
 }
+
+/**
+ * Given a list of keys (dynamic or not) and a list of schemas with dynamic keys, it will
+ * generate a "final"/non dynamic schemas list.
+ */
+export const generateSchemasFromDynamicKeys = (
+  keyNames: Array<string | GetDataDynamicKey>,
+  schemas: ERC725JSONSchema[],
+) => {
+  return keyNames.map((keyName) => {
+    if (typeof keyName === 'string') {
+      return getSchemaElement(schemas, keyName);
+    }
+    return getSchemaElement(schemas, keyName.keyName, keyName.dynamicKeyParts);
+  });
+};

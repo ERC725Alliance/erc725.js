@@ -19,3 +19,7 @@ export interface DecodeDataOutput {
   name: string;
   key: string;
 }
+
+export interface GetDataExternalSourcesOutput extends DecodeDataOutput {
+  value: any;
+}

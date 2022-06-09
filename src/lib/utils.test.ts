@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-expressions */
+
 import { expect } from 'chai';
 import assert from 'assert';
 
@@ -7,6 +9,7 @@ import {
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueType,
 } from '../types/ERC725JSONSchema';
+import { GetDataDynamicKey } from '../types/GetData';
 
 import { SUPPORTED_HASH_FUNCTION_STRINGS } from './constants';
 import {
@@ -20,7 +23,9 @@ import {
   encodeData,
   convertIPFSGatewayUrl,
   decodeData,
+  generateSchemasFromDynamicKeys,
 } from './utils';
+import { isDynamicKeyName } from './encodeKeyName';
 
 describe('utils', () => {
   describe('encodeKey/decodeKey', () => {
@@ -688,6 +693,53 @@ describe('utils', () => {
         convertIPFSGatewayUrl('https://cloudflare-ipfs.com/ipfs/'),
         expectedIPFSGateway,
       );
+    });
+  });
+
+  describe('generateSchemasFromDynamicKeys', () => {
+    it('generates a non dynamic schema correctly', () => {
+      const schemas: ERC725JSONSchema[] = [
+        {
+          name: 'AddressPermissions:AllowedFunctions:<address>',
+          key: '0x4b80742de2bf8efea1e80000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: 'bytes4[]',
+          valueContent: 'Bytes4',
+        },
+        {
+          name: 'AddressPermissions[]',
+          key: '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3',
+          keyType: 'Array',
+          valueType: 'address',
+          valueContent: 'Address',
+        },
+        {
+          name: 'LSP4CreatorsMap:<address>',
+          key: '0x6de85eaf5d982b4e5da00000<address>',
+          keyType: 'Mapping',
+          valueType: 'bytes',
+          valueContent: 'Bytes4',
+        },
+      ];
+
+      const keys: Array<string | GetDataDynamicKey> = [
+        'AddressPermissions[]',
+        {
+          keyName: 'LSP4CreatorsMap:<address>',
+          dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
+        },
+      ];
+
+      const generatedSchemas = generateSchemasFromDynamicKeys(keys, schemas);
+
+      expect(generatedSchemas.length).to.equal(keys.length);
+
+      generatedSchemas.forEach((schema) => {
+        expect(
+          isDynamicKeyName(schema.name),
+          'generated schema key should not be dynamic',
+        ).to.be.false;
+      });
     });
   });
 });
