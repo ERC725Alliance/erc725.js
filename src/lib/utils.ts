@@ -25,7 +25,11 @@ import {
 } from 'web3-utils';
 import { arrToBufArr } from 'ethereumjs-util';
 
-import { JSONURLDataToEncode, EncodeDataReturn } from '../types';
+import {
+  JSONURLDataToEncode,
+  EncodeDataReturn,
+  URLDataWithHash,
+} from '../types';
 import {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
@@ -425,3 +429,25 @@ export const generateSchemasFromDynamicKeys = (
     return getSchemaElement(schemas, keyName.keyName, keyName.dynamicKeyParts);
   });
 };
+
+/**
+ * Changes the protocol from `ipfs://` to `http(s)://` and adds the selected IPFS gateway.
+ * `ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D => https://ipfs.lukso.network/ipfs/QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D`
+ */
+export function patchIPFSUrlsIfApplicable(
+  receivedData: URLDataWithHash,
+  ipfsGateway: string,
+): URLDataWithHash {
+  if (
+    receivedData &&
+    receivedData.url &&
+    receivedData.url.indexOf('ipfs://') !== -1
+  ) {
+    return {
+      ...receivedData,
+      url: receivedData.url.replace('ipfs://', ipfsGateway),
+    };
+  }
+
+  return receivedData;
+}
