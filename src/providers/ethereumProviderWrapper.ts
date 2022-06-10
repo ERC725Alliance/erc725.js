@@ -24,7 +24,11 @@
 
 import * as abi from 'web3-eth-abi';
 
-import { ERC725_VERSION, INTERFACE_IDS, METHODS } from '../lib/constants';
+import {
+  ERC725_VERSION,
+  ERC725Y_INTERFACE_IDS,
+  METHODS,
+} from '../lib/constants';
 import { decodeResult as decodeResultUtils } from '../lib/provider-wrapper-utils';
 import { JsonRpcEthereumProvider } from '../types/JsonRpc';
 import { Method } from '../types/Method';
@@ -61,7 +65,7 @@ export class EthereumProviderWrapper {
   async getErc725YVersion(address: string): Promise<ERC725_VERSION> {
     const isErc725Y = await this.supportsInterface(
       address,
-      INTERFACE_IDS.ERC725Y,
+      ERC725Y_INTERFACE_IDS['3.0'],
     );
 
     if (isErc725Y) {
@@ -70,7 +74,7 @@ export class EthereumProviderWrapper {
 
     const isErc725Yv200 = await this.supportsInterface(
       address,
-      INTERFACE_IDS.ERC725Y_v200,
+      ERC725Y_INTERFACE_IDS['2.0'],
     );
 
     if (isErc725Yv200) {
@@ -81,7 +85,7 @@ export class EthereumProviderWrapper {
 
     const isErc725YLegacy = await this.supportsInterface(
       address,
-      INTERFACE_IDS.ERC725Y_LEGACY,
+      ERC725Y_INTERFACE_IDS.legacy,
     );
 
     return isErc725YLegacy
