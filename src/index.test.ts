@@ -42,7 +42,7 @@ import {
 import 'isomorphic-fetch';
 
 import {
-  INTERFACE_IDS,
+  ERC725Y_INTERFACE_IDS,
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './lib/constants';
 import { decodeKey } from './lib/decodeData';
@@ -275,7 +275,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             },
           ],
         },
-        [INTERFACE_IDS.ERC725Y_LEGACY],
+        [ERC725Y_INTERFACE_IDS.legacy],
       );
       const erc725 = new ERC725(
         [
@@ -321,7 +321,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             },
           ],
         },
-        [INTERFACE_IDS.ERC725Y],
+        [ERC725Y_INTERFACE_IDS['3.0']],
       );
       const erc725 = new ERC725(
         [
@@ -380,15 +380,15 @@ describe('Running @erc725/erc725.js tests...', () => {
   });
 
   [
-    { name: 'legacy', interface: INTERFACE_IDS.ERC725Y_LEGACY },
-    { name: 'latest', interface: INTERFACE_IDS.ERC725Y },
+    { name: 'legacy', interface: ERC725Y_INTERFACE_IDS.legacy },
+    { name: 'latest', interface: ERC725Y_INTERFACE_IDS['3.0'] },
   ].forEach((contractVersion) => {
     describe(`Getting all data in schema by provider [ERC725Y ${contractVersion.name}][mock]`, () => {
       // Construct the full data and results
       const fullResults = generateAllResults(mockSchema);
       const allRawData = generateAllRawData(
         mockSchema,
-        contractVersion.interface === INTERFACE_IDS.ERC725Y,
+        contractVersion.interface === ERC725Y_INTERFACE_IDS['3.0'],
       );
 
       it('with web3.currentProvider', async () => {
@@ -482,7 +482,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         );
       });
 
-      if (contractVersion.interface === INTERFACE_IDS.ERC725Y) {
+      if (contractVersion.interface === ERC725Y_INTERFACE_IDS['3.0']) {
         it('fetchData JSONURL with dynamic key', async () => {
           const provider = new HttpProvider(
             {
@@ -529,7 +529,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         });
       }
 
-      if (contractVersion.interface === INTERFACE_IDS.ERC725Y_LEGACY) {
+      if (contractVersion.interface === ERC725Y_INTERFACE_IDS.legacy) {
         it('fetchData AssetURL', async () => {
           const fetchStub = sinon.stub(global, 'fetch');
           fetchStub
@@ -587,7 +587,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       it(schemaElement.name + ' with web3.currentProvider', async () => {
         const returnRawData = generateAllRawData([schemaElement], false);
         const provider = new HttpProvider({ returnData: returnRawData }, [
-          INTERFACE_IDS.ERC725Y_LEGACY,
+          ERC725Y_INTERFACE_IDS.legacy,
         ]);
         const erc725 = new ERC725(mockSchema, address, provider);
         const result = await erc725.getData(
@@ -608,7 +608,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       it(schemaElement.name + ' with ethereumProvider EIP 1193', async () => {
         const returnRawData = generateAllRawData([schemaElement], false);
         const provider = new HttpProvider({ returnData: returnRawData }, [
-          INTERFACE_IDS.ERC725Y_LEGACY,
+          ERC725Y_INTERFACE_IDS.legacy,
         ]);
         const erc725 = new ERC725(mockSchema, address, provider);
         const result = await erc725.getData(
