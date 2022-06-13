@@ -601,6 +601,11 @@ export class ERC725 {
       DEPLOY: false,
       TRANSFERVALUE: false,
       SIGN: false,
+      SUPER_SETDATA: false,
+      SUPER_TRANSFERVALUE: false,
+      SUPER_CALL: false,
+      SUPER_STATICCALL: false,
+      SUPER_DELEGATECALL: false,
     };
 
     const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);

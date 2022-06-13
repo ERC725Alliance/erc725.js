@@ -35,4 +35,9 @@ export interface Permissions {
   DEPLOY?: boolean;
   TRANSFERVALUE?: boolean;
   SIGN?: boolean;
+  SUPER_SETDATA?: boolean;
+  SUPER_TRANSFERVALUE?: boolean;
+  SUPER_CALL?: boolean;
+  SUPER_STATICCALL?: boolean;
+  SUPER_DELEGATECALL?: boolean;
 }
