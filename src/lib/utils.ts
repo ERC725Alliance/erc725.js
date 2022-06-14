@@ -53,12 +53,13 @@ import { isDynamicKeyName } from './encodeKeyName';
 import { getSchemaElement } from './getSchemaElement';
 import { EncodeDataInput } from '../types/decodeData';
 import { GetDataDynamicKey } from '../types/GetData';
+import { isValidTuple } from './decodeData';
 
 /**
  *
  * @param {string} valueContent as per ERC725Schema definition
  * @param {string} valueType as per ERC725Schema definition
- * @param value can contain single value, an array, or an object as required by schema (JSONURL, or ASSETURL)
+ * @param decodedValue can contain single value, an array, or an object as required by schema (JSONURL, or ASSETURL)
  * @param {string} [name]
  *
  * @return the encoded value as per the schema
@@ -66,7 +67,13 @@ import { GetDataDynamicKey } from '../types/GetData';
 export function encodeKeyValue(
   valueContent: string,
   valueType: ERC725JSONSchemaValueType,
-  value: string | string[] | JSONURLDataToEncode | JSONURLDataToEncode[],
+  decodedValue:
+    | string
+    | string[]
+    | number
+    | number[]
+    | JSONURLDataToEncode
+    | JSONURLDataToEncode[],
   name?: string,
 ): string | false {
   const isSupportedValueContent =
@@ -81,9 +88,9 @@ export function encodeKeyValue(
 
   const isValueTypeArray = valueType.slice(valueType.length - 2) === '[]';
 
-  if (!isValueTypeArray && !Array.isArray(value)) {
+  if (!isValueTypeArray && !Array.isArray(decodedValue)) {
     // Straight forward encode
-    return encodeValueContent(valueContent, value);
+    return encodeValueContent(valueContent, decodedValue);
   }
 
   const valueContentEncodingMethods = valueContentMap(valueContent);
@@ -95,13 +102,13 @@ export function encodeKeyValue(
   let result;
 
   // We only loop if the valueType done by abi.encodeParameter can not handle it directly
-  if (Array.isArray(value)) {
+  if (Array.isArray(decodedValue)) {
     // value type encoding will handle it?
 
     // we handle an array element encoding
     const results: Array<string | AssetURLEncode | false> = [];
-    for (let index = 0; index < value.length; index++) {
-      const element = value[index];
+    for (let index = 0; index < decodedValue.length; index++) {
+      const element = decodedValue[index];
       results.push(encodeValueContent(valueContent, element));
     }
 
@@ -116,7 +123,7 @@ export function encodeKeyValue(
   ) {
     result = encodeValueType(valueType, result);
   } else if (isValueTypeArray && isSameEncoding) {
-    result = encodeValueType(valueType, value as any);
+    result = encodeValueType(valueType, decodedValue as any);
   }
 
   return result;
@@ -160,6 +167,58 @@ export function guessKeyTypeFromKeyName(
   return 'Singleton';
 }
 
+export const encodeTupleKeyValue = (
+  valueContent: string, // i.e. (bytes4,Number,bytes16)
+  valueType: string, // i.e. (bytes4,bytes8,bytes16)
+  decodedValues: Array<string | number | JSONURLDataToEncode>,
+) => {
+  // We assume data has already been validated at this stage
+
+  const valueTypeParts = valueType
+    .substring(1, valueType.length - 1)
+    .split(',');
+  const valueContentParts = valueContent
+    .substring(1, valueContent.length - 1)
+    .split(',');
+
+  if (valueTypeParts.length !== decodedValues.length) {
+    throw new Error(
+      `Can not encode tuple key value: ${decodedValues}. Expecte array of length: ${valueTypeParts.length}`,
+    );
+  }
+
+  const returnValue =
+    `0x` +
+    valueContentParts
+      .map((valueContentPart, i) => {
+        const encodedKeyValue = encodeKeyValue(
+          valueContentPart,
+          valueTypeParts[i],
+          decodedValues[i],
+        );
+
+        if (!encodedKeyValue) {
+          return ''; // may cause issues?
+        }
+
+        const numberOfBytes = parseInt(valueTypeParts[i].substring(5), 10); // bytes50 -> 50
+
+        // If the encoded value is too large for the expected valueType, we shrink it from the left
+        // i.e. number are encoded on 32bytes
+        // TODO: might be missing cases !
+        if (encodedKeyValue.length > 2 + numberOfBytes * 2) {
+          return encodedKeyValue.slice(
+            encodedKeyValue.length - numberOfBytes * 2,
+          );
+        }
+
+        return padLeft(encodedKeyValue, numberOfBytes * 2).replace('0x', '');
+      })
+      .join('');
+
+  return returnValue;
+};
+
 /**
  *
  * @param schema is an object of a schema definitions.
@@ -169,7 +228,13 @@ export function guessKeyTypeFromKeyName(
  */
 export function encodeKey(
   schema: ERC725JSONSchema,
-  value: string | string[] | JSONURLDataToEncode | JSONURLDataToEncode[],
+  value:
+    | string
+    | string[]
+    | number
+    | number[]
+    | JSONURLDataToEncode
+    | JSONURLDataToEncode[],
 ) {
   // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
 
@@ -215,6 +280,19 @@ export function encodeKey(
     case 'mappingwithgrouping':
     case 'singleton':
     case 'mapping':
+      if (isValidTuple(schema.valueType, schema.valueContent)) {
+        if (!Array.isArray(value)) {
+          throw new Error(
+            `Incorrect value for tuple. Got: ${value}, expected array.`,
+          );
+        }
+        return encodeTupleKeyValue(
+          schema.valueContent,
+          schema.valueType,
+          value,
+        );
+      }
+
       return encodeKeyValue(
         schema.valueContent,
         schema.valueType,
