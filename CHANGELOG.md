@@ -2,8 +2,7 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [0.14.0-beta.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.13.0...v0.14.0-beta.0) (2022-06-09)
-
+## [0.14.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.13.0...v0.14.0) (2022-06-14)
 
 ### ⚠ BREAKING CHANGES
 
@@ -20,7 +19,8 @@ All notable changes to this project will be documented in this file. See [standa
 * add dynamicKeys for decodeData ([f386e15](https://github.com/ERC725Alliance/erc725.js/commit/f386e15396cbf6c2b842302f1c85b41a0798b684))
 * add non array input on decodeData ([0774a86](https://github.com/ERC725Alliance/erc725.js/commit/0774a86d652e205814863d07319adef2266f634c))
 * add support for hashed key for encodeData ([23323a0](https://github.com/ERC725Alliance/erc725.js/commit/23323a02a6bfb81be1eba24207fe353942367837))
-
+* add BytesN value content ([#184](https://github.com/ERC725Alliance/erc725.js/issues/184)) ([7e073e4](https://github.com/ERC725Alliance/erc725.js/commit/7e073e4dfc7094aac55935fffc18ef14d16a24c8))
+* add tuples support ([7f3d1a0](https://github.com/ERC725Alliance/erc725.js/commit/7f3d1a09c3e6058b76a5b3ceca8bc1f454e634ce))
 
 ### Bug Fixes
 
