@@ -28,7 +28,7 @@ import { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
 import { ProviderTypes } from '../types/provider';
-import { ERC725_VERSION, INTERFACE_IDS } from '../lib/constants';
+import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../lib/constants';
 
 // TS can't get the types from the import...
 // @ts-ignore
@@ -61,7 +61,7 @@ export class Web3ProviderWrapper {
   async getErc725YVersion(address: string): Promise<ERC725_VERSION> {
     const isErc725Y = await this.supportsInterface(
       address,
-      INTERFACE_IDS.ERC725Y,
+      ERC725Y_INTERFACE_IDS['3.0'],
     );
 
     if (isErc725Y) {
@@ -70,7 +70,7 @@ export class Web3ProviderWrapper {
 
     const isErc725Yv200 = await this.supportsInterface(
       address,
-      INTERFACE_IDS.ERC725Y_v200,
+      ERC725Y_INTERFACE_IDS['2.0'],
     );
 
     if (isErc725Yv200) {
@@ -81,7 +81,7 @@ export class Web3ProviderWrapper {
 
     const isErc725YLegacy = await this.supportsInterface(
       address,
-      INTERFACE_IDS.ERC725Y_LEGACY,
+      ERC725Y_INTERFACE_IDS.legacy,
     );
 
     return isErc725YLegacy

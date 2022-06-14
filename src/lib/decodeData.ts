@@ -1,8 +1,155 @@
+/*
+    This file is part of @erc725/erc725.js.
+    @erc725/erc725.js is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    @erc725/erc725.js is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+    You should have received a copy of the GNU Lesser General Public License
+    along with @erc725/erc725.js.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/**
+ * @file decodeData.ts
+ * @author Hugo Masclet <@Hugoo>
+ * @date 2022
+ */
+
+import { isHex } from 'web3-utils';
 import { DecodeDataInput, DecodeDataOutput } from '../types/decodeData';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { isDynamicKeyName } from './encodeKeyName';
+import { valueContentEncodingMap } from './encoder';
 import { getSchemaElement } from './getSchemaElement';
 import { decodeKeyValue, encodeArrayKey } from './utils';
+
+export const tupleValueTypesRegex = /bytes(\d+)/;
+
+export const isValidTuple = (valueType: string, valueContent: string) => {
+  if (valueType.length <= 2 && valueContent.length <= 2) {
+    return false;
+  }
+
+  if (
+    valueType[0] !== '(' &&
+    valueType[valueType.length - 1] !== ')' &&
+    valueContent[0] !== '(' &&
+    valueContent[valueContent.length - 1] !== ')'
+  ) {
+    return false;
+  }
+
+  // At this stage, we can assume the user is trying to use a tuple, let's throw errors instead of returning
+  // false
+
+  const valueTypeParts = valueType
+    .substring(1, valueType.length - 1)
+    .split(',');
+  const valueContentParts = valueContent
+    .substring(1, valueContent.length - 1)
+    .split(',');
+
+  const tuplesValidValueTypes = ['bytes4', 'bytes8', 'bytes16', 'bytes32'];
+
+  if (valueTypeParts.length !== valueContentParts.length) {
+    throw new Error(
+      `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. They should have the same number of elements. Got: ${valueTypeParts.length} and ${valueContentParts.length}`,
+    );
+  }
+
+  for (let i = 0; i < valueTypeParts.length; i++) {
+    if (!tuplesValidValueTypes.includes(valueTypeParts[i])) {
+      throw new Error(
+        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. Type: ${valueTypeParts[i]} is not valid. Valid types are: ${tuplesValidValueTypes}`,
+      );
+    }
+
+    if (
+      valueContentParts[i].substring(0, 5) === 'Bytes' &&
+      valueContentParts[i].toLowerCase() !== valueTypeParts[i]
+    ) {
+      throw new Error(
+        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. valueContent of type: ${valueContentParts[i]} should match valueType: ${valueTypeParts[i]}`,
+      );
+    }
+
+    if (
+      valueContentEncodingMap(valueContentParts[i]).type === 'unknown' &&
+      valueContentParts[i].slice(0, 5) !== 'Bytes' &&
+      valueContentParts[i].slice(0, 2) !== '0x'
+    ) {
+      throw new Error(
+        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. valueContent of type: ${valueContentParts[i]} is not valid`,
+      );
+    }
+
+    if (
+      valueContentParts[i].slice(0, 2) === '0x' &&
+      !isHex(valueContentParts[i])
+    ) {
+      throw new Error(
+        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. valueContent of type: ${valueContentParts[i]} is not a valid hex value`,
+      );
+    }
+
+    // TODO: check if length of 0x112233 is compatible with of bytesX
+  }
+
+  return true;
+};
+
+export const decodeTupleKeyValue = (
+  valueContent: string, // i.e. (bytes4,Number,bytes16)
+  valueType: string, // i.e. (bytes4,bytes8,bytes16)
+  value: string, // should start with 0x
+) => {
+  // We assume data has already been validated at this stage
+
+  const valueTypeParts = valueType
+    .substring(1, valueType.length - 1)
+    .split(',');
+  const valueContentParts = valueContent
+    .substring(1, valueContent.length - 1)
+    .split(',');
+
+  const bytesLengths: number[] = [];
+  valueTypeParts.forEach((valueTypePart) => {
+    const regexMatch = valueTypePart.match(tupleValueTypesRegex);
+
+    if (!regexMatch) {
+      return;
+    }
+
+    bytesLengths.push(parseInt(regexMatch[1], 10));
+  });
+
+  const totalBytesLength = bytesLengths.reduce(
+    (acc, bytesLength) => acc + bytesLength,
+    0,
+  );
+
+  if (value.length !== 2 + totalBytesLength * 2) {
+    console.error(
+      `Trying to decode a value: ${value} which does not match the length of the valueType: ${valueType}. Expected ${totalBytesLength} bytes.`,
+    );
+    return [];
+  }
+
+  let cursor = 2; // to skip the 0x
+
+  const valueParts = bytesLengths.map((bytesLength) => {
+    const splitValue = value.substring(cursor, cursor + bytesLength * 2);
+    cursor += bytesLength * 2;
+    return `0x${splitValue}`;
+  });
+
+  return valueContentParts.map((valueContentPart, i) =>
+    decodeKeyValue(valueContentPart, valueTypeParts[i], valueParts[i]),
+  );
+};
 
 /**
  *
@@ -69,6 +216,14 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
           schema.valueType,
           newValue.value,
           schema.name,
+        );
+      }
+
+      if (isValidTuple(schema.valueType, schema.valueContent)) {
+        return decodeTupleKeyValue(
+          schema.valueContent,
+          schema.valueType,
+          value,
         );
       }
 

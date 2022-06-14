@@ -4,10 +4,22 @@ import { numberToHex, keccak256 } from 'web3-utils';
 import { MethodData, Encoding, Method } from '../types/Method';
 
 // https://github.com/ERC725Alliance/ERC725/blob/develop/docs/ERC-725.md#specification
-export const INTERFACE_IDS = {
-  ERC725Y_LEGACY: '0x2bd57b73',
-  ERC725Y_v200: '0x5a988c0f', // introduced in v0.2.0
-  ERC725Y: '0x714df77c', // introduced in v0.6.0
+export const ERC725Y_INTERFACE_IDS = {
+  // interface functions:
+  //     - getData(bytes32)
+  //     - setData(bytes32,bytes)
+  legacy: '0x2bd57b73',
+  // interface functions:
+  //     - getData(bytes32[])
+  //     - setData(bytes32[],bytes[])
+  '2.0': '0x5a988c0f',
+  // version 3.0.0 introduced function overloading
+  // interface functions:
+  //     - getData(bytes32)
+  //     - setData(bytes32,bytes)
+  //     - getData(bytes32[])
+  //     - setData(bytes32[],bytes[])
+  '3.0': '0x714df77c',
 };
 
 export enum ERC725_VERSION {
@@ -128,6 +140,16 @@ export const LSP6_DEFAULT_PERMISSIONS = {
   TRANSFERVALUE:
     '0x0000000000000000000000000000000000000000000000000000000000000100',
   SIGN: '0x0000000000000000000000000000000000000000000000000000000000000200',
+  SUPER_SETDATA:
+    '0x0000000000000000000000000000000000000000000000000000000000000400',
+  SUPER_TRANSFERVALUE:
+    '0x0000000000000000000000000000000000000000000000000000000000000800',
+  SUPER_CALL:
+    '0x0000000000000000000000000000000000000000000000000000000000001000',
+  SUPER_STATICCALL:
+    '0x0000000000000000000000000000000000000000000000000000000000002000',
+  SUPER_DELEGATECALL:
+    '0x0000000000000000000000000000000000000000000000000000000000004000',
 };
 
 export const LSP6_ALL_PERMISSIONS =

@@ -26,7 +26,6 @@ import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
 import {
   encodeArrayKey,
   decodeKeyValue,
-  isDataAuthentic,
   encodeData,
   convertIPFSGatewayUrl,
   generateSchemasFromDynamicKeys,
@@ -38,13 +37,11 @@ import { isValidSignature } from './lib/isValidSignature';
 import {
   LSP6_ALL_PERMISSIONS,
   LSP6_DEFAULT_PERMISSIONS,
-  SUPPORTED_HASH_FUNCTIONS,
-  SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './lib/constants';
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types
-import { KeyValuePair, URLDataWithHash } from './types';
+import { KeyValuePair } from './types';
 import { ERC725Config } from './types/Config';
 import { Permissions } from './types/Method';
 import {
@@ -57,10 +54,10 @@ import {
   DecodeDataInput,
   DecodeDataOutput,
   EncodeDataInput,
-  GetDataExternalSourcesOutput,
 } from './types/decodeData';
 import { GetDataDynamicKey, GetDataInput } from './types/GetData';
 import { decodeData } from './lib/decodeData';
+import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 
 export {
   ERC725JSONSchema,
@@ -254,9 +251,10 @@ export class ERC725 {
       this.options.schemas,
     );
 
-    const dataFromExternalSources = await this.getDataFromExternalSources(
+    const dataFromExternalSources = await getDataFromExternalSources(
       schemas,
       dataFromChain,
+      this.options.ipfsGateway,
     );
 
     if (
@@ -296,79 +294,6 @@ export class ERC725 {
       keyOrKeys,
       this.options.schemas.concat(providedSchemas || []),
     );
-  }
-
-  private getDataFromExternalSources(
-    schemas: ERC725JSONSchema[],
-    dataFromChain: DecodeDataOutput[],
-  ): Promise<GetDataExternalSourcesOutput[]> {
-    const promises = dataFromChain.map(async (dataEntry) => {
-      const schemaElement = schemas.find(
-        (schema) => schema.key === dataEntry.key,
-      );
-
-      if (!schemaElement) {
-        // It is weird if we can't find the schema element for the key...
-        // Let's simply ignore and return it...
-        return dataEntry;
-      }
-
-      if (
-        !['jsonurl', 'asseturl'].includes(
-          schemaElement.valueContent.toLowerCase(),
-        )
-      ) {
-        return dataEntry;
-      }
-
-      // At this stage, value should be of type jsonurl or asseturl
-      if (typeof dataEntry.value === 'string') {
-        console.error(
-          `Value of key: ${dataEntry.name} (${dataEntry.value}) is string but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,
-        );
-        return dataEntry;
-      }
-
-      if (Array.isArray(dataEntry.value)) {
-        console.error(
-          `Value of key: ${dataEntry.name} (${dataEntry.value}) is string[] but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,
-        );
-        return dataEntry;
-      }
-
-      const urlDataWithHash = dataEntry.value; // Type URLDataWithHash
-
-      let receivedData;
-      try {
-        const { url } = this.patchIPFSUrlsIfApplicable(urlDataWithHash);
-
-        receivedData = await fetch(url).then(async (response) => {
-          if (
-            urlDataWithHash.hashFunction ===
-            SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_BYTES
-          ) {
-            return response
-              .arrayBuffer()
-              .then((buffer) => new Uint8Array(buffer));
-          }
-
-          return response.json();
-        });
-      } catch (error) {
-        console.error(error, `GET request to ${urlDataWithHash.url} failed`);
-        throw error;
-      }
-
-      return isDataAuthentic(
-        receivedData,
-        urlDataWithHash.hash,
-        urlDataWithHash.hashFunction as SUPPORTED_HASH_FUNCTIONS,
-      )
-        ? { ...dataEntry, value: receivedData }
-        : { ...dataEntry, value: null };
-    });
-
-    return Promise.all(promises);
   }
 
   /**
@@ -615,27 +540,6 @@ export class ERC725 {
     );
   }
 
-  /**
-   * Changes the protocol from `ipfs://` to `http(s)://` and adds the selected IPFS gateway.
-   * `ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D => https://ipfs.lukso.network/ipfs/QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D`
-   */
-  private patchIPFSUrlsIfApplicable(
-    receivedData: URLDataWithHash,
-  ): URLDataWithHash {
-    if (
-      receivedData &&
-      receivedData.url &&
-      receivedData.url.indexOf('ipfs://') !== -1
-    ) {
-      return {
-        ...receivedData,
-        url: receivedData.url.replace('ipfs://', this.options.ipfsGateway),
-      };
-    }
-
-    return receivedData;
-  }
-
   private getAddressAndProvider() {
     if (!this.options.address || !isAddress(this.options.address)) {
       throw new Error('Missing ERC725 contract address.');
@@ -697,6 +601,11 @@ export class ERC725 {
       DEPLOY: false,
       TRANSFERVALUE: false,
       SIGN: false,
+      SUPER_SETDATA: false,
+      SUPER_TRANSFERVALUE: false,
+      SUPER_CALL: false,
+      SUPER_STATICCALL: false,
+      SUPER_DELEGATECALL: false,
     };
 
     const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);

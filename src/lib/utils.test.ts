@@ -22,83 +22,106 @@ import {
   encodeData,
   convertIPFSGatewayUrl,
   generateSchemasFromDynamicKeys,
+  encodeTupleKeyValue,
 } from './utils';
 import { isDynamicKeyName } from './encodeKeyName';
 import { decodeKey } from './decodeData';
 
 describe('utils', () => {
   describe('encodeKey/decodeKey', () => {
-    it('encodes/decodes keyType Array', () => {
-      const testCases = [
-        {
-          schema: {
-            name: 'LSP3IssuedAssets[]',
+    const testCases = [
+      {
+        schema: {
+          name: 'LSP3IssuedAssets[]',
+          key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+          keyType: 'Array',
+          valueContent: 'Address',
+          valueType: 'address',
+        },
+        decodedValue: [
+          '0xc444009d38d3046bb0cF81Fa2Cd295ce46A67C78',
+          '0x4fEbC3491230571F6e1829E46602e3b110215A2E',
+        ],
+        encodedValue: [
+          {
             key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
-            keyType: 'Array',
-            valueContent: 'Address',
-            valueType: 'address',
+            value:
+              '0x0000000000000000000000000000000000000000000000000000000000000002',
           },
-          decodedValue: [
-            '0xc444009d38d3046bb0cF81Fa2Cd295ce46A67C78',
-            '0x4fEbC3491230571F6e1829E46602e3b110215A2E',
-          ],
-          encodedValue: [
-            {
-              key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
-              value:
-                '0x0000000000000000000000000000000000000000000000000000000000000002',
-            },
-            {
-              key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
-              value: '0xc444009d38d3046bb0cf81fa2cd295ce46a67c78',
-            },
-            {
-              key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
-              value: '0x4febc3491230571f6e1829e46602e3b110215a2e',
-            },
-          ],
+          {
+            key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
+            value: '0xc444009d38d3046bb0cf81fa2cd295ce46a67c78',
+          },
+          {
+            key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
+            value: '0x4febc3491230571f6e1829e46602e3b110215a2e',
+          },
+        ],
+      },
+      {
+        schema: {
+          name: 'TestObjArray[]',
+          key: '0x9985edaf12cbacf5ac7d6ed54f0445cc0ea56075aee9b9942e4ab3bf4239f950',
+          keyType: 'Array',
+          valueContent: 'JSONURL',
+          valueType: 'bytes',
         },
-        {
-          schema: {
-            name: 'TestObjArray[]',
+        decodedValue: [
+          {
+            hashFunction: SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+            hash: '0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d',
+            url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
+          },
+          {
+            hashFunction: SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+            hash: '0x81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88',
+            url: 'ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd',
+          },
+        ],
+        encodedValue: [
+          {
             key: '0x9985edaf12cbacf5ac7d6ed54f0445cc0ea56075aee9b9942e4ab3bf4239f950',
-            keyType: 'Array',
-            valueContent: 'JSONURL',
-            valueType: 'bytes',
+            value:
+              '0x0000000000000000000000000000000000000000000000000000000000000002',
           },
-          decodedValue: [
-            {
-              hashFunction: SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
-              hash: '0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d',
-              url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
-            },
-            {
-              hashFunction: SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
-              hash: '0x81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88',
-              url: 'ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd',
-            },
-          ],
-          encodedValue: [
-            {
-              key: '0x9985edaf12cbacf5ac7d6ed54f0445cc0ea56075aee9b9942e4ab3bf4239f950',
-              value:
-                '0x0000000000000000000000000000000000000000000000000000000000000002',
-            },
-            {
-              key: '0x9985edaf12cbacf5ac7d6ed54f0445cc00000000000000000000000000000000',
-              value:
-                '0x6f357c6a733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
-            },
-            {
-              key: '0x9985edaf12cbacf5ac7d6ed54f0445cc00000000000000000000000000000001',
-              value:
-                '0x6f357c6a81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88697066733a2f2f516d6245724b6833466a7378787878787878787878787878787878787878787878787878787639414a4a765a6264',
-            },
-          ],
+          {
+            key: '0x9985edaf12cbacf5ac7d6ed54f0445cc00000000000000000000000000000000',
+            value:
+              '0x6f357c6a733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
+          },
+          {
+            key: '0x9985edaf12cbacf5ac7d6ed54f0445cc00000000000000000000000000000001',
+            value:
+              '0x6f357c6a81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88697066733a2f2f516d6245724b6833466a7378787878787878787878787878787878787878787878787878787639414a4a765a6264',
+          },
+        ],
+      },
+      {
+        schema: {
+          name: 'TupleType',
+          key: '0x50f2bd37dff422565ef30f885bf0ee0a36a2a2bcf9b0146ac9c646679c38dfd8',
+          keyType: 'Singleton',
+          valueType: '(bytes4,bytes8)',
+          valueContent: '(Bytes4,Number)',
         },
-      ];
+        decodedValue: ['0xcafecafe', '11'],
+        encodedValue: '0xcafecafe000000000000000b',
+      },
+      {
+        schema: {
+          name: 'TupleMultiType',
+          key: '1e1bc4abe01b7baa7d4a359c0f460e632ef34b3f16f5722bd8892f2dae913022',
+          keyType: 'Singleton',
+          valueType: '(bytes4,bytes8,bytes4)',
+          valueContent: '(Bytes4,Number,Number)',
+        },
+        decodedValue: ['0xcafecafe', '11', '8'],
+        encodedValue: '0xcafecafe000000000000000b00000008',
+      },
+    ];
 
-      testCases.forEach((testCase) => {
+    testCases.forEach((testCase) => {
+      it(`encodes/decodes keyType Array / tuples (valueContent: ${testCase.schema.valueContent}, valueType: ${testCase.schema.valueType}`, () => {
         assert.deepStrictEqual(
           encodeKey(testCase.schema as ERC725JSONSchema, testCase.decodedValue),
           testCase.encodedValue,
@@ -187,21 +210,27 @@ describe('utils', () => {
         encodedValue:
           '0x6f357c6a81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88697066733a2f2f516d6245724b6833466a7378787878787878787878787878787878787878787878787878787639414a4a765a6264',
       },
-      // THE CASES BELOW ARE CURRENTLY NOT SUPPORTED BY THE LIB
-      // {
-      //   valueContent: 'Bytes',
-      //   valueType: 'bytes',
-      //   decodedValue: '0xaaAE32',
-      //   encodedValue: '0xaaAE32',
-      // },
-      // {
-      //   valueContent: 'Bytes32',
-      //   valueType: 'bytes',
-      //   decodedValue:
-      //     '0x7465737400000000000000000000000000000000000000000000000000000000',
-      //   encodedValue:
-      //     '0x7465737400000000000000000000000000000000000000000000000000000000',
-      // },
+
+      {
+        valueContent: 'Bytes',
+        valueType: 'bytes',
+        decodedValue: '0xaaAE32',
+        encodedValue: '0xaaAE32',
+      },
+      {
+        valueContent: 'Bytes32',
+        valueType: 'bytes',
+        decodedValue:
+          '0x7465737400000000000000000000000000000000000000000000000000000000',
+        encodedValue:
+          '0x7465737400000000000000000000000000000000000000000000000000000000',
+      },
+      {
+        valueContent: 'Bytes4',
+        valueType: 'bytes',
+        decodedValue: '0x74657374',
+        encodedValue: '0x74657374',
+      },
       {
         valueContent: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
         valueType: 'bytes',
@@ -230,6 +259,29 @@ describe('utils', () => {
           ),
           testCase.decodedValue,
         );
+      });
+    });
+  });
+
+  describe('encodeTupleKeyValue', () => {
+    const testCases = [
+      {
+        valueContent: '(Bytes4,Number)',
+        valueType: '(bytes4,bytes8)',
+        encodedValue: '0xe33f65c30000000000000010',
+        decodedValue: ['0xe33f65c3', 16],
+      },
+    ]; // we may need to add more test cases! Address, etc.
+
+    testCases.forEach((testCase) => {
+      it(`encodes tuple values`, () => {
+        expect(
+          encodeTupleKeyValue(
+            testCase.valueContent,
+            testCase.valueType,
+            testCase.decodedValue,
+          ),
+        ).to.eq(testCase.encodedValue);
       });
     });
   });

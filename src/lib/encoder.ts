@@ -27,6 +27,7 @@ import {
   hexToNumber,
   hexToUtf8,
   isAddress,
+  isHex,
   keccak256,
   numberToHex,
   padLeft,
@@ -42,6 +43,10 @@ import {
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './constants';
 import { getHashFunction, hashData } from './utils';
+
+const bytesNRegex = /Bytes(\d+)/;
+
+const ALLOWED_BYTES_SIZES = [2, 4, 8, 16, 32, 64, 128, 256];
 
 const encodeDataSourceWithHash = (
   hashType: SUPPORTED_HASH_FUNCTIONS,
@@ -129,101 +134,192 @@ const valueTypeEncodingMap = {
 // Use enum for type bellow
 // Is it this enum ERC725JSONSchemaValueType? (If so, custom is missing from enum)
 
-export const valueContentEncodingMap = {
-  Keccak256: {
-    type: 'bytes32',
-    encode: (value: string) => value,
-    decode: (value: string) => value,
-  },
-  // NOTE: Deprecated. For reference/testing in future
-  ArrayLength: {
-    type: 'uint256',
-    encode: (value: number | string) => padLeft(numberToHex(value), 64),
-    decode: (value: string) => hexToNumber(value),
-  },
-  Number: {
-    type: 'uint256',
-    // NOTE: extra logic is to handle and always return a string number
-    encode: (value: string) => {
-      let parsedValue: number;
-      try {
-        parsedValue = parseInt(value, 10);
-      } catch (error: any) {
-        throw new Error(error);
-      }
+export const valueContentEncodingMap = (valueContent: string) => {
+  const bytesNRegexMatch = valueContent.match(bytesNRegex);
+  const bytesLength = bytesNRegexMatch ? parseInt(bytesNRegexMatch[1], 10) : '';
 
-      return padLeft(numberToHex(parsedValue), 64);
-    },
-    decode: (value) => '' + hexToNumber(value),
-  },
-  // NOTE: This is not symmetrical, and always returns a checksummed address
-  Address: {
-    type: 'address',
-    encode: (value: string) => {
-      if (isAddress(value)) {
-        return value.toLowerCase();
-      }
+  switch (valueContent) {
+    case 'Keccak256': {
+      return {
+        type: 'bytes32',
+        encode: (value: string) => value,
+        decode: (value: string) => value,
+      };
+    }
+    // NOTE: Deprecated. For reference/testing in future
+    case 'ArrayLength': {
+      return {
+        type: 'uint256',
+        encode: (value: number | string) => padLeft(numberToHex(value), 64),
+        decode: (value: string) => hexToNumber(value),
+      };
+    }
+    case 'Number': {
+      return {
+        type: 'uint256',
+        // TODO: extra logic to handle and always return a string number
+        encode: (value: string) => {
+          let parsedValue: number;
+          try {
+            parsedValue = parseInt(value, 10);
+          } catch (error: any) {
+            throw new Error(error);
+          }
 
-      throw new Error('Address: "' + value + '" is an invalid address.');
-    },
-    decode: (value: string) => toChecksumAddress(value),
-  },
-  String: {
-    type: 'string',
-    encode: (value: string) => utf8ToHex(value),
-    decode: (value: string) => hexToUtf8(value),
-  },
-  Markdown: {
-    type: 'string',
-    encode: (value: string) => utf8ToHex(value),
-    decode: (value: string) => hexToUtf8(value),
-  },
-  URL: {
-    type: 'string',
-    encode: (value: string) => utf8ToHex(value),
-    decode: (value: string) => hexToUtf8(value),
-  },
-  AssetURL: {
-    type: 'custom',
-    encode: (value: AssetURLEncode) =>
-      encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
-    decode: (value: string) => decodeDataSourceWithHash(value),
-  },
-  // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
-  JSONURL: {
-    type: 'custom',
-    encode: (dataToEncode: JSONURLDataToEncode) => {
-      const { hash, json, hashFunction, url } = dataToEncode;
+          return padLeft(numberToHex(parsedValue), 64);
+        },
+        decode: (value) => '' + hexToNumber(value),
+      };
+    }
+    // NOTE: This is not symmetrical, and always returns a checksummed address
+    case 'Address': {
+      return {
+        type: 'address',
+        encode: (value: string) => {
+          if (isAddress(value)) {
+            return value.toLowerCase();
+          }
 
-      let hashedJson = hash;
+          throw new Error('Address: "' + value + '" is an invalid address.');
+        },
+        decode: (value: string) => toChecksumAddress(value),
+      };
+    }
+    case 'String': {
+      return {
+        type: 'string',
+        encode: (value: string) => utf8ToHex(value),
+        decode: (value: string) => hexToUtf8(value),
+      };
+    }
+    case 'Markdown': {
+      return {
+        type: 'string',
+        encode: (value: string) => utf8ToHex(value),
+        decode: (value: string) => hexToUtf8(value),
+      };
+    }
+    case 'URL': {
+      return {
+        type: 'string',
+        encode: (value: string) => utf8ToHex(value),
+        decode: (value: string) => hexToUtf8(value),
+      };
+    }
+    case 'AssetURL': {
+      return {
+        type: 'custom',
+        encode: (value: AssetURLEncode) =>
+          encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
+        decode: (value: string) => decodeDataSourceWithHash(value),
+      };
+    }
+    // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
+    case 'JSONURL': {
+      return {
+        type: 'custom',
+        encode: (dataToEncode: JSONURLDataToEncode) => {
+          const { hash, json, hashFunction, url } = dataToEncode;
 
-      if (json) {
-        if (hashFunction) {
-          throw new Error(
-            'When passing in the `json` property, we use "keccak256(utf8)" as a default hashingFunction. You do not need to set a `hashFunction`.',
+          let hashedJson = hash;
+
+          if (json) {
+            if (hashFunction) {
+              throw new Error(
+                'When passing in the `json` property, we use "keccak256(utf8)" as a default hashingFunction. You do not need to set a `hashFunction`.',
+              );
+            }
+            hashedJson = hashData(
+              json,
+              SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+            );
+          }
+
+          if (!hashedJson) {
+            throw new Error(
+              'You have to provide either the hash or the json via the respective properties',
+            );
+          }
+
+          return encodeDataSourceWithHash(
+            (hashFunction as SUPPORTED_HASH_FUNCTION_STRINGS) ||
+              SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+            hashedJson,
+            url,
           );
-        }
-        hashedJson = hashData(
-          json,
-          SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
-        );
-      }
+        },
+        decode: (dataToDecode: string) =>
+          decodeDataSourceWithHash(dataToDecode),
+      };
+    }
+    case `Bytes${bytesLength}`: {
+      return {
+        type: 'bytes',
+        encode: (value: string) => {
+          if (typeof value !== 'string' || !isHex(value)) {
+            throw new Error(`Value: ${value} is not hex.`);
+          }
 
-      if (!hashedJson) {
-        throw new Error(
-          'You have to provide either the hash or the json via the respective properties',
-        );
-      }
+          if (bytesLength && !ALLOWED_BYTES_SIZES.includes(bytesLength)) {
+            throw new Error(
+              `Provided bytes length: ${bytesLength} for encoding valueContent: ${valueContent} is not valid.`,
+            );
+          }
 
-      return encodeDataSourceWithHash(
-        (hashFunction as SUPPORTED_HASH_FUNCTION_STRINGS) ||
-          SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
-        hashedJson,
-        url,
-      );
-    },
-    decode: (dataToDecode: string) => decodeDataSourceWithHash(dataToDecode),
-  },
+          if (bytesLength && value.length !== 2 + bytesLength * 2) {
+            throw new Error(
+              `Value: ${value} is not of type ${valueContent}. Expected hex value of length ${
+                2 + bytesLength * 2
+              }`,
+            );
+          }
+
+          return value;
+        },
+        decode: (value: string) => {
+          if (typeof value !== 'string' || !isHex(value)) {
+            console.log(`Value: ${value} is not hex.`);
+            return null;
+          }
+
+          if (bytesLength && !ALLOWED_BYTES_SIZES.includes(bytesLength)) {
+            console.error(
+              `Provided bytes length: ${bytesLength} for encoding valueContent: ${valueContent} is not valid.`,
+            );
+            return null;
+          }
+
+          if (bytesLength && value.length !== 2 + bytesLength * 2) {
+            console.error(
+              `Value: ${value} is not of type ${valueContent}. Expected hex value of length ${
+                2 + bytesLength * 2
+              }`,
+            );
+            return null;
+          }
+
+          return value;
+        },
+      };
+    }
+    default: {
+      return {
+        type: 'unknown',
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        encode: (_value: any) => {
+          throw new Error(
+            `Could not encode unknown (${valueContent}) valueContent.`,
+          );
+        },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        decode: (_value: any) => {
+          throw new Error(
+            `Could not decode unknown (${valueContent}) valueContent.`,
+          );
+        },
+      };
+    }
+  }
 };
 
 export function encodeValueType(
@@ -248,27 +344,46 @@ export function decodeValueType(type: string, value: string) {
 }
 
 export function encodeValueContent(
-  type: string,
-  value: string | AssetURLEncode | JSONURLDataToEncode,
+  valueContent: string,
+  value: string | number | AssetURLEncode | JSONURLDataToEncode,
 ): string | false {
-  if (!valueContentEncodingMap[type] && type.slice(0, 2) !== '0x') {
-    throw new Error('Could not encode valueContent: "' + type + '".');
-  } else if (type.slice(0, 2) === '0x') {
-    return type === value ? value : false;
+  if (valueContent.slice(0, 2) === '0x') {
+    return valueContent === value ? value : false;
   }
 
-  return value ? (valueContentEncodingMap[type].encode(value) as string) : '0x';
+  const valueContentEncodingMethods = valueContentEncodingMap(valueContent);
+
+  if (!valueContentEncodingMethods) {
+    throw new Error(`Could not encode valueContent: ${valueContent}.`);
+  }
+
+  if (!value) {
+    return '0x';
+  }
+
+  if (
+    (valueContent === 'AssetURL' || valueContent === 'JSONURL') &&
+    typeof value === 'string'
+  ) {
+    throw new Error(
+      `Could not encode valueContent: ${valueContent} with value: ${value}. Expected object.`,
+    );
+  }
+
+  return valueContentEncodingMethods.encode(value as any) as string;
 }
 
 export function decodeValueContent(
-  type: string,
+  valueContent: string,
   value: string,
-): string | false {
-  if (!valueContentEncodingMap[type] && type.slice(0, 2) !== '0x') {
-    throw new Error('Could not decode valueContent: "' + type + '".');
-  } else if (type.slice(0, 2) === '0x') {
-    return type === value ? value : false;
+): string | URLDataWithHash | number | null {
+  if (valueContent.slice(0, 2) === '0x') {
+    return valueContent === value ? value : null;
   }
 
-  return value ? valueContentEncodingMap[type].decode(value) : value;
+  if (!value || value === '0x') {
+    return null;
+  }
+
+  return valueContentEncodingMap(valueContent).decode(value);
 }
