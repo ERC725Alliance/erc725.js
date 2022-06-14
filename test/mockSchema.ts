@@ -621,6 +621,49 @@ export const mockSchema: (ERC725JSONSchema & {
       url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd', // FAKE. just used from above TODO: fix this is not an asset URL but a JSON url !!
     },
   },
+  {
+    name: 'TestStringWithBytes4ValueContent',
+    key: '0xb61b0a1d86687ef022781d2698d5e0221997458e3a720cded0b8f165a029d3c5',
+    keyType: 'Singleton',
+    valueContent: 'Bytes4',
+    valueType: 'bytes',
+    // Test data
+    returnRawData: abiCoder.encodeParameter('bytes', '0xcafecafe'),
+    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0xcafecafe']),
+    expectedResult: '0xcafecafe',
+    returnGraphData: '0xcafecafe',
+  },
+  {
+    name: 'TestStringWithBytes32ValueType',
+    key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',
+    keyType: 'Singleton',
+    valueContent: 'Bytes32',
+    valueType: 'bytes32',
+    // Test data
+    returnRawData: abiCoder.encodeParameter(
+      'bytes',
+      '0xcafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe',
+    ),
+    returnRawDataArray: abiCoder.encodeParameter('bytes[]', [
+      '0xcafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe',
+    ]),
+    expectedResult:
+      '0xcafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe',
+    returnGraphData:
+      '0xcafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe',
+  },
+  {
+    name: 'TestStringWithBytes4ValueType',
+    key: '0x1b92e269c7ce7fc16e625562aa588403fe603edb4e2740b0558ed44faa3c1728',
+    keyType: 'Singleton',
+    valueContent: 'Bytes4',
+    valueType: 'bytes4',
+    // Test data
+    returnRawData: abiCoder.encodeParameter('bytes', '0xcafecafe'),
+    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0xcafecafe']),
+    expectedResult: '0xcafecafe',
+    returnGraphData: '0xcafecafe',
+  },
 
   // Nested array tests
   // NOTE: The below are failing on decode all (no source loops, or individual) with data out-of-bounds

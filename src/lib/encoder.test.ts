@@ -1,3 +1,7 @@
+/* eslint-disable no-unused-expressions */
+
+import { expect } from 'chai';
+
 import assert from 'assert';
 import { keccak256, utf8ToHex } from 'web3-utils';
 import {
@@ -230,6 +234,15 @@ describe('encoder', () => {
       );
     });
 
+    it('should throw when encodeValueContent value is a string and valueContent is JSONURL or ASSETURL', () => {
+      expect(() => {
+        encodeValueContent('AssetURL', 'imnotanobject!');
+      }).to.throw;
+      expect(() => {
+        encodeValueContent('JSONURL', 'imnotanobject!');
+      }).to.throw;
+    });
+
     it('should throw when valueContent is unknown', () => {
       assert.throws(
         () => {
@@ -257,27 +270,27 @@ describe('encoder', () => {
       it('throws when the hashFunction of JSON of JSONURL to encode is not keccak256(utf8)', () => {
         assert.throws(
           () => {
-            // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
-            valueContentEncodingMap.JSONURL.encode({
+            valueContentEncodingMap('JSONURL').encode({
+              // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
               hashFunction: 'whatever',
               url: 'https://file-desination.com/file-name',
               hash: '0x321',
-              json: {
-                hello: 'mario',
-              },
             });
           },
-          (error: any) =>
-            error.message ===
-            'When passing in the `json` property, we use "keccak256(utf8)" as a default hashingFunction. You do not need to set a `hashFunction`.',
+          (error: any) => {
+            return (
+              error.message ===
+              `Chosen hashFunction 'whatever' is not supported. Supported hashFunctions: keccak256(utf8),keccak256(bytes)`
+            );
+          },
         );
       });
 
       it('throws when JSONURL encode a JSON without json or hash key', () => {
         assert.throws(
           () => {
-            // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
-            valueContentEncodingMap.JSONURL.encode({
+            valueContentEncodingMap('JSONURL').encode({
+              // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
               hashFunction: 'keccak256(utf8)',
               url: 'https://file-desination.com/file-name',
             });

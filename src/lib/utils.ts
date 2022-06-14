@@ -70,7 +70,7 @@ export function encodeKeyValue(
   name?: string,
 ): string | false {
   const isSupportedValueContent =
-    valueContentMap[valueContent] || valueContent.slice(0, 2) === '0x';
+    !!valueContentMap(valueContent) || valueContent.slice(0, 2) === '0x';
 
   if (!isSupportedValueContent) {
     throw new Error(
@@ -86,9 +86,11 @@ export function encodeKeyValue(
     return encodeValueContent(valueContent, value);
   }
 
+  const valueContentEncodingMethods = valueContentMap(valueContent);
+
   const isSameEncoding =
-    valueContentMap[valueContent] &&
-    valueContentMap[valueContent].type === valueType.split('[]')[0];
+    valueContentEncodingMethods &&
+    valueContentEncodingMethods.type === valueType.split('[]')[0];
 
   let result;
 
@@ -245,7 +247,9 @@ export function decodeKeyValue(
   name?: string,
 ) {
   // Check for the missing map.
-  if (!valueContentMap[valueContent] && valueContent.slice(0, 2) !== '0x') {
+  const valueContentEncodingMethods = valueContentMap(valueContent);
+
+  if (!valueContentEncodingMethods && valueContent.slice(0, 2) !== '0x') {
     throw new Error(
       'The valueContent "' +
         valueContent +
@@ -256,13 +260,16 @@ export function decodeKeyValue(
   }
 
   let sameEncoding =
-    valueContentMap[valueContent] &&
-    valueContentMap[valueContent].type === valueType.split('[]')[0];
+    valueContentEncodingMethods &&
+    valueContentEncodingMethods.type === valueType.split('[]')[0];
   const isArray = valueType.substring(valueType.length - 2) === '[]';
 
   // VALUE TYPE
+  const valueTypeIsBytesNonArray =
+    valueType.slice(0, 5) === 'bytes' && valueType.slice(-2) !== '[]';
+
   if (
-    valueType !== 'bytes' && // we ignore because all is decoded by bytes to start with (abi)
+    !valueTypeIsBytesNonArray &&
     valueType !== 'string' &&
     !isAddress(value) // checks for addresses, since technically an address is bytes?
   ) {
@@ -284,7 +291,7 @@ export function decodeKeyValue(
 
   if (isArray && Array.isArray(value)) {
     // value must be an array also
-    const results: (string | false)[] = [];
+    const results: (string | URLDataWithHash | number | null)[] = [];
 
     for (let index = 0; index < value.length; index++) {
       const element = value[index];
@@ -349,9 +356,7 @@ export function getHashFunction(hashFunctionNameOrHash: string) {
 
   if (!hashFunction) {
     throw new Error(
-      `Chosen hashFunction '${hashFunctionNameOrHash}' is not supported.
-      Supported hashFunctions: ${SUPPORTED_HASH_FUNCTIONS_LIST}
-      `,
+      `Chosen hashFunction '${hashFunctionNameOrHash}' is not supported. Supported hashFunctions: ${SUPPORTED_HASH_FUNCTIONS_LIST}`,
     );
   }
 

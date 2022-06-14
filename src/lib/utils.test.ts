@@ -187,21 +187,27 @@ describe('utils', () => {
         encodedValue:
           '0x6f357c6a81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88697066733a2f2f516d6245724b6833466a7378787878787878787878787878787878787878787878787878787639414a4a765a6264',
       },
-      // THE CASES BELOW ARE CURRENTLY NOT SUPPORTED BY THE LIB
-      // {
-      //   valueContent: 'Bytes',
-      //   valueType: 'bytes',
-      //   decodedValue: '0xaaAE32',
-      //   encodedValue: '0xaaAE32',
-      // },
-      // {
-      //   valueContent: 'Bytes32',
-      //   valueType: 'bytes',
-      //   decodedValue:
-      //     '0x7465737400000000000000000000000000000000000000000000000000000000',
-      //   encodedValue:
-      //     '0x7465737400000000000000000000000000000000000000000000000000000000',
-      // },
+
+      {
+        valueContent: 'Bytes',
+        valueType: 'bytes',
+        decodedValue: '0xaaAE32',
+        encodedValue: '0xaaAE32',
+      },
+      {
+        valueContent: 'Bytes32',
+        valueType: 'bytes',
+        decodedValue:
+          '0x7465737400000000000000000000000000000000000000000000000000000000',
+        encodedValue:
+          '0x7465737400000000000000000000000000000000000000000000000000000000',
+      },
+      {
+        valueContent: 'Bytes4',
+        valueType: 'bytes',
+        decodedValue: '0x74657374',
+        encodedValue: '0x74657374',
+      },
       {
         valueContent: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
         valueType: 'bytes',
