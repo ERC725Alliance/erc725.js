@@ -3,7 +3,7 @@
 import { expect } from 'chai';
 
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
-import { decodeData } from './decodeData';
+import { decodeData, decodeTupleKeyValue, isValidTuple } from './decodeData';
 
 describe('decodeData', () => {
   const schemas: ERC725JSONSchema[] = [
@@ -61,11 +61,34 @@ describe('decodeData', () => {
         keyName: 'KeyOne',
         value: '0x1111',
       },
-
       schemas,
     );
 
     expect(decodedData.name).to.eql('KeyOne');
+  });
+
+  it('parses type tuples/Mixed correctly', () => {
+    const schema: ERC725JSONSchema = {
+      name: 'MyDynamicKey:<address>',
+      key: '0x',
+      keyType: 'Singleton',
+      valueType: '(bytes4,bytes8)',
+      valueContent: '(Bytes4,Number)',
+    };
+
+    const decodedData = decodeData(
+      {
+        keyName: 'MyDynamicKey:<address>',
+        dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
+        value: '0x11223344000000000000000c',
+        //        |------||--------------|
+        //         bytes4     bytes8
+        //         bytes4     number
+      },
+      [schema],
+    );
+
+    expect(decodedData.value).to.eql(['0x11223344', '12']); // TODO: we may want to return a number instead of a string.
   });
 
   it('parses type Array correctly', () => {
@@ -88,7 +111,6 @@ describe('decodeData', () => {
           },
         ],
       },
-
       [
         {
           name: 'LSP12IssuedAssets[]',
@@ -138,5 +160,109 @@ describe('decodeData', () => {
       'MyDynamicKey:cafecafecafecafecafecafecafecafecafecafe',
       'KeyTwo',
     ]);
+  });
+});
+
+describe('tuple', () => {
+  describe('decodeTupleKeyValue', () => {
+    const testCases = [
+      {
+        valueContent: '(Bytes4,Number)',
+        valueType: '(bytes4,bytes8)',
+        encodedValue: '0xe33f65c3000000000000000c',
+        decodedValue: ['0xe33f65c3', '12'],
+      },
+    ]; // TODO: add more cases? Address, etc.
+
+    testCases.forEach((testCase) => {
+      it(`decodes tuple values`, () => {
+        expect(
+          decodeTupleKeyValue(
+            testCase.valueContent,
+            testCase.valueType,
+            testCase.encodedValue,
+          ),
+        ).to.eql(testCase.decodedValue);
+      });
+    });
+  });
+
+  describe('isValidTupleValueType', () => {
+    const testCases = [
+      {
+        valueType: 'abcd', // not a tuple
+        valueContent: 'WebThr33',
+        isTuple: false,
+      },
+      {
+        valueType: '()',
+        valueContent: '()',
+        isTuple: false, // it is empty
+      },
+      {
+        valueType: '(bytes4)',
+        valueContent: '(HeyHey)',
+        isTuple: false, // valueContent is wrong
+        shouldThrow: true,
+      },
+      {
+        valueType: '(bytes4,number)', // number not allowed in valueType
+        valueContent: '(Bytes4,Number)',
+        isTuple: false,
+        shouldThrow: true,
+      },
+      {
+        valueType: '(bytes4,bytes8)',
+        valueContent: '(Bytes4,Number,Bytes5)',
+        isTuple: false, // valueContent length != valueType length
+        shouldThrow: true,
+      },
+      {
+        valueType: '(bytes4,bytes8)',
+        valueContent: '(Bytes8,Number)',
+        isTuple: false, // first item does not match between valueType and valueContent (bytes4 != bytes8)
+        shouldThrow: true,
+      },
+      {
+        valueType: '(bytes4,bytes8)',
+        valueContent: '(Bytes4,Number)',
+        isTuple: true,
+      },
+      {
+        valueType: '(bytes4,bytes8,bytes16)',
+        valueContent: '(Bytes4,Number,Bytes16)',
+        isTuple: true,
+      },
+      {
+        valueType: '(bytes4,bytes4)',
+        valueContent: '(Number,0x112233XX)',
+        isTuple: false,
+        shouldThrow: true, // valueContent is not a valid hex value
+      },
+      // TODO: add feature for this test
+      // {
+      //   valueType: '(bytes4,bytes4)',
+      //   valueContent: '(Number,0x1122334455)',
+      //   isTuple: false,
+      //   shouldThrow: true, // valueContent is bytes5 vs bytes4
+      // },
+    ];
+
+    testCases.forEach((testCase) => {
+      it(`detects valueType: ${testCase.valueType} valueContent: ${
+        testCase.valueContent
+      } as ${testCase.isTuple ? 'tuple' : 'non tuple'}`, () => {
+        if (testCase.shouldThrow) {
+          expect(() => {
+            isValidTuple(testCase.valueType, testCase.valueContent);
+          }).to.throw();
+          return;
+        }
+
+        expect(
+          isValidTuple(testCase.valueType, testCase.valueContent),
+        ).to.equal(testCase.isTuple);
+      });
+    });
   });
 });

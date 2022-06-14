@@ -157,7 +157,7 @@ export const valueContentEncodingMap = (valueContent: string) => {
     case 'Number': {
       return {
         type: 'uint256',
-        // NOTE: extra logic is to handle and always return a string number
+        // TODO: extra logic to handle and always return a string number
         encode: (value: string) => {
           let parsedValue: number;
           try {
@@ -307,11 +307,15 @@ export const valueContentEncodingMap = (valueContent: string) => {
         type: 'unknown',
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         encode: (_value: any) => {
-          throw new Error('Could not encode unknown valueContent.');
+          throw new Error(
+            `Could not encode unknown (${valueContent}) valueContent.`,
+          );
         },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         decode: (_value: any) => {
-          throw new Error('Could not decode unknown valueContent.');
+          throw new Error(
+            `Could not decode unknown (${valueContent}) valueContent.`,
+          );
         },
       };
     }
@@ -341,7 +345,7 @@ export function decodeValueType(type: string, value: string) {
 
 export function encodeValueContent(
   valueContent: string,
-  value: string | AssetURLEncode | JSONURLDataToEncode,
+  value: string | number | AssetURLEncode | JSONURLDataToEncode,
 ): string | false {
   if (valueContent.slice(0, 2) === '0x') {
     return valueContent === value ? value : false;
