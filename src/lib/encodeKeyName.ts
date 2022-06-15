@@ -11,9 +11,8 @@
     You should have received a copy of the GNU Lesser General Public License
     along with @erc725/erc725.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 /**
- * @file encodeKeyName.ts
+ * @file lib/encodeKeyName.ts
  * @author Hugo Masclet <@Hugoo>
  * @date 2022
  */

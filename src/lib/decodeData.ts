@@ -13,12 +13,15 @@
 */
 
 /**
- * @file decodeData.ts
+ * @file lib/decodeData.ts
+ * @author Robert McLeod <@robertdavid010>
  * @author Hugo Masclet <@Hugoo>
- * @date 2022
+ * @author Callum Grindle <@CallumGrindle>
+ * @date 2020
  */
 
 import { isHex } from 'web3-utils';
+
 import { DecodeDataInput, DecodeDataOutput } from '../types/decodeData';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { isDynamicKeyName } from './encodeKeyName';

@@ -13,7 +13,9 @@
 */
 /**
  * @file lib/utils.ts
- * @author Robert McLeod <@robertdavid010>, Fabian Vogelsteller <fabian@lukso.network>
+ * @author Robert McLeod <@robertdavid010>
+ * @author Fabian Vogelsteller <fabian@lukso.network>
+ * @author Hugo Masclet <@Hugoo>
  * @date 2020
  */
 
