@@ -89,6 +89,11 @@ describe('Running @erc725/erc725.js tests...', () => {
     }
   });
 
+  it('should instantiate when giving a web3 instance as provider', async () => {
+    const web3 = new Web3('https://rpc.l14.lukso.network');
+    const erc725 = new ERC725(mockSchema, address, web3);
+  });
+
   describe('isValidSignature', () => {
     it('should return true if the signature is valid [mock HttpProvider]', async () => {
       const provider = new HttpProvider({ returnData: [] }, [], true); // we mock a valid return response (magic number)
