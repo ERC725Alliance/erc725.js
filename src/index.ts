@@ -166,6 +166,10 @@ export class ERC725 {
     )
       return new Web3ProviderWrapper(providerOrProviderWrapper);
 
+    if (typeof providerOrProviderWrapper.currentProvider == 'object') {
+      return new Web3ProviderWrapper(providerOrProviderWrapper.currentProvider);
+    }
+
     throw new Error(
       `Incorrect or unsupported provider ${providerOrProviderWrapper}`,
     );
