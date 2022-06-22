@@ -64,10 +64,10 @@ export function constructJSONRPC(
       {
         to: address,
         gas: METHODS[method].gas,
-        gasPrice: METHODS[method].gasPrice,
         value: METHODS[method].value,
         data,
       },
+      'latest',
     ],
     id: idCount,
   };

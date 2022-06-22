@@ -221,7 +221,6 @@ export class EthereumProviderWrapper {
     return {
       to: address,
       gas: METHODS[method].gas,
-      gasPrice: METHODS[method].gasPrice,
       value: METHODS[method].value,
       data,
     };
