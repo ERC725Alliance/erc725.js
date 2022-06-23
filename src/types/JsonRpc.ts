@@ -13,7 +13,7 @@ export interface JsonRpc {
   id: number;
 }
 
-export interface JsonRpcEthereumProvider {
+export interface JsonRpcEthereumProviderParams {
   to: string;
   gas: string;
   value: string;
