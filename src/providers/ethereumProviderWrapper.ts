@@ -30,7 +30,7 @@ import {
   METHODS,
 } from '../lib/constants';
 import { decodeResult as decodeResultUtils } from '../lib/provider-wrapper-utils';
-import { JsonRpcEthereumProvider } from '../types/JsonRpc';
+import { JsonRpcEthereumProviderParams } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 import { ProviderTypes } from '../types/provider';
 
@@ -53,7 +53,7 @@ export class EthereumProviderWrapper {
 
   async getOwner(address: string) {
     const params = this.constructJSONRPC(address, Method.OWNER);
-    const result = await this.callContract([params]);
+    const result = await this.callContract(params);
     if (result.error) {
       throw result.error;
     }
@@ -102,13 +102,13 @@ export class EthereumProviderWrapper {
   async supportsInterface(address: string, interfaceId: string) {
     return this.decodeResult(
       Method.SUPPORTS_INTERFACE,
-      await this.callContract([
+      await this.callContract(
         this.constructJSONRPC(
           address,
           Method.SUPPORTS_INTERFACE,
           `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
         ),
-      ]),
+      ),
     );
   }
 
@@ -125,9 +125,9 @@ export class EthereumProviderWrapper {
       [hash, signature],
     );
 
-    const result = await this.callContract([
+    const result = await this.callContract(
       this.constructJSONRPC(address, Method.IS_VALID_SIGNATURE, encodedParams),
-    ]);
+    );
 
     if (result.error) {
       throw result.error;
@@ -172,13 +172,13 @@ export class EthereumProviderWrapper {
     address: string,
     keyHashes: string[],
   ): Promise<GetDataReturn[]> {
-    const encodedResults = await this.callContract([
+    const encodedResults = await this.callContract(
       this.constructJSONRPC(
         address,
         Method.GET_DATA,
         abiCoder.encodeParameter('bytes32[]', keyHashes),
       ),
-    ]);
+    );
 
     const decodedValues = this.decodeResult(Method.GET_DATA, encodedResults);
 
@@ -195,9 +195,9 @@ export class EthereumProviderWrapper {
     // Here we could use `getDataMultiple` instead of sending multiple calls to `getData`
     // But this is already legacy and it won't be used anymore..
     const encodedResultsPromises = keyHashes.map((keyHash) =>
-      this.callContract([
+      this.callContract(
         this.constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
-      ]),
+      ),
     );
 
     const decodedResults = await Promise.all(encodedResultsPromises);
@@ -213,18 +213,20 @@ export class EthereumProviderWrapper {
     address: string,
     method: Method,
     methodParam?: string,
-  ): JsonRpcEthereumProvider {
+  ): (JsonRpcEthereumProviderParams | string)[] {
     const data = methodParam
       ? METHODS[method].sig + methodParam.replace('0x', '')
       : METHODS[method].sig;
 
-    return {
-      to: address,
-      gas: METHODS[method].gas,
-      gasPrice: METHODS[method].gasPrice,
-      value: METHODS[method].value,
-      data,
-    };
+    return [
+      {
+        to: address,
+        value: METHODS[method].value,
+        gas: METHODS[method].gas,
+        data,
+      },
+      'latest',
+    ];
   }
 
   private async callContract(params: any) {
