@@ -5,18 +5,17 @@ export interface JsonRpc {
     {
       to: string;
       gas: string;
-      gasPrice: string;
       value: string;
       data;
     },
+    'latest',
   ];
   id: number;
 }
 
-export interface JsonRpcEthereumProvider {
+export interface JsonRpcEthereumProviderParams {
   to: string;
   gas: string;
-  gasPrice: string;
   value: string;
   data;
 }

@@ -99,16 +99,15 @@ export class Web3ProviderWrapper {
     address: string,
     interfaceId: string,
   ): Promise<boolean> {
-    return decodeResult(
-      Method.SUPPORTS_INTERFACE,
-      await this.callContract(
-        constructJSONRPC(
-          address,
-          Method.SUPPORTS_INTERFACE,
-          `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
-        ),
+    const result = await this.callContract(
+      constructJSONRPC(
+        address,
+        Method.SUPPORTS_INTERFACE,
+        `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
       ),
     );
+
+    return decodeResult(Method.SUPPORTS_INTERFACE, result);
   }
 
   /**
@@ -200,6 +199,7 @@ export class Web3ProviderWrapper {
         constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHashes[index]),
       );
     }
+
     const results: any = await this.callContract(payload);
 
     return payload.map<GetDataReturn>((payloadCall, index) => ({
@@ -215,6 +215,7 @@ export class Web3ProviderWrapper {
     return new Promise((resolve, reject) => {
       // Send old web3 method with callback to resolve promise
       // This is deprecated: https://docs.metamask.io/guide/ethereum-provider.html#ethereum-send-deprecated
+
       this.provider.send(payload, (e, r) => {
         if (e) {
           reject(e);
