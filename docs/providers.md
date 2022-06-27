@@ -16,7 +16,7 @@ The following code snippet will use the web3 provider available at web3.provider
 import Web3 from 'web3';
 
 const web3provider = new Web3(
-  new Web3.providers.HttpProvider('https://rpc.l14.lukso.network'),
+  new Web3.providers.HttpProvider('https://rpc.l16.lukso.network'),
 );
 ```
 
