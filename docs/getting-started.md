@@ -53,7 +53,7 @@ const schemas = [
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
 const provider = new Web3.providers.HttpProvider(
-  'https://rpc.l14.lukso.network',
+  'https://rpc.l16.lukso.network',
 );
 const config = {
   ipfsGateway: 'https://ipfs.lukso.network/ipfs/',
