@@ -305,6 +305,26 @@ export const valueContentEncodingMap = (valueContent: string) => {
         },
       };
     }
+    case 'BitArray': {
+      return {
+        type: 'bytes',
+        encode: (value: string) => {
+          if (typeof value !== 'string' || !isHex(value)) {
+            throw new Error(`Value: ${value} is not hex.`);
+          }
+
+          return value;
+        },
+        decode: (value: string) => {
+          if (typeof value !== 'string' || !isHex(value)) {
+            console.log(`Value: ${value} is not hex.`);
+            return null;
+          }
+
+          return value;
+        },
+      };
+    }
     default: {
       return {
         type: 'unknown',
