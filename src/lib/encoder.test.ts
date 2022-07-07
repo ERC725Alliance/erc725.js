@@ -195,6 +195,13 @@ describe('encoder', () => {
         encodedValue:
           '0x6f357c6a027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168687474703a2f2f746573742e636f6d2f61737365742e676c62',
       },
+      {
+        valueContent: 'BitArray',
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000008', // ... 0000 0000 1000
+        decodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000008',
+      },
     ];
 
     testCases.forEach((testCase) => {

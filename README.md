@@ -70,7 +70,7 @@ const schema = [
 
 const address = '0x3000783905Cc7170cCCe49a4112Deda952DDBe24';
 const provider = new Web3.providers.HttpProvider(
-  'https://rpc.l14.lukso.network',
+  'https://rpc.l16.lukso.network',
 );
 const config = {
   ipfsGateway: 'https://ipfs.lukso.network/ipfs/',
