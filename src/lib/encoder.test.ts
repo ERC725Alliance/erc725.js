@@ -132,6 +132,18 @@ describe('encoder', () => {
         decodedValue: [`0x${'cafe'.repeat(256)}`, `0x${'beef'.repeat(250)}`],
         encodedValue: `0x0200${'cafe'.repeat(256)}01f4${'beef'.repeat(250)}`,
       },
+      {
+        valueType: 'bool',
+        decodedValue: true,
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000001',
+      },
+      {
+        valueType: 'bool',
+        decodedValue: false,
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000000',
+      },
     ];
 
     testCases.forEach((testCase) => {
@@ -290,6 +302,18 @@ describe('encoder', () => {
           '0x0000000000000000000000000000000000000000000000000000000000000008', // ... 0000 0000 1000
         decodedValue:
           '0x0000000000000000000000000000000000000000000000000000000000000008',
+      },
+      {
+        valueContent: 'Boolean',
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000000',
+        decodedValue: false,
+      },
+      {
+        valueContent: 'Boolean',
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000001',
+        decodedValue: true,
       },
     ];
 

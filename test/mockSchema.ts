@@ -789,4 +789,30 @@ export const mockSchema: (ERC725JSONSchema & {
   //   ]
 
   // },
+
+  // Case yy for booleans
+  //   {
+  //     name: 'TestBooleanValueContentTrue',
+  //     key: '0x90f613c57609d3f501994ddba712de31989f84e4861126c3c37d0bc25936067c',
+  //     keyType: 'Singleton',
+  //     valueContent: 'Boolean',
+  //     valueType: 'bool',
+  //     // Test data
+  //     returnRawData: abiCoder.encodeParameter('bool', true),
+  //     returnRawDataArray: abiCoder.encodeParameter('bool[]', [true]),
+  //     returnGraphData: true,
+  //     expectedResult: true,
+  //   },
+  //   {
+  //     name: 'TestBooleanValueContentFalse',
+  //     key: '0x60c24873dd6268f4cc10a21327faa897b1ff48b42e702bd3647894d9a70c3914',
+  //     keyType: 'Singleton',
+  //     valueContent: 'Boolean',
+  //     valueType: 'bool',
+  //     // Test data
+  //     returnRawData: abiCoder.encodeParameter('bool', false),
+  //     returnRawDataArray: abiCoder.encodeParameter('bool[]', [false]),
+  //     returnGraphData: false,
+  //     expectedResult: false,
+  //   },
 ];
