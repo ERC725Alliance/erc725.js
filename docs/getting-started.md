@@ -27,7 +27,7 @@ import Web3 from 'web3';
 
 // Part of LSP3-UniversalProfile Schema
 // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
-const schemas = [
+const schemas: ERC725JSONSchema[] = [
   {
     name: 'SupportedStandards:LSP3UniversalProfile',
     key: '0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38',

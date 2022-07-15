@@ -16,6 +16,7 @@ export type ERC725JSONSchemaValueContent =
   | 'JSONURL'
   | 'URL'
   | 'Markdown'
+  | 'Boolean'
   | string; // for tuples
 
 export type ERC725JSONSchemaValueType =
@@ -31,7 +32,8 @@ export type ERC725JSONSchemaValueType =
   | 'bytes32[]'
   | 'bytes4[]'
   | 'bytes[]'
-  | string; // for tuples;
+  | 'boolean'
+  | string; // for tuples
 
 /**
  * ```javascript title=Example
