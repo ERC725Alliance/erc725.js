@@ -60,6 +60,7 @@ import {
 import { GetDataDynamicKey, GetDataInput } from './types/GetData';
 import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
+import { DynamicKeyParts } from './types/dynamicKeys';
 
 export {
   ERC725JSONSchema,
@@ -649,22 +650,27 @@ export class ERC725 {
    * Hashes a key name for use on an ERC725Y contract according to LSP2 ERC725Y JSONSchema standard.
    *
    * @param {string} keyName The key name you want to encode.
+   * @param {DynamicKeyParts} dynamicKeyParts String or Array of String values used to construct the key.
    * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md ERC725YJsonSchema standard.
    * @returns {string} The keccak256 hash of the provided key name. This is the key that must be retrievable from the ERC725Y contract via ERC725Y.getData(bytes32 key).
    */
-  static encodeKeyName(keyName: string): string {
-    return encodeKeyName(keyName);
+  static encodeKeyName(
+    keyName: string,
+    dynamicKeyParts?: DynamicKeyParts,
+  ): string {
+    return encodeKeyName(keyName, dynamicKeyParts);
   }
 
   /**
    * Hashes a key name for use on an ERC725Y contract according to LSP2 ERC725Y JSONSchema standard.
    *
    * @param {string} keyName The key name you want to encode.
+   * @param {DynamicKeyParts} dynamicKeyParts String or Array of String values used to construct the key.
    * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md ERC725YJsonSchema standard.
    * @returns {string} The keccak256 hash of the provided key name. This is the key that must be retrievable from the ERC725Y contract via ERC725Y.getData(bytes32 key).
    */
-  encodeKeyName(keyName: string): string {
-    return encodeKeyName(keyName);
+  encodeKeyName(keyName: string, dynamicKeyParts?: DynamicKeyParts): string {
+    return encodeKeyName(keyName, dynamicKeyParts);
   }
 }
 
