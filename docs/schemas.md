@@ -32,14 +32,14 @@ LSP4DigitalAsset.json
 LSP5ReceivedAssets.json
 LSP6KeyManager.json
 LSP9Vault.json
-LSP10ReceivedVaults.json           
-LSP12IssuedAssets.json            
+LSP10ReceivedVaults.json
+LSP12IssuedAssets.json
 ```
 
 You can import them from:
 
 ```js
-import LSP3 from '@erc725/erc725.js/schemas/LSP3UniversalProfile.json';
+import LSP3 from '@erc725/erc725.js/schemas/LSP3UniversalProfileMetadata.json';
 import LSP5 from '@erc725/erc725.js/schemas/LSP5ReceivedAssets.json';
 // ...
 
