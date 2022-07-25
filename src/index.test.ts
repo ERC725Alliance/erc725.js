@@ -1170,4 +1170,21 @@ describe('encodeKeyName', () => {
       '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2',
     );
   });
+
+  it('works for dynamic keys', () => {
+    assert.deepStrictEqual(
+      ERC725.encodeKeyName(
+        'FavouriteFood:<address>',
+        '0xa4FBbFe353124E6fa6Bb7f8e088a9269dF552EA2',
+      ),
+      '0x31145577efe228036af40000a4fbbfe353124e6fa6bb7f8e088a9269df552ea2',
+    );
+    assert.deepStrictEqual(
+      erc725Instance.encodeKeyName(
+        'FavouriteFood:<address>',
+        '0xa4FBbFe353124E6fa6Bb7f8e088a9269dF552EA2',
+      ),
+      '0x31145577efe228036af40000a4fbbfe353124e6fa6bb7f8e088a9269df552ea2',
+    );
+  });
 });
