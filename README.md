@@ -36,6 +36,8 @@ import { ERC725 } from '@erc725/erc725.js';
 import ERC725 from '@erc725/erc725.js';
 ```
 
+If you install it on the backend side, you may need to also install [`isomorphic-fetch`](https://www.npmjs.com/package/isomorphic-fetch).
+
 ## Example Instantiation
 
 ```js
