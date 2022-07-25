@@ -19,6 +19,12 @@ The `@erc725/erc725.js` package allows you to interact with the ERC-725 schemas 
 npm install @erc725/erc725.js
 ```
 
+:::info
+
+If you install it on the backend side, you may need to also install [`isomorphic-fetch`](https://www.npmjs.com/package/isomorphic-fetch).
+
+:::
+
 ## Instantiation
 
 ```js
