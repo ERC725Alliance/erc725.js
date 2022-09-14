@@ -35,6 +35,7 @@ export interface Permissions {
   DEPLOY?: boolean;
   TRANSFERVALUE?: boolean;
   SIGN?: boolean;
+  ENCRYPT?: boolean;
   SUPER_SETDATA?: boolean;
   SUPER_TRANSFERVALUE?: boolean;
   SUPER_CALL?: boolean;
