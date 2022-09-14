@@ -604,6 +604,7 @@ export class ERC725 {
       DEPLOY: false,
       TRANSFERVALUE: false,
       SIGN: false,
+      ENCRYPT: false,
       SUPER_SETDATA: false,
       SUPER_TRANSFERVALUE: false,
       SUPER_CALL: false,
