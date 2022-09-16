@@ -183,8 +183,8 @@ describe('tuple', () => {
       {
         valueContent: '(Bytes4,Number)',
         valueType: '(bytes4,bytes8)',
-        encodedValue: '0x5fcaac27000000000000000c',
-        decodedValue: ['0x5fcaac27', '12'],
+        encodedValue: '0xdeadbeaf000000000000000c',
+        decodedValue: ['0xdeadbeaf', '12'],
       },
     ]; // TODO: add more cases? Address, etc.
 
