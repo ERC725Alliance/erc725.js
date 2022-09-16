@@ -282,8 +282,8 @@ describe('utils', () => {
       {
         valueContent: '(Bytes4,Number)',
         valueType: '(bytes4,bytes8)',
-        encodedValue: '0x5fcaac270000000000000010',
-        decodedValue: ['0x5fcaac27', 16],
+        encodedValue: '0xdeadbeaf0000000000000010',
+        decodedValue: ['0xdeadbeaf', 16],
       },
     ]; // we may need to add more test cases! Address, etc.
 
