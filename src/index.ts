@@ -20,7 +20,7 @@
  * @date 2020
  */
 
-import { hexToNumber, isAddress, leftPad, toHex } from 'web3-utils';
+import { hexToNumber, isAddress, leftPad, toHex, AbiItem } from 'web3-utils';
 import Web3 from 'web3';
 
 import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
@@ -50,6 +50,9 @@ import {
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
 } from './types/ERC725JSONSchema';
+import lsp3Schema from '../schemas/LSP3UniversalProfileMetadata.json';
+import lsp4Schema from '../schemas/LSP4DigitalAsset.json';
+import lsp9Schema from '../schemas/LSP9Vault.json';
 import {
   DecodeDataInput,
   DecodeDataOutput,
