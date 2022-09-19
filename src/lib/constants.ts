@@ -14,7 +14,7 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 import { numberToHex, keccak256 } from 'web3-utils';
-
+import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { MethodData, Encoding, Method } from '../types/Method';
 
 // https://github.com/ERC725Alliance/ERC725/blob/develop/docs/ERC-725.md#specification
@@ -169,3 +169,64 @@ export const LSP6_DEFAULT_PERMISSIONS = {
 
 export const LSP6_ALL_PERMISSIONS =
   '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
+export const COMMON_ABIS = {
+  supportsInterface: [
+    {
+      inputs: [
+        {
+          internalType: 'bytes4',
+          name: 'interfaceId',
+          type: 'bytes4',
+        },
+      ],
+      name: 'supportsInterface',
+      outputs: [
+        {
+          internalType: 'bool',
+          name: '',
+          type: 'bool',
+        },
+      ],
+      stateMutability: 'view',
+      type: 'function',
+    },
+  ],
+};
+
+export const IPFS_GATEWAY_BASE_URL = 'https://ipfs.io/ipfs/'; // 'https://2eff.lukso.dev/ipfs/' not working;
+
+export enum LSPType {
+  LSP3UniversalProfile = 'LSP3',
+  LSP7DigitalAsset = 'LSP7',
+  LSP8IdentifiableDigitalAsset = 'LSP8',
+  LSP9Vault = 'LSP9',
+  Unknown = 'Unknown',
+}
+
+// from @lukso/lsp-smart-contracts v0.7.0, erc725.js should stay independent
+export const INTERFACE_IDS = {
+  ERC165: '0x01ffc9a7',
+  ERC1271: '0x1626ba7e',
+  ERC20: '0x36372b07',
+  ERC223: '0x87d43052',
+  ERC721: '0x80ac58cd',
+  ERC721Metadata: '0x5b5e139f',
+  ERC777: '0xe58e113c',
+  ERC1155: '0xd9b67a26',
+  ERC725X: '0x44c028fe',
+  ERC725Y: '0x714df77c',
+  LSP0ERC725Account: '0xeb6be62e',
+  LSP1UniversalReceiver: '0x6bb56a14',
+  LSP1UniversalReceiverDelegate: '0xa245bbda',
+  LSP6KeyManager: '0xc403d48f',
+  LSP7DigitalAsset: '0x5fcaac27',
+  LSP8IdentifiableDigitalAsset: '0x49399145',
+  LSP9Vault: '0xfd4d5c50',
+  ClaimOwnership: '0xa375e9c6',
+};
+
+export interface LspTypeOption {
+  interfaceId: string; // EIP-165
+  lsp2Schema: ERC725JSONSchema | null;
+}
