@@ -605,6 +605,7 @@ export class ERC725 {
       TRANSFERVALUE: false,
       SIGN: false,
       ENCRYPT: false,
+      DECRYPT: false,
       SUPER_SETDATA: false,
       SUPER_TRANSFERVALUE: false,
       SUPER_CALL: false,
