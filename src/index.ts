@@ -39,6 +39,12 @@ import {
   LSP6_ALL_PERMISSIONS,
   LSP6_DEFAULT_PERMISSIONS,
 } from './lib/constants';
+import {
+  LSPType,
+  COMMON_ABIS,
+  INTERFACE_IDS_0_7_0,
+  LSPTypeOptions,
+} from './lib/interfaces';
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types
@@ -52,6 +58,8 @@ import {
 } from './types/ERC725JSONSchema';
 import lsp3Schema from '../schemas/LSP3UniversalProfileMetadata.json';
 import lsp4Schema from '../schemas/LSP4DigitalAsset.json';
+import lsp5Schema from '../schemas/LSP5ReceivedAssets.json';
+import lsp6Schema from '../schemas/LSP6KeyManager.json';
 import lsp9Schema from '../schemas/LSP9Vault.json';
 import {
   DecodeDataInput,
@@ -540,6 +548,112 @@ export class ERC725 {
   encodeKeyName(keyName: string, dynamicKeyParts?: DynamicKeyParts): string {
     return encodeKeyName(keyName, dynamicKeyParts);
   }
-}
 
+  LSPTypeOptions: Record<Exclude<LSPType, LSPType.Unknown>, LSPTypeOptions> = {
+    [LSPType.LSP0ERC725Account]: {
+      interfaceId: INTERFACE_IDS_0_7_0.LSP0ERC725Account,
+    },
+    [LSPType.LSP1UniversalReceiver]: {
+      interfaceId: INTERFACE_IDS_0_7_0.LSP1UniversalReceiver,
+    },
+    [LSPType.LSP1UniversalReceiverDelegate]: {
+      interfaceId: INTERFACE_IDS_0_7_0.LSP1UniversalReceiverDelegate,
+    },
+    [LSPType.LSP3UniversalProfile]: {
+      lsp2Schema: this.getSupportedStandardObject(
+        lsp3Schema as ERC725JSONSchema[],
+      ),
+    },
+    [LSPType.LSP4DigitalAssetMetadata]: {
+      lsp2Schema: this.getSupportedStandardObject(
+        lsp4Schema as ERC725JSONSchema[],
+      ),
+    },
+    [LSPType.LSP5ReceivedAssets]: {
+      // TODO: No supportedStandards key nor interface
+    },
+    [LSPType.LSP6KeyManager]: {
+      interfaceId: INTERFACE_IDS_0_7_0.LSP6KeyManager,
+    },
+    [LSPType.LSP7DigitalAsset]: {
+      interfaceId: INTERFACE_IDS_0_7_0.LSP7DigitalAsset,
+    },
+    [LSPType.LSP8IdentifiableDigitalAsset]: {
+      interfaceId: INTERFACE_IDS_0_7_0.LSP8IdentifiableDigitalAsset,
+    },
+    [LSPType.LSP9Vault]: {
+      // TODO: Check both: InterfaceId and schema?
+      interfaceId: INTERFACE_IDS_0_7_0.LSP9Vault,
+      lsp2Schema: this.getSupportedStandardObject(
+        lsp9Schema as ERC725JSONSchema[],
+      ),
+    },
+    [LSPType.LSP10ReceivedVaults]: {
+      // TODO: No supportedStandards key nor interface
+    },
+    [LSPType.LSP12IssuedAssets]: {
+      // TODO: No supportedStandards key nor interface
+    },
+  };
+
+  private getSupportedStandardObject(schemas: ERC725JSONSchema[]) {
+    try {
+      const results = schemas.filter((schema) => {
+        return schema.name.startsWith('SupportedStandard:');
+      });
+
+      if (results.length === 0) {
+        return null;
+      }
+
+      return results[0];
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async detectLSP(
+    contractAddress: string,
+    lspType: LSPType,
+    web3Provider: Web3,
+  ) {
+    if (lspType === LSPType.Unknown) {
+      return false;
+    }
+
+    // EIP-165 detection
+    const contract = new web3Provider.eth.Contract(
+      COMMON_ABIS.supportsInterface as AbiItem[],
+      contractAddress,
+    );
+
+    // Check if the contract implements the LSP interface ID
+    if (this.LSPTypeOptions[lspType].interfaceId) {
+      try {
+        return await contract.methods.supportsInterface(
+          this.LSPTypeOptions[lspType],
+        ).call;
+      } catch (err) {
+        return false;
+      }
+    }
+
+    // Check if the contract implements the LSP schema
+    if (this.LSPTypeOptions[lspType].lsp2Schema) {
+      const { lsp2Schema } = this.LSPTypeOptions[lspType];
+
+      if (!lsp2Schema) {
+        return false;
+      }
+
+      try {
+        const lspSupportedStandards = await this.fetchData(lsp2Schema.name);
+        // @ts-ignore
+        return lspSupportedStandards.value === lsp2Schema.valueContent;
+      } catch (error) {
+        return false;
+      }
+    } else return false;
+  }
+}
 export default ERC725;
