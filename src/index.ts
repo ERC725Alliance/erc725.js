@@ -612,19 +612,16 @@ export class ERC725 {
     }
   }
 
-  async detectLSP(
-    contractAddress: string,
-    lspType: LSPType,
-    web3Provider: Web3,
-  ) {
+  async detectLSP(lspType: LSPType) {
     if (lspType === LSPType.Unknown) {
       return false;
     }
+    const { address, provider } = this.getAddressAndProvider();
 
     // EIP-165 detection
-    const contract = new web3Provider.eth.Contract(
+    const contract = new provider.eth.Contract(
       COMMON_ABIS.supportsInterface as AbiItem[],
-      contractAddress,
+      address,
     );
 
     // Check if the contract implements the LSP interface ID
