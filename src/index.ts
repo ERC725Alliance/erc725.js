@@ -21,7 +21,6 @@
  */
 
 import { hexToNumber, isAddress, leftPad, toHex, AbiItem } from 'web3-utils';
-import Web3 from 'web3';
 
 import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
 import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
@@ -58,8 +57,6 @@ import {
 } from './types/ERC725JSONSchema';
 import lsp3Schema from '../schemas/LSP3UniversalProfileMetadata.json';
 import lsp4Schema from '../schemas/LSP4DigitalAsset.json';
-import lsp5Schema from '../schemas/LSP5ReceivedAssets.json';
-import lsp6Schema from '../schemas/LSP6KeyManager.json';
 import lsp9Schema from '../schemas/LSP9Vault.json';
 import {
   DecodeDataInput,
