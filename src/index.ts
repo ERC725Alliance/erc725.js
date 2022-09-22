@@ -557,17 +557,14 @@ export class ERC725 {
       interfaceId: INTERFACE_IDS_0_7_0.LSP1UniversalReceiverDelegate,
     },
     [LSPType.LSP3UniversalProfile]: {
-      lsp2Schema: this.getSupportedStandardObject(
+      lsp2Schema: this.getSupportedStandardSchema(
         lsp3Schema as ERC725JSONSchema[],
       ),
     },
     [LSPType.LSP4DigitalAssetMetadata]: {
-      lsp2Schema: this.getSupportedStandardObject(
+      lsp2Schema: this.getSupportedStandardSchema(
         lsp4Schema as ERC725JSONSchema[],
       ),
-    },
-    [LSPType.LSP5ReceivedAssets]: {
-      // TODO: No supportedStandards key nor interface
     },
     [LSPType.LSP6KeyManager]: {
       interfaceId: INTERFACE_IDS_0_7_0.LSP6KeyManager,
@@ -579,21 +576,21 @@ export class ERC725 {
       interfaceId: INTERFACE_IDS_0_7_0.LSP8IdentifiableDigitalAsset,
     },
     [LSPType.LSP9Vault]: {
-      // TODO: Check both: InterfaceId and schema?
       interfaceId: INTERFACE_IDS_0_7_0.LSP9Vault,
-      lsp2Schema: this.getSupportedStandardObject(
+      lsp2Schema: this.getSupportedStandardSchema(
         lsp9Schema as ERC725JSONSchema[],
       ),
     },
-    [LSPType.LSP10ReceivedVaults]: {
-      // TODO: No supportedStandards key nor interface
-    },
-    [LSPType.LSP12IssuedAssets]: {
-      // TODO: No supportedStandards key nor interface
-    },
   };
 
-  private getSupportedStandardObject(schemas: ERC725JSONSchema[]) {
+  /**
+   * Fetch the SupportedStandard schema object
+   * out of all supported schema objects of the LSP
+   *
+   * @param schemas Array of LSP schemas
+   * @returns SupportedStandard schema
+   */
+  private getSupportedStandardSchema(schemas: ERC725JSONSchema[]) {
     try {
       const results = schemas.filter((schema) => {
         return schema.name.startsWith('SupportedStandard:');
@@ -609,6 +606,13 @@ export class ERC725 {
     }
   }
 
+  /**
+   * Checks if the ERC725 object has the interface ID or
+   * schema key of the provided LSP type.
+   *
+   * @param lspType Name of the LSP
+   * @returns Boolean
+   */
   async detectLSP(lspType: LSPType) {
     if (lspType === LSPType.Unknown) {
       return false;
@@ -622,14 +626,19 @@ export class ERC725 {
     );
 
     // Check if the contract implements the LSP interface ID
+    let isInterface = false;
     if (this.LSPTypeOptions[lspType].interfaceId) {
       try {
-        return await contract.methods.supportsInterface(
-          this.LSPTypeOptions[lspType],
+        isInterface = await contract.methods.supportsInterface(
+          this.LSPTypeOptions[lspType].interfaceId,
         ).call;
       } catch (err) {
         return false;
       }
+    }
+
+    if (!isInterface) {
+      return false;
     }
 
     // Check if the contract implements the LSP schema
@@ -647,7 +656,9 @@ export class ERC725 {
       } catch (error) {
         return false;
       }
-    } else return false;
+    } else {
+      return false;
+    }
   }
 }
 export default ERC725;
