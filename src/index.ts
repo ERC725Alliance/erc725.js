@@ -20,7 +20,7 @@
  * @date 2020
  */
 
-import { hexToNumber, isAddress, leftPad, toHex, AbiItem } from 'web3-utils';
+import { hexToNumber, isAddress, leftPad, toHex } from 'web3-utils';
 
 import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
 import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
@@ -37,13 +37,7 @@ import { isValidSignature } from './lib/isValidSignature';
 import {
   LSP6_ALL_PERMISSIONS,
   LSP6_DEFAULT_PERMISSIONS,
-} from './lib/constants';
-import {
-  LSPType,
-  COMMON_ABIS,
-  INTERFACE_IDS_0_7_0,
-  LSPTypeOptions,
-} from './lib/interfaces';
+} from './constants/constants';
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types
@@ -55,9 +49,6 @@ import {
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
 } from './types/ERC725JSONSchema';
-import lsp3Schema from '../schemas/LSP3UniversalProfileMetadata.json';
-import lsp4Schema from '../schemas/LSP4DigitalAsset.json';
-import lsp9Schema from '../schemas/LSP9Vault.json';
 import {
   DecodeDataInput,
   DecodeDataOutput,
@@ -68,6 +59,7 @@ import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
+import { detectLSPs } from './lib/detector';
 
 export {
   ERC725JSONSchema,
@@ -546,119 +538,16 @@ export class ERC725 {
     return encodeKeyName(keyName, dynamicKeyParts);
   }
 
-  LSPTypeOptions: Record<Exclude<LSPType, LSPType.Unknown>, LSPTypeOptions> = {
-    [LSPType.LSP0ERC725Account]: {
-      interfaceId: INTERFACE_IDS_0_7_0.LSP0ERC725Account,
-    },
-    [LSPType.LSP1UniversalReceiver]: {
-      interfaceId: INTERFACE_IDS_0_7_0.LSP1UniversalReceiver,
-    },
-    [LSPType.LSP1UniversalReceiverDelegate]: {
-      interfaceId: INTERFACE_IDS_0_7_0.LSP1UniversalReceiverDelegate,
-    },
-    [LSPType.LSP3UniversalProfile]: {
-      lsp2Schema: this.getSupportedStandardSchema(
-        lsp3Schema as ERC725JSONSchema[],
-      ),
-    },
-    [LSPType.LSP4DigitalAssetMetadata]: {
-      lsp2Schema: this.getSupportedStandardSchema(
-        lsp4Schema as ERC725JSONSchema[],
-      ),
-    },
-    [LSPType.LSP6KeyManager]: {
-      interfaceId: INTERFACE_IDS_0_7_0.LSP6KeyManager,
-    },
-    [LSPType.LSP7DigitalAsset]: {
-      interfaceId: INTERFACE_IDS_0_7_0.LSP7DigitalAsset,
-    },
-    [LSPType.LSP8IdentifiableDigitalAsset]: {
-      interfaceId: INTERFACE_IDS_0_7_0.LSP8IdentifiableDigitalAsset,
-    },
-    [LSPType.LSP9Vault]: {
-      interfaceId: INTERFACE_IDS_0_7_0.LSP9Vault,
-      lsp2Schema: this.getSupportedStandardSchema(
-        lsp9Schema as ERC725JSONSchema[],
-      ),
-    },
-  };
-
   /**
-   * Fetch the SupportedStandard schema object
-   * out of all supported schema objects of the LSP
+   * TODO:
    *
-   * @param schemas Array of LSP schemas
-   * @returns SupportedStandard schema
+   * @param address
+   * @returns
    */
-  private getSupportedStandardSchema(schemas: ERC725JSONSchema[]) {
-    try {
-      const results = schemas.filter((schema) => {
-        return schema.name.startsWith('SupportedStandard:');
-      });
+  async detectLSPs(address?: string) {
+    const options = this.getAddressAndProvider();
 
-      if (results.length === 0) {
-        return null;
-      }
-
-      return results[0];
-    } catch (error) {
-      return null;
-    }
-  }
-
-  /**
-   * Checks if the ERC725 object has the interface ID or
-   * schema key of the provided LSP type.
-   *
-   * @param lspType Name of the LSP
-   * @returns Boolean
-   */
-  async detectLSP(lspType: LSPType) {
-    if (lspType === LSPType.Unknown) {
-      return false;
-    }
-    const { address, provider } = this.getAddressAndProvider();
-
-    // EIP-165 detection
-    const contract = new provider.eth.Contract(
-      COMMON_ABIS.supportsInterface as AbiItem[],
-      address,
-    );
-
-    // Check if the contract implements the LSP interface ID
-    let isInterface = false;
-    if (this.LSPTypeOptions[lspType].interfaceId) {
-      try {
-        isInterface = await contract.methods.supportsInterface(
-          this.LSPTypeOptions[lspType].interfaceId,
-        ).call;
-      } catch (err) {
-        return false;
-      }
-    }
-
-    if (!isInterface) {
-      return false;
-    }
-
-    // Check if the contract implements the LSP schema
-    if (this.LSPTypeOptions[lspType].lsp2Schema) {
-      const { lsp2Schema } = this.LSPTypeOptions[lspType];
-
-      if (!lsp2Schema) {
-        return false;
-      }
-
-      try {
-        const lspSupportedStandards = await this.fetchData(lsp2Schema.name);
-        // @ts-ignore
-        return lspSupportedStandards.value === lsp2Schema.valueContent;
-      } catch (error) {
-        return false;
-      }
-    } else {
-      return false;
-    }
+    return detectLSPs(address || options.address, options.provider);
   }
 }
 export default ERC725;

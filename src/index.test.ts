@@ -44,7 +44,7 @@ import 'isomorphic-fetch';
 import {
   ERC725Y_INTERFACE_IDS,
   SUPPORTED_HASH_FUNCTION_STRINGS,
-} from './lib/constants';
+} from './constants/constants';
 import { decodeKey } from './lib/decodeData';
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';

@@ -11,52 +11,6 @@
     You should have received a copy of the GNU Lesser General Public License
     along with @erc725/erc725.js.  If not, see <http://www.gnu.org/licenses/>.
 */
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
-
-export const COMMON_ABIS = {
-  supportsInterface: [
-    {
-      inputs: [
-        {
-          internalType: 'bytes4',
-          name: 'interfaceId',
-          type: 'bytes4',
-        },
-      ],
-      name: 'supportsInterface',
-      outputs: [
-        {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
-      ],
-      stateMutability: 'view',
-      type: 'function',
-    },
-  ],
-};
-
-export enum LSPType {
-  // LSPs which are contract interfaces
-  LSP0ERC725Account = 'LSP0ERC725Account',
-  LSP1UniversalReceiver = 'LSP1UniversalReceiver',
-  LSP1UniversalReceiverDelegate = 'LSP1UniversalReceiverDelegate',
-  LSP6KeyManager = 'LSP6KeyManager',
-  LSP7DigitalAsset = 'LSP7DigitalAsset',
-  LSP8IdentifiableDigitalAsset = 'LSP8IdentifiableDigitalAsset',
-  LSP9Vault = 'LSP9Vault',
-
-  // LSPs which are storage schemas
-  LSP3UniversalProfile = 'LSP3UniversalProfile',
-  LSP4DigitalAssetMetadata = 'LSP4DigitalAssetMetadata',
-  LSP5ReceivedAssets = 'LSP5ReceivedAssets',
-  LSP10ReceivedVaults = 'LSP10ReceivedVaults',
-  LSP12IssuedAssets = 'LSP12IssuedAssets',
-
-  // Default
-  Unknown = 'Unknown',
-}
 
 // from @lukso/lsp-smart-contracts v0.7.0, erc725.js should stay independent
 export const INTERFACE_IDS_0_7_0 = {
@@ -79,8 +33,3 @@ export const INTERFACE_IDS_0_7_0 = {
   LSP9Vault: '0xfd4d5c50',
   ClaimOwnership: '0xa375e9c6',
 };
-
-export interface LSPTypeOptions {
-  interfaceId?: string; // EIP-165
-  lsp2Schema?: ERC725JSONSchema | null;
-}

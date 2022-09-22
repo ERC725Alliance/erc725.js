@@ -28,7 +28,7 @@ import {
   ERC725_VERSION,
   ERC725Y_INTERFACE_IDS,
   METHODS,
-} from '../lib/constants';
+} from '../constants/constants';
 import { decodeResult as decodeResultUtils } from '../lib/provider-wrapper-utils';
 import { JsonRpcEthereumProviderParams } from '../types/JsonRpc';
 import { Method } from '../types/Method';
