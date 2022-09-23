@@ -26,8 +26,6 @@ import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
 import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
 
 import {
-  encodeArrayKey,
-  decodeKeyValue,
   encodeData,
   convertIPFSGatewayUrl,
   generateSchemasFromDynamicKeys,
@@ -43,8 +41,7 @@ import {
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types
-import { KeyValuePair } from './types';
-import { ERC725Config } from './types/Config';
+import { ERC725Config, ERC725Options } from './types/Config';
 import { Permissions } from './types/Method';
 import {
   ERC725JSONSchema,
@@ -61,6 +58,7 @@ import { GetDataDynamicKey, GetDataInput } from './types/GetData';
 import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyParts } from './types/dynamicKeys';
+import { getData } from './lib/getData';
 
 export {
   ERC725JSONSchema,
@@ -78,11 +76,7 @@ export { encodeData } from './lib/utils';
  *
  */
 export class ERC725 {
-  options: ERC725Config & {
-    schemas: ERC725JSONSchema[];
-    address?: string;
-    provider?;
-  };
+  options: ERC725Options & ERC725Config;
 
   /**
    * Creates an instance of ERC725.
@@ -195,21 +189,7 @@ export class ERC725 {
     keyOrKeys?: GetDataInput,
   ): Promise<DecodeDataOutput | DecodeDataOutput[]> {
     this.getAddressAndProvider();
-
-    if (!keyOrKeys) {
-      // eslint-disable-next-line no-param-reassign
-      keyOrKeys = this.options.schemas
-        .map((element) => element.name)
-        .filter((key) => !isDynamicKeyName(key));
-    }
-
-    if (Array.isArray(keyOrKeys)) {
-      return this.getDataMultiple(keyOrKeys);
-    }
-
-    const data = await this.getDataMultiple([keyOrKeys]);
-
-    return data[0];
+    return getData(this.options, keyOrKeys);
   }
 
   /**
@@ -419,127 +399,6 @@ export class ERC725 {
       signature,
       this.options.address,
       this.options.provider,
-    );
-  }
-
-  /**
-   * @internal
-   * @param schema associated with the schema with keyType = 'Array'
-   *               the data includes the raw (encoded) length key-value pair for the array
-   * @param data array of key-value pairs, one of which is the length key for the schema array
-   *             Data can hold other field data not relevant here, and will be ignored
-   * @return an array of keys/values
-   */
-  private async getArrayValues(
-    schema: ERC725JSONSchema,
-    data: Record<string, any>,
-  ) {
-    if (schema.keyType !== 'Array') {
-      throw new Error(
-        `The "getArrayValues" method requires a schema definition with "keyType: Array",
-         ${schema}`,
-      );
-    }
-    const results: { key: string; value }[] = [];
-
-    // 1. get the array length
-    const value = data[schema.key]; // get the length key/value pair
-
-    if (!value || !value.value) {
-      return results;
-    } // Handle empty/non-existent array
-
-    const arrayLength = await decodeKeyValue(
-      'Number',
-      'uint256',
-      value.value,
-      schema.name,
-    ); // get the int array length
-
-    const arrayElementKeys: string[] = [];
-    for (let index = 0; index < arrayLength; index++) {
-      const arrayElementKey = encodeArrayKey(schema.key, index);
-      if (!data[arrayElementKey]) {
-        arrayElementKeys.push(arrayElementKey);
-      }
-    }
-
-    try {
-      const arrayElements = await this.options.provider?.getAllData(
-        this.options.address as string,
-        arrayElementKeys,
-      );
-
-      results.push(...arrayElements);
-    } catch (err) {
-      // This case may happen if user requests an array key which does not exist in the contract.
-      // In this case, we simply skip
-    }
-
-    return results;
-  }
-
-  private async getDataMultiple(keyNames: Array<string | GetDataDynamicKey>) {
-    const schemas = generateSchemasFromDynamicKeys(
-      keyNames,
-      this.options.schemas,
-    );
-
-    // Get all the raw data from the provider based on schema key hashes
-    const allRawData: KeyValuePair[] = await this.options.provider?.getAllData(
-      this.options.address as string,
-      schemas.map((schema) => schema.key),
-    );
-
-    const keyValueMap = allRawData.reduce<{ [key: string]: any }>(
-      (accumulator, current) => {
-        accumulator[current.key] = current.value;
-        return accumulator;
-      },
-      {},
-    );
-
-    const schemasWithValue = schemas.map((schema) => {
-      return { ...schema, value: keyValueMap[schema.key] || null };
-    });
-
-    // ------- BEGIN ARRAY HANDLER -------
-    // Get missing 'Array' fields for all arrays, as necessary
-
-    const arraySchemas = schemas.filter(
-      (e) => e.keyType.toLowerCase() === 'array',
-    );
-
-    // Looks like it gets array even if not requested as it gets the arrays from the this.options.schemas?
-    // eslint-disable-next-line no-restricted-syntax
-    for (const keySchema of arraySchemas) {
-      const dataKeyValue = {
-        [keySchema.key]: {
-          key: keySchema.key,
-          value: keyValueMap[keySchema.key],
-        },
-      };
-      const arrayValues = await this.getArrayValues(keySchema, dataKeyValue);
-
-      if (arrayValues && arrayValues.length > 0) {
-        arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
-
-        schemasWithValue[
-          schemasWithValue.findIndex((schema) => schema.key === keySchema.key)
-        ] = { ...keySchema, value: arrayValues };
-      }
-    }
-    // ------- END ARRAY HANDLER -------
-
-    return decodeData(
-      schemasWithValue.map(({ key, value }) => {
-        return {
-          keyName: key,
-          value,
-          // no need to add dynamic key parts here as the schemas object below already holds the "generated" schemas for the dynamic keys
-        };
-      }),
-      schemas,
     );
   }
 
