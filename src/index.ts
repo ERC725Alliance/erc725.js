@@ -21,6 +21,7 @@
  */
 
 import { hexToNumber, isAddress, leftPad, toHex } from 'web3-utils';
+import Web3 from 'web3';
 
 import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
 import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
@@ -154,22 +155,27 @@ export class ERC725 {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  private initializeProvider(providerOrProviderWrapper) {
+  private initializeProvider(providerOrRpcUrl) {
     // do not fail on no-provider
-    if (!providerOrProviderWrapper) return undefined;
+    if (!providerOrRpcUrl) return undefined;
 
-    if (typeof providerOrProviderWrapper.request === 'function')
-      return new EthereumProviderWrapper(providerOrProviderWrapper);
+    // if provider is a string, assume it's a rpcUrl
+    if (typeof providerOrRpcUrl === 'string') {
+      return new Web3ProviderWrapper(
+        new Web3.providers.HttpProvider(providerOrRpcUrl),
+      );
+    }
+
+    if (typeof providerOrRpcUrl.request === 'function')
+      return new EthereumProviderWrapper(providerOrRpcUrl);
 
     if (
-      !providerOrProviderWrapper.request &&
-      typeof providerOrProviderWrapper.send === 'function'
+      !providerOrRpcUrl.request &&
+      typeof providerOrRpcUrl.send === 'function'
     )
-      return new Web3ProviderWrapper(providerOrProviderWrapper);
+      return new Web3ProviderWrapper(providerOrRpcUrl);
 
-    throw new Error(
-      `Incorrect or unsupported provider ${providerOrProviderWrapper}`,
-    );
+    throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
   }
 
   /**
@@ -437,7 +443,7 @@ export class ERC725 {
     if (schema.keyType !== 'Array') {
       throw new Error(
         `The "getArrayValues" method requires a schema definition with "keyType: Array",
-         ${schema}`,
+           ${schema}`,
       );
     }
     const results: { key: string; value }[] = [];
