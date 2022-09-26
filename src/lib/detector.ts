@@ -1,5 +1,11 @@
 // https://docs.lukso.tech/standards/standard-detection
 
+/**
+ * @file detector.ts
+ * @author Hugo Masclet <@Hugoo>
+ * @author Felix Hildebrandt <@fhildeb>
+ * @date 2022
+ */
 import { INTERFACE_IDS_0_7_0 } from '../constants/interfaces';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { LSPType } from '../types/LSP';
@@ -7,6 +13,8 @@ import { LSPType } from '../types/LSP';
 import lsp3Schema from '../../schemas/LSP3UniversalProfileMetadata.json';
 import lsp4Schema from '../../schemas/LSP4DigitalAsset.json';
 import lsp9Schema from '../../schemas/LSP9Vault.json';
+import { getData } from './getData';
+import { ERC725Options } from '../types/Config';
 
 interface LSPTypeOptions {
   interfaceId?: string; // EIP-165
@@ -75,9 +83,8 @@ const lspTypeOptions: Record<LSPType, LSPTypeOptions> = {
  * @returns Boolean
  */
 const checkInterfaceIdAndLsp2Key = async (
-  address: string,
+  erc725Options: ERC725Options,
   lspType: LSPType,
-  provider,
 ) => {
   const { interfaceId, lsp2Schema } = lspTypeOptions[lspType];
 
@@ -85,8 +92,8 @@ const checkInterfaceIdAndLsp2Key = async (
   let hasValidInterfaceId = false;
   if (interfaceId) {
     try {
-      hasValidInterfaceId = await provider.supportsInterface(
-        address,
+      hasValidInterfaceId = await erc725Options.provider.supportsInterface(
+        erc725Options.address,
         interfaceId,
       );
     } catch (err) {
@@ -100,7 +107,7 @@ const checkInterfaceIdAndLsp2Key = async (
   }
 
   try {
-    const lspSupportedStandards = await  .fetchData(lsp2Schema.name);
+    const lspSupportedStandards = await getData(erc725Options, lsp2Schema.name);
     // @ts-ignore
     return lspSupportedStandards.value === lsp2Schema.valueContent;
   } catch (error) {
@@ -108,14 +115,20 @@ const checkInterfaceIdAndLsp2Key = async (
   }
 };
 
-export const detectLSPs = (address: string, provider: any) => {
-  return {
-    LSP0ERC725Account: true,
-    LSP1UniversalReceiver: false,
-    LSP1UniversalReceiverDelegate: false,
-    LSP6KeyManager: false,
-    LSP7DigitalAsset: false,
-    LSP8IdentifiableDigitalAsset: false,
-    LSP9Vault: false,
-  };
+/**
+ *
+ * @param erc725Options
+ * @returns JSON Object with the results of every LSP check
+ */
+export const detectLSPs = async (erc725Options: ERC725Options) => {
+  const lspMap: Map<string, boolean> = new Map();
+  const lspTypes = Object.values(LSPType);
+  // Only get keys in the first half of the array
+  const lspTypeKeys = lspTypes.slice(0, Math.ceil(lspTypes.length / 2));
+
+  lspTypeKeys.forEach(async (lsp) => {
+    const isLSP = await checkInterfaceIdAndLsp2Key(erc725Options, lsp);
+    lspMap.set(lsp, isLSP);
+  });
+  return lspMap;
 };

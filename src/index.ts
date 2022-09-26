@@ -17,6 +17,7 @@
  * @author Robert McLeod <@robertdavid010>
  * @author Fabian Vogelsteller <fabian@lukso.network>
  * @author Hugo Masclet <@Hugoo>
+ * @author Felix Hildebrandt <@fhildeb>
  * @date 2020
  */
 
@@ -539,15 +540,20 @@ export class ERC725 {
   }
 
   /**
-   * TODO:
+   * Detect all LSPs the ERC725 Object or
+   * smart contract address implements
    *
-   * @param address
-   * @returns
+   * @param address smart contract address (optional)
+   * @returns JSON Object with the results of the LSP check
    */
   async detectLSPs(address?: string) {
-    const options = this.getAddressAndProvider();
+    const options: ERC725Options = {
+      schemas: this.options.schemas,
+      address: address || this.options.address,
+      provider: this.options.provider,
+    };
 
-    return detectLSPs(address || options.address, options.provider);
+    return detectLSPs(options);
   }
 }
 export default ERC725;
