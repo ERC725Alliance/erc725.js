@@ -1,3 +1,5 @@
+import { ERC725JSONSchema } from './ERC725JSONSchema';
+
 export interface ERC725Config {
   /**
    * ```js title=Example
@@ -9,4 +11,10 @@ export interface ERC725Config {
    * Another example: `https://cloudflare-ipfs.com/ipfs/`
    */
   ipfsGateway: string;
+}
+
+export interface ERC725Options {
+  schemas: ERC725JSONSchema[];
+  address?: string;
+  provider?;
 }

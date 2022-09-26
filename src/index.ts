@@ -27,8 +27,6 @@ import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
 import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
 
 import {
-  encodeArrayKey,
-  decodeKeyValue,
   encodeData,
   convertIPFSGatewayUrl,
   generateSchemasFromDynamicKeys,
@@ -44,8 +42,7 @@ import {
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types
-import { KeyValuePair } from './types';
-import { ERC725Config } from './types/Config';
+import { ERC725Config, ERC725Options } from './types/Config';
 import { Permissions } from './types/Method';
 import {
   ERC725JSONSchema,
@@ -62,6 +59,7 @@ import { GetDataDynamicKey, GetDataInput } from './types/GetData';
 import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyParts } from './types/dynamicKeys';
+import { getData } from './lib/getData';
 
 export {
   ERC725JSONSchema,
@@ -79,11 +77,7 @@ export { encodeData } from './lib/utils';
  *
  */
 export class ERC725 {
-  options: ERC725Config & {
-    schemas: ERC725JSONSchema[];
-    address?: string;
-    provider?;
-  };
+  options: ERC725Options & ERC725Config;
 
   /**
    * Creates an instance of ERC725.
@@ -201,21 +195,7 @@ export class ERC725 {
     keyOrKeys?: GetDataInput,
   ): Promise<DecodeDataOutput | DecodeDataOutput[]> {
     this.getAddressAndProvider();
-
-    if (!keyOrKeys) {
-      // eslint-disable-next-line no-param-reassign
-      keyOrKeys = this.options.schemas
-        .map((element) => element.name)
-        .filter((key) => !isDynamicKeyName(key));
-    }
-
-    if (Array.isArray(keyOrKeys)) {
-      return this.getDataMultiple(keyOrKeys);
-    }
-
-    const data = await this.getDataMultiple([keyOrKeys]);
-
-    return data[0];
+    return getData(this.options, keyOrKeys);
   }
 
   /**
