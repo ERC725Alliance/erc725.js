@@ -35,17 +35,6 @@ export const ERC725Y_INTERFACE_IDS = {
   '3.0': '0x714df77c',
 };
 
-// from @lukso/lsp-smart-contracts v0.7.0, erc725.js should stay independent
-export const INTERFACE_IDS_0_7_0 = {
-  LSP0ERC725Account: '0xeb6be62e',
-  LSP1UniversalReceiver: '0x6bb56a14',
-  LSP1UniversalReceiverDelegate: '0xa245bbda',
-  LSP6KeyManager: '0xc403d48f',
-  LSP7DigitalAsset: '0x5fcaac27',
-  LSP8IdentifiableDigitalAsset: '0x49399145',
-  LSP9Vault: '0xfd4d5c50',
-};
-
 export enum ERC725_VERSION {
   ERC725 = 'ERC725', // https://github.com/ERC725Alliance/ERC725/commit/cca7f98cdf243f1ebf1c0a3ae89b1e46931481b0
   ERC725_LEGACY = 'ERC725_LEGACY',
