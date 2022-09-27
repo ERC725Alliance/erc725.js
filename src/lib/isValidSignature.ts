@@ -19,7 +19,7 @@
 
 import { keccak256 } from 'web3-utils';
 import { EthereumProviderWrapper } from '../providers/ethereumProviderWrapper';
-import { Web3ProviderWrapper } from '../providers/web3ProviderWrapper';
+import { ProviderWrapper } from '../providers/providerWrapper';
 
 const MAGIC_VALUE = '0x1626ba7e';
 
@@ -41,7 +41,7 @@ export const isValidSignature = async (
   messageOrHash: string,
   signature: string,
   address: string,
-  wrappedProvider: EthereumProviderWrapper | Web3ProviderWrapper,
+  wrappedProvider: EthereumProviderWrapper | ProviderWrapper,
 ): Promise<boolean> => {
   const hash = validateHash(messageOrHash)
     ? messageOrHash

@@ -22,24 +22,28 @@
   in accordance with implementation of smart contract interfaces of ERC725
 */
 
-import AbiCoder from 'web3-eth-abi';
+import * as abi from 'web3-eth-abi';
 
 import { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
-import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
+import {
+  constructJSONRPC,
+  constructJSONRPCEthereumProvider,
+  decodeResult,
+} from '../lib/provider-wrapper-utils';
 import { ProviderTypes } from '../types/provider';
 import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../lib/constants';
 
 // TS can't get the types from the import...
 // @ts-ignore
-const abiCoder: AbiCoder.AbiCoder = AbiCoder;
+const abiCoder = abi.default;
 
 interface GetDataReturn {
   key: string;
   value: Record<string, any> | null;
 }
 
-export class Web3ProviderWrapper {
+export class ProviderWrapper {
   type: ProviderTypes;
   provider: any;
   constructor(provider: any) {
@@ -48,6 +52,18 @@ export class Web3ProviderWrapper {
   }
 
   async getOwner(address: string) {
+    // this is an ethereum provider
+    if (typeof this.provider.request === 'function') {
+      console.log('from getOwner with ethereum provider');
+      const params = constructJSONRPCEthereumProvider(address, Method.OWNER);
+      const result = await this.callContract(params);
+      if (result.error) {
+        throw result.error;
+      }
+
+      return this.decodeResultEthereum(Method.OWNER, result);
+    }
+    // following is with a web3 provider
     const result = await this.callContract(
       constructJSONRPC(address, Method.OWNER),
     );
@@ -90,7 +106,7 @@ export class Web3ProviderWrapper {
   }
 
   /**
-   * https://eips.ethereum.org/EIPS/eip-165
+   * https://eips.ethereum.org/EIPconstructJSONRPCS/eip-165
    *
    * @param address the smart contract address
    * @param interfaceId ERC-165 identifier as described here: https://github.com/ERC725Alliance/ERC725/blob/develop/docs/ERC-725.md#specification
@@ -99,15 +115,32 @@ export class Web3ProviderWrapper {
     address: string,
     interfaceId: string,
   ): Promise<boolean> {
-    const result = await this.callContract(
-      constructJSONRPC(
-        address,
+    // this is an ethereum provider
+    if (typeof this.provider.request === 'function') {
+      return this.decodeResultEthereum(
         Method.SUPPORTS_INTERFACE,
-        `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
+        await this.callContract(
+          constructJSONRPCEthereumProvider(
+            address,
+            Method.SUPPORTS_INTERFACE,
+            `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
+          ),
+        ),
+      );
+    }
+
+    // @audit - see what's the difference
+    return decodeResult(
+      Method.SUPPORTS_INTERFACE,
+      await this.callContract(
+        // @audit - see what's the difference
+        constructJSONRPC(
+          address,
+          Method.SUPPORTS_INTERFACE,
+          `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
+        ),
       ),
     );
-
-    return decodeResult(Method.SUPPORTS_INTERFACE, result);
   }
 
   /**
@@ -118,6 +151,28 @@ export class Web3ProviderWrapper {
    * @param signature
    */
   async isValidSignature(address: string, hash: string, signature: string) {
+    if (typeof this.provider.request === 'function') {
+      console.log('from ethereum isValidSignature');
+      const encodedParams = abiCoder.encodeParameters(
+        ['bytes32', 'bytes'],
+        [hash, signature],
+      );
+
+      const result = await this.callContract(
+        constructJSONRPCEthereumProvider(
+          address,
+          Method.IS_VALID_SIGNATURE,
+          encodedParams,
+        ),
+      );
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      return this.decodeResultEthereum(Method.IS_VALID_SIGNATURE, result);
+    }
+
     const encodedParams = abiCoder.encodeParameters(
       ['bytes32', 'bytes'],
       [hash, signature],
@@ -155,6 +210,18 @@ export class Web3ProviderWrapper {
       );
     }
 
+    // this is an ethereum provider
+    if (typeof this.provider.request === 'function') {
+      switch (erc725Version) {
+        case ERC725_VERSION.ERC725:
+          return this._getAllData(address, keyHashes);
+        case ERC725_VERSION.ERC725_LEGACY:
+          return this._getAllDataLegacyEthereum(address, keyHashes);
+        default:
+          return [];
+      }
+    }
+
     switch (erc725Version) {
       case ERC725_VERSION.ERC725:
         return this._getAllData(address, keyHashes);
@@ -186,6 +253,31 @@ export class Web3ProviderWrapper {
     }));
   }
 
+  // @audit - not the same
+  private async _getAllDataLegacyEthereum(
+    address: string,
+    keyHashes: string[],
+  ): Promise<GetDataReturn[]> {
+    // Here we could use `getDataMultiple` instead of sending multiple calls to `getData`
+    // But this is already legacy and it won't be used anymore..
+    const encodedResultsPromises = keyHashes.map((keyHash) =>
+      this.callContract(
+        constructJSONRPCEthereumProvider(
+          address,
+          Method.GET_DATA_LEGACY,
+          keyHash,
+        ),
+      ),
+    );
+
+    const decodedResults = await Promise.all(encodedResultsPromises);
+
+    return decodedResults.map((decodedResult, index) => ({
+      key: keyHashes[index],
+      value: decodedResult(Method.GET_DATA_LEGACY, decodedResult),
+    }));
+  }
+  // @audit - not the same
   private async _getAllDataLegacy(
     address: string,
     keyHashes: string[],
@@ -211,11 +303,18 @@ export class Web3ProviderWrapper {
     }));
   }
 
-  private async callContract(payload: JsonRpc[] | JsonRpc): Promise<any> {
+  // @audit-info replace any type
+  private async callContract(payload) {
+    // this is an ethereum provider
+    if (typeof this.provider.request === 'function') {
+      console.log('this is an ethereum provider');
+      return this.provider.request({ method: 'eth_call', payload });
+    }
+    // this is a web3 provider
     return new Promise((resolve, reject) => {
       // Send old web3 method with callback to resolve promise
       // This is deprecated: https://docs.metamask.io/guide/ethereum-provider.html#ethereum-send-deprecated
-
+      // if provider is a string, assume it's a rpcUrl
       this.provider.send(payload, (e, r) => {
         if (e) {
           reject(e);
@@ -224,5 +323,10 @@ export class Web3ProviderWrapper {
         }
       });
     });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private decodeResultEthereum(method: Method, result: string) {
+    return decodeResult(method, { result });
   }
 }

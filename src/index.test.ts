@@ -89,7 +89,7 @@ describe('Running @erc725/erc725.js tests...', () => {
     }
   });
 
-  describe('isValidSignature', () => {
+  describe.only('isValidSignature', () => {
     it('should return true if the signature is valid [using rpcUrl]', async () => {
       const rpcUrl = 'https://rpc.l14.lukso.network';
       const erc725 = new ERC725(

@@ -46,6 +46,26 @@ export function decodeResult(method: Method, result) {
   return decodedData;
 }
 
+export function constructJSONRPCEthereumProvider(
+  address: string,
+  method: Method,
+  methodParam?: string,
+) {
+  const data = methodParam
+    ? METHODS[method].sig + methodParam.replace('0x', '')
+    : METHODS[method].sig;
+
+  return [
+    {
+      to: address,
+      value: METHODS[method].value,
+      gas: METHODS[method].gas,
+      data,
+    },
+    'latest',
+  ];
+}
+
 export function constructJSONRPC(
   address: string,
   method: Method,
