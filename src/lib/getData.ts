@@ -73,6 +73,10 @@ const getDataMultiple = async (
   erc725Options: ERC725Options,
   keyNames: Array<string | GetDataDynamicKey>,
 ) => {
+  if (!erc725Options.address) {
+    throw new Error('Missing Address');
+  }
+
   const schemas = generateSchemasFromDynamicKeys(
     keyNames,
     erc725Options.schemas,

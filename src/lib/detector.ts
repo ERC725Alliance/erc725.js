@@ -6,6 +6,8 @@
  * @author Felix Hildebrandt <@fhildeb>
  * @date 2022
  */
+import { isValidAddress } from 'ethereumjs-util';
+
 import { INTERFACE_IDS_0_7_0 } from '../constants/interfaces';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { LSPType } from '../types/LSP';
@@ -14,7 +16,6 @@ import lsp3Schema from '../../schemas/LSP3UniversalProfileMetadata.json';
 import lsp4Schema from '../../schemas/LSP4DigitalAsset.json';
 import lsp9Schema from '../../schemas/LSP9Vault.json';
 import { getData } from './getData';
-import { ERC725Options } from '../types/Config';
 
 interface LSPTypeOptions {
   interfaceId?: string; // EIP-165
@@ -83,7 +84,8 @@ const lspTypeOptions: Record<LSPType, LSPTypeOptions> = {
  * @returns Boolean
  */
 const checkInterfaceIdAndLsp2Key = async (
-  erc725Options: ERC725Options,
+  address: string,
+  provider: any,
   lspType: LSPType,
 ) => {
   const { interfaceId, lsp2Schema } = lspTypeOptions[lspType];
@@ -92,8 +94,8 @@ const checkInterfaceIdAndLsp2Key = async (
   let hasValidInterfaceId = false;
   if (interfaceId) {
     try {
-      hasValidInterfaceId = await erc725Options.provider.supportsInterface(
-        erc725Options.address,
+      hasValidInterfaceId = await provider.supportsInterface(
+        address,
         interfaceId,
       );
     } catch (err) {
@@ -107,7 +109,10 @@ const checkInterfaceIdAndLsp2Key = async (
   }
 
   try {
-    const lspSupportedStandards = await getData(erc725Options, lsp2Schema.name);
+    const lspSupportedStandards = await getData(
+      { provider, schemas: [lsp2Schema], address },
+      lsp2Schema.name,
+    );
     // @ts-ignore
     return lspSupportedStandards.value === lsp2Schema.valueContent;
   } catch (error) {
@@ -116,19 +121,32 @@ const checkInterfaceIdAndLsp2Key = async (
 };
 
 /**
+ * Detect all LSPs the ERC725 Object or
+ * smart contract address implements
  *
- * @param erc725Options
- * @returns JSON Object with the results of every LSP check
+ * @param address address to check against LSP standards
+ * @param provider blockchain provider to call
+ * @returns JSON Object with booleans for each LSP
  */
-export const detectLSPs = async (erc725Options: ERC725Options) => {
-  const lspMap: Map<string, boolean> = new Map();
-  const lspTypes = Object.values(LSPType);
-  // Only get keys in the first half of the array
-  const lspTypeKeys = lspTypes.slice(0, Math.ceil(lspTypes.length / 2));
+export const detectLSPs = async (address: string, provider: any) => {
+  if (!isValidAddress(address)) {
+    throw new Error(`Address: ${address} is not a valid address`);
+  }
 
-  lspTypeKeys.forEach(async (lsp) => {
-    const isLSP = await checkInterfaceIdAndLsp2Key(erc725Options, lsp);
-    lspMap.set(lsp, isLSP);
-  });
-  return lspMap;
+  // TODO: Use Promise.all
+
+  const lspMap: Record<LSPType, boolean> | Record<string, never> = Object.keys(
+    lspTypeOptions,
+  ).reduce(async (acc, lspKey) => {
+    return {
+      ...acc,
+      [lspKey]: await checkInterfaceIdAndLsp2Key(
+        address,
+        provider,
+        lspTypeOptions[lspKey],
+      ),
+    };
+  }, {});
+
+  return lspMap as Record<LSPType, boolean>;
 };

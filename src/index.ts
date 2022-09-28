@@ -543,17 +543,15 @@ export class ERC725 {
    * Detect all LSPs the ERC725 Object or
    * smart contract address implements
    *
-   * @param address smart contract address (optional)
-   * @returns JSON Object with the results of the LSP check
+   * @param address address to check against LSP standards (optional)
+   * @returns JSON Object with booleans for each LSP
    */
   async detectLSPs(address?: string) {
-    const options: ERC725Options = {
-      schemas: this.options.schemas,
-      address: address || this.options.address,
-      provider: this.options.provider,
-    };
-
-    return detectLSPs(options);
+    if (!address || !this.options.address) {
+      throw new Error('Missing address');
+    }
+    const { provider } = this.getAddressAndProvider();
+    return detectLSPs(address || this.options.address, provider);
   }
 }
 export default ERC725;
