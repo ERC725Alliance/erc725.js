@@ -12,18 +12,16 @@
     along with @erc725/erc725.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// from @lukso/lsp-smart-contracts v0.7.0, erc725.js should stay independent
-export const INTERFACE_IDS_0_7_0 = {
-  LSP0ERC725Account: '0xeb6be62e',
-  LSP1UniversalReceiver: '0x6bb56a14',
-  LSP1UniversalReceiverDelegate: '0xa245bbda',
-  LSP6KeyManager: '0xc403d48f',
-  LSP7DigitalAsset: '0x5fcaac27',
-  LSP8IdentifiableDigitalAsset: '0x49399145',
-  LSP9Vault: '0xfd4d5c50',
-};
+export enum LSPSchemaType {
+  // LSPs which are storage schemas
+  LSP3UniversalProfile = 'LSP3UniversalProfile',
+  LSP4DigitalAssetMetadata = 'LSP4DigitalAssetMetadata',
+  LSP9Vault = 'LSP9Vault',
 
-export interface addressProviderOption {
-  address: string;
-  provider: any;
+  /**
+      NOTE: LSP5ReceivedAssets, LSP10ReceivedVaults, and LSP12IssuedAssets 
+      are not included as an LSPType to check against an interface ID or 
+      schema standard, as they are purely metadata standards, which should
+      be performed individually.
+    */
 }

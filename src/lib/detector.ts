@@ -6,21 +6,19 @@
  * @author Felix Hildebrandt <@fhildeb>
  * @date 2022
  */
-import { isValidAddress } from 'ethereumjs-util';
 
-import { INTERFACE_IDS_0_7_0 } from '../constants/interfaces';
+import {
+  addressProviderOption,
+  INTERFACE_IDS_0_7_0,
+} from '../constants/interfaces';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
-import { LSPType } from '../types/LSP';
 
 import lsp3Schema from '../../schemas/LSP3UniversalProfileMetadata.json';
 import lsp4Schema from '../../schemas/LSP4DigitalAsset.json';
 import lsp9Schema from '../../schemas/LSP9Vault.json';
 import { getData } from './getData';
-
-interface LSPTypeOptions {
-  interfaceId?: string; // EIP-165
-  lsp2Schema?: ERC725JSONSchema | null;
-}
+import { ERC725Options } from '../types/Config';
+import { LSPSchemaType } from '../constants/schemas';
 
 /**
  * Find the SupportedStandard schema object
@@ -45,108 +43,103 @@ const getSupportedStandardSchema = (schemas: ERC725JSONSchema[]) => {
   }
 };
 
-const lspTypeOptions: Record<LSPType, LSPTypeOptions> = {
-  [LSPType.LSP0ERC725Account]: {
-    interfaceId: INTERFACE_IDS_0_7_0.LSP0ERC725Account,
+const lspSchemaOptions: Record<LSPSchemaType, any> = {
+  [LSPSchemaType.LSP3UniversalProfile]: {
+    schema: getSupportedStandardSchema(lsp3Schema as ERC725JSONSchema[]),
   },
-  [LSPType.LSP1UniversalReceiver]: {
-    interfaceId: INTERFACE_IDS_0_7_0.LSP1UniversalReceiver,
+  [LSPSchemaType.LSP4DigitalAssetMetadata]: {
+    schema: getSupportedStandardSchema(lsp4Schema as ERC725JSONSchema[]),
   },
-  [LSPType.LSP1UniversalReceiverDelegate]: {
-    interfaceId: INTERFACE_IDS_0_7_0.LSP1UniversalReceiverDelegate,
-  },
-  [LSPType.LSP3UniversalProfile]: {
-    lsp2Schema: getSupportedStandardSchema(lsp3Schema as ERC725JSONSchema[]),
-  },
-  [LSPType.LSP4DigitalAssetMetadata]: {
-    lsp2Schema: getSupportedStandardSchema(lsp4Schema as ERC725JSONSchema[]),
-  },
-  [LSPType.LSP6KeyManager]: {
-    interfaceId: INTERFACE_IDS_0_7_0.LSP6KeyManager,
-  },
-  [LSPType.LSP7DigitalAsset]: {
-    interfaceId: INTERFACE_IDS_0_7_0.LSP7DigitalAsset,
-  },
-  [LSPType.LSP8IdentifiableDigitalAsset]: {
-    interfaceId: INTERFACE_IDS_0_7_0.LSP8IdentifiableDigitalAsset,
-  },
-  [LSPType.LSP9Vault]: {
-    interfaceId: INTERFACE_IDS_0_7_0.LSP9Vault,
-    lsp2Schema: getSupportedStandardSchema(lsp9Schema as ERC725JSONSchema[]),
+  [LSPSchemaType.LSP9Vault]: {
+    schema: getSupportedStandardSchema(lsp9Schema as ERC725JSONSchema[]),
   },
 };
 
 /**
- * Checks if the ERC725 object has the interface ID and/or
- * schema key of the provided LSP type.
+ * Check if the smart contract address
+ * supports a certain interface.
  *
- * @param lspType Name of the LSP
- * @returns Boolean
+ * @param interfaceId Interface ID or supported interface name
+ * @param interfaceOptions Object with address and provider
+ * @returns Boolean if interface is supported
  */
-const checkInterfaceIdAndLsp2Key = async (
-  address: string,
-  provider: any,
-  lspType: LSPType,
+export const supportsInterface = async (
+  interfaceIdOrName: string,
+  interfaceOptions: addressProviderOption,
 ) => {
-  const { interfaceId, lsp2Schema } = lspTypeOptions[lspType];
-
-  // ERC-1271 Detection
-  let hasValidInterfaceId = false;
-  if (interfaceId) {
-    try {
-      hasValidInterfaceId = await provider.supportsInterface(
-        address,
-        interfaceId,
-      );
-    } catch (err) {
-      return false;
-    }
-  }
-
-  // LSP2 Key Detection
-  if (!lsp2Schema) {
-    return hasValidInterfaceId;
+  // @ts-ignore
+  let plainInterfaceId = INTERFACE_IDS_0_7_0[interfaceId];
+  if (!plainInterfaceId) {
+    plainInterfaceId = interfaceIdOrName;
   }
 
   try {
-    const lspSupportedStandards = await getData(
-      { provider, schemas: [lsp2Schema], address },
-      lsp2Schema.name,
+    return await interfaceOptions.provider.supportsInterface(
+      interfaceOptions.address,
+      plainInterfaceId,
     );
-    // @ts-ignore
-    return lspSupportedStandards.value === lsp2Schema.valueContent;
-  } catch (error) {
+  } catch (err) {
     return false;
   }
 };
 
 /**
- * Detect all LSPs the ERC725 Object or
- * smart contract address implements
+ * Check if the key value store of the smart
+ * contract supports a certain schema.
  *
- * @param address address to check against LSP standards
- * @param provider blockchain provider to call
- * @returns JSON Object with booleans for each LSP
+ * @param schemaKey Schema key or supported schema name
+ * @param schemaOptions Object with address and provider
+ * @param schema ERC725JSONSchema of the key
  */
-export const detectLSPs = async (address: string, provider: any) => {
-  if (!isValidAddress(address)) {
-    throw new Error(`Address: ${address} is not a valid address`);
-  }
-
-  // TODO: Use Promise.all
-
-  const lspMap: Record<LSPType, boolean> | Record<string, never> = Object.keys(
-    lspTypeOptions,
-  ).reduce(async (acc, lspKey) => {
-    return {
-      ...acc,
-      [lspKey]: await checkInterfaceIdAndLsp2Key(
-        address,
-        provider,
-        lspTypeOptions[lspKey],
-      ),
+export const supportsSchema = async (
+  schemaKeyOrName: string,
+  schemaOptions: addressProviderOption,
+  schema?: ERC725JSONSchema,
+) => {
+  try {
+    const erc725Options: ERC725Options = {
+      // @ts-ignore
+      schemas: [schema],
+      address: schemaOptions.address,
+      provider: schemaOptions.provider,
     };
-  }, {});
 
-  return lspMap as Record<LSPType, boolean>;
+    let plainSchemaName = '';
+    let knownSchema: ERC725JSONSchema;
+
+    // If full schema name was used, trim down
+    if (schemaKeyOrName.startsWith('SupportedStandard:')) {
+      plainSchemaName = schemaKeyOrName.substring(18);
+    } else {
+      plainSchemaName = schemaKeyOrName;
+    }
+
+    // Look if
+    let plainSchemaKey = lspSchemaOptions[plainSchemaName].schema.key;
+
+    // If
+    if (!plainSchemaKey) {
+      plainSchemaKey = schemaKeyOrName;
+    }
+
+    if (!schema) {
+      knownSchema = lspSchemaOptions[plainSchemaName].schema;
+      if (!knownSchema) {
+        throw new Error(
+          `There is no default schema for schemaKeyOrName: ${plainSchemaKey}. Please provide one.`,
+        );
+      }
+    }
+
+    const schemaContents = await getData(erc725Options, plainSchemaKey);
+
+    if (!schema) {
+      // @ts-ignore
+      return schemaContents.value === knownSchema.valueContent;
+    }
+    // @ts-ignore
+    return schemaContents.value === schema.valueContent;
+  } catch (error) {
+    return false;
+  }
 };

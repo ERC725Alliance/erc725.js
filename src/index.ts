@@ -60,7 +60,8 @@ import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
-import { detectLSPs } from './lib/detector';
+import { supportsInterface, supportsSchema } from './lib/detector';
+import { addressProviderOption } from './constants/interfaces';
 
 export {
   ERC725JSONSchema,
@@ -540,18 +541,64 @@ export class ERC725 {
   }
 
   /**
-   * Detect all LSPs the ERC725 Object or
-   * smart contract address implements
+   * Check if the ERC725 object or custom smart contract
+   * address supports a certain interface.
    *
-   * @param address address to check against LSP standards (optional)
-   * @returns JSON Object with booleans for each LSP
+   * @param interfaceId Interface ID or supported interface name
+   * @param interfaceOptions Optional object of address and provider
+   * @returns Boolean if interface is supported
    */
-  async detectLSPs(address?: string) {
-    if (!address || !this.options.address) {
-      throw new Error('Missing address');
+  async supportsInterface(
+    interfaceIdOrName: string,
+    interfaceOptions?: addressProviderOption,
+  ) {
+    if (!interfaceOptions) {
+      this.getAddressAndProvider();
+    } else {
+      isAddress(interfaceOptions.address);
+      if (!interfaceOptions.provider) {
+        throw new Error('Missing provider');
+      }
     }
-    const { provider } = this.getAddressAndProvider();
-    return detectLSPs(address || this.options.address, provider);
+
+    return supportsInterface(interfaceIdOrName, {
+      // @ts-ignore: undefined was checked before
+      address: interfaceOptions?.address || this.options.address,
+      provider: interfaceOptions?.provider || this.options.provider,
+    });
+  }
+
+  /**
+   * Check if the key value store of the ERC725 object or
+   * custom smart contract supports a certain schema.
+   *
+   * @param schemaKey Schema key or supported schema name
+   * @param schemaOptions Object with address and provider
+   * @param schema ERC725JSONSchema of the key
+   */
+  async supportsSchema(
+    schemaKeyOrName: string,
+    schemaOptions?: addressProviderOption,
+    schema?: ERC725JSONSchema,
+  ) {
+    if (!schemaOptions) {
+      this.getAddressAndProvider();
+    } else {
+      isAddress(schemaOptions.address);
+      if (!schemaOptions.provider) {
+        throw new Error('Missing provider');
+      }
+    }
+
+    return supportsSchema(
+      schemaKeyOrName,
+      {
+        // @ts-ignore: undefined was checked before
+        address: schemaOptions?.address || this.options.address,
+        provider: schemaOptions?.provider || this.options.provider,
+      },
+      schema,
+    );
   }
 }
 export default ERC725;
