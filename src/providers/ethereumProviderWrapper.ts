@@ -24,13 +24,9 @@
 
 import * as abi from 'web3-eth-abi';
 
-import {
-  ERC725_VERSION,
-  ERC725Y_INTERFACE_IDS,
-  METHODS,
-} from '../lib/constants';
-import { decodeResult } from '../lib/provider-wrapper-utils';
-import { JsonRpcEthereumProviderParams } from '../types/JsonRpc';
+import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../lib/constants';
+import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
+import { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 import { ProviderTypes } from '../types/provider';
 
@@ -52,7 +48,7 @@ export class EthereumProviderWrapper {
   }
 
   async getOwner(address: string) {
-    const params = this.constructJSONRPC(address, Method.OWNER);
+    const params = constructJSONRPC(address, Method.OWNER);
     const result = await this.callContract(params);
     if (result.error) {
       throw result.error;
@@ -101,7 +97,7 @@ export class EthereumProviderWrapper {
    */
   async supportsInterface(address: string, interfaceId: string) {
     const result = await this.callContract(
-      this.constructJSONRPC(
+      constructJSONRPC(
         address,
         Method.SUPPORTS_INTERFACE,
         `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
@@ -125,7 +121,7 @@ export class EthereumProviderWrapper {
     );
 
     const result = await this.callContract(
-      this.constructJSONRPC(address, Method.IS_VALID_SIGNATURE, encodedParams),
+      constructJSONRPC(address, Method.IS_VALID_SIGNATURE, encodedParams),
     );
 
     if (result.error) {
@@ -172,7 +168,7 @@ export class EthereumProviderWrapper {
     keyHashes: string[],
   ): Promise<GetDataReturn[]> {
     const encodedResults = await this.callContract(
-      this.constructJSONRPC(
+      constructJSONRPC(
         address,
         Method.GET_DATA,
         abiCoder.encodeParameter('bytes32[]', keyHashes),
@@ -197,7 +193,7 @@ export class EthereumProviderWrapper {
     // But this is already legacy and it won't be used anymore..
     const encodedResultsPromises = keyHashes.map((keyHash) =>
       this.callContract(
-        this.constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
+        constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
       ),
     );
 
@@ -209,28 +205,7 @@ export class EthereumProviderWrapper {
     }));
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  private constructJSONRPC(
-    address: string,
-    method: Method,
-    methodParam?: string,
-  ): (JsonRpcEthereumProviderParams | string)[] {
-    const data = methodParam
-      ? METHODS[method].sig + methodParam.replace('0x', '')
-      : METHODS[method].sig;
-
-    return [
-      {
-        to: address,
-        value: METHODS[method].value,
-        gas: METHODS[method].gas,
-        data,
-      },
-      'latest',
-    ];
-  }
-
-  private async callContract(params: any) {
-    return this.provider.request({ method: 'eth_call', params });
+  private async callContract(params: JsonRpc) {
+    return this.provider.request({ method: 'eth_call', params: params.params });
   }
 }

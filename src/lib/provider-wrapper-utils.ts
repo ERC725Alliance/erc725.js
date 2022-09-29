@@ -14,7 +14,10 @@
 
 import * as abi from 'web3-eth-abi';
 
-import { JsonRpc } from '../types/JsonRpc';
+import {
+  JsonRpc,
+  JsonRpcEthereumProviderParamsWithLatest,
+} from '../types/JsonRpc';
 import { Method } from '../types/Method';
 
 import { METHODS } from './constants';
@@ -46,29 +49,36 @@ export function decodeResult(method: Method, result) {
   return decodedData;
 }
 
+const constructJSONRPCParams = (
+  address: string,
+  method: Method,
+  methodParam?: string,
+): JsonRpcEthereumProviderParamsWithLatest => {
+  const data = methodParam
+    ? METHODS[method].sig + methodParam.replace('0x', '')
+    : METHODS[method].sig;
+
+  return [
+    {
+      to: address,
+      value: METHODS[method].value,
+      gas: METHODS[method].gas,
+      data,
+    },
+    'latest',
+  ];
+};
+
 export function constructJSONRPC(
   address: string,
   method: Method,
   methodParam?: string,
 ): JsonRpc {
-  const data = methodParam
-    ? METHODS[method].sig + methodParam.replace('0x', '')
-    : METHODS[method].sig;
-
   idCount += 1;
-
   return {
     jsonrpc: '2.0',
     method: 'eth_call',
-    params: [
-      {
-        to: address,
-        gas: METHODS[method].gas,
-        value: METHODS[method].value,
-        data,
-      },
-      'latest',
-    ],
+    params: constructJSONRPCParams(address, method, methodParam),
     id: idCount,
   };
 }
