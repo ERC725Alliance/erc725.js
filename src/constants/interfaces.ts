@@ -14,6 +14,9 @@
 
 // from @lukso/lsp-smart-contracts v0.7.0, erc725.js should stay independent
 export const INTERFACE_IDS_0_7_0 = {
+  ERC1271: '0x1626ba7e',
+  ERC725X: '0x44c028fe',
+  ERC725Y: '0x714df77c',
   LSP0ERC725Account: '0xeb6be62e',
   LSP1UniversalReceiver: '0x6bb56a14',
   LSP1UniversalReceiverDelegate: '0xa245bbda',
