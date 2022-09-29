@@ -55,7 +55,7 @@ export class Web3ProviderWrapper {
       throw result.error;
     }
 
-    return decodeResult(Method.OWNER, result);
+    return decodeResult(Method.OWNER, result.result);
   }
 
   async getErc725YVersion(address: string): Promise<ERC725_VERSION> {
@@ -107,7 +107,7 @@ export class Web3ProviderWrapper {
       ),
     );
 
-    return decodeResult(Method.SUPPORTS_INTERFACE, result);
+    return decodeResult(Method.SUPPORTS_INTERFACE, result.result);
   }
 
   /**
@@ -130,7 +130,7 @@ export class Web3ProviderWrapper {
       throw results.error;
     }
 
-    return decodeResult(Method.IS_VALID_SIGNATURE, results[0]);
+    return decodeResult(Method.IS_VALID_SIGNATURE, results[0].result);
   }
 
   async getData(address: string, keyHash: string) {
@@ -178,7 +178,7 @@ export class Web3ProviderWrapper {
     ];
 
     const results: any = await this.callContract(payload);
-    const decodedValues = decodeResult(Method.GET_DATA, results[0]);
+    const decodedValues = decodeResult(Method.GET_DATA, results[0].result);
 
     return keyHashes.map<GetDataReturn>((key, index) => ({
       key,
@@ -206,7 +206,7 @@ export class Web3ProviderWrapper {
       key: keyHashes[index],
       value: decodeResult(
         Method.GET_DATA_LEGACY,
-        results.find((element) => payloadCall.id === element.id),
+        results.find((element) => payloadCall.id === element.id).result,
       ),
     }));
   }

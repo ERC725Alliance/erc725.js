@@ -26,16 +26,14 @@ let idCount = 0;
 // @ts-ignore
 const web3abiDecoder = abi.default;
 
-export function decodeResult(method: Method, result) {
-  const rpcResult = result.result;
-
-  if (rpcResult === '0x') {
+export function decodeResult(method: Method, hexString: string) {
+  if (hexString === '0x') {
     return null;
   }
 
   const decodedData = web3abiDecoder.decodeParameter(
     METHODS[method].returnEncoding,
-    rpcResult,
+    hexString,
   );
 
   if (

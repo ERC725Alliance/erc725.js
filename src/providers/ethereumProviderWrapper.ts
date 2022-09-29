@@ -54,7 +54,7 @@ export class EthereumProviderWrapper {
       throw result.error;
     }
 
-    return decodeResult(Method.OWNER, { result });
+    return decodeResult(Method.OWNER, result);
   }
 
   // Duplicated code with ethereumProvider ...
@@ -104,7 +104,7 @@ export class EthereumProviderWrapper {
       ),
     );
 
-    return decodeResult(Method.SUPPORTS_INTERFACE, { result });
+    return decodeResult(Method.SUPPORTS_INTERFACE, result);
   }
 
   /**
@@ -128,7 +128,7 @@ export class EthereumProviderWrapper {
       throw result.error;
     }
 
-    return decodeResult(Method.IS_VALID_SIGNATURE, { result });
+    return decodeResult(Method.IS_VALID_SIGNATURE, result);
   }
 
   async getData(address: string, keyHash: string) {
@@ -175,9 +175,7 @@ export class EthereumProviderWrapper {
       ),
     );
 
-    const decodedValues = decodeResult(Method.GET_DATA, {
-      result: encodedResults,
-    });
+    const decodedValues = decodeResult(Method.GET_DATA, encodedResults);
 
     return keyHashes.map<GetDataReturn>((keyHash, index) => ({
       key: keyHash,
@@ -201,7 +199,7 @@ export class EthereumProviderWrapper {
 
     return decodedResults.map((decodedResult, index) => ({
       key: keyHashes[index],
-      value: decodeResult(Method.GET_DATA_LEGACY, { result: decodedResult }),
+      value: decodeResult(Method.GET_DATA_LEGACY, decodedResult),
     }));
   }
 
