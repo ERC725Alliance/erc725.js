@@ -24,15 +24,20 @@
 
 import * as abi from 'web3-eth-abi';
 
-import { JsonRpc } from '../types/JsonRpc';
+import { JsonRpc, JsonRpcEthereumProviderParams } from '../types/JsonRpc';
 import { Method } from '../types/Method';
+
 import {
   constructJSONRPC,
-  constructJSONRPCEthereumProvider,
+  // constructJSONRPCEthereumProvider,
   decodeResult,
 } from '../lib/provider-wrapper-utils';
 import { ProviderTypes } from '../types/provider';
-import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../lib/constants';
+import {
+  ERC725_VERSION,
+  ERC725Y_INTERFACE_IDS,
+  METHODS,
+} from '../lib/constants';
 
 // TS can't get the types from the import...
 // @ts-ignore
@@ -55,7 +60,7 @@ export class ProviderWrapper {
     // this is an ethereum provider
     if (typeof this.provider.request === 'function') {
       console.log('from getOwner with ethereum provider');
-      const params = constructJSONRPCEthereumProvider(address, Method.OWNER);
+      const params = this.constructJSONRPCETH(address, Method.OWNER);
       const result = await this.callContract(params);
       if (result.error) {
         throw result.error;
@@ -120,7 +125,7 @@ export class ProviderWrapper {
       return this.decodeResultEthereum(
         Method.SUPPORTS_INTERFACE,
         await this.callContract(
-          constructJSONRPCEthereumProvider(
+          this.constructJSONRPCETH(
             address,
             Method.SUPPORTS_INTERFACE,
             `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
@@ -134,13 +139,34 @@ export class ProviderWrapper {
       Method.SUPPORTS_INTERFACE,
       await this.callContract(
         // @audit - see what's the difference
-        constructJSONRPC(
+        this.constructJSONRPCETH(
           address,
           Method.SUPPORTS_INTERFACE,
           `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
         ),
       ),
     );
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private constructJSONRPCETH(
+    address: string,
+    method: Method,
+    methodParam?: string,
+  ): (JsonRpcEthereumProviderParams | string)[] {
+    const data = methodParam
+      ? METHODS[method].sig + methodParam.replace('0x', '')
+      : METHODS[method].sig;
+
+    return [
+      {
+        to: address,
+        value: METHODS[method].value,
+        gas: METHODS[method].gas,
+        data,
+      },
+      'latest',
+    ];
   }
 
   /**
@@ -153,23 +179,24 @@ export class ProviderWrapper {
   async isValidSignature(address: string, hash: string, signature: string) {
     if (typeof this.provider.request === 'function') {
       console.log('from ethereum isValidSignature');
+      console.log('address: ', address);
       const encodedParams = abiCoder.encodeParameters(
         ['bytes32', 'bytes'],
         [hash, signature],
       );
-
+      console.log('encodedParams: ', encodedParams);
       const result = await this.callContract(
-        constructJSONRPCEthereumProvider(
+        this.constructJSONRPCETH(
           address,
           Method.IS_VALID_SIGNATURE,
           encodedParams,
         ),
       );
-
+      console.log('result: ', result);
       if (result.error) {
         throw result.error;
       }
-
+      console.log(this.decodeResultEthereum(Method.IS_VALID_SIGNATURE, result));
       return this.decodeResultEthereum(Method.IS_VALID_SIGNATURE, result);
     }
 
@@ -214,7 +241,7 @@ export class ProviderWrapper {
     if (typeof this.provider.request === 'function') {
       switch (erc725Version) {
         case ERC725_VERSION.ERC725:
-          return this._getAllData(address, keyHashes);
+          return this._getAllDataEthereum(address, keyHashes);
         case ERC725_VERSION.ERC725_LEGACY:
           return this._getAllDataLegacyEthereum(address, keyHashes);
         default:
@@ -232,6 +259,29 @@ export class ProviderWrapper {
     }
   }
 
+  private async _getAllDataEthereum(
+    address: string,
+    keyHashes: string[],
+  ): Promise<GetDataReturn[]> {
+    const encodedResults = await this.callContract(
+      this.constructJSONRPCETH(
+        address,
+        Method.GET_DATA,
+        abiCoder.encodeParameter('bytes32[]', keyHashes),
+      ),
+    );
+
+    const decodedValues = this.decodeResultEthereum(
+      Method.GET_DATA,
+      encodedResults,
+    );
+
+    return keyHashes.map<GetDataReturn>((keyHash, index) => ({
+      key: keyHash,
+      value: decodedValues[index],
+    }));
+  }
+
   private async _getAllData(
     address: string,
     keyHashes: string[],
@@ -243,9 +293,14 @@ export class ProviderWrapper {
         abiCoder.encodeParameter('bytes32[]', keyHashes),
       ),
     ];
+    let decodedValues;
 
     const results: any = await this.callContract(payload);
-    const decodedValues = decodeResult(Method.GET_DATA, results[0]);
+    if (typeof this.provider.request === 'function') {
+      decodedValues = this.decodeResultEthereum(Method.GET_DATA, results[0]);
+    } else {
+      decodedValues = decodeResult(Method.GET_DATA, results[0]);
+    }
 
     return keyHashes.map<GetDataReturn>((key, index) => ({
       key,
@@ -262,11 +317,7 @@ export class ProviderWrapper {
     // But this is already legacy and it won't be used anymore..
     const encodedResultsPromises = keyHashes.map((keyHash) =>
       this.callContract(
-        constructJSONRPCEthereumProvider(
-          address,
-          Method.GET_DATA_LEGACY,
-          keyHash,
-        ),
+        this.constructJSONRPCETH(address, Method.GET_DATA_LEGACY, keyHash),
       ),
     );
 
@@ -304,10 +355,15 @@ export class ProviderWrapper {
   }
 
   // @audit-info replace any type
-  private async callContract(payload) {
+  private async callContract(payload: any) {
     // this is an ethereum provider
     if (typeof this.provider.request === 'function') {
       console.log('this is an ethereum provider');
+      console.log(
+        'request: ',
+        this.provider.request({ method: 'eth_call', payload }),
+        payload,
+      );
       return this.provider.request({ method: 'eth_call', payload });
     }
     // this is a web3 provider

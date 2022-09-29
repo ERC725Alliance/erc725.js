@@ -61,6 +61,7 @@ import { GetDataDynamicKey, GetDataInput } from './types/GetData';
 import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyParts } from './types/dynamicKeys';
+import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
 // import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
 
 export {
@@ -164,6 +165,10 @@ export class ERC725 {
       return new ProviderWrapper(
         new Web3.providers.HttpProvider(providerOrRpcUrl),
       );
+    }
+
+    if (!providerOrRpcUrl.request) {
+      return new EthereumProviderWrapper(providerOrRpcUrl);
     }
 
     if (

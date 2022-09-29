@@ -230,6 +230,7 @@ export class EthereumProviderWrapper {
   }
 
   private async callContract(params: any) {
+    console.log('callContract', this.provider, params);
     return this.provider.request({ method: 'eth_call', params });
   }
 
