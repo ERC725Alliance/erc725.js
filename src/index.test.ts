@@ -90,6 +90,20 @@ describe('Running @erc725/erc725.js tests...', () => {
   });
 
   describe('isValidSignature', () => {
+    it('should return true if the signature is valid [using rpcUrl]', async () => {
+      const rpcUrl = 'https://rpc.l14.lukso.network';
+      const erc725 = new ERC725(
+        [],
+        '0xD295E4748c1DFDFE028D7Dd2FEC3e52de2b1EB42', // result is mocked so we can use any address
+        rpcUrl,
+      );
+      const res = await erc725.isValidSignature(
+        'hello',
+        '0x6c54ad4814ed6de85b9786e79de48ad0d597a243158194fa6b3604254ff58f9c2e4ffcc080e18a68c8e813f720b893c8d47d6f757b9e288a5814263642811c1b1c',
+      );
+      assert.deepStrictEqual(res, true);
+    });
+
     it('should return true if the signature is valid [mock HttpProvider]', async () => {
       const provider = new HttpProvider({ returnData: [] }, [], true); // we mock a valid return response (magic number)
       const erc725 = new ERC725(
@@ -120,6 +134,30 @@ describe('Running @erc725/erc725.js tests...', () => {
       );
 
       assert.deepStrictEqual(res, true);
+    });
+
+    it('should return false if the signature is invalid [using rpcUrl]', async () => {
+      const contractAddress = '0xD295E4748c1DFDFE028D7Dd2FEC3e52de2b1EB42';
+      const rpcUrl = 'https://rpc.l14.lukso.network';
+      const erc725 = new ERC725(
+        [],
+        contractAddress, // result is mocked so we can use any address
+        rpcUrl,
+      );
+
+      try {
+        await erc725.isValidSignature(
+          'wrong message',
+          '0x6c54ad4814ed6de85b9786e79de48ad0d597a243158194fa6b3604254ff58f9c2e4ffcc080e18a68c8e813f720b893c8d47d6f757b9e288a5814263642811c1b1c',
+        );
+        // should not reach this line
+        assert.deepStrictEqual(true, false);
+      } catch (error: any) {
+        assert.deepStrictEqual(
+          error.message,
+          `Error when checking signature. Is ${contractAddress} a valid contract address which supports EIP-1271 standard?`,
+        );
+      }
     });
 
     it('should return false if the signature is valid [mock EthereumProvider]', async () => {
