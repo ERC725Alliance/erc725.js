@@ -30,7 +30,7 @@ import { LSPSchemaType } from '../constants/schemas';
 const getSupportedStandardSchema = (schemas: ERC725JSONSchema[]) => {
   try {
     const results = schemas.filter((schema) => {
-      return schema.name.startsWith('SupportedStandard:');
+      return schema.name.startsWith('SupportedStandards:');
     });
 
     if (results.length === 0) {
@@ -68,7 +68,7 @@ export const supportsInterface = async (
   interfaceOptions: addressProviderOption,
 ) => {
   // @ts-ignore
-  let plainInterfaceId = INTERFACE_IDS_0_7_0[interfaceId];
+  let plainInterfaceId = INTERFACE_IDS_0_7_0[interfaceIdOrName];
   if (!plainInterfaceId) {
     plainInterfaceId = interfaceIdOrName;
   }
@@ -108,8 +108,8 @@ export const supportsSchema = async (
     let knownSchema: ERC725JSONSchema;
 
     // If full schema name was used, trim down
-    if (schemaKeyOrName.startsWith('SupportedStandard:')) {
-      plainSchemaName = schemaKeyOrName.substring(18);
+    if (schemaKeyOrName.startsWith('SupportedStandards:')) {
+      plainSchemaName = schemaKeyOrName.substring(19);
     } else {
       plainSchemaName = schemaKeyOrName;
     }

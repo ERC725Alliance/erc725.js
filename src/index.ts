@@ -22,6 +22,7 @@
  */
 
 import { hexToNumber, isAddress, leftPad, toHex } from 'web3-utils';
+import Web3 from 'web3';
 
 import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
 import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
@@ -544,14 +545,14 @@ export class ERC725 {
    * Check if the ERC725 object or custom smart contract
    * address supports a certain interface.
    *
-   * @param interfaceId Interface ID or supported interface name
+   * @param interfaceIdOrName Interface ID or supported interface name
    * @param interfaceOptions Optional object of address and provider
    * @returns Boolean if interface is supported
    */
   async supportsInterface(
     interfaceIdOrName: string,
     interfaceOptions?: addressProviderOption,
-  ) {
+  ): Promise<string> {
     if (!interfaceOptions) {
       this.getAddressAndProvider();
     } else {
@@ -564,7 +565,9 @@ export class ERC725 {
     return supportsInterface(interfaceIdOrName, {
       // @ts-ignore: undefined was checked before
       address: interfaceOptions?.address || this.options.address,
-      provider: interfaceOptions?.provider || this.options.provider,
+      provider:
+        this.initializeProvider(interfaceOptions?.provider) ||
+        this.options.provider,
     });
   }
 
@@ -595,7 +598,9 @@ export class ERC725 {
       {
         // @ts-ignore: undefined was checked before
         address: schemaOptions?.address || this.options.address,
-        provider: schemaOptions?.provider || this.options.provider,
+        provider:
+          this.initializeProvider(schemaOptions?.provider) ||
+          this.options.provider,
       },
       schema,
     );
