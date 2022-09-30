@@ -24,6 +24,7 @@ export const INTERFACE_IDS_0_7_0 = {
   LSP7DigitalAsset: '0x5fcaac27',
   LSP8IdentifiableDigitalAsset: '0x49399145',
   LSP9Vault: '0xfd4d5c50',
+  LSP14Ownable2Step: '0x94be5999',
 };
 
 export interface addressProviderOption {
