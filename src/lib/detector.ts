@@ -66,10 +66,11 @@ const lspSchemaOptions: Record<LSPSchemaType, any> = {
 export const supportsInterface = async (
   interfaceIdOrName: string,
   interfaceOptions: addressProviderOption,
-) => {
-  // @ts-ignore
-  let plainInterfaceId = INTERFACE_IDS_0_7_0[interfaceIdOrName];
-  if (!plainInterfaceId) {
+): Promise<boolean> => {
+  let plainInterfaceId: string;
+  if (INTERFACE_IDS_0_7_0[interfaceIdOrName]) {
+    plainInterfaceId = INTERFACE_IDS_0_7_0[interfaceIdOrName];
+  } else {
     plainInterfaceId = interfaceIdOrName;
   }
 
@@ -78,8 +79,8 @@ export const supportsInterface = async (
       interfaceOptions.address,
       plainInterfaceId,
     );
-  } catch (err) {
-    return false;
+  } catch (error) {
+    throw new Error(`Error checking the interface: ${error}`);
   }
 };
 
@@ -95,51 +96,54 @@ export const supportsSchema = async (
   schemaKeyOrName: string,
   schemaOptions: addressProviderOption,
   schema?: ERC725JSONSchema,
-) => {
-  try {
-    const erc725Options: ERC725Options = {
-      // @ts-ignore
-      schemas: [schema],
-      address: schemaOptions.address,
-      provider: schemaOptions.provider,
-    };
-
-    let plainSchemaName = '';
-    let knownSchema: ERC725JSONSchema;
-
-    // If full schema name was used, trim down
-    if (schemaKeyOrName.startsWith('SupportedStandards:')) {
-      plainSchemaName = schemaKeyOrName.substring(19);
-    } else {
-      plainSchemaName = schemaKeyOrName;
-    }
-
-    // Look if
-    let plainSchemaKey = lspSchemaOptions[plainSchemaName].schema.key;
-
-    // If
-    if (!plainSchemaKey) {
-      plainSchemaKey = schemaKeyOrName;
-    }
-
-    if (!schema) {
-      knownSchema = lspSchemaOptions[plainSchemaName].schema;
-      if (!knownSchema) {
-        throw new Error(
-          `There is no default schema for schemaKeyOrName: ${plainSchemaKey}. Please provide one.`,
-        );
-      }
-    }
-
-    const schemaContents = await getData(erc725Options, plainSchemaKey);
-
-    if (!schema) {
-      // @ts-ignore
-      return schemaContents.value === knownSchema.valueContent;
-    }
+): Promise<boolean> => {
+  const erc725Options: ERC725Options = {
     // @ts-ignore
-    return schemaContents.value === schema.valueContent;
-  } catch (error) {
-    return false;
+    schemas: [schema],
+    address: schemaOptions.address,
+    provider: schemaOptions.provider,
+  };
+
+  let plainSchemaName = '';
+  let knownSchema: ERC725JSONSchema;
+
+  // If full schema name was used, trim down
+  if (schemaKeyOrName.startsWith('SupportedStandards:')) {
+    plainSchemaName = schemaKeyOrName.substring(19);
+  } else {
+    plainSchemaName = schemaKeyOrName;
   }
+
+  // Look if there is a key to the schema name
+  let plainSchemaKey: string;
+  if (lspSchemaOptions[plainSchemaName].schema.key) {
+    plainSchemaKey = lspSchemaOptions[plainSchemaName].schema.key;
+  } else {
+    plainSchemaKey = schemaKeyOrName;
+  }
+
+  if (!schema) {
+    if (lspSchemaOptions[plainSchemaName].schema) {
+      knownSchema = lspSchemaOptions[plainSchemaName].schema;
+    } else {
+      throw new Error(
+        `There is no default schema for schemaKeyOrName: ${schemaKeyOrName}. Please provide one within the options parameter.`,
+      );
+    }
+
+    try {
+      // TODO: resolve key error
+      const schemaContents = await getData(erc725Options, plainSchemaKey);
+
+      if (!schema) {
+        // @ts-ignore
+        return schemaContents.value === knownSchema.valueContent;
+      }
+      // @ts-ignore
+      return schemaContents.value === schema.valueContent;
+    } catch (error) {
+      throw new Error(`Error checking the schema: ${error}`);
+    }
+  }
+  return false;
 };

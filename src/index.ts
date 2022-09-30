@@ -552,7 +552,7 @@ export class ERC725 {
   async supportsInterface(
     interfaceIdOrName: string,
     interfaceOptions?: addressProviderOption,
-  ): Promise<string> {
+  ): Promise<boolean> {
     if (!interfaceOptions) {
       this.getAddressAndProvider();
     } else {
@@ -583,7 +583,7 @@ export class ERC725 {
     schemaKeyOrName: string,
     schemaOptions?: addressProviderOption,
     schema?: ERC725JSONSchema,
-  ) {
+  ): Promise<boolean> {
     if (!schemaOptions) {
       this.getAddressAndProvider();
     } else {
