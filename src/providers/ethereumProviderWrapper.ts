@@ -24,13 +24,9 @@
 
 import * as abi from 'web3-eth-abi';
 
-import {
-  ERC725_VERSION,
-  ERC725Y_INTERFACE_IDS,
-  METHODS,
-} from '../lib/constants';
-import { decodeResult as decodeResultUtils } from '../lib/provider-wrapper-utils';
-import { JsonRpcEthereumProviderParams } from '../types/JsonRpc';
+import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../lib/constants';
+import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
+import { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 import { ProviderTypes } from '../types/provider';
 
@@ -52,13 +48,13 @@ export class EthereumProviderWrapper {
   }
 
   async getOwner(address: string) {
-    const params = this.constructJSONRPC(address, Method.OWNER);
+    const params = constructJSONRPC(address, Method.OWNER);
     const result = await this.callContract(params);
     if (result.error) {
       throw result.error;
     }
 
-    return this.decodeResult(Method.OWNER, result);
+    return decodeResult(Method.OWNER, result);
   }
 
   // Duplicated code with ethereumProvider ...
@@ -100,16 +96,15 @@ export class EthereumProviderWrapper {
    * @param interfaceId ERC-165 identifier as described here: https://github.com/ERC725Alliance/ERC725/blob/develop/docs/ERC-725.md#specification
    */
   async supportsInterface(address: string, interfaceId: string) {
-    return this.decodeResult(
-      Method.SUPPORTS_INTERFACE,
-      await this.callContract(
-        this.constructJSONRPC(
-          address,
-          Method.SUPPORTS_INTERFACE,
-          `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
-        ),
+    const result = await this.callContract(
+      constructJSONRPC(
+        address,
+        Method.SUPPORTS_INTERFACE,
+        `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
       ),
     );
+
+    return decodeResult(Method.SUPPORTS_INTERFACE, result);
   }
 
   /**
@@ -126,14 +121,14 @@ export class EthereumProviderWrapper {
     );
 
     const result = await this.callContract(
-      this.constructJSONRPC(address, Method.IS_VALID_SIGNATURE, encodedParams),
+      constructJSONRPC(address, Method.IS_VALID_SIGNATURE, encodedParams),
     );
 
     if (result.error) {
       throw result.error;
     }
 
-    return this.decodeResult(Method.IS_VALID_SIGNATURE, result);
+    return decodeResult(Method.IS_VALID_SIGNATURE, result);
   }
 
   async getData(address: string, keyHash: string) {
@@ -173,14 +168,14 @@ export class EthereumProviderWrapper {
     keyHashes: string[],
   ): Promise<GetDataReturn[]> {
     const encodedResults = await this.callContract(
-      this.constructJSONRPC(
+      constructJSONRPC(
         address,
         Method.GET_DATA,
         abiCoder.encodeParameter('bytes32[]', keyHashes),
       ),
     );
 
-    const decodedValues = this.decodeResult(Method.GET_DATA, encodedResults);
+    const decodedValues = decodeResult(Method.GET_DATA, encodedResults);
 
     return keyHashes.map<GetDataReturn>((keyHash, index) => ({
       key: keyHash,
@@ -196,7 +191,7 @@ export class EthereumProviderWrapper {
     // But this is already legacy and it won't be used anymore..
     const encodedResultsPromises = keyHashes.map((keyHash) =>
       this.callContract(
-        this.constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
+        constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
       ),
     );
 
@@ -204,37 +199,11 @@ export class EthereumProviderWrapper {
 
     return decodedResults.map((decodedResult, index) => ({
       key: keyHashes[index],
-      value: this.decodeResult(Method.GET_DATA_LEGACY, decodedResult),
+      value: decodeResult(Method.GET_DATA_LEGACY, decodedResult),
     }));
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  private constructJSONRPC(
-    address: string,
-    method: Method,
-    methodParam?: string,
-  ): (JsonRpcEthereumProviderParams | string)[] {
-    const data = methodParam
-      ? METHODS[method].sig + methodParam.replace('0x', '')
-      : METHODS[method].sig;
-
-    return [
-      {
-        to: address,
-        value: METHODS[method].value,
-        gas: METHODS[method].gas,
-        data,
-      },
-      'latest',
-    ];
-  }
-
-  private async callContract(params: any) {
-    return this.provider.request({ method: 'eth_call', params });
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  private decodeResult(method: Method, result: string) {
-    return decodeResultUtils(method, { result });
+  private async callContract(params: JsonRpc) {
+    return this.provider.request({ method: 'eth_call', params: params.params });
   }
 }
