@@ -28,7 +28,7 @@ import {
 import {
   SUPPORTED_HASH_FUNCTION_HASHES,
   SUPPORTED_HASH_FUNCTION_STRINGS,
-} from './constants';
+} from '../constants/constants';
 import { JSONURLDataToEncode, URLDataWithHash } from '../types';
 
 describe('encoder', () => {

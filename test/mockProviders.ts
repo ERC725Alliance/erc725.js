@@ -2,7 +2,7 @@
 
 import AbiCoder from 'web3-eth-abi';
 
-import { METHODS } from '../src/lib/constants';
+import { METHODS } from '../src/constants/constants';
 import { Method } from '../src/types/Method';
 
 interface HttpProviderPayload {

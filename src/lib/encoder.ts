@@ -44,7 +44,7 @@ import { AssetURLEncode } from '../types/encodeData';
 import {
   SUPPORTED_HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTION_STRINGS,
-} from './constants';
+} from '../constants/constants';
 import { getHashFunction, hashData } from './utils';
 
 const bytesNRegex = /Bytes(\d+)/;

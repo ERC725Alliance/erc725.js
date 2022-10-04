@@ -38,7 +38,7 @@ import { isValidSignature } from './lib/isValidSignature';
 import {
   LSP6_ALL_PERMISSIONS,
   LSP6_DEFAULT_PERMISSIONS,
-} from './lib/constants';
+} from './constants/constants';
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types

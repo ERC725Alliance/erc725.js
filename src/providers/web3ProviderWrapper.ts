@@ -28,7 +28,7 @@ import { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
 import { ProviderTypes } from '../types/provider';
-import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../lib/constants';
+import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../constants/constants';
 
 // TS can't get the types from the import...
 // @ts-ignore

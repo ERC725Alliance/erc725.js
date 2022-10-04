@@ -42,7 +42,7 @@ import {
   HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTIONS_LIST,
-} from './constants';
+} from '../constants/constants';
 import {
   decodeValueContent,
   decodeValueType,

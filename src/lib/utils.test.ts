@@ -25,7 +25,7 @@ import {
 } from '../types/ERC725JSONSchema';
 import { GetDataDynamicKey } from '../types/GetData';
 
-import { SUPPORTED_HASH_FUNCTION_STRINGS } from './constants';
+import { SUPPORTED_HASH_FUNCTION_STRINGS } from '../constants/constants';
 import {
   guessKeyTypeFromKeyName,
   isDataAuthentic,

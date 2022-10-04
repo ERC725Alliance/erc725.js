@@ -24,7 +24,7 @@
 
 import * as abi from 'web3-eth-abi';
 
-import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../lib/constants';
+import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../constants/constants';
 import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
 import { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
