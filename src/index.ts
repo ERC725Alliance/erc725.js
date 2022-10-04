@@ -60,6 +60,7 @@ import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
+import { supportsInterface } from './lib/detector';
 
 export {
   ERC725JSONSchema,
@@ -107,7 +108,7 @@ export class ERC725 {
     this.options = {
       schemas: this.validateSchemas(schemas),
       address,
-      provider: this.initializeProvider(provider),
+      provider: ERC725.initializeProvider(provider),
       ipfsGateway: config?.ipfsGateway
         ? convertIPFSGatewayUrl(config?.ipfsGateway)
         : defaultConfig.ipfsGateway,
@@ -148,8 +149,7 @@ export class ERC725 {
     });
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  private initializeProvider(providerOrRpcUrl) {
+  private static initializeProvider(providerOrRpcUrl) {
     // do not fail on no-provider
     if (!providerOrRpcUrl) return undefined;
 
@@ -536,6 +536,46 @@ export class ERC725 {
    */
   encodeKeyName(keyName: string, dynamicKeyParts?: DynamicKeyParts): string {
     return encodeKeyName(keyName, dynamicKeyParts);
+  }
+
+  /**
+   * Check if the ERC725 object supports
+   * a certain interface.
+   *
+   * @param interfaceIdOrName Interface ID or supported interface name.
+   * @returns {Promise<boolean>} if interface is supported.
+   */
+  async supportsInterface(interfaceIdOrName: string): Promise<boolean> {
+    const { address, provider } = this.getAddressAndProvider();
+
+    return supportsInterface(interfaceIdOrName, {
+      address,
+      provider,
+    });
+  }
+
+  /**
+   * Check if a smart contract address
+   * supports a certain interface.
+   *
+   * @param {string} interfaceIdOrName Interface ID or supported interface name.
+   * @param options Object of address and RPC URL.
+   * @returns {Promise<boolean>} if interface is supported.
+   */
+  static async supportsInterface(
+    interfaceIdOrName: string,
+    options: { address: string; rpcUrl: string },
+  ): Promise<boolean> {
+    isAddress(options.address);
+    if (!options.rpcUrl) {
+      throw new Error('Missing RPC URL');
+    }
+
+    return supportsInterface(interfaceIdOrName, {
+      // @ts-ignore: undefined was checked before
+      address: options.address,
+      provider: this.initializeProvider(options.rpcUrl),
+    });
   }
 }
 
