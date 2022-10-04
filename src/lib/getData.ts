@@ -164,7 +164,6 @@ export const getData = async (
       .map((element) => element.name)
       .filter((key) => !isDynamicKeyName(key));
   }
-
   if (Array.isArray(keyOrKeys)) {
     return getDataMultiple(erc725Options, keyOrKeys);
   }

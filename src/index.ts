@@ -23,8 +23,7 @@
 import { hexToNumber, isAddress, leftPad, toHex } from 'web3-utils';
 import Web3 from 'web3';
 
-import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
-import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
+import { ProviderWrapper } from './providers/providerWrapper';
 
 import {
   encodeData,
@@ -60,6 +59,7 @@ import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
+// import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
 
 export {
   ERC725JSONSchema,
@@ -155,19 +155,16 @@ export class ERC725 {
 
     // if provider is a string, assume it's a rpcUrl
     if (typeof providerOrRpcUrl === 'string') {
-      return new Web3ProviderWrapper(
+      return new ProviderWrapper(
         new Web3.providers.HttpProvider(providerOrRpcUrl),
       );
     }
 
-    if (typeof providerOrRpcUrl.request === 'function')
-      return new EthereumProviderWrapper(providerOrRpcUrl);
-
     if (
-      !providerOrRpcUrl.request &&
+      typeof providerOrRpcUrl.request === 'function' ||
       typeof providerOrRpcUrl.send === 'function'
     )
-      return new Web3ProviderWrapper(providerOrRpcUrl);
+      return new ProviderWrapper(providerOrRpcUrl);
 
     throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
   }
