@@ -21,7 +21,6 @@
  */
 
 import { hexToNumber, isAddress, leftPad, toHex } from 'web3-utils';
-import Web3 from 'web3';
 
 import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
 import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
@@ -61,6 +60,9 @@ import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
 
+/* eslint-disable-next-line */
+const HttpProvider = require('web3-providers-http');
+
 export {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
@@ -70,6 +72,7 @@ export {
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
 export { encodeData } from './lib/utils';
+
 /**
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
  *
@@ -155,9 +158,7 @@ export class ERC725 {
 
     // if provider is a string, assume it's a rpcUrl
     if (typeof providerOrRpcUrl === 'string') {
-      return new Web3ProviderWrapper(
-        new Web3.providers.HttpProvider(providerOrRpcUrl),
-      );
+      return new Web3ProviderWrapper(new HttpProvider(providerOrRpcUrl));
     }
 
     if (typeof providerOrRpcUrl.request === 'function')
