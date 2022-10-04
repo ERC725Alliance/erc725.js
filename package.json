@@ -79,6 +79,7 @@
   "dependencies": {
     "ethereumjs-util": "^7.1.4",
     "web3-eth-abi": "^1.7.3",
+    "web3-providers-http": "^1.8.0",
     "web3-utils": "^1.7.3"
   }
 }
