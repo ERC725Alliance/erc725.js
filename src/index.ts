@@ -22,8 +22,7 @@
 
 import { hexToNumber, isAddress, leftPad, toHex } from 'web3-utils';
 
-import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
-import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
+import { ProviderWrapper } from './provider/providerWrapper';
 
 import {
   encodeData,
@@ -158,17 +157,14 @@ export class ERC725 {
 
     // if provider is a string, assume it's a rpcUrl
     if (typeof providerOrRpcUrl === 'string') {
-      return new Web3ProviderWrapper(new HttpProvider(providerOrRpcUrl));
+      return new ProviderWrapper(new HttpProvider(providerOrRpcUrl));
     }
 
-    if (typeof providerOrRpcUrl.request === 'function')
-      return new EthereumProviderWrapper(providerOrRpcUrl);
-
     if (
-      !providerOrRpcUrl.request &&
+      typeof providerOrRpcUrl.request === 'function' ||
       typeof providerOrRpcUrl.send === 'function'
     )
-      return new Web3ProviderWrapper(providerOrRpcUrl);
+      return new ProviderWrapper(providerOrRpcUrl);
 
     throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
   }
