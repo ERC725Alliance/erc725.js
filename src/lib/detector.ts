@@ -98,7 +98,7 @@ export const supportsSchema = async (
   schema?: ERC725JSONSchema,
 ): Promise<boolean> => {
   const erc725Options: ERC725Options = {
-    // @ts-ignore
+    // @ts-ignore schema can be null here, since we check later (knownSchema)
     schemas: [schema],
     address: schemaOptions.address,
     provider: schemaOptions.provider,
@@ -125,6 +125,7 @@ export const supportsSchema = async (
   if (!schema) {
     if (lspSchemaOptions[plainSchemaName].schema) {
       knownSchema = lspSchemaOptions[plainSchemaName].schema;
+      erc725Options.schemas = [knownSchema];
     } else {
       throw new Error(
         `There is no default schema for schemaKeyOrName: ${schemaKeyOrName}. Please provide one within the options parameter.`,
@@ -132,14 +133,13 @@ export const supportsSchema = async (
     }
 
     try {
-      // TODO: resolve key error
       const schemaContents = await getData(erc725Options, plainSchemaKey);
 
       if (!schema) {
-        // @ts-ignore
+        // @ts-ignore .value does exist on getData return value
         return schemaContents.value === knownSchema.valueContent;
       }
-      // @ts-ignore
+      // @ts-ignore .value does exist on getData return value
       return schemaContents.value === schema.valueContent;
     } catch (error) {
       throw new Error(`Error checking the schema: ${error}`);
