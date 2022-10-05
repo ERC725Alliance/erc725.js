@@ -563,7 +563,9 @@ export class ERC725 {
     interfaceIdOrName: string,
     options: { address: string; rpcUrl: string },
   ): Promise<boolean> {
-    isAddress(options.address);
+    if (!isAddress(options.address)) {
+      throw new Error('Invalid address');
+    }
     if (!options.rpcUrl) {
       throw new Error('Missing RPC URL');
     }
