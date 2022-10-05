@@ -19,6 +19,8 @@
 
 // Tests for the @erc725/erc725.js package
 import assert from 'assert';
+import { assert as chaiAssert } from 'chai';
+
 import Web3 from 'web3';
 import * as sinon from 'sinon';
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
@@ -47,7 +49,6 @@ import {
 } from './constants/constants';
 import { decodeKey } from './lib/decodeData';
 import { INTERFACE_IDS_0_7_0 } from './constants/interfaces';
-import { supportsInterface } from './lib/detector';
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
 
@@ -1238,57 +1239,39 @@ describe('encodeKeyName', () => {
 });
 
 describe('supportsInterface', () => {
+  const erc725Instance = new ERC725([]);
+
+  it('is available on instance and class', () => {
+    chaiAssert.typeOf(ERC725.supportsInterface, 'function');
+    chaiAssert.typeOf(erc725Instance.supportsInterface, 'function');
+  });
+
   const interfaceId = INTERFACE_IDS_0_7_0.LSP1UniversalReceiver;
   const rpcUrl = 'https://my.test.provider';
   const contractAddress = '0xcafecafecafecafecafecafecafecafecafecafe';
 
-  it('should throw when provided address is not an address', () => {
-    const invalidContractAddress = 'notAnAddress';
-
-    assert.throws(
-      () => {
-        ERC725.supportsInterface(interfaceId, {
-          address: invalidContractAddress,
-          rpcUrl,
-        });
-      },
-      (error: any) => error.message === 'Invalid address',
-    );
+  it('should throw when provided address is not an address', async () => {
+    try {
+      await ERC725.supportsInterface(interfaceId, {
+        address: 'notAnAddress',
+        rpcUrl,
+      });
+    } catch (error: any) {
+      assert.deepStrictEqual(error.message, 'Invalid address');
+    }
   });
 
-  it('should throw when rpcUrl is not provided', () => {
-    assert.throws(
-      () => {
-        ERC725.supportsInterface(interfaceId, {
-          address: contractAddress,
-          // @ts-ignore
-          rpcUrl: undefined,
-        });
-      },
-      (error: any) => error.message === 'Missing RPC URL',
-    );
+  it('should throw when rpcUrl is not provided on non instantiated class', async () => {
+    try {
+      await ERC725.supportsInterface(interfaceId, {
+        address: contractAddress,
+        // @ts-ignore
+        rpcUrl: undefined,
+      });
+    } catch (error: any) {
+      assert.deepStrictEqual(error.message, 'Missing RPC URL');
+    }
   });
 
-  it('should return the same result as supportsInterface from library', async () => {
-    const erc725 = new ERC725([], contractAddress, rpcUrl);
-    const providerStub = { supportsInterface: sinon.stub() };
-    providerStub.supportsInterface
-      .withArgs(contractAddress, interfaceId)
-      .returns(Promise.resolve(true));
-
-    const directCall = await supportsInterface(interfaceId, {
-      address: contractAddress,
-      provider: providerStub,
-    });
-
-    const functionCall = await erc725.supportsInterface(interfaceId);
-
-    const classCall = await ERC725.supportsInterface(interfaceId, {
-      address: contractAddress,
-      rpcUrl,
-    });
-
-    assert.deepStrictEqual(directCall, functionCall);
-    assert.deepStrictEqual(directCall, classCall);
-  });
+  // TODO: add test to test the actual behavior of the function.
 });
