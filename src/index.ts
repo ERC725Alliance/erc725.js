@@ -58,7 +58,8 @@ import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
-import { supportsInterface } from './lib/detector';
+import { supportsInterface, supportsSchema } from './lib/detector';
+import { AddressProviderOptions } from './constants/interfaces';
 
 /* eslint-disable-next-line */
 const HttpProvider = require('web3-providers-http');
@@ -575,6 +576,52 @@ export class ERC725 {
       address: options.address,
       provider: this.initializeProvider(options.rpcUrl),
     });
+  }
+
+  /**
+   * Check if the ERC725 object supports a certain schema.
+   *
+   * @param schemaKeyOrName Schema key or supported schema name.
+   * @param schema Optional ERC725JSONSchema of the key.
+   */
+  async supportsSchema(
+    schemaKeyOrName: string,
+    schema?: ERC725JSONSchema,
+  ): Promise<boolean> {
+    const { address, provider } = this.getAddressAndProvider();
+
+    return supportsSchema(schemaKeyOrName, { address, provider }, schema);
+  }
+
+  /**
+   * Check if the key value store of a smart contract
+   * supports a specific schema.
+   *
+   * @param schemaKeyOrName Schema key or supported schema name.
+   * @param options Object with address and provider.
+   * @param schema ERC725JSONSchema of the key.
+   */
+  static async supportsSchema(
+    schemaKeyOrName: string,
+    options: AddressProviderOptions,
+    schema?: ERC725JSONSchema,
+  ): Promise<boolean> {
+    if (!isAddress(options.address)) {
+      throw new Error('Invalid address');
+    } else if (!options.provider) {
+      throw new Error('Missing provider');
+    } else if (!schema) {
+      throw new Error('Missing schema');
+    }
+
+    return supportsSchema(
+      schemaKeyOrName,
+      {
+        address: options.address,
+        provider: this.initializeProvider(options.provider),
+      },
+      schema,
+    );
   }
 }
 
