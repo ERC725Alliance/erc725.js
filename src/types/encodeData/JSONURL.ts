@@ -1,4 +1,4 @@
-import { SUPPORTED_HASH_FUNCTIONS } from '../../lib/constants';
+import { SUPPORTED_HASH_FUNCTIONS } from '../../constants/constants';
 
 export interface KeyValuePair {
   key: string;
