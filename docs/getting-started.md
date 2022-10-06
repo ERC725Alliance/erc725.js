@@ -58,14 +58,12 @@ const schemas = [
 ];
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
-const provider = new Web3.providers.HttpProvider(
-  'https://rpc.l16.lukso.network',
-);
+const RPC_URL = 'https://rpc.l16.lukso.network';
 const config = {
   ipfsGateway: 'https://ipfs.lukso.network/ipfs/',
 };
 
-const erc725 = new ERC725(schemas, address, provider, config);
+const erc725 = new ERC725(schemas, address, RPC_URL, config);
 ```
 
 ## Usage
