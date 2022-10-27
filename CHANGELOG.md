@@ -2,18 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [0.15.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.14.4...v0.15.0) (2022-09-14)
-
+## [0.16.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.15.0...v0.16.0) (2022-10-27)
 
 ### ⚠ BREAKING CHANGES
 
-* add LSP6 `ENCRYPT` permission in for encrypt/decrypt permissions methods. (#223)
+- We deprecated using Web3 or ethereum provider, you can now simply use a RPC URL to init the lib.
+
+### Features
+
+- add supportsInterface ([#243](https://github.com/ERC725Alliance/erc725.js/issues/243)) ([a2b0828](https://github.com/ERC725Alliance/erc725.js/commit/a2b08288e9aaede8a1a3307c1371672eb7b50969))
+- make library compatible with RPC urls ([263de19](https://github.com/ERC725Alliance/erc725.js/commit/263de1983f08c9f31f0cc931e581fe8af52bd541))
+
+### Bug Fixes
+
+- change lsp7 interface id from `0xe33f65c3` to `0x5fcaac27` ([6aa6eb3](https://github.com/ERC725Alliance/erc725.js/commit/6aa6eb30d427609c89ebc1920fc9ecf03c0dd68b))
+- update return type for `fetchData` ([#247](https://github.com/ERC725Alliance/erc725.js/issues/247)) ([7ffcd64](https://github.com/ERC725Alliance/erc725.js/commit/7ffcd64b2c0ee841b71472d0d6d869e4149db37d))
+
+## [0.15.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.14.4...v0.15.0) (2022-09-14)
+
+### ⚠ BREAKING CHANGES
+
+- add LSP6 `ENCRYPT` permission in for encrypt/decrypt permissions methods. (#223)
 
 ### [0.14.4](https://github.com/ERC725Alliance/erc725.js/compare/v0.14.3...v0.14.4) (2022-07-25)
 
 ### Features
 
-* expose dynamic parts to public encodeKeyName ([#213](https://github.com/ERC725Alliance/erc725.js/issues/213)) ([73f1265](https://github.com/ERC725Alliance/erc725.js/commit/73f126570eaf5f118c48859ee878608afc48a0aa))
+- expose dynamic parts to public encodeKeyName ([#213](https://github.com/ERC725Alliance/erc725.js/issues/213)) ([73f1265](https://github.com/ERC725Alliance/erc725.js/commit/73f126570eaf5f118c48859ee878608afc48a0aa))
 
 ### [0.14.3](https://github.com/ERC725Alliance/erc725.js/compare/v0.14.2...v0.14.3) (2022-07-07)
 
