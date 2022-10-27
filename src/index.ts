@@ -52,6 +52,7 @@ import {
   DecodeDataInput,
   DecodeDataOutput,
   EncodeDataInput,
+  FetchDataOutput,
 } from './types/decodeData';
 import { GetDataDynamicKey, GetDataInput } from './types/GetData';
 import { decodeData } from './lib/decodeData';
@@ -208,13 +209,13 @@ export class ERC725 {
 
   async fetchData(
     keyOrKeys?: Array<string | GetDataDynamicKey>,
-  ): Promise<DecodeDataOutput[]>;
+  ): Promise<FetchDataOutput[]>;
   async fetchData(
     keyOrKeys?: string | GetDataDynamicKey,
-  ): Promise<DecodeDataOutput>;
+  ): Promise<FetchDataOutput>;
   async fetchData(
     keyOrKeys?: GetDataInput,
-  ): Promise<DecodeDataOutput | DecodeDataOutput[]> {
+  ): Promise<FetchDataOutput | FetchDataOutput[]> {
     let keyNames: Array<string | GetDataDynamicKey>;
 
     if (Array.isArray(keyOrKeys)) {

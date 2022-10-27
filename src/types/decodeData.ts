@@ -20,6 +20,16 @@ export interface DecodeDataOutput {
   key: string;
 }
 
+export interface FetchDataOutput {
+  value:
+    | string
+    | string[]
+    | { LSP3Profile: Record<string, any> }
+    | Record<string, any>;
+  name: string;
+  key: string;
+}
+
 export interface GetDataExternalSourcesOutput extends DecodeDataOutput {
   value: any;
 }
