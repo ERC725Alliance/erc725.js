@@ -14,25 +14,26 @@
 
 import * as abi from 'web3-eth-abi';
 
-import { JsonRpc } from '../types/JsonRpc';
+import {
+  JsonRpc,
+  JsonRpcEthereumProviderParamsWithLatest,
+} from '../types/JsonRpc';
 import { Method } from '../types/Method';
 
-import { METHODS } from './constants';
+import { METHODS } from '../constants/constants';
 
 let idCount = 0;
 // @ts-ignore
 const web3abiDecoder = abi.default;
 
-export function decodeResult(method: Method, result) {
-  const rpcResult = result.result;
-
-  if (rpcResult === '0x') {
+export function decodeResult(method: Method, hexString: string) {
+  if (hexString === '0x') {
     return null;
   }
 
   const decodedData = web3abiDecoder.decodeParameter(
     METHODS[method].returnEncoding,
-    rpcResult,
+    hexString,
   );
 
   if (
@@ -46,29 +47,36 @@ export function decodeResult(method: Method, result) {
   return decodedData;
 }
 
+const constructJSONRPCParams = (
+  address: string,
+  method: Method,
+  methodParam?: string,
+): JsonRpcEthereumProviderParamsWithLatest => {
+  const data = methodParam
+    ? METHODS[method].sig + methodParam.replace('0x', '')
+    : METHODS[method].sig;
+
+  return [
+    {
+      to: address,
+      value: METHODS[method].value,
+      gas: METHODS[method].gas,
+      data,
+    },
+    'latest',
+  ];
+};
+
 export function constructJSONRPC(
   address: string,
   method: Method,
   methodParam?: string,
 ): JsonRpc {
-  const data = methodParam
-    ? METHODS[method].sig + methodParam.replace('0x', '')
-    : METHODS[method].sig;
-
   idCount += 1;
-
   return {
     jsonrpc: '2.0',
     method: 'eth_call',
-    params: [
-      {
-        to: address,
-        gas: METHODS[method].gas,
-        value: METHODS[method].value,
-        data,
-      },
-      'latest',
-    ],
+    params: constructJSONRPCParams(address, method, methodParam),
     id: idCount,
   };
 }

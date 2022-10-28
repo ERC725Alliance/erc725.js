@@ -1,6 +1,6 @@
 {
   "name": "@erc725/erc725.js",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "Library to interact with ERC725 smart contracts",
   "main": "build/main/src/index.js",
   "typings": "build/main/src/index.d.ts",
@@ -79,6 +79,7 @@
   "dependencies": {
     "ethereumjs-util": "^7.1.4",
     "web3-eth-abi": "^1.7.3",
+    "web3-providers-http": "^1.8.0",
     "web3-utils": "^1.7.3"
   }
 }

@@ -1,10 +1,10 @@
 import assert from 'assert';
 
-import { Web3ProviderWrapper } from './web3ProviderWrapper';
+import { ProviderWrapper } from './providerWrapper';
 
 const erc725AccountAddress = '0x214be121bB52e6909c5158579b3458f8760f1b2f';
 
-describe('Web3ProviderWrapper', () => {
+describe('ProviderWrapper', () => {
   describe('#getOwner', () => {
     it('should return an address', async () => {
       const mockProvider = {
@@ -15,7 +15,7 @@ describe('Web3ProviderWrapper', () => {
           });
         },
       };
-      const ethSource = new Web3ProviderWrapper(mockProvider);
+      const ethSource = new ProviderWrapper(mockProvider);
 
       const owner = await ethSource.getOwner(erc725AccountAddress);
       assert.deepStrictEqual(
@@ -30,7 +30,7 @@ describe('Web3ProviderWrapper', () => {
           cb(new Error('some error'));
         },
       };
-      const ethSource = new Web3ProviderWrapper(mockProvider);
+      const ethSource = new ProviderWrapper(mockProvider);
 
       try {
         await ethSource.getOwner(erc725AccountAddress);
@@ -47,7 +47,7 @@ describe('Web3ProviderWrapper', () => {
           });
         },
       };
-      const ethSource = new Web3ProviderWrapper(mockProvider);
+      const ethSource = new ProviderWrapper(mockProvider);
 
       try {
         await ethSource.getOwner(erc725AccountAddress);

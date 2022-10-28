@@ -22,12 +22,9 @@
 
 import { hexToNumber, isAddress, leftPad, toHex } from 'web3-utils';
 
-import { Web3ProviderWrapper } from './providers/web3ProviderWrapper';
-import { EthereumProviderWrapper } from './providers/ethereumProviderWrapper';
+import { ProviderWrapper } from './provider/providerWrapper';
 
 import {
-  encodeArrayKey,
-  decodeKeyValue,
   encodeData,
   convertIPFSGatewayUrl,
   generateSchemasFromDynamicKeys,
@@ -39,12 +36,11 @@ import { isValidSignature } from './lib/isValidSignature';
 import {
   LSP6_ALL_PERMISSIONS,
   LSP6_DEFAULT_PERMISSIONS,
-} from './lib/constants';
+} from './constants/constants';
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types
-import { KeyValuePair } from './types';
-import { ERC725Config } from './types/Config';
+import { ERC725Config, ERC725Options } from './types/Config';
 import { Permissions } from './types/Method';
 import {
   ERC725JSONSchema,
@@ -56,11 +52,17 @@ import {
   DecodeDataInput,
   DecodeDataOutput,
   EncodeDataInput,
+  FetchDataOutput,
 } from './types/decodeData';
 import { GetDataDynamicKey, GetDataInput } from './types/GetData';
 import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyParts } from './types/dynamicKeys';
+import { getData } from './lib/getData';
+import { supportsInterface } from './lib/detector';
+
+/* eslint-disable-next-line */
+const HttpProvider = require('web3-providers-http');
 
 export {
   ERC725JSONSchema,
@@ -71,6 +73,7 @@ export {
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
 export { encodeData } from './lib/utils';
+
 /**
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
  *
@@ -78,11 +81,7 @@ export { encodeData } from './lib/utils';
  *
  */
 export class ERC725 {
-  options: ERC725Config & {
-    schemas: ERC725JSONSchema[];
-    address?: string;
-    provider?;
-  };
+  options: ERC725Options & ERC725Config;
 
   /**
    * Creates an instance of ERC725.
@@ -112,7 +111,7 @@ export class ERC725 {
     this.options = {
       schemas: this.validateSchemas(schemas),
       address,
-      provider: this.initializeProvider(provider),
+      provider: ERC725.initializeProvider(provider),
       ipfsGateway: config?.ipfsGateway
         ? convertIPFSGatewayUrl(config?.ipfsGateway)
         : defaultConfig.ipfsGateway,
@@ -153,25 +152,23 @@ export class ERC725 {
     });
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  private initializeProvider(providerOrProviderWrapper) {
+  private static initializeProvider(providerOrRpcUrl) {
     // do not fail on no-provider
-    if (!providerOrProviderWrapper) return undefined;
+    if (!providerOrRpcUrl) return undefined;
 
-    if (typeof providerOrProviderWrapper.request === 'function')
-      return new EthereumProviderWrapper(providerOrProviderWrapper);
+    // if provider is a string, assume it's a rpcUrl
+    if (typeof providerOrRpcUrl === 'string') {
+      return new ProviderWrapper(new HttpProvider(providerOrRpcUrl));
+    }
 
     if (
-      !providerOrProviderWrapper.request &&
-      typeof providerOrProviderWrapper.send === 'function'
+      typeof providerOrRpcUrl.request === 'function' ||
+      typeof providerOrRpcUrl.send === 'function'
     )
-      return new Web3ProviderWrapper(providerOrProviderWrapper);
+      return new ProviderWrapper(providerOrRpcUrl);
 
-    throw new Error(
-      `Incorrect or unsupported provider ${providerOrProviderWrapper}`,
-    );
+    throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
   }
-
   /**
    * Gets **decoded data** for one, many or all keys of the specified `ERC725` smart-contract.
    * When omitting the `keyOrKeys` parameter, it will get all the keys (as per {@link ERC725JSONSchema | ERC725JSONSchema} definition).
@@ -195,21 +192,7 @@ export class ERC725 {
     keyOrKeys?: GetDataInput,
   ): Promise<DecodeDataOutput | DecodeDataOutput[]> {
     this.getAddressAndProvider();
-
-    if (!keyOrKeys) {
-      // eslint-disable-next-line no-param-reassign
-      keyOrKeys = this.options.schemas
-        .map((element) => element.name)
-        .filter((key) => !isDynamicKeyName(key));
-    }
-
-    if (Array.isArray(keyOrKeys)) {
-      return this.getDataMultiple(keyOrKeys);
-    }
-
-    const data = await this.getDataMultiple([keyOrKeys]);
-
-    return data[0];
+    return getData(this.options, keyOrKeys);
   }
 
   /**
@@ -226,13 +209,13 @@ export class ERC725 {
 
   async fetchData(
     keyOrKeys?: Array<string | GetDataDynamicKey>,
-  ): Promise<DecodeDataOutput[]>;
+  ): Promise<FetchDataOutput[]>;
   async fetchData(
     keyOrKeys?: string | GetDataDynamicKey,
-  ): Promise<DecodeDataOutput>;
+  ): Promise<FetchDataOutput>;
   async fetchData(
     keyOrKeys?: GetDataInput,
-  ): Promise<DecodeDataOutput | DecodeDataOutput[]> {
+  ): Promise<FetchDataOutput | FetchDataOutput[]> {
     let keyNames: Array<string | GetDataDynamicKey>;
 
     if (Array.isArray(keyOrKeys)) {
@@ -422,127 +405,6 @@ export class ERC725 {
     );
   }
 
-  /**
-   * @internal
-   * @param schema associated with the schema with keyType = 'Array'
-   *               the data includes the raw (encoded) length key-value pair for the array
-   * @param data array of key-value pairs, one of which is the length key for the schema array
-   *             Data can hold other field data not relevant here, and will be ignored
-   * @return an array of keys/values
-   */
-  private async getArrayValues(
-    schema: ERC725JSONSchema,
-    data: Record<string, any>,
-  ) {
-    if (schema.keyType !== 'Array') {
-      throw new Error(
-        `The "getArrayValues" method requires a schema definition with "keyType: Array",
-         ${schema}`,
-      );
-    }
-    const results: { key: string; value }[] = [];
-
-    // 1. get the array length
-    const value = data[schema.key]; // get the length key/value pair
-
-    if (!value || !value.value) {
-      return results;
-    } // Handle empty/non-existent array
-
-    const arrayLength = await decodeKeyValue(
-      'Number',
-      'uint256',
-      value.value,
-      schema.name,
-    ); // get the int array length
-
-    const arrayElementKeys: string[] = [];
-    for (let index = 0; index < arrayLength; index++) {
-      const arrayElementKey = encodeArrayKey(schema.key, index);
-      if (!data[arrayElementKey]) {
-        arrayElementKeys.push(arrayElementKey);
-      }
-    }
-
-    try {
-      const arrayElements = await this.options.provider?.getAllData(
-        this.options.address as string,
-        arrayElementKeys,
-      );
-
-      results.push(...arrayElements);
-    } catch (err) {
-      // This case may happen if user requests an array key which does not exist in the contract.
-      // In this case, we simply skip
-    }
-
-    return results;
-  }
-
-  private async getDataMultiple(keyNames: Array<string | GetDataDynamicKey>) {
-    const schemas = generateSchemasFromDynamicKeys(
-      keyNames,
-      this.options.schemas,
-    );
-
-    // Get all the raw data from the provider based on schema key hashes
-    const allRawData: KeyValuePair[] = await this.options.provider?.getAllData(
-      this.options.address as string,
-      schemas.map((schema) => schema.key),
-    );
-
-    const keyValueMap = allRawData.reduce<{ [key: string]: any }>(
-      (accumulator, current) => {
-        accumulator[current.key] = current.value;
-        return accumulator;
-      },
-      {},
-    );
-
-    const schemasWithValue = schemas.map((schema) => {
-      return { ...schema, value: keyValueMap[schema.key] || null };
-    });
-
-    // ------- BEGIN ARRAY HANDLER -------
-    // Get missing 'Array' fields for all arrays, as necessary
-
-    const arraySchemas = schemas.filter(
-      (e) => e.keyType.toLowerCase() === 'array',
-    );
-
-    // Looks like it gets array even if not requested as it gets the arrays from the this.options.schemas?
-    // eslint-disable-next-line no-restricted-syntax
-    for (const keySchema of arraySchemas) {
-      const dataKeyValue = {
-        [keySchema.key]: {
-          key: keySchema.key,
-          value: keyValueMap[keySchema.key],
-        },
-      };
-      const arrayValues = await this.getArrayValues(keySchema, dataKeyValue);
-
-      if (arrayValues && arrayValues.length > 0) {
-        arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
-
-        schemasWithValue[
-          schemasWithValue.findIndex((schema) => schema.key === keySchema.key)
-        ] = { ...keySchema, value: arrayValues };
-      }
-    }
-    // ------- END ARRAY HANDLER -------
-
-    return decodeData(
-      schemasWithValue.map(({ key, value }) => {
-        return {
-          keyName: key,
-          value,
-          // no need to add dynamic key parts here as the schemas object below already holds the "generated" schemas for the dynamic keys
-        };
-      }),
-      schemas,
-    );
-  }
-
   private getAddressAndProvider() {
     if (!this.options.address || !isAddress(this.options.address)) {
       throw new Error('Missing ERC725 contract address.');
@@ -672,6 +534,48 @@ export class ERC725 {
    */
   encodeKeyName(keyName: string, dynamicKeyParts?: DynamicKeyParts): string {
     return encodeKeyName(keyName, dynamicKeyParts);
+  }
+
+  /**
+   * Check if the ERC725 object supports
+   * a certain interface.
+   *
+   * @param interfaceIdOrName Interface ID or supported interface name.
+   * @returns {Promise<boolean>} if interface is supported.
+   */
+  async supportsInterface(interfaceIdOrName: string): Promise<boolean> {
+    const { address, provider } = this.getAddressAndProvider();
+
+    return supportsInterface(interfaceIdOrName, {
+      address,
+      provider,
+    });
+  }
+
+  /**
+   * Check if a smart contract address
+   * supports a certain interface.
+   *
+   * @param {string} interfaceIdOrName Interface ID or supported interface name.
+   * @param options Object of address and RPC URL.
+   * @returns {Promise<boolean>} if interface is supported.
+   */
+  static async supportsInterface(
+    interfaceIdOrName: string,
+    options: { address: string; rpcUrl: string },
+  ): Promise<boolean> {
+    if (!isAddress(options.address)) {
+      throw new Error('Invalid address');
+    }
+    if (!options.rpcUrl) {
+      throw new Error('Missing RPC URL');
+    }
+
+    return supportsInterface(interfaceIdOrName, {
+      // @ts-ignore: undefined was checked before
+      address: options.address,
+      provider: this.initializeProvider(options.rpcUrl),
+    });
   }
 }
 

@@ -28,7 +28,7 @@ import { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
 import { ProviderTypes } from '../types/provider';
-import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../lib/constants';
+import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../constants/constants';
 
 // TS can't get the types from the import...
 // @ts-ignore
@@ -39,11 +39,15 @@ interface GetDataReturn {
   value: Record<string, any> | null;
 }
 
-export class Web3ProviderWrapper {
+export class ProviderWrapper {
   type: ProviderTypes;
   provider: any;
   constructor(provider: any) {
-    this.type = ProviderTypes.WEB3;
+    if (typeof provider.request === 'function') {
+      this.type = ProviderTypes.ETHEREUM;
+    } else {
+      this.type = ProviderTypes.WEB3;
+    }
     this.provider = provider;
   }
 
@@ -55,7 +59,7 @@ export class Web3ProviderWrapper {
       throw result.error;
     }
 
-    return decodeResult(Method.OWNER, result);
+    return decodeResult(Method.OWNER, result.result);
   }
 
   async getErc725YVersion(address: string): Promise<ERC725_VERSION> {
@@ -106,8 +110,10 @@ export class Web3ProviderWrapper {
         `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
       ),
     );
-
-    return decodeResult(Method.SUPPORTS_INTERFACE, result);
+    if (this.type === ProviderTypes.ETHEREUM) {
+      return decodeResult(Method.SUPPORTS_INTERFACE, result);
+    }
+    return decodeResult(Method.SUPPORTS_INTERFACE, result.result);
   }
 
   /**
@@ -118,6 +124,23 @@ export class Web3ProviderWrapper {
    * @param signature
    */
   async isValidSignature(address: string, hash: string, signature: string) {
+    if (this.type === ProviderTypes.ETHEREUM) {
+      const encodedParams = abiCoder.encodeParameters(
+        ['bytes32', 'bytes'],
+        [hash, signature],
+      );
+
+      const result = await this.callContract(
+        constructJSONRPC(address, Method.IS_VALID_SIGNATURE, encodedParams),
+      );
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      return decodeResult(Method.IS_VALID_SIGNATURE, result);
+    }
+
     const encodedParams = abiCoder.encodeParameters(
       ['bytes32', 'bytes'],
       [hash, signature],
@@ -130,12 +153,11 @@ export class Web3ProviderWrapper {
       throw results.error;
     }
 
-    return decodeResult(Method.IS_VALID_SIGNATURE, results[0]);
+    return decodeResult(Method.IS_VALID_SIGNATURE, results[0].result);
   }
 
   async getData(address: string, keyHash: string) {
     const result = await this.getAllData(address, [keyHash]);
-
     try {
       return result[0].value;
     } catch {
@@ -169,6 +191,23 @@ export class Web3ProviderWrapper {
     address: string,
     keyHashes: string[],
   ): Promise<GetDataReturn[]> {
+    if (this.type === ProviderTypes.ETHEREUM) {
+      const encodedResults = await this.callContract(
+        constructJSONRPC(
+          address,
+          Method.GET_DATA,
+          abiCoder.encodeParameter('bytes32[]', keyHashes),
+        ),
+      );
+
+      const decodedValues = decodeResult(Method.GET_DATA, encodedResults);
+
+      return keyHashes.map<GetDataReturn>((keyHash, index) => ({
+        key: keyHash,
+        value: decodedValues[index],
+      }));
+    }
+
     const payload: JsonRpc[] = [
       constructJSONRPC(
         address,
@@ -178,7 +217,7 @@ export class Web3ProviderWrapper {
     ];
 
     const results: any = await this.callContract(payload);
-    const decodedValues = decodeResult(Method.GET_DATA, results[0]);
+    const decodedValues = decodeResult(Method.GET_DATA, results[0].result);
 
     return keyHashes.map<GetDataReturn>((key, index) => ({
       key,
@@ -190,8 +229,24 @@ export class Web3ProviderWrapper {
     address: string,
     keyHashes: string[],
   ): Promise<GetDataReturn[]> {
-    const payload: JsonRpc[] = [];
+    if (this.type === ProviderTypes.ETHEREUM) {
+      // Here we could use `getDataMultiple` instead of sending multiple calls to `getData`
+      // But this is already legacy and it won't be used anymore..
+      const encodedResultsPromises = keyHashes.map((keyHash) =>
+        this.callContract(
+          constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
+        ),
+      );
 
+      const decodedResults = await Promise.all(encodedResultsPromises);
+
+      return decodedResults.map((decodedResult, index) => ({
+        key: keyHashes[index],
+        value: decodeResult(Method.GET_DATA_LEGACY, decodedResult),
+      }));
+    }
+
+    const payload: JsonRpc[] = [];
     // Here we could use `getDataMultiple` instead of sending multiple calls to `getData`
     // But this is already legacy and it won't be used anymore..
     for (let index = 0; index < keyHashes.length; index++) {
@@ -206,12 +261,19 @@ export class Web3ProviderWrapper {
       key: keyHashes[index],
       value: decodeResult(
         Method.GET_DATA_LEGACY,
-        results.find((element) => payloadCall.id === element.id),
+        results.find((element) => payloadCall.id === element.id).result,
       ),
     }));
   }
 
   private async callContract(payload: JsonRpc[] | JsonRpc): Promise<any> {
+    if (this.type === ProviderTypes.ETHEREUM) {
+      return this.provider.request({
+        method: 'eth_call',
+        params: (payload as JsonRpc).params,
+      });
+    }
+
     return new Promise((resolve, reject) => {
       // Send old web3 method with callback to resolve promise
       // This is deprecated: https://docs.metamask.io/guide/ethereum-provider.html#ethereum-send-deprecated
