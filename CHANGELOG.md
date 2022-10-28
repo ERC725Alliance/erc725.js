@@ -6,11 +6,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### ⚠ BREAKING CHANGES
 
-- We deprecated using Web3 or ethereum provider, you can now simply use a RPC URL to init the lib.
+- It is now recommended to initialise the library with an RPC URL over the Web3 or Ethers provider, you can check the [erc725.js documentation](https://docs.lukso.tech/tools/erc725js/providers#rpc-url) to get more information.
 
 ### Features
 
-- add supportsInterface ([#243](https://github.com/ERC725Alliance/erc725.js/issues/243)) ([a2b0828](https://github.com/ERC725Alliance/erc725.js/commit/a2b08288e9aaede8a1a3307c1371672eb7b50969))
+- add [supportsInterface](https://docs.lukso.tech/tools/erc725js/classes/ERC725#supportsinterface) ([#243](https://github.com/ERC725Alliance/erc725.js/issues/243)) ([a2b0828](https://github.com/ERC725Alliance/erc725.js/commit/a2b08288e9aaede8a1a3307c1371672eb7b50969))
 - make library compatible with RPC urls ([263de19](https://github.com/ERC725Alliance/erc725.js/commit/263de1983f08c9f31f0cc931e581fe8af52bd541))
 
 ### Bug Fixes
