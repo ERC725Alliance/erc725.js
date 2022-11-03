@@ -57,9 +57,10 @@ import {
 import { GetDataDynamicKey, GetDataInput } from './types/GetData';
 import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
-import { DynamicKeyParts } from './types/dynamicKeys';
+import { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
 import { supportsInterface } from './lib/detector';
+import { decodeMappingKey } from './lib/decodeMappingKey';
 
 /* eslint-disable-next-line */
 const HttpProvider = require('web3-providers-http');
@@ -534,6 +535,36 @@ export class ERC725 {
    */
   encodeKeyName(keyName: string, dynamicKeyParts?: DynamicKeyParts): string {
     return encodeKeyName(keyName, dynamicKeyParts);
+  }
+
+  /**
+   * Decodes a hashed key used on an ERC725Y contract according to LSP2 ERC725Y JSONSchema standard.
+   *
+   * @param {string} keyHash Key hash that needs to be decoded.
+   * @param {string | ERC725JSONSchema} keyNameOrSchema Key name following schema specifications or ERC725Y JSON Schema to follow in order to decode the key.
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md ERC725YJsonSchema standard.
+   * @returns {DynamicKeyPart[]} The Array with all the key decoded dynamic parameters. Each object have an attribute type and value.
+   */
+  static decodeMappingKey(
+    keyHash: string,
+    keyNameOrSchema: string | ERC725JSONSchema,
+  ): DynamicKeyPart[] {
+    return decodeMappingKey(keyHash, keyNameOrSchema);
+  }
+
+  /**
+   * Decodes a hashed key used on an ERC725Y contract according to LSP2 ERC725Y JSONSchema standard.
+   *
+   * @param {string} keyHash Key hash that needs to be decoded.
+   * @param {string | ERC725JSONSchema} keyNameOrSchema Key name following schema specifications or ERC725Y JSON Schema to follow in order to decode the key.
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md ERC725YJsonSchema standard.
+   * @returns {DynamicKeyPart[]} The Array with all the key decoded dynamic parameters. Each object have an attribute type and value.
+   */
+  decodeMappingKey(
+    keyHash: string,
+    keyNameOrSchema: string | ERC725JSONSchema,
+  ): DynamicKeyPart[] {
+    return decodeMappingKey(keyHash, keyNameOrSchema);
   }
 
   /**
