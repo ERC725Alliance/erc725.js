@@ -20,15 +20,15 @@ const RPC_URL = 'https://rpc.l16.lukso.network';
 const erc725 = new ERC725([], '0x...', RPC_URL);
 ```
 
-## Ethereum (injected provider from extension)
+## Ethereum (MetaMask)
 
-```javascript
-import ERC725 from '@erc725/erc725.js';
+:::caution Warning
 
-const ethereumProvider = window.ethereum;
+Ethereum providers are being deprecated. Please provide an RPC URL instead.
 
-const erc725 = new ERC725([], '0x...', ethereumProvider);
-```
+:::
+
+The following code snippet will use the web3 provider available at web3.providers from the corresponding `web3` library.
 
 ## Web3
 
