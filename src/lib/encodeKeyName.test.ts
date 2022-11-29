@@ -110,6 +110,13 @@ describe('encodeKeyName', () => {
       dynamicKeyParts: '4081242941',
     },
     {
+      keyName: 'MyKeyName:<uint32>',
+      expectedKey:
+        '0x35e6950bc8d21a1699e5000000000000000000000000000000000000f342d33d',
+      // |--keccak256 bytes12-||--||---bytes20: keccak256()---------------|
+      dynamicKeyParts: '0xf342d33d',
+    },
+    {
       keyName: 'MyKeyName:<bytes4>',
       expectedKey:
         '0x35e6950bc8d21a1699e5000000000000000000000000000000000000abcd1234',
@@ -159,6 +166,13 @@ describe('encodeKeyName', () => {
         '0x35e6950bc8d20000ffff000000000000000000000000000000000000f342d33d',
       // |-- bytes6 --||------||--||------------ bytes20 -----------------|
       dynamicKeyParts: ['ffff', '4081242941'],
+    },
+    {
+      keyName: 'MyKeyName:<bytes2>:<uint32>',
+      expectedKey:
+        '0x35e6950bc8d20000ffff000000000000000000000000000000000000f342d33d',
+      // |-- bytes6 --||------||--||------------ bytes20 -----------------|
+      dynamicKeyParts: ['ffff', '0xf342d33d'],
     },
     {
       keyName: 'MyKeyName:<address>:<address>',
@@ -332,7 +346,19 @@ describe('encodeDynamicKeyPart', () => {
     },
     {
       type: '<uint32>',
+      value: '0xf342d33d',
+      bytes: 20,
+      expectedEncoding: '00000000000000000000000000000000f342d33d', // left padded
+    },
+    {
+      type: '<uint32>',
       value: '4081242941',
+      bytes: 2,
+      expectedEncoding: 'd33d', // left cut
+    },
+    {
+      type: '<uint32>',
+      value: '0xf342d33d',
       bytes: 2,
       expectedEncoding: 'd33d', // left cut
     },
