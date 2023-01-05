@@ -1275,3 +1275,34 @@ describe('supportsInterface', () => {
 
   // TODO: add test to test the actual behavior of the function.
 });
+
+describe('decodeMappingKey', () => {
+  const erc725Instance = new ERC725([]);
+
+  it('is available on instance and class', () => {
+    assert.deepStrictEqual(
+      ERC725.decodeMappingKey(
+        '0x35e6950bc8d21a1699e50000cafecafecafecafecafecafecafecafecafecafe',
+        'MyKeyName:<address>',
+      ),
+      [
+        {
+          type: 'address',
+          value: '0xCAfEcAfeCAfECaFeCaFecaFecaFECafECafeCaFe',
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      erc725Instance.decodeMappingKey(
+        '0x35e6950bc8d21a1699e50000cafecafecafecafecafecafecafecafecafecafe',
+        'MyKeyName:<address>',
+      ),
+      [
+        {
+          type: 'address',
+          value: '0xCAfEcAfeCAfECaFeCaFecaFecaFECafECafeCaFe',
+        },
+      ],
+    );
+  });
+});
