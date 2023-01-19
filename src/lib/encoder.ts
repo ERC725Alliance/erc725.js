@@ -132,6 +132,54 @@ const valueTypeEncodingMap = {
     encode: (value: string[]) => abiCoder.encodeParameter('bytes[]', value),
     decode: (value: string) => abiCoder.decodeParameter('bytes[]', value),
   },
+  'bytes[CompactBytesArray]': {
+    encode: (value: string[]) => encodeCompactBytesArray(value),
+    decode: (value: string) => decodeCompactBytesArray(value),
+  },
+};
+
+const encodeCompactBytesArray = (values: string[]): string => {
+  let compactBytesArray = '0x';
+  for (let i = 0; i < values.length; i++) {
+    if (!isHex(values[i]))
+      throw new Error(`Couldn't encode, value at index ${i} is not hex`);
+
+    if (values[i].length > 65_535 * 2 + 2)
+      throw new Error(
+        `Couldn't encode bytes[CompactBytesArray], value at index ${i} exceeds 65_535 bytes`,
+      );
+
+    const numberOfBytes = (values[i].length - 2) / 2;
+    let hexNumber = padLeft(numberToHex(numberOfBytes), 4);
+
+    compactBytesArray += hexNumber.substring(2) + values[i].substring(2);
+  }
+
+  return compactBytesArray;
+};
+
+const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
+  if (!isHex(compactBytesArray))
+    throw new Error("Couldn't decode, value is not hex");
+
+  let pointer: number = 2;
+  let encodedValues: string[] = [];
+  while (pointer < compactBytesArray.length) {
+    const length = hexToNumber(
+      '0x' + compactBytesArray.substring(pointer, pointer + 4),
+    );
+    encodedValues.push(
+      '0x' +
+        compactBytesArray.substring(pointer + 4, pointer + 2 * (length + 2)),
+    );
+
+    pointer += 2 * (length + 2);
+  }
+
+  if (pointer > compactBytesArray.length)
+    throw new Error("Couldn't decode bytes[CompactBytesArray]");
+
+  return encodedValues;
 };
 
 // Use enum for type bellow
