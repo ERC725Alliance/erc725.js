@@ -36,6 +36,7 @@ import {
   padLeft,
   toChecksumAddress,
   utf8ToHex,
+  stripHexPrefix,
 } from 'web3-utils';
 
 import { JSONURLDataToEncode, URLDataWithHash } from '../types';
@@ -82,7 +83,13 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
 
 const encodeCompactBytesArray = (values: string[]): string => {
   let compactBytesArray = '0x';
+
   for (let i = 0; i < values.length; i++) {
+    if (values[i] === '')
+      throw new Error(
+        `Couldn't encode, value at index ${i} is '', expected '0x'`,
+      );
+
     if (!isHex(values[i]))
       throw new Error(`Couldn't encode, value at index ${i} is not hex`);
 
@@ -94,7 +101,7 @@ const encodeCompactBytesArray = (values: string[]): string => {
     const numberOfBytes = (values[i].length - 2) / 2;
     const hexNumber = padLeft(numberToHex(numberOfBytes), 4);
 
-    compactBytesArray += hexNumber.substring(2) + values[i].substring(2);
+    compactBytesArray += stripHexPrefix(hexNumber) + stripHexPrefix(values[i]);
   }
 
   return compactBytesArray;
@@ -108,11 +115,10 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
   const encodedValues: string[] = [];
   while (pointer < compactBytesArray.length) {
     const length = hexToNumber(
-      '0x' + compactBytesArray.substring(pointer, pointer + 4),
+      '0x' + compactBytesArray.slice(pointer, pointer + 4),
     );
     encodedValues.push(
-      '0x' +
-        compactBytesArray.substring(pointer + 4, pointer + 2 * (length + 2)),
+      '0x' + compactBytesArray.slice(pointer + 4, pointer + 2 * (length + 2)),
     );
 
     pointer += 2 * (length + 2);
