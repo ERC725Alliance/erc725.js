@@ -80,6 +80,163 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   return { hashFunction: hashFunction.name, hash: dataHash, url: dataSource };
 };
 
+const encodeCompactBytesArray = (values: string[]): string => {
+  let compactBytesArray = '0x';
+  for (let i = 0; i < values.length; i++) {
+    if (!isHex(values[i]))
+      throw new Error(`Couldn't encode, value at index ${i} is not hex`);
+
+    if (values[i].length > 65_535 * 2 + 2)
+      throw new Error(
+        `Couldn't encode bytes[CompactBytesArray], value at index ${i} exceeds 65_535 bytes`,
+      );
+
+    const numberOfBytes = (values[i].length - 2) / 2;
+    const hexNumber = padLeft(numberToHex(numberOfBytes), 4);
+
+    compactBytesArray += hexNumber.substring(2) + values[i].substring(2);
+  }
+
+  return compactBytesArray;
+};
+
+const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
+  if (!isHex(compactBytesArray))
+    throw new Error("Couldn't decode, value is not hex");
+
+  let pointer = 2;
+  const encodedValues: string[] = [];
+  while (pointer < compactBytesArray.length) {
+    const length = hexToNumber(
+      '0x' + compactBytesArray.substring(pointer, pointer + 4),
+    );
+    encodedValues.push(
+      '0x' +
+        compactBytesArray.substring(pointer + 4, pointer + 2 * (length + 2)),
+    );
+
+    pointer += 2 * (length + 2);
+  }
+
+  if (pointer > compactBytesArray.length)
+    throw new Error("Couldn't decode bytes[CompactBytesArray]");
+
+  return encodedValues;
+};
+
+const encodeBytesNCompactBytesArray = (
+  values: string[],
+  numberOfBytes: number,
+): string => {
+  for (let i = 0; i < values.length; i++) {
+    if (values[i].length > numberOfBytes * 2 + 2)
+      throw new Error(
+        `Hex bytes${numberOfBytes} value at index: ${i} is using ${
+          (values[i].length - 2) / 2
+        } bytes, which exceedes ${numberOfBytes}`,
+      );
+  }
+
+  return encodeCompactBytesArray(values);
+};
+
+const decodeBytesNCompactBytesArray = (
+  compactBytesArray: string,
+  numberOfBytes: number,
+): string[] => {
+  const bytesValues = decodeCompactBytesArray(compactBytesArray);
+
+  for (let i = 0; i < bytesValues.length; i++) {
+    if (bytesValues[i].length > numberOfBytes * 2 + 2)
+      throw new Error(
+        `Hex bytes${numberOfBytes} value at index: ${i} is using ${
+          (bytesValues[i].length - 2) / 2
+        } bytes, which exceedes ${numberOfBytes}`,
+      );
+  }
+
+  return bytesValues;
+};
+
+const returnCompactBytesArrayBytesNTypes = () => {
+  const types = {};
+  for (let i = 1; i < 33; i++) {
+    types[`bytes${i}[CompactBytesArray]`] = {
+      encode: (value: string[]) => encodeBytesNCompactBytesArray(value, i),
+      decode: (value: string) => decodeBytesNCompactBytesArray(value, i),
+    };
+  }
+  return types;
+};
+
+const encodeUintNCompactBytesArray = (
+  values: number[],
+  numberOfBytes: number,
+): string => {
+  const hexValues: string[] = [];
+
+  for (let i = 0; i < values.length; i++) {
+    const hexNumber = numberToHex(values[i]);
+    if (hexNumber.length > numberOfBytes * 2 + 2)
+      throw new Error(
+        `Hex uint${numberOfBytes * 8} value at index: ${i} is using ${
+          (hexNumber.length - 2) / 2
+        } bytes, which exceedes ${numberOfBytes}`,
+      );
+    hexValues.push(hexNumber);
+  }
+
+  return encodeCompactBytesArray(hexValues);
+};
+
+const decodeUintNCompactBytesArray = (
+  compactBytesArray: string,
+  numberOfBytes: number,
+): number[] => {
+  const hexValues = decodeCompactBytesArray(compactBytesArray);
+  const numberValues: number[] = [];
+
+  for (let i = 0; i < hexValues.length; i++) {
+    if (hexValues[i].length > numberOfBytes * 2 + 2)
+      throw new Error(
+        `Hex uint${numberOfBytes * 8} value at index: ${i} is using ${
+          (hexValues[i].length - 2) / 2
+        } bytes, which exceedes ${numberOfBytes}`,
+      );
+    numberValues.push(hexToNumber(hexValues[i]));
+  }
+
+  return numberValues;
+};
+
+const returnCompactBytesArrayUintNTypes = () => {
+  const types = {};
+  for (let i = 1; i < 33; i++) {
+    types[`uint${i * 8}[CompactBytesArray]`] = {
+      encode: (value: number[]) => encodeUintNCompactBytesArray(value, i),
+      decode: (value: string) => decodeUintNCompactBytesArray(value, i),
+    };
+  }
+  return types;
+};
+
+const encodeStringCompactBytesArray = (values: string[]): string => {
+  const hexValues: string[] = values.map((element) => utf8ToHex(element));
+
+  return encodeCompactBytesArray(hexValues);
+};
+
+const decodeStringCompactBytesArray = (compactBytesArray: string): string[] => {
+  const hexValues: string[] = decodeCompactBytesArray(compactBytesArray);
+  const stringValues: string[] = [];
+
+  for (let i = 0; i < hexValues.length; i++) {
+    stringValues.push(hexToUtf8(hexValues[i]));
+  }
+
+  return stringValues;
+};
+
 const valueTypeEncodingMap = {
   string: {
     encode: (value: string) => abiCoder.encodeParameter('string', value),
@@ -131,6 +288,16 @@ const valueTypeEncodingMap = {
   'bytes[]': {
     encode: (value: string[]) => abiCoder.encodeParameter('bytes[]', value),
     decode: (value: string) => abiCoder.decodeParameter('bytes[]', value),
+  },
+  'bytes[CompactBytesArray]': {
+    encode: (value: string[]) => encodeCompactBytesArray(value),
+    decode: (value: string) => decodeCompactBytesArray(value),
+  },
+  ...returnCompactBytesArrayBytesNTypes(),
+  ...returnCompactBytesArrayUintNTypes(),
+  'string[CompactBytesArray]': {
+    encode: (value: string[]) => encodeStringCompactBytesArray(value),
+    decode: (value: string) => decodeStringCompactBytesArray(value),
   },
 };
 
