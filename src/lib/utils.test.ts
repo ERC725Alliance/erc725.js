@@ -146,6 +146,45 @@ describe('utils', () => {
         );
       });
     });
+
+    it.only(`encodes a CompactBytesArray of tuple`, () => {
+      const testCase = {
+        schema: {
+          name: 'TupleMultiType',
+          key: '1e1bc4abe01b7baa7d4a359c0f460e632ef34b3f16f5722bd8892f2dae913022',
+          keyType: 'Singleton',
+          valueType: '(bytes4,address,bytes)[CompactBytesArray]',
+          valueContent: '(Bytes4,Address,Bytes)',
+        },
+        decodedValue: [
+          [
+            '0xcafecafe',
+            '0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5',
+            '0xcafe',
+          ],
+          [
+            '0xbeefbeef',
+            '0xFE31320faF8Da1492Eadf8Deb79bd264D7cF2141',
+            '0xbeef',
+          ],
+          [
+            '0xf00df00d',
+            '0xc527702b14BF2f79F70B32e09F62B6A74cADFd80',
+            '0xf00d',
+          ],
+        ],
+        encodedValue:
+          '0x001acafecafeDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5cafe001abeefbeefFE31320faF8Da1492Eadf8Deb79bd264D7cF2141beef001af00df00dc527702b14BF2f79F70B32e09F62B6A74cADFd80f00d',
+      };
+
+      assert.deepStrictEqual(
+        encodeKey(
+          testCase.schema as ERC725JSONSchema,
+          testCase.decodedValue as any,
+        ),
+        testCase.encodedValue,
+      );
+    });
   });
 
   describe('encodeKeyValue/decodeKeyValue', () => {

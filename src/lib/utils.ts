@@ -233,6 +233,7 @@ export function encodeKey(
   value:
     | string
     | string[]
+    | string[][]
     | number
     | number[]
     | JSONURLDataToEncode
@@ -293,6 +294,10 @@ export function encodeKey(
           schema.valueType,
           value,
         );
+      }
+
+      if (String(schema.valueType).includes('[CompactBytesArray]')) {
+        //
       }
 
       return encodeKeyValue(
