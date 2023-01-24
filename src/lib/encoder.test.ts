@@ -132,11 +132,6 @@ describe('encoder', () => {
         decodedValue: [`0x${'cafe'.repeat(256)}`, `0x${'beef'.repeat(250)}`],
         encodedValue: `0x0200${'cafe'.repeat(256)}01f4${'beef'.repeat(250)}`,
       },
-      {
-        valueType: 'bytes[CompactBytesArray]',
-        decodedValue: ['0xaabb', '0x', '0x', '0xbeefbeefbeefbeefbeef'],
-        encodedValue: '0x0002aabb00000000000abeefbeefbeefbeefbeef',
-      },
     ];
 
     testCases.forEach((testCase) => {
@@ -151,6 +146,52 @@ describe('encoder', () => {
           decodeValueType(testCase.valueType, encodedValue),
           testCase.decodedValue,
         );
+      });
+    });
+
+    describe('when encoding bytes[CompactBytesArray]', () => {
+      it('should encode `0x` elements as `0x0000`', async () => {
+        const testCase = {
+          valueType: 'bytes[CompactBytesArray]',
+          decodedValue: ['0xaabb', '0x', '0x', '0xbeefbeefbeefbeefbeef'],
+          encodedValue: '0x0002aabb00000000000abeefbeefbeefbeefbeef',
+        };
+
+        const encodedValue = encodeValueType(
+          testCase.valueType,
+          testCase.decodedValue,
+        );
+        assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+      });
+
+      it("should encode '' (empty strings) elements as `0x0000`", async () => {
+        const testCase = {
+          valueType: 'bytes[CompactBytesArray]',
+          decodedValue: ['0xaabb', '', '', '0xbeefbeefbeefbeefbeef'],
+          encodedValue: '0x0002aabb00000000000abeefbeefbeefbeefbeef',
+        };
+
+        const encodedValue = encodeValueType(
+          testCase.valueType,
+          testCase.decodedValue,
+        );
+        assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+      });
+    });
+
+    describe('when decoding a bytes[CompactBytesArray] that contains `0000` entries', () => {
+      it("should decode as '' (empty string) in the decoded array", async () => {
+        const testCase = {
+          valueType: 'bytes[CompactBytesArray]',
+          decodedValue: ['0xaabb', '', '', '0xbeefbeefbeefbeefbeef'],
+          encodedValue: '0x0002aabb00000000000abeefbeefbeefbeefbeef',
+        };
+
+        const decodedValue = decodeValueType(
+          testCase.valueType,
+          testCase.encodedValue,
+        );
+        assert.deepStrictEqual(decodedValue, testCase.decodedValue);
       });
     });
 

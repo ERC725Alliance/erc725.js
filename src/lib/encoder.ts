@@ -84,12 +84,6 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
 const encodeCompactBytesArray = (values: string[]): string => {
   const compactBytesArray = values
     .filter((value, index) => {
-      if (value === '') {
-        throw new Error(
-          `Couldn't encode, value at index ${index} is '', expected '0x'`,
-        );
-      }
-
       if (!isHex(value)) {
         throw new Error(`Couldn't encode, value at index ${index} is not hex`);
       }
@@ -121,9 +115,15 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
     const length = hexToNumber(
       '0x' + compactBytesArray.slice(pointer, pointer + 4),
     );
-    encodedValues.push(
-      '0x' + compactBytesArray.slice(pointer + 4, pointer + 2 * (length + 2)),
-    );
+
+    if (length === 0) {
+      // empty entries (`0x0000`) in a CompactBytesArray are returned as empty entries in the array
+      encodedValues.push('');
+    } else {
+      encodedValues.push(
+        '0x' + compactBytesArray.slice(pointer + 4, pointer + 2 * (length + 2)),
+      );
+    }
 
     pointer += 2 * (length + 2);
   }
