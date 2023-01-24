@@ -130,8 +130,7 @@ describe('encoder', () => {
       {
         valueType: 'bytes[CompactBytesArray]',
         decodedValue: [`0x${'cafe'.repeat(256)}`, `0x${'beef'.repeat(250)}`],
-        encodedValue:
-          `0x0200${'cafe'.repeat(256)}` + `01f4${'beef'.repeat(250)}`,
+        encodedValue: `0x0200${'cafe'.repeat(256)}01f4${'beef'.repeat(250)}`,
       },
       {
         valueType: 'bytes[CompactBytesArray]',
