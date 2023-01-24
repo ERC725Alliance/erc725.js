@@ -36,6 +36,7 @@ import {
   padLeft,
   toChecksumAddress,
   utf8ToHex,
+  stripHexPrefix,
 } from 'web3-utils';
 
 import { JSONURLDataToEncode, URLDataWithHash } from '../types';
@@ -78,6 +79,68 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   const dataSource = hexToUtf8('0x' + encodedData.slice(64)); // Get remainder as URI
 
   return { hashFunction: hashFunction.name, hash: dataHash, url: dataSource };
+};
+
+const encodeCompactBytesArray = (values: string[]): string => {
+  const compactBytesArray = values
+    .filter((value, index) => {
+      if (!isHex(value)) {
+        throw new Error(
+          `Couldn't encode bytes[CompactBytesArray], value at index ${index} is not hex`,
+        );
+      }
+
+      if (value.length > 65_535 * 2 + 2) {
+        throw new Error(
+          `Couldn't encode bytes[CompactBytesArray], value at index ${index} exceeds 65_535 bytes`,
+        );
+      }
+
+      return true;
+    })
+    .reduce((acc, value) => {
+      const numberOfBytes = stripHexPrefix(value).length / 2;
+      const hexNumber = padLeft(numberToHex(numberOfBytes), 4);
+      return acc + stripHexPrefix(hexNumber) + stripHexPrefix(value);
+    }, '0x');
+
+  return compactBytesArray;
+};
+
+const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
+  if (!isHex(compactBytesArray))
+    throw new Error("Couldn't decode, value is not hex");
+
+  let pointer = 0;
+  const encodedValues: string[] = [];
+
+  const strippedCompactBytesArray = stripHexPrefix(compactBytesArray);
+
+  while (pointer < strippedCompactBytesArray.length) {
+    const length = hexToNumber(
+      '0x' + strippedCompactBytesArray.slice(pointer, pointer + 4),
+    );
+
+    if (length === 0) {
+      // empty entries (`0x0000`) in a CompactBytesArray are returned as empty entries in the array
+      encodedValues.push('');
+    } else {
+      encodedValues.push(
+        '0x' +
+          strippedCompactBytesArray.slice(
+            pointer + 4,
+            pointer + 2 * (length + 2),
+          ),
+      );
+    }
+
+    pointer += 2 * (length + 2);
+  }
+
+  if (pointer > strippedCompactBytesArray.length)
+    throw new Error("Couldn't decode bytes[CompactBytesArray]");
+
+  return encodedValues;
 };
 
 const valueTypeEncodingMap = {
@@ -131,6 +194,10 @@ const valueTypeEncodingMap = {
   'bytes[]': {
     encode: (value: string[]) => abiCoder.encodeParameter('bytes[]', value),
     decode: (value: string) => abiCoder.decodeParameter('bytes[]', value),
+  },
+  'bytes[CompactBytesArray]': {
+    encode: (value: string[]) => encodeCompactBytesArray(value),
+    decode: (value: string) => decodeCompactBytesArray(value),
   },
 };
 
