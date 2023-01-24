@@ -114,11 +114,11 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
   let pointer = 0;
   const encodedValues: string[] = [];
 
-  compactBytesArray = stripHexPrefix(compactBytesArray);
+  let strippedCompactBytesArray = stripHexPrefix(compactBytesArray);
 
-  while (pointer < compactBytesArray.length) {
+  while (pointer < strippedCompactBytesArray.length) {
     const length = hexToNumber(
-      '0x' + compactBytesArray.slice(pointer, pointer + 4),
+      '0x' + strippedCompactBytesArray.slice(pointer, pointer + 4),
     );
 
     if (length === 0) {
@@ -126,14 +126,18 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
       encodedValues.push('');
     } else {
       encodedValues.push(
-        '0x' + compactBytesArray.slice(pointer + 4, pointer + 2 * (length + 2)),
+        '0x' +
+          strippedCompactBytesArray.slice(
+            pointer + 4,
+            pointer + 2 * (length + 2),
+          ),
       );
     }
 
     pointer += 2 * (length + 2);
   }
 
-  if (pointer > compactBytesArray.length)
+  if (pointer > strippedCompactBytesArray.length)
     throw new Error("Couldn't decode bytes[CompactBytesArray]");
 
   return encodedValues;
