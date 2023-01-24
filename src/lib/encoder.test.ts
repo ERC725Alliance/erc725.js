@@ -120,9 +120,9 @@ describe('encoder', () => {
       {
         valueType: 'bytes[CompactBytesArray]',
         decodedValue: [
-          'aabb',
-          'cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe',
-          'beefbeefbeefbeefbeef',
+          '0xaabb',
+          '0xcafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe',
+          '0xbeefbeefbeefbeefbeef',
         ],
         encodedValue:
           '0x0002aabb0020cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe000abeefbeefbeefbeefbeef',
