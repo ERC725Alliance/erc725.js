@@ -132,23 +132,7 @@ describe('utils', () => {
         decodedValue: ['0xcafecafe', '11', '8'],
         encodedValue: '0xcafecafe000000000000000b00000008',
       },
-    ];
-
-    testCases.forEach((testCase) => {
-      it(`encodes/decodes keyType Array / tuples (valueContent: ${testCase.schema.valueContent}, valueType: ${testCase.schema.valueType}`, () => {
-        assert.deepStrictEqual(
-          encodeKey(testCase.schema as ERC725JSONSchema, testCase.decodedValue),
-          testCase.encodedValue,
-        );
-        assert.deepStrictEqual(
-          decodeKey(testCase.schema as ERC725JSONSchema, testCase.encodedValue),
-          testCase.decodedValue,
-        );
-      });
-    });
-
-    it(`encodes a CompactBytesArray of tuple (bytes4,address,bytes2)`, () => {
-      const testCase = {
+      {
         schema: {
           name: 'TupleMultiType',
           key: '1e1bc4abe01b7baa7d4a359c0f460e632ef34b3f16f5722bd8892f2dae913022',
@@ -175,19 +159,8 @@ describe('utils', () => {
         ],
         encodedValue:
           '0x001acafecafeDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5cafe001abeefbeefFE31320faF8Da1492Eadf8Deb79bd264D7cF2141beef001af00df00dc527702b14BF2f79F70B32e09F62B6A74cADFd80f00d'.toLowerCase(),
-      };
-
-      assert.deepStrictEqual(
-        encodeKey(
-          testCase.schema as ERC725JSONSchema,
-          testCase.decodedValue as any,
-        ),
-        testCase.encodedValue,
-      );
-    });
-
-    it(`encodes a CompactBytesArray of tuple (bytes4,bytes8,bytes16)`, () => {
-      const testCase = {
+      },
+      {
         schema: {
           name: 'TupleMultiType',
           key: '1e1bc4abe01b7baa7d4a359c0f460e632ef34b3f16f5722bd8892f2dae913022',
@@ -214,15 +187,48 @@ describe('utils', () => {
         ],
         encodedValue:
           '0x001ccafecafe951a5d121531bba8DAFEA492D9c6733ae3d56b7Ed1ADB606001cbeefbeef8a483080f5db1105FE31320faF8Da1492Eadf8Deb79bd264001cf00df00d2fe92a11caf28ab2c527702b14BF2f79F70B32e09F62B6A7',
-      };
+      },
+      {
+        schema: {
+          name: 'AddressPermissions:AllowedCalls:<address>',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,address,bytes4)[CompactBytesArray]',
+          valueContent: '(Bytes4,Address,Bytes4)',
+        },
+        decodedValue: [
+          [
+            '0xcafecafe',
+            '0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5',
+            '0xcafecafe',
+          ],
+          [
+            '0xbeefbeef',
+            '0xFE31320faF8Da1492Eadf8Deb79bd264D7cF2141',
+            '0xbeefbeef',
+          ],
+          [
+            '0xf00df00d',
+            '0xc527702b14BF2f79F70B32e09F62B6A74cADFd80',
+            '0xf00df00d',
+          ],
+        ],
+        encodedValue:
+          '0x001ccafecafeDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5cafecafe001cbeefbeefFE31320faF8Da1492Eadf8Deb79bd264D7cF2141beefbeef001cf00df00dc527702b14BF2f79F70B32e09F62B6A74cADFd80f00df00d'.toLowerCase(),
+      },
+    ];
 
-      assert.deepStrictEqual(
-        encodeKey(
-          testCase.schema as ERC725JSONSchema,
-          testCase.decodedValue as any,
-        ),
-        testCase.encodedValue,
-      );
+    testCases.forEach((testCase) => {
+      it(`encodes/decodes keyType Array / tuples (valueContent: ${testCase.schema.valueContent}, valueType: ${testCase.schema.valueType}`, () => {
+        assert.deepStrictEqual(
+          encodeKey(testCase.schema as ERC725JSONSchema, testCase.decodedValue),
+          testCase.encodedValue,
+        );
+        assert.deepStrictEqual(
+          decodeKey(testCase.schema as ERC725JSONSchema, testCase.encodedValue),
+          testCase.decodedValue,
+        );
+      });
     });
   });
 
