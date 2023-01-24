@@ -82,27 +82,31 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
 };
 
 const encodeCompactBytesArray = (values: string[]): string => {
-  let compactBytesArray = '0x';
+  const compactBytesArray = values
+    .filter((value, index) => {
+      if (value === '') {
+        throw new Error(
+          `Couldn't encode, value at index ${index} is '', expected '0x'`,
+        );
+      }
 
-  for (let i = 0; i < values.length; i++) {
-    if (values[i] === '')
-      throw new Error(
-        `Couldn't encode, value at index ${i} is '', expected '0x'`,
-      );
+      if (!isHex(value)) {
+        throw new Error(`Couldn't encode, value at index ${index} is not hex`);
+      }
 
-    if (!isHex(values[i]))
-      throw new Error(`Couldn't encode, value at index ${i} is not hex`);
+      if (value.length > 65_535 * 2 + 2) {
+        throw new Error(
+          `Couldn't encode bytes[CompactBytesArray], value at index ${index} exceeds 65_535 bytes`,
+        );
+      }
 
-    if (values[i].length > 65_535 * 2 + 2)
-      throw new Error(
-        `Couldn't encode bytes[CompactBytesArray], value at index ${i} exceeds 65_535 bytes`,
-      );
-
-    const numberOfBytes = (values[i].length - 2) / 2;
-    const hexNumber = padLeft(numberToHex(numberOfBytes), 4);
-
-    compactBytesArray += stripHexPrefix(hexNumber) + stripHexPrefix(values[i]);
-  }
+      return true;
+    })
+    .reduce((acc, value) => {
+      const numberOfBytes = stripHexPrefix(value).length / 2;
+      const hexNumber = padLeft(numberToHex(numberOfBytes), 4);
+      return acc + stripHexPrefix(hexNumber) + stripHexPrefix(value);
+    }, '0x');
 
   return compactBytesArray;
 };
