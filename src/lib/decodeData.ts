@@ -25,7 +25,7 @@ import { isHex } from 'web3-utils';
 import { DecodeDataInput, DecodeDataOutput } from '../types/decodeData';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { isDynamicKeyName } from './encodeKeyName';
-import { valueContentEncodingMap } from './encoder';
+import { valueContentEncodingMap, decodeValueType } from './encoder';
 import { getSchemaElement } from './getSchemaElement';
 import { decodeKeyValue, encodeArrayKey } from './utils';
 
@@ -123,6 +123,7 @@ export const decodeTupleKeyValue = (
     const regexMatch = valueTypePart.match(tupleValueTypesRegex);
 
     if (!regexMatch) {
+      if (valueTypePart === 'address') bytesLengths.push(20);
       return;
     }
 
@@ -220,6 +221,25 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
           newValue.value,
           schema.name,
         );
+      }
+
+      if (schema.valueType.includes('[CompactBytesArray]')) {
+        const valueType = schema.valueType.replace('[CompactBytesArray]', '');
+        const valueContent = schema.valueContent.replace(
+          '[CompactBytesArray]',
+          '',
+        );
+
+        if (valueType[0] === '(' && valueType[valueType.length - 1] === ')') {
+          const decodedCompactBytesArray = decodeValueType(
+            'bytes[CompactBytesArray]',
+            value,
+          );
+          return decodedCompactBytesArray.map((element) =>
+            decodeTupleKeyValue(valueContent, valueType, element),
+          );
+        }
+        return decodeValueType(schema.valueType, value);
       }
 
       if (isValidTuple(schema.valueType, schema.valueContent)) {

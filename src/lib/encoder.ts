@@ -188,54 +188,6 @@ const valueTypeEncodingMap = {
   },
 };
 
-const returnTypeBytesLength = (type: string): number => {
-  if (type === 'string') return 0;
-  else if (type === 'bytes') return 0;
-  else if (type.substring(0, 5) === 'bytes')
-    return Number.parseInt(type.substring(5));
-  else if (type.substring(0, 4) === 'uint')
-    return Number.parseInt(type.substring(4)) / 8;
-  return -1;
-};
-
-const decodeTuple = (tuple: string[], value: string): string[] => {
-  const decodedValues: string[] = [];
-  let slicedValue: string = value.substring(2);
-
-  for (let i = 0; i < (tuple.length + 1) / 2; i++) {
-    const indexFromStart = i;
-    const indexFromEnd = tuple.length - i - 1;
-
-    if (indexFromStart === indexFromEnd) {
-      decodedValues[i] = slicedValue;
-    } else {
-      if (returnTypeBytesLength(tuple[indexFromStart]) !== 0) {
-        decodedValues[indexFromStart] = slicedValue.substring(
-          0,
-          returnTypeBytesLength(tuple[indexFromStart]) * 2,
-        );
-
-        slicedValue = slicedValue.substring(
-          returnTypeBytesLength(tuple[indexFromStart]) * 2,
-        );
-      }
-      if (returnTypeBytesLength(tuple[indexFromEnd]) !== 0) {
-        decodedValues[indexFromEnd] = slicedValue.substring(
-          slicedValue.length - returnTypeBytesLength(tuple[indexFromEnd]) * 2,
-          slicedValue.length,
-        );
-
-        slicedValue = slicedValue.substring(
-          0,
-          slicedValue.length - returnTypeBytesLength(tuple[indexFromEnd]) * 2,
-        );
-      }
-    }
-  }
-
-  return decodedValues;
-};
-
 // Use enum for type bellow
 // Is it this enum ERC725JSONSchemaValueType? (If so, custom is missing from enum)
 

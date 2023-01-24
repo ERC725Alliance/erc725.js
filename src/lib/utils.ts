@@ -283,27 +283,44 @@ export function encodeKey(
     case 'mappingwithgrouping':
     case 'singleton':
     case 'mapping':
+      if (schema.valueType.includes('[CompactBytesArray]')) {
+        const valueType = schema.valueType.replace('[CompactBytesArray]', '');
+        const valueContent = schema.valueContent.replace(
+          '[CompactBytesArray]',
+          '',
+        );
+
+        if (
+          Array.isArray(value[0]) &&
+          valueType[0] === '(' &&
+          valueType[valueType.length - 1] === ')'
+        ) {
+          const encodedTuples = (value as string[][]).map((element) => {
+            return encodeTupleKeyValue(valueContent, valueType, element);
+          });
+          return encodeValueType('bytes[CompactBytesArray]', encodedTuples);
+        }
+        return encodeValueType(schema.valueType, value as string[]);
+      }
+
       if (isValidTuple(schema.valueType, schema.valueContent)) {
         if (!Array.isArray(value)) {
           throw new Error(
             `Incorrect value for tuple. Got: ${value}, expected array.`,
           );
         }
-        return encodeTupleKeyValue(
-          schema.valueContent,
-          schema.valueType,
-          value,
-        );
-      }
-
-      if (String(schema.valueType).includes('[CompactBytesArray]')) {
-        //
+        if (!Array.isArray(value[0]))
+          return encodeTupleKeyValue(
+            schema.valueContent,
+            schema.valueType,
+            value as string[] | number[] | JSONURLDataToEncode[],
+          );
       }
 
       return encodeKeyValue(
         schema.valueContent,
         schema.valueType,
-        value,
+        value as string | number | JSONURLDataToEncode,
         schema.name,
       );
     default:
