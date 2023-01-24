@@ -114,7 +114,7 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
   let pointer = 0;
   const encodedValues: string[] = [];
 
-  let strippedCompactBytesArray = stripHexPrefix(compactBytesArray);
+  const strippedCompactBytesArray = stripHexPrefix(compactBytesArray);
 
   while (pointer < strippedCompactBytesArray.length) {
     const length = hexToNumber(
