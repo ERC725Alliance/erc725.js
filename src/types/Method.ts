@@ -26,19 +26,25 @@ export interface MethodData {
 
 export interface Permissions {
   CHANGEOWNER?: boolean;
-  CHANGEPERMISSIONS?: boolean;
   ADDPERMISSIONS?: boolean;
-  SETDATA?: boolean;
+  CHANGEPERMISSIONS?: boolean;
+  ADDEXTENSIONS?: boolean;
+  CHANGEEXTENSIONS?: boolean;
+  ADDUNIVERSALRECEIVERDELEGATE?: boolean;
+  CHANGEUNIVERSALRECEIVERDELEGATE?: boolean;
+  REENTRANCY?: boolean;
+  SUPER_TRANSFERVALUE?: boolean;
+  TRANSFERVALUE?: boolean;
+  SUPER_CALL?: boolean;
   CALL?: boolean;
+  SUPER_STATICCALL?: boolean;
   STATICCALL?: boolean;
+  SUPER_DELEGATECALL?: boolean;
   DELEGATECALL?: boolean;
   DEPLOY?: boolean;
-  TRANSFERVALUE?: boolean;
-  SIGN?: boolean;
-  ENCRYPT?: boolean;
   SUPER_SETDATA?: boolean;
-  SUPER_TRANSFERVALUE?: boolean;
-  SUPER_CALL?: boolean;
-  SUPER_STATICCALL?: boolean;
-  SUPER_DELEGATECALL?: boolean;
+  SETDATA?: boolean;
+  ENCRYPT?: boolean;
+  DECRYPT?: boolean;
+  SIGN?: boolean;
 }
