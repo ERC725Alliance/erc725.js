@@ -85,7 +85,9 @@ const encodeCompactBytesArray = (values: string[]): string => {
   const compactBytesArray = values
     .filter((value, index) => {
       if (!isHex(value)) {
-        throw new Error(`Couldn't encode, value at index ${index} is not hex`);
+        throw new Error(
+          `Couldn't encode bytes[CompactBytesArray], value at index ${index} is not hex`,
+        );
       }
 
       if (value.length > 65_535 * 2 + 2) {
@@ -109,8 +111,11 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
   if (!isHex(compactBytesArray))
     throw new Error("Couldn't decode, value is not hex");
 
-  let pointer = 2;
+  let pointer = 0;
   const encodedValues: string[] = [];
+
+  compactBytesArray = stripHexPrefix(compactBytesArray);
+
   while (pointer < compactBytesArray.length) {
     const length = hexToNumber(
       '0x' + compactBytesArray.slice(pointer, pointer + 4),

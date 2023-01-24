@@ -177,6 +177,28 @@ describe('encoder', () => {
         );
         assert.deepStrictEqual(encodedValue, testCase.encodedValue);
       });
+
+      it('should throw when trying to encode a array that contains non hex string as `bytes[CompactBytesArray]`', async () => {
+        expect(() => {
+          encodeValueType('bytes[CompactBytesArray]', [
+            'some random string',
+            'another random strings',
+            '0xaabbccdd',
+          ]);
+        }).to.throw(
+          "Couldn't encode bytes[CompactBytesArray], value at index 0 is not hex",
+        );
+      });
+
+      it('should throw when trying to encode a `bytes[CompactBytesArray]` with a bytes length bigger than 65_535', async () => {
+        expect(() => {
+          encodeValueType('bytes[CompactBytesArray]', [
+            '0x' + 'ab'.repeat(66_0000),
+          ]);
+        }).to.throw(
+          "Couldn't encode bytes[CompactBytesArray], value at index 0 exceeds 65_535 bytes",
+        );
+      });
     });
 
     describe('when decoding a bytes[CompactBytesArray] that contains `0000` entries', () => {
@@ -193,6 +215,12 @@ describe('encoder', () => {
         );
         assert.deepStrictEqual(decodedValue, testCase.decodedValue);
       });
+
+      it('should throw when trying to decode a `bytes[CompactBytesArray]` with an invalid length byte', async () => {
+        expect(() => {
+          decodeValueType('bytes[CompactBytesArray]', '0x0005cafe');
+        }).to.throw("Couldn't decode bytes[CompactBytesArray]");
+      });
     });
 
     it('should throw when valueType is unknown', () => {
@@ -207,32 +235,6 @@ describe('encoder', () => {
           decodeValueType('whatIsthisType', 'hi');
         },
         () => true,
-      );
-    });
-
-    it('should throw when trying to decode a `bytes[CompactBytesArray]` with an invalid length byte', async () => {
-      expect(() => {
-        decodeValueType('bytes[CompactBytesArray]', '0x0005cafe');
-      }).to.throw("Couldn't decode bytes[CompactBytesArray]");
-    });
-
-    it('should throw when trying to encode a array that contains non hex string as `bytes[CompactBytesArray]`', async () => {
-      expect(() => {
-        encodeValueType('bytes[CompactBytesArray]', [
-          'some random string',
-          'another random strings',
-          '0xaabbccdd',
-        ]);
-      }).to.throw("Couldn't encode, value at index 0 is not hex");
-    });
-
-    it('should throw when trying to encode a `bytes[CompactBytesArray]` with a bytes length bigger than 65_535', async () => {
-      expect(() => {
-        encodeValueType('bytes[CompactBytesArray]', [
-          '0x' + 'ab'.repeat(66_0000),
-        ]);
-      }).to.throw(
-        "Couldn't encode bytes[CompactBytesArray], value at index 0 exceeds 65_535 bytes",
       );
     });
   });
