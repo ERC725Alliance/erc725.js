@@ -152,7 +152,7 @@ const encodeBytesNCompactBytesArray = (
       throw new Error(
         `Hex bytes${numberOfBytes} value at index: ${i} is using ${
           (values[i].length - 2) / 2
-        } bytes, which exceedes ${numberOfBytes}`,
+        } bytes, which exceeds ${numberOfBytes}`,
       );
   }
 
@@ -170,7 +170,7 @@ const decodeBytesNCompactBytesArray = (
       throw new Error(
         `Hex bytes${numberOfBytes} value at index: ${i} is using ${
           (bytesValues[i].length - 2) / 2
-        } bytes, which exceedes ${numberOfBytes}`,
+        } bytes, which exceeds ${numberOfBytes}`,
       );
   }
 
@@ -203,7 +203,7 @@ const encodeUintNCompactBytesArray = (
       throw new Error(
         `Hex uint${numberOfBytes * 8} value at index: ${i} is using ${
           hexNumber.length / 2
-        } bytes, which exceedes ${numberOfBytes}`,
+        } bytes, which exceeds ${numberOfBytes}`,
       );
     hexValues.push(hexNumber);
   }
@@ -224,7 +224,7 @@ const decodeUintNCompactBytesArray = (
       throw new Error(
         `Hex uint${numberOfBytes * 8} value at index: ${i} is using ${
           hexValue.length / 2
-        } bytes, which exceedes ${numberOfBytes}`,
+        } bytes, which exceeds ${numberOfBytes}`,
       );
     numberValues.push(hexToNumber(hexValues[i]));
   }

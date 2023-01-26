@@ -222,28 +222,28 @@ describe('encoder', () => {
     });
 
     describe('when encoding uintN[CompactBytesArray]', () => {
-      it('should thow if trying to encode a value that exceeds its type max bytes length', async () => {
+      it('should throw if trying to encode a value that exceeds the maximal lenght of bytes for this type', async () => {
         expect(() => {
           encodeValueType('uint8[CompactBytesArray]', [15, 178, 266]);
         }).to.throw(
-          'Hex uint8 value at index: 2 is using 1.5 bytes, which exceedes 1',
+          'Hex uint8 value at index: 2 is using 1.5 bytes, which exceeds 1',
         );
       });
 
-      it('should thow if trying to decode a value that exceeds its type max bytes length', async () => {
+      it('should throw if trying to decode a value that exceeds the maximal lenght of bytes for this type', async () => {
         expect(() => {
           decodeValueType(
             'uint8[CompactBytesArray]',
             '0x00010100012b00014900020100',
           );
         }).to.throw(
-          'Hex uint8 value at index: 3 is using 2 bytes, which exceedes 1',
+          'Hex uint8 value at index: 3 is using 2 bytes, which exceeds 1',
         );
       });
     });
 
     describe('when encoding bytesN[CompactBytesArray]', () => {
-      it('should thow if trying to encode a value that exceeds its type max bytes length', async () => {
+      it('should throw if trying to encode a value that exceeds the maximal lenght of bytes for this type', async () => {
         expect(() => {
           encodeValueType('bytes4[CompactBytesArray]', [
             '0xe6520726',
@@ -252,18 +252,18 @@ describe('encoder', () => {
             '0xab7f11e3aabbcc',
           ]);
         }).to.throw(
-          'Hex bytes4 value at index: 3 is using 7 bytes, which exceedes 4',
+          'Hex bytes4 value at index: 3 is using 7 bytes, which exceeds 4',
         );
       });
 
-      it('should thow if trying to decode a value that exceeds its type max bytes length', async () => {
+      it('should throw if trying to decode a value that exceeds the maximal lenght of bytes for this type', async () => {
         expect(() => {
           decodeValueType(
             'bytes4[CompactBytesArray]',
             '0x0004e65207260004272696e60004720626160007ab7f11e3aabbcc',
           );
         }).to.throw(
-          'Hex bytes4 value at index: 3 is using 7 bytes, which exceedes 4',
+          'Hex bytes4 value at index: 3 is using 7 bytes, which exceeds 4',
         );
       });
     });
