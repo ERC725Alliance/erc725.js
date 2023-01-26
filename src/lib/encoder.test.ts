@@ -117,6 +117,21 @@ describe('encoder', () => {
         encodedValue:
           '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000001337000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000054ef',
       },
+      {
+        valueType: 'bytes[CompactBytesArray]',
+        decodedValue: [
+          '0xaabb',
+          '0xcafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe',
+          '0xbeefbeefbeefbeefbeef',
+        ],
+        encodedValue:
+          '0x0002aabb0020cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe000abeefbeefbeefbeefbeef',
+      },
+      {
+        valueType: 'bytes[CompactBytesArray]',
+        decodedValue: [`0x${'cafe'.repeat(256)}`, `0x${'beef'.repeat(250)}`],
+        encodedValue: `0x0200${'cafe'.repeat(256)}01f4${'beef'.repeat(250)}`,
+      },
     ];
 
     testCases.forEach((testCase) => {
@@ -131,6 +146,80 @@ describe('encoder', () => {
           decodeValueType(testCase.valueType, encodedValue),
           testCase.decodedValue,
         );
+      });
+    });
+
+    describe('when encoding bytes[CompactBytesArray]', () => {
+      it('should encode `0x` elements as `0x0000`', async () => {
+        const testCase = {
+          valueType: 'bytes[CompactBytesArray]',
+          decodedValue: ['0xaabb', '0x', '0x', '0xbeefbeefbeefbeefbeef'],
+          encodedValue: '0x0002aabb00000000000abeefbeefbeefbeefbeef',
+        };
+
+        const encodedValue = encodeValueType(
+          testCase.valueType,
+          testCase.decodedValue,
+        );
+        assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+      });
+
+      it("should encode '' (empty strings) elements as `0x0000`", async () => {
+        const testCase = {
+          valueType: 'bytes[CompactBytesArray]',
+          decodedValue: ['0xaabb', '', '', '0xbeefbeefbeefbeefbeef'],
+          encodedValue: '0x0002aabb00000000000abeefbeefbeefbeefbeef',
+        };
+
+        const encodedValue = encodeValueType(
+          testCase.valueType,
+          testCase.decodedValue,
+        );
+        assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+      });
+
+      it('should throw when trying to encode a array that contains non hex string as `bytes[CompactBytesArray]`', async () => {
+        expect(() => {
+          encodeValueType('bytes[CompactBytesArray]', [
+            'some random string',
+            'another random strings',
+            '0xaabbccdd',
+          ]);
+        }).to.throw(
+          "Couldn't encode bytes[CompactBytesArray], value at index 0 is not hex",
+        );
+      });
+
+      it('should throw when trying to encode a `bytes[CompactBytesArray]` with a bytes length bigger than 65_535', async () => {
+        expect(() => {
+          encodeValueType('bytes[CompactBytesArray]', [
+            '0x' + 'ab'.repeat(66_0000),
+          ]);
+        }).to.throw(
+          "Couldn't encode bytes[CompactBytesArray], value at index 0 exceeds 65_535 bytes",
+        );
+      });
+    });
+
+    describe('when decoding a bytes[CompactBytesArray] that contains `0000` entries', () => {
+      it("should decode as '' (empty string) in the decoded array", async () => {
+        const testCase = {
+          valueType: 'bytes[CompactBytesArray]',
+          decodedValue: ['0xaabb', '', '', '0xbeefbeefbeefbeefbeef'],
+          encodedValue: '0x0002aabb00000000000abeefbeefbeefbeefbeef',
+        };
+
+        const decodedValue = decodeValueType(
+          testCase.valueType,
+          testCase.encodedValue,
+        );
+        assert.deepStrictEqual(decodedValue, testCase.decodedValue);
+      });
+
+      it('should throw when trying to decode a `bytes[CompactBytesArray]` with an invalid length byte', async () => {
+        expect(() => {
+          decodeValueType('bytes[CompactBytesArray]', '0x0005cafe');
+        }).to.throw("Couldn't decode bytes[CompactBytesArray]");
       });
     });
 
