@@ -132,6 +132,26 @@ describe('encoder', () => {
         decodedValue: [`0x${'cafe'.repeat(256)}`, `0x${'beef'.repeat(250)}`],
         encodedValue: `0x0200${'cafe'.repeat(256)}01f4${'beef'.repeat(250)}`,
       },
+      {
+        valueType: 'string[CompactBytesArray]',
+        decodedValue: [
+          'one random string',
+          'bring back my coke',
+          'Diagon Alley',
+        ],
+        encodedValue:
+          '0x00116f6e652072616e646f6d20737472696e6700126272696e67206261636b206d7920636f6b65000c446961676f6e20416c6c6579',
+      },
+      {
+        valueType: 'uint8[CompactBytesArray]',
+        decodedValue: [1, 43, 73, 255],
+        encodedValue: '0x00010100012b0001490001ff',
+      },
+      {
+        valueType: 'bytes4[CompactBytesArray]',
+        decodedValue: ['0xe6520726', '0x272696e6', '0x72062616', '0xab7f11e3'],
+        encodedValue: '0x0004e65207260004272696e60004720626160004ab7f11e3',
+      },
     ];
 
     testCases.forEach((testCase) => {
@@ -197,6 +217,53 @@ describe('encoder', () => {
           ]);
         }).to.throw(
           "Couldn't encode bytes[CompactBytesArray], value at index 0 exceeds 65_535 bytes",
+        );
+      });
+    });
+
+    describe('when encoding uintN[CompactBytesArray]', () => {
+      it('should thow if trying to encode a value that exceeds its type max bytes length', async () => {
+        expect(() => {
+          encodeValueType('uint8[CompactBytesArray]', [15, 178, 266]);
+        }).to.throw(
+          'Hex uint8 value at index: 2 is using 1.5 bytes, which exceedes 1',
+        );
+      });
+
+      it('should thow if trying to decode a value that exceeds its type max bytes length', async () => {
+        expect(() => {
+          decodeValueType(
+            'uint8[CompactBytesArray]',
+            '0x00010100012b00014900020100',
+          );
+        }).to.throw(
+          'Hex uint8 value at index: 3 is using 2 bytes, which exceedes 1',
+        );
+      });
+    });
+
+    describe('when encoding bytesN[CompactBytesArray]', () => {
+      it('should thow if trying to encode a value that exceeds its type max bytes length', async () => {
+        expect(() => {
+          encodeValueType('bytes4[CompactBytesArray]', [
+            '0xe6520726',
+            '0x272696e6',
+            '0x72062616',
+            '0xab7f11e3aabbcc',
+          ]);
+        }).to.throw(
+          'Hex bytes4 value at index: 3 is using 7 bytes, which exceedes 4',
+        );
+      });
+
+      it('should thow if trying to decode a value that exceeds its type max bytes length', async () => {
+        expect(() => {
+          decodeValueType(
+            'bytes4[CompactBytesArray]',
+            '0x0004e65207260004272696e60004720626160007ab7f11e3aabbcc',
+          );
+        }).to.throw(
+          'Hex bytes4 value at index: 3 is using 7 bytes, which exceedes 4',
         );
       });
     });

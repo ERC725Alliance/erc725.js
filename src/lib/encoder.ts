@@ -195,11 +195,14 @@ const encodeUintNCompactBytesArray = (
   const hexValues: string[] = [];
 
   for (let i = 0; i < values.length; i++) {
-    const hexNumber = numberToHex(values[i]);
-    if (hexNumber.length > numberOfBytes * 2 + 2)
+    const hexNumber = stripHexPrefix(numberToHex(values[i])).padStart(
+      numberOfBytes * 2,
+      '0',
+    );
+    if (hexNumber.length > numberOfBytes * 2)
       throw new Error(
         `Hex uint${numberOfBytes * 8} value at index: ${i} is using ${
-          (hexNumber.length - 2) / 2
+          hexNumber.length / 2
         } bytes, which exceedes ${numberOfBytes}`,
       );
     hexValues.push(hexNumber);
@@ -216,10 +219,11 @@ const decodeUintNCompactBytesArray = (
   const numberValues: number[] = [];
 
   for (let i = 0; i < hexValues.length; i++) {
-    if (hexValues[i].length > numberOfBytes * 2 + 2)
+    const hexValue = stripHexPrefix(hexValues[i]);
+    if (hexValue.length > numberOfBytes * 2)
       throw new Error(
         `Hex uint${numberOfBytes * 8} value at index: ${i} is using ${
-          (hexValues[i].length - 2) / 2
+          hexValue.length / 2
         } bytes, which exceedes ${numberOfBytes}`,
       );
     numberValues.push(hexToNumber(hexValues[i]));
@@ -312,12 +316,12 @@ const valueTypeEncodingMap = {
     encode: (value: string[]) => encodeCompactBytesArray(value),
     decode: (value: string) => decodeCompactBytesArray(value),
   },
-  ...returnCompactBytesArrayBytesNTypes(),
-  ...returnCompactBytesArrayUintNTypes(),
   'string[CompactBytesArray]': {
     encode: (value: string[]) => encodeStringCompactBytesArray(value),
     decode: (value: string) => decodeStringCompactBytesArray(value),
   },
+  ...returnCompactBytesArrayBytesNTypes(),
+  ...returnCompactBytesArrayUintNTypes(),
 };
 
 // Use enum for type bellow
