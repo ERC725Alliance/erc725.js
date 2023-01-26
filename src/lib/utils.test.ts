@@ -172,21 +172,21 @@ describe('utils', () => {
           [
             '0xcafecafe',
             '0x951a5d121531bba8',
-            '0xDAFEA492D9c6733ae3d56b7Ed1ADB606',
+            '0xdafea492d9c6733ae3d56b7ed1adb606',
           ],
           [
             '0xbeefbeef',
             '0x8a483080f5db1105',
-            '0xFE31320faF8Da1492Eadf8Deb79bd264',
+            '0xfe31320faf8da1492eadf8deb79bd264',
           ],
           [
             '0xf00df00d',
             '0x2fe92a11caf28ab2',
-            '0xc527702b14BF2f79F70B32e09F62B6A7',
+            '0xc527702b14bf2f79f70b32e09f62b6a7',
           ],
         ],
         encodedValue:
-          '0x001ccafecafe951a5d121531bba8DAFEA492D9c6733ae3d56b7Ed1ADB606001cbeefbeef8a483080f5db1105FE31320faF8Da1492Eadf8Deb79bd264001cf00df00d2fe92a11caf28ab2c527702b14BF2f79F70B32e09F62B6A7',
+          '0x001ccafecafe951a5d121531bba8dafea492d9c6733ae3d56b7ed1adb606001cbeefbeef8a483080f5db1105fe31320faf8da1492eadf8deb79bd264001cf00df00d2fe92a11caf28ab2c527702b14bf2f79f70b32e09f62b6a7',
       },
       {
         schema: {
