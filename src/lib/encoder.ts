@@ -147,14 +147,14 @@ const encodeBytesNCompactBytesArray = (
   values: string[],
   numberOfBytes: number,
 ): string => {
-  for (let i = 0; i < values.length; i++) {
-    if (values[i].length > numberOfBytes * 2 + 2)
+  values.forEach((value, index) => {
+    if (value.length > numberOfBytes * 2 + 2)
       throw new Error(
-        `Hex bytes${numberOfBytes} value at index: ${i} is using ${
-          (values[i].length - 2) / 2
+        `Hex bytes${numberOfBytes} value at index: ${index} is using ${
+          (value.length - 2) / 2
         } bytes, which exceeds ${numberOfBytes}`,
       );
-  }
+  });
 
   return encodeCompactBytesArray(values);
 };
@@ -164,15 +164,14 @@ const decodeBytesNCompactBytesArray = (
   numberOfBytes: number,
 ): string[] => {
   const bytesValues = decodeCompactBytesArray(compactBytesArray);
-
-  for (let i = 0; i < bytesValues.length; i++) {
-    if (bytesValues[i].length > numberOfBytes * 2 + 2)
+  bytesValues.forEach((bytesValue, index) => {
+    if (bytesValue.length > numberOfBytes * 2 + 2)
       throw new Error(
-        `Hex bytes${numberOfBytes} value at index: ${i} is using ${
-          (bytesValues[i].length - 2) / 2
+        `Hex bytes${numberOfBytes} value at index: ${index} is using ${
+          (bytesValue.length - 2) / 2
         } bytes, which exceeds ${numberOfBytes}`,
       );
-  }
+  });
 
   return bytesValues;
 };
@@ -192,21 +191,19 @@ const encodeUintNCompactBytesArray = (
   values: number[],
   numberOfBytes: number,
 ): string => {
-  const hexValues: string[] = [];
-
-  for (let i = 0; i < values.length; i++) {
-    const hexNumber = stripHexPrefix(numberToHex(values[i])).padStart(
+  const hexValues: string[] = values.map((value, index) => {
+    const hexNumber = stripHexPrefix(numberToHex(value)).padStart(
       numberOfBytes * 2,
       '0',
     );
     if (hexNumber.length > numberOfBytes * 2)
       throw new Error(
-        `Hex uint${numberOfBytes * 8} value at index: ${i} is using ${
+        `Hex uint${numberOfBytes * 8} value at index: ${index} is using ${
           hexNumber.length / 2
         } bytes, which exceeds ${numberOfBytes}`,
       );
-    hexValues.push(hexNumber);
-  }
+    return hexNumber;
+  });
 
   return encodeCompactBytesArray(hexValues);
 };
@@ -216,20 +213,17 @@ const decodeUintNCompactBytesArray = (
   numberOfBytes: number,
 ): number[] => {
   const hexValues = decodeCompactBytesArray(compactBytesArray);
-  const numberValues: number[] = [];
 
-  for (let i = 0; i < hexValues.length; i++) {
-    const hexValue = stripHexPrefix(hexValues[i]);
-    if (hexValue.length > numberOfBytes * 2)
+  return hexValues.map((hexValue, index) => {
+    const hexValueStripped = stripHexPrefix(hexValue);
+    if (hexValueStripped.length > numberOfBytes * 2)
       throw new Error(
-        `Hex uint${numberOfBytes * 8} value at index: ${i} is using ${
-          hexValue.length / 2
+        `Hex uint${numberOfBytes * 8} value at index: ${index} is using ${
+          hexValueStripped.length / 2
         } bytes, which exceeds ${numberOfBytes}`,
       );
-    numberValues.push(hexToNumber(hexValues[i]));
-  }
-
-  return numberValues;
+    return hexToNumber(hexValue);
+  });
 };
 
 const returnCompactBytesArrayUintNTypes = () => {
@@ -251,11 +245,7 @@ const encodeStringCompactBytesArray = (values: string[]): string => {
 
 const decodeStringCompactBytesArray = (compactBytesArray: string): string[] => {
   const hexValues: string[] = decodeCompactBytesArray(compactBytesArray);
-  const stringValues: string[] = [];
-
-  for (let i = 0; i < hexValues.length; i++) {
-    stringValues.push(hexToUtf8(hexValues[i]));
-  }
+  const stringValues: string[] = hexValues.map((element) => hexToUtf8(element));
 
   return stringValues;
 };
