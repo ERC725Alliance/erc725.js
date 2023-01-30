@@ -17,7 +17,7 @@
 import { expect } from 'chai';
 
 import assert from 'assert';
-import { keccak256, utf8ToHex } from 'web3-utils';
+import { keccak256, utf8ToHex, stripHexPrefix } from 'web3-utils';
 import {
   valueContentEncodingMap,
   encodeValueType,
@@ -139,8 +139,11 @@ describe('encoder', () => {
           'bring back my coke',
           'Diagon Alley',
         ],
-        encodedValue:
-          '0x00116f6e652072616e646f6d20737472696e6700126272696e67206261636b206d7920636f6b65000c446961676f6e20416c6c6579',
+        encodedValue: `0x0011${stripHexPrefix(
+          utf8ToHex('one random string'),
+        )}0012${stripHexPrefix(
+          utf8ToHex('bring back my coke'),
+        )}000c${stripHexPrefix(utf8ToHex('Diagon Alley'))}`,
       },
       {
         valueType: 'uint8[CompactBytesArray]',
@@ -225,9 +228,7 @@ describe('encoder', () => {
       it('should throw if trying to encode a value that exceeds the maximal lenght of bytes for this type', async () => {
         expect(() => {
           encodeValueType('uint8[CompactBytesArray]', [15, 178, 266]);
-        }).to.throw(
-          'Hex uint8 value at index: 2 is using 1.5 bytes, which exceeds 1',
-        );
+        }).to.throw('Hex uint8 value at index 2 does not fit in 1 bytes');
       });
 
       it('should throw if trying to decode a value that exceeds the maximal lenght of bytes for this type', async () => {
@@ -236,9 +237,7 @@ describe('encoder', () => {
             'uint8[CompactBytesArray]',
             '0x00010100012b00014900020100',
           );
-        }).to.throw(
-          'Hex uint8 value at index: 3 is using 2 bytes, which exceeds 1',
-        );
+        }).to.throw('Hex uint8 value at index 3 does not fit in 1 bytes');
       });
     });
 
@@ -251,9 +250,7 @@ describe('encoder', () => {
             '0x72062616',
             '0xab7f11e3aabbcc',
           ]);
-        }).to.throw(
-          'Hex bytes4 value at index: 3 is using 7 bytes, which exceeds 4',
-        );
+        }).to.throw('Hex bytes4 value at index 3 does not fit in 4 bytes');
       });
 
       it('should throw if trying to decode a value that exceeds the maximal lenght of bytes for this type', async () => {
@@ -262,9 +259,7 @@ describe('encoder', () => {
             'bytes4[CompactBytesArray]',
             '0x0004e65207260004272696e60004720626160007ab7f11e3aabbcc',
           );
-        }).to.throw(
-          'Hex bytes4 value at index: 3 is using 7 bytes, which exceeds 4',
-        );
+        }).to.throw('Hex bytes4 value at index 3 does not fit in 4 bytes');
       });
     });
 

@@ -150,9 +150,7 @@ const encodeBytesNCompactBytesArray = (
   values.forEach((value, index) => {
     if (value.length > numberOfBytes * 2 + 2)
       throw new Error(
-        `Hex bytes${numberOfBytes} value at index: ${index} is using ${
-          (value.length - 2) / 2
-        } bytes, which exceeds ${numberOfBytes}`,
+        `Hex bytes${numberOfBytes} value at index ${index} does not fit in ${numberOfBytes} bytes`,
       );
   });
 
@@ -167,16 +165,14 @@ const decodeBytesNCompactBytesArray = (
   bytesValues.forEach((bytesValue, index) => {
     if (bytesValue.length > numberOfBytes * 2 + 2)
       throw new Error(
-        `Hex bytes${numberOfBytes} value at index: ${index} is using ${
-          (bytesValue.length - 2) / 2
-        } bytes, which exceeds ${numberOfBytes}`,
+        `Hex bytes${numberOfBytes} value at index ${index} does not fit in ${numberOfBytes} bytes`,
       );
   });
 
   return bytesValues;
 };
 
-const returnCompactBytesArrayBytesNTypes = () => {
+const returnTypesOfBytesNCompactBytesArray = () => {
   const types = {};
   for (let i = 1; i < 33; i++) {
     types[`bytes${i}[CompactBytesArray]`] = {
@@ -198,9 +194,9 @@ const encodeUintNCompactBytesArray = (
     );
     if (hexNumber.length > numberOfBytes * 2)
       throw new Error(
-        `Hex uint${numberOfBytes * 8} value at index: ${index} is using ${
-          hexNumber.length / 2
-        } bytes, which exceeds ${numberOfBytes}`,
+        `Hex uint${
+          numberOfBytes * 8
+        } value at index ${index} does not fit in ${numberOfBytes} bytes`,
       );
     return hexNumber;
   });
@@ -218,15 +214,15 @@ const decodeUintNCompactBytesArray = (
     const hexValueStripped = stripHexPrefix(hexValue);
     if (hexValueStripped.length > numberOfBytes * 2)
       throw new Error(
-        `Hex uint${numberOfBytes * 8} value at index: ${index} is using ${
-          hexValueStripped.length / 2
-        } bytes, which exceeds ${numberOfBytes}`,
+        `Hex uint${
+          numberOfBytes * 8
+        } value at index ${index} does not fit in ${numberOfBytes} bytes`,
       );
     return hexToNumber(hexValue);
   });
 };
 
-const returnCompactBytesArrayUintNTypes = () => {
+const returnTypesOfUintNCompactBytesArray = () => {
   const types = {};
   for (let i = 1; i < 33; i++) {
     types[`uint${i * 8}[CompactBytesArray]`] = {
@@ -310,8 +306,8 @@ const valueTypeEncodingMap = {
     encode: (value: string[]) => encodeStringCompactBytesArray(value),
     decode: (value: string) => decodeStringCompactBytesArray(value),
   },
-  ...returnCompactBytesArrayBytesNTypes(),
-  ...returnCompactBytesArrayUintNTypes(),
+  ...returnTypesOfBytesNCompactBytesArray(),
+  ...returnTypesOfUintNCompactBytesArray(),
 };
 
 // Use enum for type bellow
