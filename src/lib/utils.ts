@@ -291,25 +291,30 @@ export function encodeKey(
         );
 
         if (
+          Array.isArray(value) &&
           Array.isArray(value[0]) &&
           valueType[0] === '(' &&
           valueType[valueType.length - 1] === ')'
         ) {
-          const encodedTuples = (value as string[][]).map((element) => {
+          const encodedTuples = value.map((element) => {
             return encodeTupleKeyValue(valueContent, valueType, element);
           });
           return encodeValueType('bytes[CompactBytesArray]', encodedTuples);
         }
-        return encodeValueType(schema.valueType, value as string[]);
+        if (Array.isArray(value) && !Array.isArray(value[0]))
+          return encodeValueType(schema.valueType, value as string[]);
       }
 
       if (isValidTuple(schema.valueType, schema.valueContent)) {
-        if (!Array.isArray(value)) {
+        if (
+          !Array.isArray(value) ||
+          (Array.isArray(value) && Array.isArray(value[0]))
+        ) {
           throw new Error(
             `Incorrect value for tuple. Got: ${value}, expected array.`,
           );
         }
-        if (!Array.isArray(value[0]))
+        if (Array.isArray(value) && !Array.isArray(value[0]))
           return encodeTupleKeyValue(
             schema.valueContent,
             schema.valueType,
@@ -320,7 +325,13 @@ export function encodeKey(
       return encodeKeyValue(
         schema.valueContent,
         schema.valueType,
-        value as string | number | JSONURLDataToEncode,
+        value as
+          | string
+          | string[]
+          | number
+          | number[]
+          | JSONURLDataToEncode
+          | JSONURLDataToEncode[],
         schema.name,
       );
     default:

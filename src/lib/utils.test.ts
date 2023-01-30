@@ -158,7 +158,7 @@ describe('utils', () => {
           ],
         ],
         encodedValue:
-          '0x001acafecafeDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5cafe001abeefbeefFE31320faF8Da1492Eadf8Deb79bd264D7cF2141beef001af00df00dc527702b14BF2f79F70B32e09F62B6A74cADFd80f00d'.toLowerCase(),
+          '0x001acafecafedafea492d9c6733ae3d56b7ed1adb60692c98bc5cafe001abeefbeeffe31320faf8da1492eadf8deb79bd264d7cf2141beef001af00df00dc527702b14bf2f79f70b32e09f62b6a74cadfd80f00d',
       },
       {
         schema: {
