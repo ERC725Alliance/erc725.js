@@ -949,7 +949,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       {
         permissions: {
           CHANGEOWNER: true,
-          ADDPERMISSIONS: true,
+          ADDCONTROLLER: true,
           CHANGEPERMISSIONS: true,
           ADDEXTENSIONS: true,
           CHANGEEXTENSIONS: true,
@@ -976,7 +976,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       {
         permissions: {
           CHANGEOWNER: false,
-          ADDPERMISSIONS: false,
+          ADDCONTROLLER: false,
           CHANGEPERMISSIONS: false,
           ADDEXTENSIONS: false,
           CHANGEEXTENSIONS: false,
@@ -1003,7 +1003,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       {
         permissions: {
           CHANGEOWNER: false,
-          ADDPERMISSIONS: false,
+          ADDCONTROLLER: false,
           CHANGEPERMISSIONS: false,
           ADDEXTENSIONS: false,
           CHANGEEXTENSIONS: false,
@@ -1030,7 +1030,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       {
         permissions: {
           CHANGEOWNER: false,
-          ADDPERMISSIONS: false,
+          ADDCONTROLLER: false,
           CHANGEPERMISSIONS: false,
           ADDEXTENSIONS: false,
           CHANGEEXTENSIONS: false,
@@ -1057,7 +1057,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       {
         permissions: {
           CHANGEOWNER: false,
-          ADDPERMISSIONS: false,
+          ADDCONTROLLER: false,
           CHANGEPERMISSIONS: true,
           ADDEXTENSIONS: false,
           CHANGEEXTENSIONS: false,
@@ -1084,7 +1084,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       {
         permissions: {
           CHANGEOWNER: false,
-          ADDPERMISSIONS: false,
+          ADDCONTROLLER: false,
           CHANGEPERMISSIONS: false,
           ADDEXTENSIONS: false,
           CHANGEEXTENSIONS: false,
@@ -1164,7 +1164,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           ),
           {
             CHANGEOWNER: true,
-            ADDPERMISSIONS: true,
+            ADDCONTROLLER: true,
             CHANGEPERMISSIONS: true,
             ADDEXTENSIONS: true,
             CHANGEEXTENSIONS: true,
@@ -1193,7 +1193,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           ),
           {
             CHANGEOWNER: true,
-            ADDPERMISSIONS: true,
+            ADDCONTROLLER: true,
             CHANGEPERMISSIONS: true,
             ADDEXTENSIONS: true,
             CHANGEEXTENSIONS: true,

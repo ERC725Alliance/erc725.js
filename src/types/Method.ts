@@ -26,7 +26,7 @@ export interface MethodData {
 
 export interface Permissions {
   CHANGEOWNER?: boolean;
-  ADDPERMISSIONS?: boolean;
+  ADDCONTROLLER?: boolean;
   CHANGEPERMISSIONS?: boolean;
   ADDEXTENSIONS?: boolean;
   CHANGEEXTENSIONS?: boolean;
