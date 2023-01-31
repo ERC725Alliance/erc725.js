@@ -458,7 +458,7 @@ export class ERC725 {
   static decodePermissions(permissionHex: string) {
     const result = {
       CHANGEOWNER: false,
-      ADDPERMISSIONS: false,
+      ADDCONTROLLER: false,
       CHANGEPERMISSIONS: false,
       ADDEXTENSIONS: false,
       CHANGEEXTENSIONS: false,
