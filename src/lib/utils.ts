@@ -172,7 +172,7 @@ export function guessKeyTypeFromKeyName(
 export const encodeTupleKeyValue = (
   valueContent: string, // i.e. (bytes4,Number,bytes16)
   valueType: string, // i.e. (bytes4,bytes8,bytes16)
-  decodedValues: Array<string | number | JSONURLDataToEncode>,
+  decodedValues: Array<string | number | JSONURLDataToEncode | string[]>,
 ) => {
   // We assume data has already been validated at this stage
 
@@ -283,43 +283,35 @@ export function encodeKey(
     case 'mappingwithgrouping':
     case 'singleton':
     case 'mapping':
-      if (schema.valueType.includes('[CompactBytesArray]')) {
-        const valueType = schema.valueType.replace('[CompactBytesArray]', '');
-        const valueContent = schema.valueContent.replace(
-          '[CompactBytesArray]',
-          '',
-        );
+      const isCompactBytesArray: boolean = schema.valueType.includes(
+        '[CompactBytesArray]',
+      );
 
-        if (
-          Array.isArray(value) &&
-          Array.isArray(value[0]) &&
-          valueType[0] === '(' &&
-          valueType[valueType.length - 1] === ')'
-        ) {
+      if (isValidTuple(schema.valueType, schema.valueContent)) {
+        if (!Array.isArray(value)) {
+          throw new Error(
+            `Incorrect value for tuple. Got: ${value}, expected array.`,
+          );
+        }
+
+        if (Array.isArray(value[0]) && isCompactBytesArray) {
+          const valueType = schema.valueType.replace('[CompactBytesArray]', '');
+          const valueContent = schema.valueContent.replace(
+            '[CompactBytesArray]',
+            '',
+          );
+
           const encodedTuples = value.map((element) => {
             return encodeTupleKeyValue(valueContent, valueType, element);
           });
           return encodeValueType('bytes[CompactBytesArray]', encodedTuples);
         }
-        if (Array.isArray(value) && !Array.isArray(value[0]))
-          return encodeValueType(schema.valueType, value as string[]);
-      }
 
-      if (isValidTuple(schema.valueType, schema.valueContent)) {
-        if (
-          !Array.isArray(value) ||
-          (Array.isArray(value) && Array.isArray(value[0]))
-        ) {
-          throw new Error(
-            `Incorrect value for tuple. Got: ${value}, expected array.`,
-          );
-        }
-        if (Array.isArray(value) && !Array.isArray(value[0]))
-          return encodeTupleKeyValue(
-            schema.valueContent,
-            schema.valueType,
-            value as string[] | number[] | JSONURLDataToEncode[],
-          );
+        return encodeTupleKeyValue(
+          schema.valueContent,
+          schema.valueType,
+          value,
+        );
       }
 
       return encodeKeyValue(
