@@ -301,7 +301,11 @@ export function encodeKey(
           });
           return encodeValueType('bytes[CompactBytesArray]', encodedTuples);
         }
-        if (Array.isArray(value) && !Array.isArray(value[0]))
+        if (
+          Array.isArray(value) &&
+          !Array.isArray(value[0]) &&
+          value.map((element) => typeof element === 'string')
+        )
           return encodeValueType(schema.valueType, value as string[]);
       }
 
