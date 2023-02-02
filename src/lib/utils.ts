@@ -283,16 +283,16 @@ export function encodeKey(
     case 'mappingwithgrouping':
     case 'singleton':
     case 'mapping':
-      const isCompactBytesArray: boolean = schema.valueType.includes(
-        '[CompactBytesArray]',
-      );
-
       if (isValidTuple(schema.valueType, schema.valueContent)) {
         if (!Array.isArray(value)) {
           throw new Error(
             `Incorrect value for tuple. Got: ${value}, expected array.`,
           );
         }
+
+        const isCompactBytesArray: boolean = schema.valueType.includes(
+          '[CompactBytesArray]',
+        );
 
         if (Array.isArray(value[0]) && isCompactBytesArray) {
           const valueType = schema.valueType.replace('[CompactBytesArray]', '');
