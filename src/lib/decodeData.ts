@@ -30,6 +30,7 @@ import { getSchemaElement } from './getSchemaElement';
 import { decodeKeyValue, encodeArrayKey } from './utils';
 
 export const tupleValueTypesRegex = /bytes(\d+)/;
+export const ValueContentsBytesRegex = /Bytes(\d+)/;
 
 export const isValidTuple = (valueType: string, valueContent: string) => {
   if (valueType.length <= 2 && valueContent.length <= 2) {
@@ -48,14 +49,27 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
   // At this stage, we can assume the user is trying to use a tuple, let's throw errors instead of returning
   // false
 
-  const valueTypeParts = valueType
-    .substring(1, valueType.length - 1)
+  let valueTypeToDecode = valueType;
+
+  if (valueType.includes('[CompactBytesArray')) {
+    valueTypeToDecode = valueType.replace('[CompactBytesArray]', '');
+  }
+
+  const valueTypeParts = valueTypeToDecode
+    .substring(1, valueTypeToDecode.length - 1)
     .split(',');
   const valueContentParts = valueContent
     .substring(1, valueContent.length - 1)
     .split(',');
 
-  const tuplesValidValueTypes = ['bytes4', 'bytes8', 'bytes16', 'bytes32'];
+  const tuplesValidValueTypes = [
+    'bytes2',
+    'bytes4',
+    'bytes8',
+    'bytes16',
+    'bytes32',
+    'address',
+  ];
 
   if (valueTypeParts.length !== valueContentParts.length) {
     throw new Error(
@@ -71,12 +85,17 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
     }
 
     if (
-      valueContentParts[i].substring(0, 5) === 'Bytes' &&
-      valueContentParts[i].toLowerCase() !== valueTypeParts[i]
+      valueTypeParts[i].match(tupleValueTypesRegex) &&
+      valueContentParts[i].match(ValueContentsBytesRegex)
     ) {
-      throw new Error(
-        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. valueContent of type: ${valueContentParts[i]} should match valueType: ${valueTypeParts[i]}`,
-      );
+      const valueTypeBytesLength = valueTypeParts[i].slice(4);
+      const valueContentBytesLength = valueContentParts[i].slice(4);
+
+      if (valueTypeBytesLength > valueContentBytesLength) {
+        throw new Error(
+          `Invalid tuple (${valueType},${valueContent}: ${valueType[i]} cannot fit in ${valueContent[i]}`,
+        );
+      }
     }
 
     if (
@@ -111,8 +130,14 @@ export const decodeTupleKeyValue = (
 ) => {
   // We assume data has already been validated at this stage
 
-  const valueTypeParts = valueType
-    .substring(1, valueType.length - 1)
+  let valueTypeToDecode = valueType;
+
+  if (valueType.includes('[CompactBytesArray')) {
+    valueTypeToDecode = valueType.replace('[CompactBytesArray]', '');
+  }
+
+  const valueTypeParts = valueTypeToDecode
+    .substring(1, valueTypeToDecode.length - 1)
     .split(',');
   const valueContentParts = valueContent
     .substring(1, valueContent.length - 1)
