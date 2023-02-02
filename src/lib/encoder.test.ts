@@ -144,6 +144,18 @@ describe('encoder', () => {
         encodedValue:
           '0x0000000000000000000000000000000000000000000000000000000000000000',
       },
+      {
+        valueType: 'boolean', // allow to specify "boolean"
+        decodedValue: true,
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000001',
+      },
+      {
+        valueType: 'boolean', // allow to specify "boolean"
+        decodedValue: false,
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000000',
+      },
     ];
 
     testCases.forEach((testCase) => {

@@ -148,6 +148,10 @@ const valueTypeEncodingMap = {
     encode: (value: boolean) => abiCoder.encodeParameter('bool', value),
     decode: (value: string) => abiCoder.decodeParameter('bool', value),
   },
+  boolean: {
+    encode: (value: boolean) => abiCoder.encodeParameter('bool', value),
+    decode: (value: string) => abiCoder.decodeParameter('bool', value),
+  },
   string: {
     encode: (value: string) => abiCoder.encodeParameter('string', value),
     decode: (value: string) => abiCoder.decodeParameter('string', value),
