@@ -127,7 +127,7 @@ export const decodeTupleKeyValue = (
   valueContent: string, // i.e. (bytes4,Number,bytes16)
   valueType: string, // i.e. (bytes4,bytes8,bytes16)
   value: string, // should start with 0x
-) => {
+): Array<string> => {
   // We assume data has already been validated at this stage
 
   let valueTypeToDecode = valueType;
@@ -147,12 +147,12 @@ export const decodeTupleKeyValue = (
   valueTypeParts.forEach((valueTypePart) => {
     const regexMatch = valueTypePart.match(tupleValueTypesRegex);
 
-    if (!regexMatch) {
-      if (valueTypePart === 'address') bytesLengths.push(20);
-      return;
+    // if we are dealing with `bytesN`
+    if (regexMatch) {
+      bytesLengths.push(parseInt(regexMatch[1], 10));
     }
 
-    bytesLengths.push(parseInt(regexMatch[1], 10));
+    if (valueTypePart === 'address') bytesLengths.push(20);
   });
 
   const totalBytesLength = bytesLengths.reduce(

@@ -314,6 +314,17 @@ export function encodeKey(
         );
       }
 
+      // This adds an extra check to ensure the casting below is safe
+      // TODO: refactor to fix the TS typing.
+      if (
+        Array.isArray(value) &&
+        Array.isArray(
+          value[0] && !isValidTuple(schema.valueType, schema.valueContent),
+        )
+      ) {
+        throw new Error(`Incorrect value for nested array: not a tuple.`);
+      }
+
       return encodeKeyValue(
         schema.valueContent,
         schema.valueType,
@@ -326,7 +337,6 @@ export function encodeKey(
           | JSONURLDataToEncode[],
         schema.name,
       );
-      return null;
     default:
       console.error(
         'Incorrect data match or keyType in schema from encodeKey(): "' +
