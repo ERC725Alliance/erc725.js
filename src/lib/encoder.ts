@@ -81,6 +81,11 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   return { hashFunction: hashFunction.name, hash: dataHash, url: dataSource };
 };
 
+/**
+ * Encode bytes to CompactBytesArray
+ * @param values An array of BytesLike strings
+ * @returns bytes[CompactBytesArray]
+ */
 const encodeCompactBytesArray = (values: string[]): string => {
   const compactBytesArray = values
     .filter((value, index) => {
@@ -107,6 +112,11 @@ const encodeCompactBytesArray = (values: string[]): string => {
   return compactBytesArray;
 };
 
+/**
+ * Decode CompactBytesArray of type bytes
+ * @param compactBytesArray A bytes[CompactBytesArray]
+ * @returns An array of BytesLike strings decode from `compactBytesArray`
+ */
 const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
   if (!isHex(compactBytesArray))
     throw new Error("Couldn't decode, value is not hex");
@@ -143,12 +153,18 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
   return encodedValues;
 };
 
+/**
+ * Encode bytesN to CompactBytesArray
+ * @param values An array of BytesLike strings
+ * @param numberOfBytes The number of bytes for each value from `values`
+ * @returns bytesN[CompactBytesArray]
+ */
 const encodeBytesNCompactBytesArray = (
   values: string[],
   numberOfBytes: number,
 ): string => {
   values.forEach((value, index) => {
-    if (value.length > numberOfBytes * 2 + 2)
+    if (stripHexPrefix(value).length > numberOfBytes * 2)
       throw new Error(
         `Hex bytes${numberOfBytes} value at index ${index} does not fit in ${numberOfBytes} bytes`,
       );
@@ -157,13 +173,19 @@ const encodeBytesNCompactBytesArray = (
   return encodeCompactBytesArray(values);
 };
 
+/**
+ * Decode CompactBytesArray of type bytesN
+ * @param compactBytesArray A bytesN[CompactBytesArray]
+ * @param numberOfBytes The number of bytes allowed per each element from `compactBytesArray`
+ * @returns An array of BytesLike strings decoded from `compactBytesArray`
+ */
 const decodeBytesNCompactBytesArray = (
   compactBytesArray: string,
   numberOfBytes: number,
 ): string[] => {
   const bytesValues = decodeCompactBytesArray(compactBytesArray);
   bytesValues.forEach((bytesValue, index) => {
-    if (bytesValue.length > numberOfBytes * 2 + 2)
+    if (stripHexPrefix(bytesValue).length > numberOfBytes * 2)
       throw new Error(
         `Hex bytes${numberOfBytes} value at index ${index} does not fit in ${numberOfBytes} bytes`,
       );
@@ -172,6 +194,9 @@ const decodeBytesNCompactBytesArray = (
   return bytesValues;
 };
 
+/**
+ * @returns Encoding/decoding for bytes1[CompactBytesArray] to bytes32[COmpactBytesArray]
+ */
 const returnTypesOfBytesNCompactBytesArray = () => {
   const types = {};
   for (let i = 1; i < 33; i++) {
@@ -183,6 +208,12 @@ const returnTypesOfBytesNCompactBytesArray = () => {
   return types;
 };
 
+/**
+ * Encode uintN to CompactBytesArray
+ * @param values An array of BytesLike strings
+ * @param numberOfBytes The number of bytes for each value from `values`
+ * @returns uintN[CompactBytesArray]
+ */
 const encodeUintNCompactBytesArray = (
   values: number[],
   numberOfBytes: number,
@@ -204,6 +235,12 @@ const encodeUintNCompactBytesArray = (
   return encodeCompactBytesArray(hexValues);
 };
 
+/**
+ * Decode CompactBytesArray of type uintN
+ * @param compactBytesArray A uintN[CompactBytesArray]
+ * @param numberOfBytes The number of bytes allowed per each element from `compactBytesArray`
+ * @returns An array of numbers decoded from `compactBytesArray`
+ */
 const decodeUintNCompactBytesArray = (
   compactBytesArray: string,
   numberOfBytes: number,
@@ -222,6 +259,9 @@ const decodeUintNCompactBytesArray = (
   });
 };
 
+/**
+ * @returns Encoding/decoding for uint8[CompactBytesArray] to uint256[COmpactBytesArray]
+ */
 const returnTypesOfUintNCompactBytesArray = () => {
   const types = {};
   for (let i = 1; i < 33; i++) {
@@ -233,12 +273,22 @@ const returnTypesOfUintNCompactBytesArray = () => {
   return types;
 };
 
+/**
+ * Encode any set of strings to string[CompactBytesArray]
+ * @param values An array of any strings
+ * @returns Encoding of `values` to string[CompcatBytesArray]
+ */
 const encodeStringCompactBytesArray = (values: string[]): string => {
   const hexValues: string[] = values.map((element) => utf8ToHex(element));
 
   return encodeCompactBytesArray(hexValues);
 };
 
+/**
+ * Decode a string[CompactBytesArray] to an array of strings
+ * @param compactBytesArray A valid string[CompcatBytesArray]
+ * @returns An array of strings
+ */
 const decodeStringCompactBytesArray = (compactBytesArray: string): string[] => {
   const hexValues: string[] = decodeCompactBytesArray(compactBytesArray);
   const stringValues: string[] = hexValues.map((element) => hexToUtf8(element));
