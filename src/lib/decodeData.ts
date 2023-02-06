@@ -21,6 +21,7 @@
  */
 
 import { isHex } from 'web3-utils';
+import { COMPACT_BYTES_ARRAY_STRING } from '../constants/constants';
 
 import { DecodeDataInput, DecodeDataOutput } from '../types/decodeData';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
@@ -29,8 +30,8 @@ import { valueContentEncodingMap, decodeValueType } from './encoder';
 import { getSchemaElement } from './getSchemaElement';
 import { decodeKeyValue, encodeArrayKey } from './utils';
 
-export const tupleValueTypesRegex = /bytes(\d+)/;
-export const ValueContentsBytesRegex = /Bytes(\d+)/;
+const tupleValueTypesRegex = /bytes(\d+)/;
+const valueContentsBytesRegex = /Bytes(\d+)/;
 
 export const isValidTuple = (valueType: string, valueContent: string) => {
   if (valueType.length <= 2 && valueContent.length <= 2) {
@@ -51,8 +52,8 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
 
   let valueTypeToDecode = valueType;
 
-  if (valueType.includes('[CompactBytesArray')) {
-    valueTypeToDecode = valueType.replace('[CompactBytesArray]', '');
+  if (valueType.includes(COMPACT_BYTES_ARRAY_STRING)) {
+    valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
   }
 
   const valueTypeParts = valueTypeToDecode
@@ -86,7 +87,7 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
 
     if (
       valueTypeParts[i].match(tupleValueTypesRegex) &&
-      valueContentParts[i].match(ValueContentsBytesRegex)
+      valueContentParts[i].match(valueContentsBytesRegex)
     ) {
       const valueTypeBytesLength = valueTypeParts[i].slice(4);
       const valueContentBytesLength = valueContentParts[i].slice(4);
@@ -133,7 +134,7 @@ export const decodeTupleKeyValue = (
   let valueTypeToDecode = valueType;
 
   if (valueType.includes('[CompactBytesArray')) {
-    valueTypeToDecode = valueType.replace('[CompactBytesArray]', '');
+    valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
   }
 
   const valueTypeParts = valueTypeToDecode
@@ -248,10 +249,13 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
         );
       }
 
-      if (schema.valueType.includes('[CompactBytesArray]')) {
-        const valueType = schema.valueType.replace('[CompactBytesArray]', '');
+      if (schema.valueType.includes(COMPACT_BYTES_ARRAY_STRING)) {
+        const valueType = schema.valueType.replace(
+          COMPACT_BYTES_ARRAY_STRING,
+          '',
+        );
         const valueContent = schema.valueContent.replace(
-          '[CompactBytesArray]',
+          COMPACT_BYTES_ARRAY_STRING,
           '',
         );
 

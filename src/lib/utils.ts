@@ -42,6 +42,7 @@ import {
   HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTIONS_LIST,
+  COMPACT_BYTES_ARRAY_STRING,
 } from '../constants/constants';
 import {
   decodeValueContent,
@@ -291,13 +292,16 @@ export function encodeKey(
         }
 
         const isCompactBytesArray: boolean = schema.valueType.includes(
-          '[CompactBytesArray]',
+          COMPACT_BYTES_ARRAY_STRING,
         );
 
         if (Array.isArray(value[0]) && isCompactBytesArray) {
-          const valueType = schema.valueType.replace('[CompactBytesArray]', '');
+          const valueType = schema.valueType.replace(
+            COMPACT_BYTES_ARRAY_STRING,
+            '',
+          );
           const valueContent = schema.valueContent.replace(
-            '[CompactBytesArray]',
+            COMPACT_BYTES_ARRAY_STRING,
             '',
           );
 
@@ -318,11 +322,10 @@ export function encodeKey(
       // TODO: refactor to fix the TS typing.
       if (
         Array.isArray(value) &&
-        Array.isArray(
-          value[0] && !isValidTuple(schema.valueType, schema.valueContent),
-        )
+        Array.isArray(value[0]) &&
+        !isValidTuple(schema.valueType, schema.valueContent)
       ) {
-        throw new Error(`Incorrect value for nested array: not a tuple.`);
+        throw new Error('Incorrect value for nested array: not a tuple.');
       }
 
       return encodeKeyValue(

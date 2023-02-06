@@ -160,3 +160,5 @@ export const LSP6_DEFAULT_PERMISSIONS = {
 
 export const LSP6_ALL_PERMISSIONS =
   '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
+export const COMPACT_BYTES_ARRAY_STRING = '[CompactBytesArray]';
