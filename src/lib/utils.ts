@@ -76,7 +76,8 @@ export function encodeKeyValue(
     | number
     | number[]
     | JSONURLDataToEncode
-    | JSONURLDataToEncode[],
+    | JSONURLDataToEncode[]
+    | boolean,
   name?: string,
 ): string | false {
   const isSupportedValueContent =
@@ -238,7 +239,8 @@ export function encodeKey(
     | number
     | number[]
     | JSONURLDataToEncode
-    | JSONURLDataToEncode[],
+    | JSONURLDataToEncode[]
+    | boolean,
 ) {
   // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
 
@@ -410,7 +412,7 @@ export function decodeKeyValue(
 
   if (isArray && Array.isArray(value)) {
     // value must be an array also
-    const results: (string | URLDataWithHash | number | null)[] = [];
+    const results: (string | URLDataWithHash | number | null | boolean)[] = [];
 
     for (let index = 0; index < value.length; index++) {
       const element = value[index];

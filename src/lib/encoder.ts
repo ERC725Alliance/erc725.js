@@ -310,6 +310,14 @@ const decodeStringCompactBytesArray = (compactBytesArray: string): string[] => {
 };
 
 const valueTypeEncodingMap = {
+  bool: {
+    encode: (value: boolean) => abiCoder.encodeParameter('bool', value),
+    decode: (value: string) => abiCoder.decodeParameter('bool', value),
+  },
+  boolean: {
+    encode: (value: boolean) => abiCoder.encodeParameter('bool', value),
+    decode: (value: string) => abiCoder.decodeParameter('bool', value),
+  },
   string: {
     encode: (value: string) => abiCoder.encodeParameter('string', value),
     decode: (value: string) => abiCoder.decodeParameter('string', value),
@@ -335,6 +343,14 @@ const valueTypeEncodingMap = {
   bytes: {
     encode: (value: string) => abiCoder.encodeParameter('bytes', value),
     decode: (value: string) => abiCoder.decodeParameter('bytes', value),
+  },
+  'bool[]': {
+    encode: (value: boolean) => abiCoder.encodeParameter('bool[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('bool[]', value),
+  },
+  'boolean[]': {
+    encode: (value: boolean) => abiCoder.encodeParameter('bool[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('bool[]', value),
   },
   'string[]': {
     encode: (value: string[]) => abiCoder.encodeParameter('string[]', value),
@@ -373,7 +389,7 @@ const valueTypeEncodingMap = {
   ...returnTypesOfUintNCompactBytesArray(),
 };
 
-// Use enum for type bellow
+// Use enum for type below
 // Is it this enum ERC725JSONSchemaValueType? (If so, custom is missing from enum)
 
 export const valueContentEncodingMap = (valueContent: string) => {
@@ -564,6 +580,21 @@ export const valueContentEncodingMap = (valueContent: string) => {
         },
       };
     }
+    case 'Boolean': {
+      return {
+        type: 'bool',
+        encode: (value): string => {
+          return valueTypeEncodingMap.bool.encode(value);
+        },
+        decode: (value: string): boolean => {
+          try {
+            return valueTypeEncodingMap.bool.decode(value) as any as boolean;
+          } catch (error) {
+            throw new Error(`Value ${value} is not a boolean`);
+          }
+        },
+      };
+    }
     default: {
       return {
         type: 'unknown',
@@ -586,13 +617,17 @@ export const valueContentEncodingMap = (valueContent: string) => {
 
 export function encodeValueType(
   type: string,
-  value: string | string[] | number | number[],
+  value: string | string[] | number | number[] | boolean | boolean[],
 ): string {
   if (!valueTypeEncodingMap[type]) {
     throw new Error('Could not encode valueType: "' + type + '".');
   }
 
-  return value ? valueTypeEncodingMap[type].encode(value) : value;
+  if (typeof value === 'undefined' || value === null) {
+    return value;
+  }
+
+  return valueTypeEncodingMap[type].encode(value);
 }
 
 export function decodeValueType(type: string, value: string) {
@@ -602,12 +637,16 @@ export function decodeValueType(type: string, value: string) {
 
   if (value === '0x') return null;
 
-  return value ? valueTypeEncodingMap[type].decode(value) : value;
+  if (typeof value === 'undefined' || value === null) {
+    return value;
+  }
+
+  return valueTypeEncodingMap[type].decode(value);
 }
 
 export function encodeValueContent(
   valueContent: string,
-  value: string | number | AssetURLEncode | JSONURLDataToEncode,
+  value: string | number | AssetURLEncode | JSONURLDataToEncode | boolean,
 ): string | false {
   if (valueContent.slice(0, 2) === '0x') {
     return valueContent === value ? value : false;
@@ -619,16 +658,20 @@ export function encodeValueContent(
     throw new Error(`Could not encode valueContent: ${valueContent}.`);
   }
 
-  if (!value) {
+  if (value === null || value === undefined) {
     return '0x';
   }
 
   if (
-    (valueContent === 'AssetURL' || valueContent === 'JSONURL') &&
+    (valueContent === 'AssetURL' ||
+      valueContent === 'JSONURL' ||
+      valueContent === 'Boolean') &&
     typeof value === 'string'
   ) {
+    const expectedValueType = valueContent === 'Boolean' ? 'boolean' : 'object';
+
     throw new Error(
-      `Could not encode valueContent: ${valueContent} with value: ${value}. Expected object.`,
+      `Could not encode valueContent: ${valueContent} with value: ${value}. Expected ${expectedValueType}.`,
     );
   }
 
@@ -638,7 +681,7 @@ export function encodeValueContent(
 export function decodeValueContent(
   valueContent: string,
   value: string,
-): string | URLDataWithHash | number | null {
+): string | URLDataWithHash | number | boolean | null {
   if (valueContent.slice(0, 2) === '0x') {
     return valueContent === value ? value : null;
   }
