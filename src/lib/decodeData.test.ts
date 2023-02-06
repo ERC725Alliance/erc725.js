@@ -233,9 +233,14 @@ describe('tuple', () => {
       },
       {
         valueType: '(bytes4,bytes8)',
-        valueContent: '(Bytes8,Number)',
-        isTuple: false, // first item does not match between valueType and valueContent (bytes4 != bytes8)
+        valueContent: '(Bytes2,Number)',
+        isTuple: false, // first item in valueType does not fit inside first item in valueContent (bytes4 > bytes2)
         shouldThrow: true,
+      },
+      {
+        valueType: '(bytes4,bytes8)',
+        valueContent: '(Bytes8,Number)',
+        isTuple: true, // first item in valueType fit in first item of valueContent (bytes4 < bytes8)
       },
       {
         valueType: '(bytes4,bytes8)',
