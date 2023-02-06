@@ -18,8 +18,7 @@ interface HttpProviderPayload {
   id: number;
 }
 
-// @ts-ignore
-const abiCoder: AbiCoder.AbiCoder = AbiCoder;
+const abiCoder = AbiCoder;
 
 const IS_VALID_SIGNATURE_RESPONSE = {
   valid: '0x1626ba7e00000000000000000000000000000000000000000000000000000000',

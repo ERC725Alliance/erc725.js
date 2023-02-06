@@ -66,9 +66,7 @@ const encodeDataSourceWithHash = (
   );
 };
 
-// TS can't get the types from the import...
-// @ts-ignore
-const abiCoder: AbiCoder.AbiCoder = AbiCoder;
+const abiCoder = AbiCoder;
 
 const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   const hashFunctionSig = value.slice(0, 10);

@@ -609,7 +609,6 @@ export class ERC725 {
     }
 
     return supportsInterface(interfaceIdOrName, {
-      // @ts-ignore: undefined was checked before
       address: options.address,
       provider: this.initializeProvider(options.rpcUrl),
     });
