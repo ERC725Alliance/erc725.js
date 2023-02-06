@@ -132,6 +132,90 @@ describe('utils', () => {
         decodedValue: ['0xcafecafe', '11', '8'],
         encodedValue: '0xcafecafe000000000000000b00000008',
       },
+      {
+        schema: {
+          name: 'TupleMultiType',
+          key: '1e1bc4abe01b7baa7d4a359c0f460e632ef34b3f16f5722bd8892f2dae913022',
+          keyType: 'Singleton',
+          valueType: '(bytes4,address,bytes2)[CompactBytesArray]',
+          valueContent: '(Bytes4,Address,Bytes)',
+        },
+        decodedValue: [
+          [
+            '0xcafecafe',
+            '0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5',
+            '0xcafe',
+          ],
+          [
+            '0xbeefbeef',
+            '0xFE31320faF8Da1492Eadf8Deb79bd264D7cF2141',
+            '0xbeef',
+          ],
+          [
+            '0xf00df00d',
+            '0xc527702b14BF2f79F70B32e09F62B6A74cADFd80',
+            '0xf00d',
+          ],
+        ],
+        encodedValue:
+          '0x001acafecafedafea492d9c6733ae3d56b7ed1adb60692c98bc5cafe001abeefbeeffe31320faf8da1492eadf8deb79bd264d7cf2141beef001af00df00dc527702b14bf2f79f70b32e09f62b6a74cadfd80f00d',
+      },
+      {
+        schema: {
+          name: 'TupleMultiType',
+          key: '1e1bc4abe01b7baa7d4a359c0f460e632ef34b3f16f5722bd8892f2dae913022',
+          keyType: 'Singleton',
+          valueType: '(bytes4,bytes8,bytes16)[CompactBytesArray]',
+          valueContent: '(Bytes4,Bytes8,Bytes16)',
+        },
+        decodedValue: [
+          [
+            '0xcafecafe',
+            '0x951a5d121531bba8',
+            '0xdafea492d9c6733ae3d56b7ed1adb606',
+          ],
+          [
+            '0xbeefbeef',
+            '0x8a483080f5db1105',
+            '0xfe31320faf8da1492eadf8deb79bd264',
+          ],
+          [
+            '0xf00df00d',
+            '0x2fe92a11caf28ab2',
+            '0xc527702b14bf2f79f70b32e09f62b6a7',
+          ],
+        ],
+        encodedValue:
+          '0x001ccafecafe951a5d121531bba8dafea492d9c6733ae3d56b7ed1adb606001cbeefbeef8a483080f5db1105fe31320faf8da1492eadf8deb79bd264001cf00df00d2fe92a11caf28ab2c527702b14bf2f79f70b32e09f62b6a7',
+      },
+      {
+        schema: {
+          name: 'AddressPermissions:AllowedCalls:<address>',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,address,bytes4)[CompactBytesArray]',
+          valueContent: '(Bytes4,Address,Bytes4)',
+        },
+        decodedValue: [
+          [
+            '0xcafecafe',
+            '0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5',
+            '0xcafecafe',
+          ],
+          [
+            '0xbeefbeef',
+            '0xFE31320faF8Da1492Eadf8Deb79bd264D7cF2141',
+            '0xbeefbeef',
+          ],
+          [
+            '0xf00df00d',
+            '0xc527702b14BF2f79F70B32e09F62B6A74cADFd80',
+            '0xf00df00d',
+          ],
+        ],
+        encodedValue:
+          '0x001ccafecafeDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5cafecafe001cbeefbeefFE31320faF8Da1492Eadf8Deb79bd264D7cF2141beefbeef001cf00df00dc527702b14BF2f79F70B32e09F62B6A74cADFd80f00df00d'.toLowerCase(),
+      },
     ];
 
     testCases.forEach((testCase) => {

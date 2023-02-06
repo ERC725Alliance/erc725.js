@@ -21,15 +21,17 @@
  */
 
 import { isHex } from 'web3-utils';
+import { COMPACT_BYTES_ARRAY_STRING } from '../constants/constants';
 
 import { DecodeDataInput, DecodeDataOutput } from '../types/decodeData';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { isDynamicKeyName } from './encodeKeyName';
-import { valueContentEncodingMap } from './encoder';
+import { valueContentEncodingMap, decodeValueType } from './encoder';
 import { getSchemaElement } from './getSchemaElement';
 import { decodeKeyValue, encodeArrayKey } from './utils';
 
-export const tupleValueTypesRegex = /bytes(\d+)/;
+const tupleValueTypesRegex = /bytes(\d+)/;
+const valueContentsBytesRegex = /Bytes(\d+)/;
 
 export const isValidTuple = (valueType: string, valueContent: string) => {
   if (valueType.length <= 2 && valueContent.length <= 2) {
@@ -48,14 +50,27 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
   // At this stage, we can assume the user is trying to use a tuple, let's throw errors instead of returning
   // false
 
-  const valueTypeParts = valueType
-    .substring(1, valueType.length - 1)
+  let valueTypeToDecode = valueType;
+
+  if (valueType.includes(COMPACT_BYTES_ARRAY_STRING)) {
+    valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
+  }
+
+  const valueTypeParts = valueTypeToDecode
+    .substring(1, valueTypeToDecode.length - 1)
     .split(',');
   const valueContentParts = valueContent
     .substring(1, valueContent.length - 1)
     .split(',');
 
-  const tuplesValidValueTypes = ['bytes4', 'bytes8', 'bytes16', 'bytes32'];
+  const tuplesValidValueTypes = [
+    'bytes2',
+    'bytes4',
+    'bytes8',
+    'bytes16',
+    'bytes32',
+    'address',
+  ];
 
   if (valueTypeParts.length !== valueContentParts.length) {
     throw new Error(
@@ -71,12 +86,17 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
     }
 
     if (
-      valueContentParts[i].substring(0, 5) === 'Bytes' &&
-      valueContentParts[i].toLowerCase() !== valueTypeParts[i]
+      valueTypeParts[i].match(tupleValueTypesRegex) &&
+      valueContentParts[i].match(valueContentsBytesRegex)
     ) {
-      throw new Error(
-        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. valueContent of type: ${valueContentParts[i]} should match valueType: ${valueTypeParts[i]}`,
-      );
+      const valueTypeBytesLength = valueTypeParts[i].slice(4);
+      const valueContentBytesLength = valueContentParts[i].slice(4);
+
+      if (valueTypeBytesLength > valueContentBytesLength) {
+        throw new Error(
+          `Invalid tuple (${valueType},${valueContent}: ${valueType[i]} cannot fit in ${valueContent[i]}`,
+        );
+      }
     }
 
     if (
@@ -108,11 +128,17 @@ export const decodeTupleKeyValue = (
   valueContent: string, // i.e. (bytes4,Number,bytes16)
   valueType: string, // i.e. (bytes4,bytes8,bytes16)
   value: string, // should start with 0x
-) => {
+): Array<string> => {
   // We assume data has already been validated at this stage
 
-  const valueTypeParts = valueType
-    .substring(1, valueType.length - 1)
+  let valueTypeToDecode = valueType;
+
+  if (valueType.includes('[CompactBytesArray')) {
+    valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
+  }
+
+  const valueTypeParts = valueTypeToDecode
+    .substring(1, valueTypeToDecode.length - 1)
     .split(',');
   const valueContentParts = valueContent
     .substring(1, valueContent.length - 1)
@@ -122,11 +148,12 @@ export const decodeTupleKeyValue = (
   valueTypeParts.forEach((valueTypePart) => {
     const regexMatch = valueTypePart.match(tupleValueTypesRegex);
 
-    if (!regexMatch) {
-      return;
+    // if we are dealing with `bytesN`
+    if (regexMatch) {
+      bytesLengths.push(parseInt(regexMatch[1], 10));
     }
 
-    bytesLengths.push(parseInt(regexMatch[1], 10));
+    if (valueTypePart === 'address') bytesLengths.push(20);
   });
 
   const totalBytesLength = bytesLengths.reduce(
@@ -220,6 +247,28 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
           newValue.value,
           schema.name,
         );
+      }
+
+      if (schema.valueType.includes(COMPACT_BYTES_ARRAY_STRING)) {
+        const valueType = schema.valueType.replace(
+          COMPACT_BYTES_ARRAY_STRING,
+          '',
+        );
+        const valueContent = schema.valueContent.replace(
+          COMPACT_BYTES_ARRAY_STRING,
+          '',
+        );
+
+        if (valueType[0] === '(' && valueType[valueType.length - 1] === ')') {
+          const decodedCompactBytesArray = decodeValueType(
+            'bytes[CompactBytesArray]',
+            value,
+          );
+          return decodedCompactBytesArray.map((element) =>
+            decodeTupleKeyValue(valueContent, valueType, element),
+          );
+        }
+        return decodeValueType(schema.valueType, value);
       }
 
       if (isValidTuple(schema.valueType, schema.valueContent)) {

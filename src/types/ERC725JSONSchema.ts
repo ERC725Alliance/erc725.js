@@ -18,20 +18,8 @@ export type ERC725JSONSchemaValueContent =
   | 'Markdown'
   | string; // for tuples
 
-export type ERC725JSONSchemaValueType =
-  | 'string'
-  | 'address'
-  | 'uint256'
-  | 'bytes32'
-  | 'bytes'
-  | 'bytes4'
-  | 'string[]'
-  | 'address[]'
-  | 'uint256[]'
-  | 'bytes32[]'
-  | 'bytes4[]'
-  | 'bytes[]'
-  | string; // for tuples;
+// https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#valueType
+export type ERC725JSONSchemaValueType = string;
 
 /**
  * ```javascript title=Example
