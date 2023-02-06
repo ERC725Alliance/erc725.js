@@ -182,6 +182,10 @@ const valueTypeEncodingMap = {
     encode: (value: boolean) => abiCoder.encodeParameter('bool[]', value),
     decode: (value: string) => abiCoder.decodeParameter('bool[]', value),
   },
+  'boolean[]': {
+    encode: (value: boolean) => abiCoder.encodeParameter('bool[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('bool[]', value),
+  },
   'string[]': {
     encode: (value: string[]) => abiCoder.encodeParameter('string[]', value),
     decode: (value: string) => abiCoder.decodeParameter('string[]', value),
@@ -441,7 +445,7 @@ export const valueContentEncodingMap = (valueContent: string) => {
 
 export function encodeValueType(
   type: string,
-  value: string | string[] | number | number[] | boolean,
+  value: string | string[] | number | number[] | boolean | boolean[],
 ): string {
   if (!valueTypeEncodingMap[type]) {
     throw new Error('Could not encode valueType: "' + type + '".');
