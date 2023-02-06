@@ -82,7 +82,8 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
 };
 
 /**
- * Encode bytes to CompactBytesArray
+ * Encodes bytes to CompactBytesArray
+ *
  * @param values An array of BytesLike strings
  * @returns bytes[CompactBytesArray]
  */
@@ -113,7 +114,8 @@ const encodeCompactBytesArray = (values: string[]): string => {
 };
 
 /**
- * Decode CompactBytesArray of type bytes
+ * Decodes CompactBytesArray of type bytes
+ *
  * @param compactBytesArray A bytes[CompactBytesArray]
  * @returns An array of BytesLike strings decode from `compactBytesArray`
  */
@@ -154,7 +156,8 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
 };
 
 /**
- * Encode bytesN to CompactBytesArray
+ * Encodes bytesN to CompactBytesArray
+ *
  * @param values An array of BytesLike strings
  * @param numberOfBytes The number of bytes for each value from `values`
  * @returns bytesN[CompactBytesArray]
@@ -174,7 +177,8 @@ const encodeBytesNCompactBytesArray = (
 };
 
 /**
- * Decode CompactBytesArray of type bytesN
+ * Decodes CompactBytesArray of type bytesN
+ *
  * @param compactBytesArray A bytesN[CompactBytesArray]
  * @param numberOfBytes The number of bytes allowed per each element from `compactBytesArray`
  * @returns An array of BytesLike strings decoded from `compactBytesArray`
@@ -198,7 +202,11 @@ const decodeBytesNCompactBytesArray = (
  * @returns Encoding/decoding for bytes1[CompactBytesArray] to bytes32[COmpactBytesArray]
  */
 const returnTypesOfBytesNCompactBytesArray = () => {
-  const types = {};
+  const types: Record<
+    string,
+    { encode: (value: string[]) => string; decode: (value: string) => string[] }
+  > = {};
+
   for (let i = 1; i < 33; i++) {
     types[`bytes${i}[CompactBytesArray]`] = {
       encode: (value: string[]) => encodeBytesNCompactBytesArray(value, i),
@@ -209,7 +217,7 @@ const returnTypesOfBytesNCompactBytesArray = () => {
 };
 
 /**
- * Encode uintN to CompactBytesArray
+ * Encodes uintN to CompactBytesArray
  * @param values An array of BytesLike strings
  * @param numberOfBytes The number of bytes for each value from `values`
  * @returns uintN[CompactBytesArray]
@@ -236,7 +244,7 @@ const encodeUintNCompactBytesArray = (
 };
 
 /**
- * Decode CompactBytesArray of type uintN
+ * Decodes CompactBytesArray of type uintN
  * @param compactBytesArray A uintN[CompactBytesArray]
  * @param numberOfBytes The number of bytes allowed per each element from `compactBytesArray`
  * @returns An array of numbers decoded from `compactBytesArray`
@@ -263,7 +271,11 @@ const decodeUintNCompactBytesArray = (
  * @returns Encoding/decoding for uint8[CompactBytesArray] to uint256[COmpactBytesArray]
  */
 const returnTypesOfUintNCompactBytesArray = () => {
-  const types = {};
+  const types: Record<
+    string,
+    { encode: (value: number[]) => string; decode: (value: string) => number[] }
+  > = {};
+
   for (let i = 1; i < 33; i++) {
     types[`uint${i * 8}[CompactBytesArray]`] = {
       encode: (value: number[]) => encodeUintNCompactBytesArray(value, i),
@@ -274,9 +286,10 @@ const returnTypesOfUintNCompactBytesArray = () => {
 };
 
 /**
- * Encode any set of strings to string[CompactBytesArray]
- * @param values An array of any strings
- * @returns Encoding of `values` to string[CompcatBytesArray]
+ * Encodes any set of strings to string[CompactBytesArray]
+ *
+ * @param values An array of non restricted strings
+ * @returns string[CompactBytesArray]
  */
 const encodeStringCompactBytesArray = (values: string[]): string => {
   const hexValues: string[] = values.map((element) => utf8ToHex(element));
@@ -286,7 +299,7 @@ const encodeStringCompactBytesArray = (values: string[]): string => {
 
 /**
  * Decode a string[CompactBytesArray] to an array of strings
- * @param compactBytesArray A valid string[CompcatBytesArray]
+ * @param compactBytesArray A string[CompactBytesArray]
  * @returns An array of strings
  */
 const decodeStringCompactBytesArray = (compactBytesArray: string): string[] => {
