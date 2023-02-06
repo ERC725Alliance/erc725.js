@@ -30,9 +30,7 @@ import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
 import { ProviderTypes } from '../types/provider';
 import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../constants/constants';
 
-// TS can't get the types from the import...
-// @ts-ignore
-const abiCoder: AbiCoder.AbiCoder = AbiCoder;
+const abiCoder = AbiCoder;
 
 interface GetDataReturn {
   key: string;
@@ -110,10 +108,19 @@ export class ProviderWrapper {
         `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
       ),
     );
+
+    // These will be boolean because passing Method.SUPPORTS_INTERFACE ensures they will be decoded to bool by web3-eth-abi lib
+    // The {[key: string]: any} return type causes problems for boolean values so we have to cast here
     if (this.type === ProviderTypes.ETHEREUM) {
-      return decodeResult(Method.SUPPORTS_INTERFACE, result);
+      return decodeResult(
+        Method.SUPPORTS_INTERFACE,
+        result,
+      ) as unknown as boolean;
     }
-    return decodeResult(Method.SUPPORTS_INTERFACE, result.result);
+    return decodeResult(
+      Method.SUPPORTS_INTERFACE,
+      result.result,
+    ) as unknown as boolean;
   }
 
   /**
@@ -123,7 +130,11 @@ export class ProviderWrapper {
    * @param hash
    * @param signature
    */
-  async isValidSignature(address: string, hash: string, signature: string) {
+  async isValidSignature(
+    address: string,
+    hash: string,
+    signature: string,
+  ): Promise<string> {
     if (this.type === ProviderTypes.ETHEREUM) {
       const encodedParams = abiCoder.encodeParameters(
         ['bytes32', 'bytes'],
@@ -138,7 +149,11 @@ export class ProviderWrapper {
         throw result.error;
       }
 
-      return decodeResult(Method.IS_VALID_SIGNATURE, result);
+      // Passing Method.IS_VALID_SIGNATURE ensures this will be string
+      return decodeResult(
+        Method.IS_VALID_SIGNATURE,
+        result,
+      ) as unknown as string;
     }
 
     const encodedParams = abiCoder.encodeParameters(
@@ -153,7 +168,11 @@ export class ProviderWrapper {
       throw results.error;
     }
 
-    return decodeResult(Method.IS_VALID_SIGNATURE, results[0].result);
+    // Passing Method.IS_VALID_SIGNATURE ensures this will be string
+    return decodeResult(
+      Method.IS_VALID_SIGNATURE,
+      results[0].result,
+    ) as unknown as string;
   }
 
   async getData(address: string, keyHash: string) {
@@ -204,7 +223,7 @@ export class ProviderWrapper {
 
       return keyHashes.map<GetDataReturn>((keyHash, index) => ({
         key: keyHash,
-        value: decodedValues[index],
+        value: decodedValues ? decodedValues[index] : decodedValues,
       }));
     }
 
@@ -221,7 +240,7 @@ export class ProviderWrapper {
 
     return keyHashes.map<GetDataReturn>((key, index) => ({
       key,
-      value: decodedValues[index],
+      value: decodedValues ? decodedValues[index] : decodedValues,
     }));
   }
 
