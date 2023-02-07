@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.17.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.16.0...v0.17.0) (2023-02-07)
+
+### ⚠ BREAKING CHANGES
+
+- refactor: change permission `ADDPERMISSIONS` -> `ADDCONTROLLER` ([122efa9](https://github.com/ERC725Alliance/erc725.js/commit/122efa99b4858a97cd3b1d6f5c07d85983e03653))
+
+### Features
+
+- add encoding / decoding for `bytes[CompactBytesArray]` ([#261](https://github.com/ERC725Alliance/erc725.js/issues/261)) ([8d3e4e9](https://github.com/ERC725Alliance/erc725.js/commit/8d3e4e994957dbf1f54eef4572b072bc308c61bc))
+- add decoding/encoding support for tuples of `CompactBytesArray` ([#264](https://github.com/ERC725Alliance/erc725.js/issues/264)) ([d9ce0f0](https://github.com/ERC725Alliance/erc725.js/commit/d9ce0f08b61a4a04ebc98c6b996513fb432768f6))
+- add encoding/decoding for other types of `compactBytesArray` ([#262](https://github.com/ERC725Alliance/erc725.js/issues/262)) ([9268a32](https://github.com/ERC725Alliance/erc725.js/commit/9268a3205b54f81069e6217c827dff69d4166848))
+- Add support for `bool` (valueType) and `Boolean` (valueContent) ([#266](https://github.com/ERC725Alliance/erc725.js/issues/266)) ([86d606e](https://github.com/ERC725Alliance/erc725.js/commit/86d606e677a69eebaaaeb9467c37e5f6303efb4a))
+
+### Bug Fixes
+
+- Encode key name should parse any number (hex or decimal) for uint type ([eb7385e](https://github.com/ERC725Alliance/erc725.js/commit/eb7385e6e97f6f069c4be5331f0c4547b79faab5))
+
 ## [0.16.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.15.0...v0.16.0) (2022-10-27)
 
 ### ⚠ BREAKING CHANGES
