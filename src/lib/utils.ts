@@ -42,6 +42,7 @@ import {
   HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTIONS,
   SUPPORTED_HASH_FUNCTIONS_LIST,
+  COMPACT_BYTES_ARRAY_STRING,
 } from '../constants/constants';
 import {
   decodeValueContent,
@@ -75,7 +76,8 @@ export function encodeKeyValue(
     | number
     | number[]
     | JSONURLDataToEncode
-    | JSONURLDataToEncode[],
+    | JSONURLDataToEncode[]
+    | boolean,
   name?: string,
 ): string | false {
   const isSupportedValueContent =
@@ -172,7 +174,7 @@ export function guessKeyTypeFromKeyName(
 export const encodeTupleKeyValue = (
   valueContent: string, // i.e. (bytes4,Number,bytes16)
   valueType: string, // i.e. (bytes4,bytes8,bytes16)
-  decodedValues: Array<string | number | JSONURLDataToEncode>,
+  decodedValues: Array<string | number | JSONURLDataToEncode | string[]>,
 ) => {
   // We assume data has already been validated at this stage
 
@@ -233,10 +235,12 @@ export function encodeKey(
   value:
     | string
     | string[]
+    | string[][]
     | number
     | number[]
     | JSONURLDataToEncode
-    | JSONURLDataToEncode[],
+    | JSONURLDataToEncode[]
+    | boolean,
 ) {
   // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
 
@@ -288,6 +292,27 @@ export function encodeKey(
             `Incorrect value for tuple. Got: ${value}, expected array.`,
           );
         }
+
+        const isCompactBytesArray: boolean = schema.valueType.includes(
+          COMPACT_BYTES_ARRAY_STRING,
+        );
+
+        if (Array.isArray(value[0]) && isCompactBytesArray) {
+          const valueType = schema.valueType.replace(
+            COMPACT_BYTES_ARRAY_STRING,
+            '',
+          );
+          const valueContent = schema.valueContent.replace(
+            COMPACT_BYTES_ARRAY_STRING,
+            '',
+          );
+
+          const encodedTuples = value.map((element) => {
+            return encodeTupleKeyValue(valueContent, valueType, element);
+          });
+          return encodeValueType('bytes[CompactBytesArray]', encodedTuples);
+        }
+
         return encodeTupleKeyValue(
           schema.valueContent,
           schema.valueType,
@@ -295,10 +320,26 @@ export function encodeKey(
         );
       }
 
+      // This adds an extra check to ensure the casting below is safe
+      // TODO: refactor to fix the TS typing.
+      if (
+        Array.isArray(value) &&
+        Array.isArray(value[0]) &&
+        !isValidTuple(schema.valueType, schema.valueContent)
+      ) {
+        throw new Error('Incorrect value for nested array: not a tuple.');
+      }
+
       return encodeKeyValue(
         schema.valueContent,
         schema.valueType,
-        value,
+        value as
+          | string
+          | string[]
+          | number
+          | number[]
+          | JSONURLDataToEncode
+          | JSONURLDataToEncode[],
         schema.name,
       );
     default:
@@ -371,7 +412,7 @@ export function decodeKeyValue(
 
   if (isArray && Array.isArray(value)) {
     // value must be an array also
-    const results: (string | URLDataWithHash | number | null)[] = [];
+    const results: (string | URLDataWithHash | number | null | boolean)[] = [];
 
     for (let index = 0; index < value.length; index++) {
       const element = value[index];

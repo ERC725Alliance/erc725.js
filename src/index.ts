@@ -57,9 +57,10 @@ import {
 import { GetDataDynamicKey, GetDataInput } from './types/GetData';
 import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
-import { DynamicKeyParts } from './types/dynamicKeys';
+import { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
 import { supportsInterface } from './lib/detector';
+import { decodeMappingKey } from './lib/decodeMappingKey';
 
 /* eslint-disable-next-line */
 const HttpProvider = require('web3-providers-http');
@@ -457,21 +458,27 @@ export class ERC725 {
   static decodePermissions(permissionHex: string) {
     const result = {
       CHANGEOWNER: false,
+      ADDCONTROLLER: false,
       CHANGEPERMISSIONS: false,
-      ADDPERMISSIONS: false,
-      SETDATA: false,
+      ADDEXTENSIONS: false,
+      CHANGEEXTENSIONS: false,
+      ADDUNIVERSALRECEIVERDELEGATE: false,
+      CHANGEUNIVERSALRECEIVERDELEGATE: false,
+      REENTRANCY: false,
+      SUPER_TRANSFERVALUE: false,
+      TRANSFERVALUE: false,
+      SUPER_CALL: false,
       CALL: false,
+      SUPER_STATICCALL: false,
       STATICCALL: false,
+      SUPER_DELEGATECALL: false,
       DELEGATECALL: false,
       DEPLOY: false,
-      TRANSFERVALUE: false,
-      SIGN: false,
-      ENCRYPT: false,
       SUPER_SETDATA: false,
-      SUPER_TRANSFERVALUE: false,
-      SUPER_CALL: false,
-      SUPER_STATICCALL: false,
-      SUPER_DELEGATECALL: false,
+      SETDATA: false,
+      ENCRYPT: false,
+      DECRYPT: false,
+      SIGN: false,
     };
 
     const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);
@@ -537,6 +544,36 @@ export class ERC725 {
   }
 
   /**
+   * Decodes a hashed key used on an ERC725Y contract according to LSP2 ERC725Y JSONSchema standard.
+   *
+   * @param {string} keyHash Key hash that needs to be decoded.
+   * @param {string | ERC725JSONSchema} keyNameOrSchema Key name following schema specifications or ERC725Y JSON Schema to follow in order to decode the key.
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md ERC725YJsonSchema standard.
+   * @returns {DynamicKeyPart[]} The Array with all the key decoded dynamic parameters. Each object have an attribute type and value.
+   */
+  static decodeMappingKey(
+    keyHash: string,
+    keyNameOrSchema: string | ERC725JSONSchema,
+  ): DynamicKeyPart[] {
+    return decodeMappingKey(keyHash, keyNameOrSchema);
+  }
+
+  /**
+   * Decodes a hashed key used on an ERC725Y contract according to LSP2 ERC725Y JSONSchema standard.
+   *
+   * @param {string} keyHash Key hash that needs to be decoded.
+   * @param {string | ERC725JSONSchema} keyNameOrSchema Key name following schema specifications or ERC725Y JSON Schema to follow in order to decode the key.
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md ERC725YJsonSchema standard.
+   * @returns {DynamicKeyPart[]} The Array with all the key decoded dynamic parameters. Each object have an attribute type and value.
+   */
+  decodeMappingKey(
+    keyHash: string,
+    keyNameOrSchema: string | ERC725JSONSchema,
+  ): DynamicKeyPart[] {
+    return decodeMappingKey(keyHash, keyNameOrSchema);
+  }
+
+  /**
    * Check if the ERC725 object supports
    * a certain interface.
    *
@@ -572,7 +609,6 @@ export class ERC725 {
     }
 
     return supportsInterface(interfaceIdOrName, {
-      // @ts-ignore: undefined was checked before
       address: options.address,
       provider: this.initializeProvider(options.rpcUrl),
     });

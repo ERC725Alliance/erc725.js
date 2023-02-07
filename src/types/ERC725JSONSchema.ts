@@ -16,9 +16,12 @@ export type ERC725JSONSchemaValueContent =
   | 'JSONURL'
   | 'URL'
   | 'Markdown'
+  | 'Boolean'
   | string; // for tuples
 
 export type ERC725JSONSchemaValueType =
+  | 'bool'
+  | 'boolean'
   | 'string'
   | 'address'
   | 'uint256'
@@ -31,6 +34,8 @@ export type ERC725JSONSchemaValueType =
   | 'bytes32[]'
   | 'bytes4[]'
   | 'bytes[]'
+  | 'bool[]'
+  | 'boolean[]'
   | string; // for tuples;
 
 /**

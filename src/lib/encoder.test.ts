@@ -17,7 +17,7 @@
 import { expect } from 'chai';
 
 import assert from 'assert';
-import { keccak256, utf8ToHex } from 'web3-utils';
+import { keccak256, utf8ToHex, stripHexPrefix } from 'web3-utils';
 import {
   valueContentEncodingMap,
   encodeValueType,
@@ -117,6 +117,92 @@ describe('encoder', () => {
         encodedValue:
           '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000001337000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000054ef',
       },
+      {
+        valueType: 'bytes[CompactBytesArray]',
+        decodedValue: [
+          '0xaabb',
+          '0xcafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe',
+          '0xbeefbeefbeefbeefbeef',
+        ],
+        encodedValue:
+          '0x0002aabb0020cafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe000abeefbeefbeefbeefbeef',
+      },
+      {
+        valueType: 'bytes[CompactBytesArray]',
+        decodedValue: [`0x${'cafe'.repeat(256)}`, `0x${'beef'.repeat(250)}`],
+        encodedValue: `0x0200${'cafe'.repeat(256)}01f4${'beef'.repeat(250)}`,
+      },
+      {
+        valueType: 'string[CompactBytesArray]',
+        decodedValue: [
+          'one random string',
+          'bring back my coke',
+          'Diagon Alley',
+        ],
+        encodedValue: `0x0011${stripHexPrefix(
+          utf8ToHex('one random string'),
+        )}0012${stripHexPrefix(
+          utf8ToHex('bring back my coke'),
+        )}000c${stripHexPrefix(utf8ToHex('Diagon Alley'))}`,
+      },
+      {
+        valueType: 'uint8[CompactBytesArray]',
+        decodedValue: [1, 43, 73, 255],
+        encodedValue: '0x00010100012b0001490001ff',
+      },
+      {
+        valueType: 'bytes4[CompactBytesArray]',
+        decodedValue: ['0xe6520726', '0x272696e6', '0x72062616', '0xab7f11e3'],
+        encodedValue: '0x0004e65207260004272696e60004720626160004ab7f11e3',
+      },
+      {
+        valueType: 'bool',
+        decodedValue: true,
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000001',
+      },
+      {
+        valueType: 'bool',
+        decodedValue: false,
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000000',
+      },
+      {
+        valueType: 'boolean', // allow to specify "boolean"
+        decodedValue: true,
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000001',
+      },
+      {
+        valueType: 'boolean', // allow to specify "boolean"
+        decodedValue: false,
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000000',
+      },
+      {
+        valueType: 'bool[]',
+        decodedValue: [true, false, true],
+        encodedValue:
+          '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001',
+      },
+      {
+        valueType: 'bool[]',
+        decodedValue: [false, false, true, false, false],
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+      },
+      {
+        valueType: 'boolean[]', // allow to specify "boolean"
+        decodedValue: [true],
+        encodedValue:
+          '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001',
+      },
+      {
+        valueType: 'boolean[]', // allow to specify "boolean"
+        decodedValue: [false, false],
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+      },
     ];
 
     testCases.forEach((testCase) => {
@@ -131,6 +217,119 @@ describe('encoder', () => {
           decodeValueType(testCase.valueType, encodedValue),
           testCase.decodedValue,
         );
+      });
+    });
+
+    describe('when encoding bytes[CompactBytesArray]', () => {
+      it('should encode `0x` elements as `0x0000`', async () => {
+        const testCase = {
+          valueType: 'bytes[CompactBytesArray]',
+          decodedValue: ['0xaabb', '0x', '0x', '0xbeefbeefbeefbeefbeef'],
+          encodedValue: '0x0002aabb00000000000abeefbeefbeefbeefbeef',
+        };
+
+        const encodedValue = encodeValueType(
+          testCase.valueType,
+          testCase.decodedValue,
+        );
+        assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+      });
+
+      it("should encode '' (empty strings) elements as `0x0000`", async () => {
+        const testCase = {
+          valueType: 'bytes[CompactBytesArray]',
+          decodedValue: ['0xaabb', '', '', '0xbeefbeefbeefbeefbeef'],
+          encodedValue: '0x0002aabb00000000000abeefbeefbeefbeefbeef',
+        };
+
+        const encodedValue = encodeValueType(
+          testCase.valueType,
+          testCase.decodedValue,
+        );
+        assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+      });
+
+      it('should throw when trying to encode a array that contains non hex string as `bytes[CompactBytesArray]`', async () => {
+        expect(() => {
+          encodeValueType('bytes[CompactBytesArray]', [
+            'some random string',
+            'another random strings',
+            '0xaabbccdd',
+          ]);
+        }).to.throw(
+          "Couldn't encode bytes[CompactBytesArray], value at index 0 is not hex",
+        );
+      });
+
+      it('should throw when trying to encode a `bytes[CompactBytesArray]` with a bytes length bigger than 65_535', async () => {
+        expect(() => {
+          encodeValueType('bytes[CompactBytesArray]', [
+            '0x' + 'ab'.repeat(66_0000),
+          ]);
+        }).to.throw(
+          "Couldn't encode bytes[CompactBytesArray], value at index 0 exceeds 65_535 bytes",
+        );
+      });
+    });
+
+    describe('when encoding uintN[CompactBytesArray]', () => {
+      it('should throw if trying to encode a value that exceeds the maximal lenght of bytes for this type', async () => {
+        expect(() => {
+          encodeValueType('uint8[CompactBytesArray]', [15, 178, 266]);
+        }).to.throw('Hex uint8 value at index 2 does not fit in 1 bytes');
+      });
+
+      it('should throw if trying to decode a value that exceeds the maximal lenght of bytes for this type', async () => {
+        expect(() => {
+          decodeValueType(
+            'uint8[CompactBytesArray]',
+            '0x00010100012b00014900020100',
+          );
+        }).to.throw('Hex uint8 value at index 3 does not fit in 1 bytes');
+      });
+    });
+
+    describe('when encoding bytesN[CompactBytesArray]', () => {
+      it('should throw if trying to encode a value that exceeds the maximal lenght of bytes for this type', async () => {
+        expect(() => {
+          encodeValueType('bytes4[CompactBytesArray]', [
+            '0xe6520726',
+            '0x272696e6',
+            '0x72062616',
+            '0xab7f11e3aabbcc',
+          ]);
+        }).to.throw('Hex bytes4 value at index 3 does not fit in 4 bytes');
+      });
+
+      it('should throw if trying to decode a value that exceeds the maximal lenght of bytes for this type', async () => {
+        expect(() => {
+          decodeValueType(
+            'bytes4[CompactBytesArray]',
+            '0x0004e65207260004272696e60004720626160007ab7f11e3aabbcc',
+          );
+        }).to.throw('Hex bytes4 value at index 3 does not fit in 4 bytes');
+      });
+    });
+
+    describe('when decoding a bytes[CompactBytesArray] that contains `0000` entries', () => {
+      it("should decode as '' (empty string) in the decoded array", async () => {
+        const testCase = {
+          valueType: 'bytes[CompactBytesArray]',
+          decodedValue: ['0xaabb', '', '', '0xbeefbeefbeefbeefbeef'],
+          encodedValue: '0x0002aabb00000000000abeefbeefbeefbeefbeef',
+        };
+
+        const decodedValue = decodeValueType(
+          testCase.valueType,
+          testCase.encodedValue,
+        );
+        assert.deepStrictEqual(decodedValue, testCase.decodedValue);
+      });
+
+      it('should throw when trying to decode a `bytes[CompactBytesArray]` with an invalid length byte', async () => {
+        expect(() => {
+          decodeValueType('bytes[CompactBytesArray]', '0x0005cafe');
+        }).to.throw("Couldn't decode bytes[CompactBytesArray]");
       });
     });
 
@@ -201,6 +400,18 @@ describe('encoder', () => {
           '0x0000000000000000000000000000000000000000000000000000000000000008', // ... 0000 0000 1000
         decodedValue:
           '0x0000000000000000000000000000000000000000000000000000000000000008',
+      },
+      {
+        valueContent: 'Boolean',
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000000',
+        decodedValue: false,
+      },
+      {
+        valueContent: 'Boolean',
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000000001',
+        decodedValue: true,
       },
     ];
 

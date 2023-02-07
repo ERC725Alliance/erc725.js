@@ -23,7 +23,6 @@ import { Method } from '../types/Method';
 import { METHODS } from '../constants/constants';
 
 let idCount = 0;
-// @ts-ignore
 const web3abiDecoder = abi.default;
 
 export function decodeResult(method: Method, hexString: string) {

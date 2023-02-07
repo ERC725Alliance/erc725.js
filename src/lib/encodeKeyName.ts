@@ -101,8 +101,7 @@ export const encodeDynamicKeyPart = (
       // NOTE: we could verify if the number given is not too big for the given size.
       // e.g.: uint8 max value is 255, uint16 is 65535...
 
-      const hexNumber = numberToHex(parseInt(value, 10)).slice(2);
-
+      const hexNumber = numberToHex(value).slice(2);
       if (hexNumber.length <= bytes * 2) {
         return padLeft(hexNumber, bytes * 2);
       }

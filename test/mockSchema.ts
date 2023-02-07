@@ -6,9 +6,7 @@ import { utf8ToHex } from 'web3-utils';
 
 import { ERC725JSONSchema } from '../src/types/ERC725JSONSchema';
 
-// TS can't get the types from the import...
-// @ts-ignore
-const abiCoder: AbiCoder.AbiCoder = AbiCoder;
+const abiCoder = AbiCoder;
 
 export const mockSchema: (ERC725JSONSchema & {
   returnRawData?: string | string[];

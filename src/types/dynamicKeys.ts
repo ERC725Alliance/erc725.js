@@ -8,3 +8,8 @@ export interface DynamicKeyPartInput {
   dynamicKeyParts: DynamicKeyParts;
   value: EncodeDataType;
 }
+
+export interface DynamicKeyPart {
+  type: string;
+  value: string | boolean | number;
+}

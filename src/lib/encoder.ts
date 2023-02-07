@@ -36,6 +36,7 @@ import {
   padLeft,
   toChecksumAddress,
   utf8ToHex,
+  stripHexPrefix,
 } from 'web3-utils';
 
 import { JSONURLDataToEncode, URLDataWithHash } from '../types';
@@ -65,9 +66,7 @@ const encodeDataSourceWithHash = (
   );
 };
 
-// TS can't get the types from the import...
-// @ts-ignore
-const abiCoder: AbiCoder.AbiCoder = AbiCoder;
+const abiCoder = AbiCoder;
 
 const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   const hashFunctionSig = value.slice(0, 10);
@@ -80,7 +79,243 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   return { hashFunction: hashFunction.name, hash: dataHash, url: dataSource };
 };
 
+/**
+ * Encodes bytes to CompactBytesArray
+ *
+ * @param values An array of BytesLike strings
+ * @returns bytes[CompactBytesArray]
+ */
+const encodeCompactBytesArray = (values: string[]): string => {
+  const compactBytesArray = values
+    .filter((value, index) => {
+      if (!isHex(value)) {
+        throw new Error(
+          `Couldn't encode bytes[CompactBytesArray], value at index ${index} is not hex`,
+        );
+      }
+
+      if (value.length > 65_535 * 2 + 2) {
+        throw new Error(
+          `Couldn't encode bytes[CompactBytesArray], value at index ${index} exceeds 65_535 bytes`,
+        );
+      }
+
+      return true;
+    })
+    .reduce((acc, value) => {
+      const numberOfBytes = stripHexPrefix(value).length / 2;
+      const hexNumber = padLeft(numberToHex(numberOfBytes), 4);
+      return acc + stripHexPrefix(hexNumber) + stripHexPrefix(value);
+    }, '0x');
+
+  return compactBytesArray;
+};
+
+/**
+ * Decodes CompactBytesArray of type bytes
+ *
+ * @param compactBytesArray A bytes[CompactBytesArray]
+ * @returns An array of BytesLike strings decode from `compactBytesArray`
+ */
+const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
+  if (!isHex(compactBytesArray))
+    throw new Error("Couldn't decode, value is not hex");
+
+  let pointer = 0;
+  const encodedValues: string[] = [];
+
+  const strippedCompactBytesArray = stripHexPrefix(compactBytesArray);
+
+  while (pointer < strippedCompactBytesArray.length) {
+    const length = hexToNumber(
+      '0x' + strippedCompactBytesArray.slice(pointer, pointer + 4),
+    );
+
+    if (length === 0) {
+      // empty entries (`0x0000`) in a CompactBytesArray are returned as empty entries in the array
+      encodedValues.push('');
+    } else {
+      encodedValues.push(
+        '0x' +
+          strippedCompactBytesArray.slice(
+            pointer + 4,
+            pointer + 2 * (length + 2),
+          ),
+      );
+    }
+
+    pointer += 2 * (length + 2);
+  }
+
+  if (pointer > strippedCompactBytesArray.length)
+    throw new Error("Couldn't decode bytes[CompactBytesArray]");
+
+  return encodedValues;
+};
+
+/**
+ * Encodes bytesN to CompactBytesArray
+ *
+ * @param values An array of BytesLike strings
+ * @param numberOfBytes The number of bytes for each value from `values`
+ * @returns bytesN[CompactBytesArray]
+ */
+const encodeBytesNCompactBytesArray = (
+  values: string[],
+  numberOfBytes: number,
+): string => {
+  values.forEach((value, index) => {
+    if (stripHexPrefix(value).length > numberOfBytes * 2)
+      throw new Error(
+        `Hex bytes${numberOfBytes} value at index ${index} does not fit in ${numberOfBytes} bytes`,
+      );
+  });
+
+  return encodeCompactBytesArray(values);
+};
+
+/**
+ * Decodes CompactBytesArray of type bytesN
+ *
+ * @param compactBytesArray A bytesN[CompactBytesArray]
+ * @param numberOfBytes The number of bytes allowed per each element from `compactBytesArray`
+ * @returns An array of BytesLike strings decoded from `compactBytesArray`
+ */
+const decodeBytesNCompactBytesArray = (
+  compactBytesArray: string,
+  numberOfBytes: number,
+): string[] => {
+  const bytesValues = decodeCompactBytesArray(compactBytesArray);
+  bytesValues.forEach((bytesValue, index) => {
+    if (stripHexPrefix(bytesValue).length > numberOfBytes * 2)
+      throw new Error(
+        `Hex bytes${numberOfBytes} value at index ${index} does not fit in ${numberOfBytes} bytes`,
+      );
+  });
+
+  return bytesValues;
+};
+
+/**
+ * @returns Encoding/decoding for bytes1[CompactBytesArray] to bytes32[COmpactBytesArray]
+ */
+const returnTypesOfBytesNCompactBytesArray = () => {
+  const types: Record<
+    string,
+    { encode: (value: string[]) => string; decode: (value: string) => string[] }
+  > = {};
+
+  for (let i = 1; i < 33; i++) {
+    types[`bytes${i}[CompactBytesArray]`] = {
+      encode: (value: string[]) => encodeBytesNCompactBytesArray(value, i),
+      decode: (value: string) => decodeBytesNCompactBytesArray(value, i),
+    };
+  }
+  return types;
+};
+
+/**
+ * Encodes uintN to CompactBytesArray
+ * @param values An array of BytesLike strings
+ * @param numberOfBytes The number of bytes for each value from `values`
+ * @returns uintN[CompactBytesArray]
+ */
+const encodeUintNCompactBytesArray = (
+  values: number[],
+  numberOfBytes: number,
+): string => {
+  const hexValues: string[] = values.map((value, index) => {
+    const hexNumber = stripHexPrefix(numberToHex(value)).padStart(
+      numberOfBytes * 2,
+      '0',
+    );
+    if (hexNumber.length > numberOfBytes * 2)
+      throw new Error(
+        `Hex uint${
+          numberOfBytes * 8
+        } value at index ${index} does not fit in ${numberOfBytes} bytes`,
+      );
+    return hexNumber;
+  });
+
+  return encodeCompactBytesArray(hexValues);
+};
+
+/**
+ * Decodes CompactBytesArray of type uintN
+ * @param compactBytesArray A uintN[CompactBytesArray]
+ * @param numberOfBytes The number of bytes allowed per each element from `compactBytesArray`
+ * @returns An array of numbers decoded from `compactBytesArray`
+ */
+const decodeUintNCompactBytesArray = (
+  compactBytesArray: string,
+  numberOfBytes: number,
+): number[] => {
+  const hexValues = decodeCompactBytesArray(compactBytesArray);
+
+  return hexValues.map((hexValue, index) => {
+    const hexValueStripped = stripHexPrefix(hexValue);
+    if (hexValueStripped.length > numberOfBytes * 2)
+      throw new Error(
+        `Hex uint${
+          numberOfBytes * 8
+        } value at index ${index} does not fit in ${numberOfBytes} bytes`,
+      );
+    return hexToNumber(hexValue);
+  });
+};
+
+/**
+ * @returns Encoding/decoding for uint8[CompactBytesArray] to uint256[COmpactBytesArray]
+ */
+const returnTypesOfUintNCompactBytesArray = () => {
+  const types: Record<
+    string,
+    { encode: (value: number[]) => string; decode: (value: string) => number[] }
+  > = {};
+
+  for (let i = 1; i < 33; i++) {
+    types[`uint${i * 8}[CompactBytesArray]`] = {
+      encode: (value: number[]) => encodeUintNCompactBytesArray(value, i),
+      decode: (value: string) => decodeUintNCompactBytesArray(value, i),
+    };
+  }
+  return types;
+};
+
+/**
+ * Encodes any set of strings to string[CompactBytesArray]
+ *
+ * @param values An array of non restricted strings
+ * @returns string[CompactBytesArray]
+ */
+const encodeStringCompactBytesArray = (values: string[]): string => {
+  const hexValues: string[] = values.map((element) => utf8ToHex(element));
+
+  return encodeCompactBytesArray(hexValues);
+};
+
+/**
+ * Decode a string[CompactBytesArray] to an array of strings
+ * @param compactBytesArray A string[CompactBytesArray]
+ * @returns An array of strings
+ */
+const decodeStringCompactBytesArray = (compactBytesArray: string): string[] => {
+  const hexValues: string[] = decodeCompactBytesArray(compactBytesArray);
+  const stringValues: string[] = hexValues.map((element) => hexToUtf8(element));
+
+  return stringValues;
+};
+
 const valueTypeEncodingMap = {
+  bool: {
+    encode: (value: boolean) => abiCoder.encodeParameter('bool', value),
+    decode: (value: string) => abiCoder.decodeParameter('bool', value),
+  },
+  boolean: {
+    encode: (value: boolean) => abiCoder.encodeParameter('bool', value),
+    decode: (value: string) => abiCoder.decodeParameter('bool', value),
+  },
   string: {
     encode: (value: string) => abiCoder.encodeParameter('string', value),
     decode: (value: string) => abiCoder.decodeParameter('string', value),
@@ -107,6 +342,14 @@ const valueTypeEncodingMap = {
     encode: (value: string) => abiCoder.encodeParameter('bytes', value),
     decode: (value: string) => abiCoder.decodeParameter('bytes', value),
   },
+  'bool[]': {
+    encode: (value: boolean) => abiCoder.encodeParameter('bool[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('bool[]', value),
+  },
+  'boolean[]': {
+    encode: (value: boolean) => abiCoder.encodeParameter('bool[]', value),
+    decode: (value: string) => abiCoder.decodeParameter('bool[]', value),
+  },
   'string[]': {
     encode: (value: string[]) => abiCoder.encodeParameter('string[]', value),
     decode: (value: string) => abiCoder.decodeParameter('string[]', value),
@@ -132,9 +375,19 @@ const valueTypeEncodingMap = {
     encode: (value: string[]) => abiCoder.encodeParameter('bytes[]', value),
     decode: (value: string) => abiCoder.decodeParameter('bytes[]', value),
   },
+  'bytes[CompactBytesArray]': {
+    encode: (value: string[]) => encodeCompactBytesArray(value),
+    decode: (value: string) => decodeCompactBytesArray(value),
+  },
+  'string[CompactBytesArray]': {
+    encode: (value: string[]) => encodeStringCompactBytesArray(value),
+    decode: (value: string) => decodeStringCompactBytesArray(value),
+  },
+  ...returnTypesOfBytesNCompactBytesArray(),
+  ...returnTypesOfUintNCompactBytesArray(),
 };
 
-// Use enum for type bellow
+// Use enum for type below
 // Is it this enum ERC725JSONSchemaValueType? (If so, custom is missing from enum)
 
 export const valueContentEncodingMap = (valueContent: string) => {
@@ -325,6 +578,21 @@ export const valueContentEncodingMap = (valueContent: string) => {
         },
       };
     }
+    case 'Boolean': {
+      return {
+        type: 'bool',
+        encode: (value): string => {
+          return valueTypeEncodingMap.bool.encode(value);
+        },
+        decode: (value: string): boolean => {
+          try {
+            return valueTypeEncodingMap.bool.decode(value) as any as boolean;
+          } catch (error) {
+            throw new Error(`Value ${value} is not a boolean`);
+          }
+        },
+      };
+    }
     default: {
       return {
         type: 'unknown',
@@ -347,13 +615,17 @@ export const valueContentEncodingMap = (valueContent: string) => {
 
 export function encodeValueType(
   type: string,
-  value: string | string[] | number | number[],
+  value: string | string[] | number | number[] | boolean | boolean[],
 ): string {
   if (!valueTypeEncodingMap[type]) {
     throw new Error('Could not encode valueType: "' + type + '".');
   }
 
-  return value ? valueTypeEncodingMap[type].encode(value) : value;
+  if (typeof value === 'undefined' || value === null) {
+    return value;
+  }
+
+  return valueTypeEncodingMap[type].encode(value);
 }
 
 export function decodeValueType(type: string, value: string) {
@@ -363,12 +635,16 @@ export function decodeValueType(type: string, value: string) {
 
   if (value === '0x') return null;
 
-  return value ? valueTypeEncodingMap[type].decode(value) : value;
+  if (typeof value === 'undefined' || value === null) {
+    return value;
+  }
+
+  return valueTypeEncodingMap[type].decode(value);
 }
 
 export function encodeValueContent(
   valueContent: string,
-  value: string | number | AssetURLEncode | JSONURLDataToEncode,
+  value: string | number | AssetURLEncode | JSONURLDataToEncode | boolean,
 ): string | false {
   if (valueContent.slice(0, 2) === '0x') {
     return valueContent === value ? value : false;
@@ -380,16 +656,20 @@ export function encodeValueContent(
     throw new Error(`Could not encode valueContent: ${valueContent}.`);
   }
 
-  if (!value) {
+  if (value === null || value === undefined) {
     return '0x';
   }
 
   if (
-    (valueContent === 'AssetURL' || valueContent === 'JSONURL') &&
+    (valueContent === 'AssetURL' ||
+      valueContent === 'JSONURL' ||
+      valueContent === 'Boolean') &&
     typeof value === 'string'
   ) {
+    const expectedValueType = valueContent === 'Boolean' ? 'boolean' : 'object';
+
     throw new Error(
-      `Could not encode valueContent: ${valueContent} with value: ${value}. Expected object.`,
+      `Could not encode valueContent: ${valueContent} with value: ${value}. Expected ${expectedValueType}.`,
     );
   }
 
@@ -399,7 +679,7 @@ export function encodeValueContent(
 export function decodeValueContent(
   valueContent: string,
   value: string,
-): string | URLDataWithHash | number | null {
+): string | URLDataWithHash | number | boolean | null {
   if (valueContent.slice(0, 2) === '0x') {
     return valueContent === value ? value : null;
   }
