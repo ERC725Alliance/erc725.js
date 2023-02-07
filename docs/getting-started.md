@@ -60,7 +60,7 @@ const schemas = [
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
 const RPC_URL = 'https://rpc.l16.lukso.network';
 const config = {
-  ipfsGateway: 'https://ipfs.lukso.network/ipfs/',
+  ipfsGateway: 'https://YOUR-IPFS-GATEWAY/ipfs/',
 };
 
 const erc725 = new ERC725(schemas, address, RPC_URL, config);

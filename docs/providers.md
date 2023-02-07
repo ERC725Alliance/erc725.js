@@ -32,9 +32,11 @@ const erc725 = new ERC725([], '0x...', ethereumProvider);
 
 ## Web3
 
+The following code snippet will use the web3 provider available at web3.providers from the corresponding `web3` library.
+
 :::caution Warning
 
-Web3 providers are being deprecated. Please provide an RPC URL instead.
+Web3.js providers are being deprecated. Please provide an RPC URL or injected Ethereum provider instead.
 
 :::
 
