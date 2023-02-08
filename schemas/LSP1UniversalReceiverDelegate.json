@@ -5,5 +5,12 @@
     "keyType": "Singleton",
     "valueType": "address",
     "valueContent": "Address"
+  },
+  {
+    "name": "LSP1UniversalReceiverDelegate:<bytes32>",
+    "key": "0x0cfc51aec37c55a4d0b10000<bytes32>",
+    "keyType": "Mapping",
+    "valueType": "address",
+    "valueContent": "Address"
   }
 ]
