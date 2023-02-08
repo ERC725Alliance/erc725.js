@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.17.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.17.0...v0.17.1) (2023-02-08)
+
+### ⚠ BREAKING CHANGES
+
+- update schemas (#274)
+
 ## [0.17.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.16.0...v0.17.0) (2023-02-07)
 
 ### ⚠ BREAKING CHANGES
