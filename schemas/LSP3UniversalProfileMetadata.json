@@ -28,13 +28,6 @@
     "valueContent": "(Bytes4,Number)"
   },
   {
-    "name": "LSP5ReceivedAssetsMap:<address>",
-    "key": "0x812c4334633eb816c80d0000<address>",
-    "keyType": "Mapping",
-    "valueType": "(bytes4,bytes8)",
-    "valueContent": "(Bytes4,Number)"
-  },
-  {
     "name": "LSP5ReceivedAssets[]",
     "key": "0x6460ee3c0aac563ccbf76d6e1d07bada78e3a9514e6382b736ed3f478ab7b90b",
     "keyType": "Array",
@@ -42,9 +35,30 @@
     "valueContent": "Address"
   },
   {
+    "name": "LSP5ReceivedAssetsMap:<address>",
+    "key": "0x812c4334633eb816c80d0000<address>",
+    "keyType": "Mapping",
+    "valueType": "(bytes4,bytes8)",
+    "valueContent": "(Bytes4,Number)"
+  },
+  {
     "name": "LSP1UniversalReceiverDelegate",
     "key": "0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47",
     "keyType": "Singleton",
+    "valueType": "address",
+    "valueContent": "Address"
+  },
+  {
+    "name": "LSP1UniversalReceiverDelegate:<bytes32>",
+    "key": "0x0cfc51aec37c55a4d0b10000<bytes32>",
+    "keyType": "Mapping",
+    "valueType": "address",
+    "valueContent": "Address"
+  },
+  {
+    "name": "LSP17Extension:<bytes4>",
+    "key": "0xcee78b4094da860110960000<bytes4>",
+    "keyType": "Mapping",
     "valueType": "address",
     "valueContent": "Address"
   }
