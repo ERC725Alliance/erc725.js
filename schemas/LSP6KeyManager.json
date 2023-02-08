@@ -14,31 +14,17 @@
     "valueContent": "BitArray"
   },
   {
-    "name": "AddressPermissions:AllowedAddresses:<address>",
-    "key": "0x4b80742de2bfc6dd6b3c0000<address>",
+    "name": "AddressPermissions:AllowedCalls:<address>",
+    "key": "0x4b80742de2bf393a64c70000<address>",
     "keyType": "MappingWithGrouping",
-    "valueType": "address[]",
-    "valueContent": "Address"
+    "valueType": "(bytes4,address,bytes4)[CompactBytesArray]",
+    "valueContent": "(Bytes4,Address,Bytes4)"
   },
   {
-    "name": "AddressPermissions:AllowedFunctions:<address>",
-    "key": "0x4b80742de2bf8efea1e80000<address>",
+    "name": "AddressPermissions:AllowedERC725YDataKeys:<address>",
+    "key": "0x4b80742de2bf866c29110000<address>",
     "keyType": "MappingWithGrouping",
-    "valueType": "bytes4[]",
-    "valueContent": "Bytes4"
-  },
-  {
-    "name": "AddressPermissions:AllowedStandards:<address>",
-    "key": "0x4b80742de2bf3efa94a30000<address>",
-    "keyType": "MappingWithGrouping",
-    "valueType": "bytes4[]",
-    "valueContent": "Bytes4"
-  },
-  {
-    "name": "AddressPermissions:AllowedERC725YKeys:<address>",
-    "key": "0x4b80742de2bf90b8b4850000<address>",
-    "keyType": "MappingWithGrouping",
-    "valueType": "bytes32[]",
-    "valueContent": "Bytes32"
+    "valueType": "bytes[CompactBytesArray]",
+    "valueContent": "Bytes"
   }
 ]
