@@ -2,7 +2,6 @@
 
 export type ERC725JSONSchemaKeyType =
   | 'Singleton'
-  | 'Mapping'
   | 'Array'
   | 'Mapping'
   | 'MappingWithGrouping';
