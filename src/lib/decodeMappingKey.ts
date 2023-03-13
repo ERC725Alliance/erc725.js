@@ -18,14 +18,13 @@
  * @date 2022
  */
 
-import { isHex } from 'web3-utils';
-import Web3 from 'web3';
+import { isHex, padLeft } from 'web3-utils';
 import { decodeValueType } from './encoder';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { DynamicKeyPart } from '../types/dynamicKeys';
 
 function make32BytesLong(s: string): string {
-  return Web3.utils.padLeft(s, 64);
+  return padLeft(s, 64);
 }
 
 function isDynamicKeyPart(keyPartName: string): boolean {
