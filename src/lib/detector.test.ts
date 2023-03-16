@@ -64,7 +64,7 @@ describe('supportsInterface', () => {
   });
 });
 
-describe.only('checkPermissions', () => {
+describe('checkPermissions', () => {
   describe('test with single permission', () => {
     it('should return true when single literal permission matches granted permissions', async () => {
       const requiredPermissions = 'CHANGEOWNER';
