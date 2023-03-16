@@ -21,6 +21,8 @@
  * @date 2022
  */
 
+import { LSP6_DEFAULT_PERMISSIONS } from '../constants/constants';
+
 import {
   AddressProviderOptions,
   INTERFACE_IDS_0_7_0,
@@ -53,4 +55,33 @@ export const supportsInterface = async (
   } catch (error) {
     throw new Error(`Error checking the interface: ${error}`);
   }
+};
+
+function mapPermission(permission: string): string {
+  return LSP6_DEFAULT_PERMISSIONS[permission] || permission;
+}
+
+export const checkPermissions = (
+  requiredPermissions: string[] | string,
+  grantedPermissions: string,
+): boolean => {
+  // Convert requiredPermissions to an array if it's a single string
+  const requiredPermissionArray: string[] = Array.isArray(requiredPermissions)
+    ? requiredPermissions
+    : [requiredPermissions];
+
+  // Map the literal permissions to their bytes32 representation
+  const mappedPermissionArray: string[] =
+    requiredPermissionArray.map(mapPermission);
+
+  // Perform the AND operation check for each required permission
+  return mappedPermissionArray.every((requiredPermission: string) => {
+    const requiredPermissionBigInt = BigInt(requiredPermission);
+    const grantedPermissionsBigInt = BigInt(grantedPermissions);
+
+    return (
+      (requiredPermissionBigInt & grantedPermissionsBigInt) ===
+      requiredPermissionBigInt
+    );
+  });
 };
