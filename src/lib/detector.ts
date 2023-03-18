@@ -57,7 +57,26 @@ export const supportsInterface = async (
   }
 };
 
+function isValid32ByteHexString(str: string): boolean {
+  return (
+    str.startsWith('0x') &&
+    str.length === 66 &&
+    str
+      .slice(2)
+      .split('')
+      .every((char) => '0123456789abcdefABCDEF'.includes(char))
+  );
+}
+
 function mapPermission(permission: string): string {
+  if (
+    !LSP6_DEFAULT_PERMISSIONS[permission] &&
+    !isValid32ByteHexString(permission)
+  ) {
+    throw new Error(
+      'Invalid permission string. It must be a valid 32-byte hex string or a known permission name.',
+    );
+  }
   return LSP6_DEFAULT_PERMISSIONS[permission] || permission;
 }
 
@@ -65,6 +84,13 @@ export const checkPermissions = (
   requiredPermissions: string[] | string,
   grantedPermissions: string,
 ): boolean => {
+  // Validate the grantedPermissions string
+  if (!isValid32ByteHexString(grantedPermissions)) {
+    throw new Error(
+      'Invalid grantedPermissions string. It must be a valid 32-byte hex string.',
+    );
+  }
+
   // Convert requiredPermissions to an array if it's a single string
   const requiredPermissionArray: string[] = Array.isArray(requiredPermissions)
     ? requiredPermissions
