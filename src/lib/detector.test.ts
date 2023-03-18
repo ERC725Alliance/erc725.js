@@ -64,7 +64,7 @@ describe('supportsInterface', () => {
   });
 });
 
-describe.only('checkPermissions', () => {
+describe('checkPermissions', () => {
   describe('test with single permission', () => {
     it('should throw an error when given an invalid permission string', async () => {
       const requiredPermissions = 'INVALIDPERMISSION';
