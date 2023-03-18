@@ -57,6 +57,11 @@ export const supportsInterface = async (
   }
 };
 
+/**
+ * @notice Check if the given string is a valid 32-byte hex string.
+ * @param str The string to be checked.
+ * @return A boolean value indicating whether the string is a valid 32-byte hex string.
+ */
 function isValid32ByteHexString(str: string): boolean {
   return (
     str.startsWith('0x') &&
@@ -68,6 +73,12 @@ function isValid32ByteHexString(str: string): boolean {
   );
 }
 
+/**
+ * @notice Map a permission to its corresponding bytes32 representation.
+ * @param permission The permission string to be mapped.
+ * @return The bytes32 representation of the permission.
+ * @dev Throws an error if the input is not a known permission name or a valid 32-byte hex string.
+ */
 function mapPermission(permission: string): string {
   if (
     !LSP6_DEFAULT_PERMISSIONS[permission] &&
@@ -80,6 +91,13 @@ function mapPermission(permission: string): string {
   return LSP6_DEFAULT_PERMISSIONS[permission] || permission;
 }
 
+/**
+ * @notice Check if the required permissions are included in the granted permissions.
+ * @param requiredPermissions An array of required permissions or a single required permission.
+ * @param grantedPermissions The granted permissions as a 32-byte hex string.
+ * @return A boolean value indicating whether the required permissions are included in the granted permissions.
+ * @dev Throws an error if the grantedPermissions input is not a valid 32-byte hex string.
+ */
 export const checkPermissions = (
   requiredPermissions: string[] | string,
   grantedPermissions: string,
