@@ -263,7 +263,7 @@ export function encodeKey(
             key: schema.key,
             value: encodeKeyValue(
               'Number',
-              'uint256',
+              'uint128',
               value.length.toString(),
               schema.name,
             ) as string,

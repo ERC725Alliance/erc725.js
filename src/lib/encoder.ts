@@ -37,6 +37,7 @@ import {
   toChecksumAddress,
   utf8ToHex,
   stripHexPrefix,
+  toDecimal,
 } from 'web3-utils';
 
 import { JSONURLDataToEncode, URLDataWithHash } from '../types';
@@ -325,6 +326,10 @@ const valueTypeEncodingMap = {
     decode: (value: string) => abiCoder.decodeParameter('address', value),
   },
   // NOTE: We could add conditional handling of numeric values here...
+  uint128: {
+    encode: (value: string | number) => padLeft(value, 32),
+    decode: (value: string) => toDecimal(value),
+  },
   uint256: {
     encode: (value: string | number) =>
       abiCoder.encodeParameter('uint256', value),
@@ -405,8 +410,8 @@ export const valueContentEncodingMap = (valueContent: string) => {
     // NOTE: Deprecated. For reference/testing in future
     case 'ArrayLength': {
       return {
-        type: 'uint256',
-        encode: (value: number | string) => padLeft(numberToHex(value), 64),
+        type: 'uint128',
+        encode: (value: number | string) => padLeft(numberToHex(value), 32),
         decode: (value: string) => hexToNumber(value),
       };
     }
