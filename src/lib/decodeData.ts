@@ -207,7 +207,7 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
       }
 
       const arrayLength =
-        decodeKeyValue('Number', 'uint256', valueElement.value, schema.name) ||
+        decodeKeyValue('Number', 'uint128', valueElement.value, schema.name) ||
         0;
 
       // This will not run if no match or arrayLength

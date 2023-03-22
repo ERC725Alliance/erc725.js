@@ -2,7 +2,7 @@
 // make one schema that tests every single type
 
 import AbiCoder from 'web3-eth-abi';
-import { utf8ToHex } from 'web3-utils';
+import { leftPad, utf8ToHex } from 'web3-utils';
 
 import { ERC725JSONSchema } from '../src/types/ERC725JSONSchema';
 
@@ -185,7 +185,7 @@ export const mockSchema: (ERC725JSONSchema & {
     // testing data
     // the full array of values
     returnRawData: [
-      abiCoder.encodeParameter('bytes', abiCoder.encodeParameter('uint128', 2)), // array length
+      leftPad(2, 32), // array length
       abiCoder.encodeParameter(
         'bytes',
         '0xc444009d38d3046bb0cf81fa2cd295ce46a67c78',
@@ -196,9 +196,7 @@ export const mockSchema: (ERC725JSONSchema & {
       ),
     ],
     returnRawDataArray: [
-      abiCoder.encodeParameter('bytes[]', [
-        abiCoder.encodeParameter('uint128', 2),
-      ]),
+      abiCoder.encodeParameter('bytes[]', [leftPad(2, 32)]), // array length
       abiCoder.encodeParameter('bytes[]', [
         '0xc444009d38d3046bb0cf81fa2cd295ce46a67c78',
       ]),
@@ -207,7 +205,7 @@ export const mockSchema: (ERC725JSONSchema & {
       ]),
     ],
     returnGraphData: [
-      '0x00000000000000000000000000000002', // array length
+      leftPad(2, 32), // array length
       '0xc444009d38d3046bb0cf81fa2cd295ce46a67c78',
       '0x4febc3491230571f6e1829e46602e3b110215a2e',
     ],
@@ -226,7 +224,7 @@ export const mockSchema: (ERC725JSONSchema & {
     // testing data
     // the full array of values
     returnRawData: [
-      abiCoder.encodeParameter('bytes', abiCoder.encodeParameter('uint128', 2)), // array length
+      leftPad(2, 32), // array length
       abiCoder.encodeParameter('bytes', '0x'),
       abiCoder.encodeParameter(
         'bytes',
@@ -234,16 +232,14 @@ export const mockSchema: (ERC725JSONSchema & {
       ),
     ],
     returnRawDataArray: [
-      abiCoder.encodeParameter('bytes[]', [
-        abiCoder.encodeParameter('uint128', 2),
-      ]),
+      abiCoder.encodeParameter('bytes[]', [leftPad(2, 32)]),
       abiCoder.encodeParameter('bytes[]', ['0x']),
       abiCoder.encodeParameter('bytes[]', [
         '0x4febc3491230571f6e1829e46602e3b110215a2e',
       ]),
     ],
     returnGraphData: [
-      '0x00000000000000000000000000000002', // array length
+      leftPad(2, 32), // array length
       '0x',
       '0x4febc3491230571f6e1829e46602e3b110215a2e',
     ],
