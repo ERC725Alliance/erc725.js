@@ -42,12 +42,11 @@ describe('encoder', () => {
       {
         valueType: 'address',
         decodedValue: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-        encodedValue:
-          '0x000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec7',
+        encodedValue: '0xdac17f958d2ee523a2206206994597c13d831ec7',
       },
       {
         valueType: 'uint256',
-        decodedValue: '1337',
+        decodedValue: 1337,
         encodedValue:
           '0x0000000000000000000000000000000000000000000000000000000000000539',
       },
@@ -61,15 +60,12 @@ describe('encoder', () => {
       {
         valueType: 'bytes4',
         decodedValue: '0x13370000',
-        encodedValue:
-          '0x1337000000000000000000000000000000000000000000000000000000000000',
+        encodedValue: '0x13370000',
       },
       {
         valueType: 'bytes',
-        decodedValue:
-          '0x0000000000000000000000000000000000000000000000000000000000001337',
-        encodedValue:
-          '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000001337',
+        decodedValue: '0x1337',
+        encodedValue: '0x1337',
       },
       {
         valueType: 'string[]',
@@ -88,7 +84,7 @@ describe('encoder', () => {
       },
       {
         valueType: 'uint256[]',
-        decodedValue: ['1', '99'],
+        decodedValue: ['1', '99'], // TODO: return them as an array of `number` type, not an array of `string`
         encodedValue:
           '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000063',
       },
@@ -157,26 +153,22 @@ describe('encoder', () => {
       {
         valueType: 'bool',
         decodedValue: true,
-        encodedValue:
-          '0x0000000000000000000000000000000000000000000000000000000000000001',
+        encodedValue: '0x01',
       },
       {
         valueType: 'bool',
         decodedValue: false,
-        encodedValue:
-          '0x0000000000000000000000000000000000000000000000000000000000000000',
+        encodedValue: '0x00',
       },
       {
         valueType: 'boolean', // allow to specify "boolean"
         decodedValue: true,
-        encodedValue:
-          '0x0000000000000000000000000000000000000000000000000000000000000001',
+        encodedValue: '0x01',
       },
       {
         valueType: 'boolean', // allow to specify "boolean"
         decodedValue: false,
-        encodedValue:
-          '0x0000000000000000000000000000000000000000000000000000000000000000',
+        encodedValue: '0x00',
       },
       {
         valueType: 'bool[]',
@@ -402,14 +394,12 @@ describe('encoder', () => {
       },
       {
         valueContent: 'Boolean',
-        encodedValue:
-          '0x0000000000000000000000000000000000000000000000000000000000000000',
+        encodedValue: '0x00',
         decodedValue: false,
       },
       {
         valueContent: 'Boolean',
-        encodedValue:
-          '0x0000000000000000000000000000000000000000000000000000000000000001',
+        encodedValue: '0x01',
         decodedValue: true,
       },
     ];
