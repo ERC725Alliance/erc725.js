@@ -37,6 +37,8 @@ import {
   toChecksumAddress,
   utf8ToHex,
   stripHexPrefix,
+  padRight,
+  toHex,
 } from 'web3-utils';
 
 import { JSONURLDataToEncode, URLDataWithHash } from '../types';
@@ -309,38 +311,38 @@ const decodeStringCompactBytesArray = (compactBytesArray: string): string[] => {
 
 const valueTypeEncodingMap = {
   bool: {
-    encode: (value: boolean) => abiCoder.encodeParameter('bool', value),
-    decode: (value: string) => abiCoder.decodeParameter('bool', value),
+    encode: (value: boolean) => (value == true ? '0x01' : '0x00'),
+    decode: (value: string) => (value == '0x01' ? true : false),
   },
   boolean: {
-    encode: (value: boolean) => abiCoder.encodeParameter('bool', value),
-    decode: (value: string) => abiCoder.decodeParameter('bool', value),
+    encode: (value: boolean) => (value == true ? '0x01' : '0x00'),
+    decode: (value: string) => (value == '0x01' ? true : false),
   },
   string: {
-    encode: (value: string) => abiCoder.encodeParameter('string', value),
-    decode: (value: string) => abiCoder.decodeParameter('string', value),
+    encode: (value: string) => utf8ToHex(value),
+    decode: (value: string) => hexToUtf8(value),
   },
   address: {
-    encode: (value: string) => abiCoder.encodeParameter('address', value),
-    decode: (value: string) => abiCoder.decodeParameter('address', value),
+    // TODO: if there is more than 20 bytes, truncate, if there is less than 20 bytes, throw an error
+    encode: (value: string) => value.toLowerCase(),
+    decode: (value: string) => toChecksumAddress(value),
   },
   // NOTE: We could add conditional handling of numeric values here...
   uint256: {
-    encode: (value: string | number) =>
-      abiCoder.encodeParameter('uint256', value),
-    decode: (value: string) => abiCoder.decodeParameter('uint256', value),
+    encode: (value: string | number) => padLeft(numberToHex(value), 64),
+    decode: (value: string) => hexToNumber(value),
   },
   bytes32: {
-    encode: (value) => abiCoder.encodeParameter('bytes32', value),
-    decode: (value: string) => abiCoder.decodeParameter('bytes32', value),
+    encode: (value) => padRight(value, 64),
+    decode: (value: string) => value.slice(0, 66),
   },
   bytes4: {
-    encode: (value) => abiCoder.encodeParameter('bytes4', value),
-    decode: (value: string) => abiCoder.decodeParameter('bytes4', value),
+    encode: (value) => padRight(value, 8),
+    decode: (value: string) => value.slice(0, 10),
   },
   bytes: {
-    encode: (value: string) => abiCoder.encodeParameter('bytes', value),
-    decode: (value: string) => abiCoder.decodeParameter('bytes', value),
+    encode: (value: string) => toHex(value),
+    decode: (value: string) => value,
   },
   'bool[]': {
     encode: (value: boolean) => abiCoder.encodeParameter('bool[]', value),
