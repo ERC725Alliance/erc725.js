@@ -408,6 +408,7 @@ export const valueContentEncodingMap = (valueContent: string) => {
       };
     }
     // NOTE: Deprecated. For reference/testing in future
+    // this valueContent does not exist
     case 'ArrayLength': {
       return {
         type: 'uint128',
