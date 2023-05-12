@@ -76,13 +76,13 @@ const config = {
   ipfsGateway: 'https://2eff.lukso.dev/ipfs/',
 };
 
-const erc725 = new ERC725(schema, address, RPC_URL, config);
+const myErc725 = new ERC725(schema, address, RPC_URL, config);
 ```
 
 ## Usage
 
 ```js
-await erc725.getOwner();
+await myErc725.getOwner();
 // > '0x28D25E70819140daF65b724158D00c373D1a18ee'
 
 await myErc725.getData();
