@@ -351,7 +351,7 @@ export const mockSchema: (ERC725JSONSchema & {
     ]),
     returnGraphData:
       '0x0000000000000000000000000000000000000000000000000000000000000063',
-    expectedResult: '99',
+    expectedResult: 99,
   },
 
   // Case 14
@@ -478,8 +478,8 @@ export const mockSchema: (ERC725JSONSchema & {
     ]),
     returnGraphData: abiCoder.encodeParameter('uint256[]', [123, 456]),
     expectedResult: [
-      '123', // (firefox metamask key)
-      '456', // {firefox metamask key}
+      123, // (firefox metamask key)
+      456, // {firefox metamask key}
     ],
   },
 

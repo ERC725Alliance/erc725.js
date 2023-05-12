@@ -102,7 +102,7 @@ describe('decodeData', () => {
       [schema],
     );
 
-    expect(decodedData.value).to.eql(['0x11223344', '12']); // TODO: we may want to return a number instead of a string.
+    expect(decodedData.value).to.eql(['0x11223344', 12]);
   });
 
   it('parses type Array correctly', () => {
@@ -183,7 +183,7 @@ describe('tuple', () => {
         valueContent: '(Bytes4,Number)',
         valueType: '(bytes4,bytes8)',
         encodedValue: '0xdeadbeaf000000000000000c',
-        decodedValue: ['0xdeadbeaf', '12'],
+        decodedValue: ['0xdeadbeaf', 12],
       },
     ]; // TODO: add more cases? Address, etc.
 

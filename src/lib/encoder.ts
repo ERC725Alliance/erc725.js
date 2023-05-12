@@ -463,7 +463,12 @@ const valueTypeEncodingMap = {
   'uint256[]': {
     encode: (value: Array<number | string>) =>
       abiCoder.encodeParameter('uint256[]', value),
-    decode: (value: string) => abiCoder.decodeParameter('uint256[]', value),
+    decode: (value: string) => {
+      // we want to return an array of numbers as [1, 2, 3], not an array of strings as [ '1', '2', '3']
+      return abiCoder
+        .decodeParameter('uint256[]', value)
+        .map((numberAsString) => parseInt(numberAsString));
+    },
   },
   'bytes32[]': {
     encode: (value: string[]) => abiCoder.encodeParameter('bytes32[]', value),
