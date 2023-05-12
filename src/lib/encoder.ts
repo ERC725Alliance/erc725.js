@@ -311,12 +311,12 @@ const decodeStringCompactBytesArray = (compactBytesArray: string): string[] => {
 
 const valueTypeEncodingMap = {
   bool: {
-    encode: (value: boolean) => (value == true ? '0x01' : '0x00'),
-    decode: (value: string) => (value == '0x01' ? true : false),
+    encode: (value: boolean) => (value === true ? '0x01' : '0x00'),
+    decode: (value: string) => value === '0x01',
   },
   boolean: {
-    encode: (value: boolean) => (value == true ? '0x01' : '0x00'),
-    decode: (value: string) => (value == '0x01' ? true : false),
+    encode: (value: boolean) => (value === true ? '0x01' : '0x00'),
+    decode: (value: string) => value === '0x01',
   },
   string: {
     encode: (value: string) => utf8ToHex(value),
