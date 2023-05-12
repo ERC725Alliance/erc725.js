@@ -257,13 +257,12 @@ describe('tuple', () => {
         isTuple: false,
         shouldThrow: true, // valueContent is not a valid hex value
       },
-      // TODO: add feature for this test
-      // {
-      //   valueType: '(bytes4,bytes4)',
-      //   valueContent: '(Number,0x1122334455)',
-      //   isTuple: false,
-      //   shouldThrow: true, // valueContent is bytes5 vs bytes4
-      // },
+      {
+        valueType: '(bytes4,bytes4)',
+        valueContent: '(Number,0x1122334455)',
+        isTuple: false,
+        shouldThrow: true, // valueContent is bytes5 vs bytes4
+      },
     ];
 
     testCases.forEach((testCase) => {

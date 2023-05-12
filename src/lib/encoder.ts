@@ -101,7 +101,7 @@ const encodeToBytesN = (
     valueToEncode = value;
   }
 
-  const numberOfBytesInType = parseInt(bytesN.slice(5), 10);
+  const numberOfBytesInType = parseInt(bytesN.split('bytes')[1], 10);
   const numberOfBytesInValue = countNumberOfBytes(valueToEncode);
 
   if (numberOfBytesInValue > numberOfBytesInType) {
@@ -467,7 +467,7 @@ const valueTypeEncodingMap = {
       // we want to return an array of numbers as [1, 2, 3], not an array of strings as [ '1', '2', '3']
       return abiCoder
         .decodeParameter('uint256[]', value)
-        .map((numberAsString) => parseInt(numberAsString));
+        .map((numberAsString) => parseInt(numberAsString, 10));
     },
   },
   'bytes32[]': {
@@ -512,7 +512,6 @@ export const valueContentEncodingMap = (valueContent: string) => {
     case 'Number': {
       return {
         type: 'uint256',
-        // TODO: extra logic to handle and always return a string number
         encode: (value: string) => {
           let parsedValue: number;
           try {
@@ -523,7 +522,7 @@ export const valueContentEncodingMap = (valueContent: string) => {
 
           return padLeft(numberToHex(parsedValue), 64);
         },
-        decode: (value) => hexToNumber(value).toString(),
+        decode: (value) => Number(hexToNumber(value)),
       };
     }
     // NOTE: This is not symmetrical, and always returns a checksummed address
