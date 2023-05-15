@@ -407,15 +407,6 @@ export const valueContentEncodingMap = (valueContent: string) => {
         decode: (value: string) => value,
       };
     }
-    // NOTE: Deprecated. For reference/testing in future
-    // this valueContent does not exist
-    case 'ArrayLength': {
-      return {
-        type: 'uint128',
-        encode: (value: number | string) => padLeft(numberToHex(value), 32),
-        decode: (value: string) => hexToNumber(value),
-      };
-    }
     case 'Number': {
       return {
         type: 'uint256',
