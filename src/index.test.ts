@@ -304,6 +304,55 @@ describe('Running @erc725/erc725.js tests...', () => {
     });
   });
 
+  describe('Getting data (using new getDataBatch) in schema by provider [e2e] - luksoTestnet', () => {
+    const web3 = new Web3('https://rpc.testnet.lukso.network');
+    const ERC725_BATCH_CONTRACT_ADDRESS =
+      '0x4b30900F119E11D2A8CAe18176c4f9840E586Cc4';
+
+    const e2eSchema: any = [
+      {
+        name: 'LSP3Profile',
+        key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+        keyType: 'Singleton',
+        valueContent: 'JSONURL',
+        valueType: 'bytes',
+      },
+      {
+        name: 'LSP1UniversalReceiverDelegate',
+        key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
+        keyType: 'Singleton',
+        valueContent: 'Address',
+        valueType: 'address',
+      },
+    ];
+
+    const e2eResults = [
+      {
+        name: 'LSP3Profile',
+        key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+        value: {
+          hashFunction: 'keccak256(utf8)',
+          hash: '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
+          url: 'ipfs://QmecrGejUQVXpW4zS948pNvcnQrJ1KiAoM6bdfrVcWZsn5',
+        },
+      },
+      {
+        name: 'LSP1UniversalReceiverDelegate',
+        key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
+        value: '0x36e4Eb6Ee168EF54B1E8e850ACBE51045214B313',
+      },
+    ];
+    it('with web3.currentProvider [ERC725Y_BATCH]', async () => {
+      const erc725 = new ERC725(
+        e2eSchema,
+        ERC725_BATCH_CONTRACT_ADDRESS,
+        web3.currentProvider,
+      );
+      const result = await erc725.getData();
+      assert.deepStrictEqual(result, e2eResults);
+    });
+  });
+
   describe('Get/fetch edge cases [mock]', () => {
     it('should return null if the JSONURL is not set [fetchData]', async () => {
       const provider = new HttpProvider(
