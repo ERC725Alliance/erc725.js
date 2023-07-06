@@ -61,6 +61,15 @@ export class ProviderWrapper {
   }
 
   async getErc725YVersion(address: string): Promise<ERC725_VERSION> {
+    const isErc725YBatch = await this.supportsInterface(
+      address,
+      ERC725Y_INTERFACE_IDS['5.0'],
+    );
+
+    if (isErc725YBatch) {
+      return ERC725_VERSION.ERC725_BATCH;
+    }
+
     const isErc725Y = await this.supportsInterface(
       address,
       ERC725Y_INTERFACE_IDS['3.0'],
@@ -197,6 +206,8 @@ export class ProviderWrapper {
     }
 
     switch (erc725Version) {
+      case ERC725_VERSION.ERC725_BATCH:
+        return this._getAllDataBatch(address, keyHashes);
       case ERC725_VERSION.ERC725:
         return this._getAllData(address, keyHashes);
       case ERC725_VERSION.ERC725_LEGACY:
@@ -204,6 +215,47 @@ export class ProviderWrapper {
       default:
         return [];
     }
+  }
+
+  private async _getAllDataBatch(
+    address: string,
+    keyHashes: string[],
+  ): Promise<GetDataReturn[]> {
+    if (this.type === ProviderTypes.ETHEREUM) {
+      const encodedResults = await this.callContract(
+        constructJSONRPC(
+          address,
+          Method.GET_DATA_BATCH,
+          abiCoder.encodeParameter('bytes32[]', keyHashes),
+        ),
+      );
+
+      const decodedValues = decodeResult(Method.GET_DATA_BATCH, encodedResults);
+
+      return keyHashes.map<GetDataReturn>((keyHash, index) => ({
+        key: keyHash,
+        value: decodedValues ? decodedValues[index] : decodedValues,
+      }));
+    }
+
+    const payload: JsonRpc[] = [
+      constructJSONRPC(
+        address,
+        Method.GET_DATA_BATCH,
+        abiCoder.encodeParameter('bytes32[]', keyHashes),
+      ),
+    ];
+
+    const results: any = await this.callContract(payload);
+    const decodedValues = decodeResult(
+      Method.GET_DATA_BATCH,
+      results[0].result,
+    );
+
+    return keyHashes.map<GetDataReturn>((key, index) => ({
+      key,
+      value: decodedValues ? decodedValues[index] : decodedValues,
+    }));
   }
 
   private async _getAllData(

@@ -1,6 +1,7 @@
 export enum Method {
   GET_DATA_LEGACY = 'getDataLegacy', // For legacy ERC725 with interface id: 0x2bd57b73 NOTE: I had to add Legacy at the end so the map keys stays unique
   GET_DATA = 'getData', // For latest ERC725 with interface id: 0x5a988c0f
+  GET_DATA_BATCH = 'getDataBatch',
   OWNER = 'owner',
   SUPPORTS_INTERFACE = 'supportsInterface', // https://eips.ethereum.org/EIPS/eip-165
   IS_VALID_SIGNATURE = 'isValidSignature', // https://eips.ethereum.org/EIPS/eip-1271
