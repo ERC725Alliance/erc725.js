@@ -157,7 +157,7 @@ describe('checkPermissions', () => {
     });
 
     it('should return false when one of the literal permissions does not match granted permissions', async () => {
-      const requiredPermissions = ['CHANGEPERMISSIONS', 'CALL'];
+      const requiredPermissions = ['EDITPERMISSIONS', 'CALL'];
       const grantedPermissions =
         '0x000000000000000000000000000000000000000000000000000000000000ff51';
       const result = checkPermissions(requiredPermissions, grantedPermissions);
@@ -177,7 +177,7 @@ describe('checkPermissions', () => {
 
     it('should return true when all the mixed literal and bytes32 permissions match granted permissions', async () => {
       const requiredPermissions = [
-        'CHANGEPERMISSIONS',
+        'EDITPERMISSIONS',
         '0x0000000000000000000000000000000000000000000000000000000000000800',
       ];
       const grantedPermissions =

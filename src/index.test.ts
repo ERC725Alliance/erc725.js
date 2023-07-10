@@ -950,7 +950,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         permissions: {
           CHANGEOWNER: true,
           ADDCONTROLLER: true,
-          CHANGEPERMISSIONS: true,
+          EDITPERMISSIONS: true,
           ADDEXTENSIONS: true,
           CHANGEEXTENSIONS: true,
           ADDUNIVERSALRECEIVERDELEGATE: true,
@@ -977,7 +977,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         permissions: {
           CHANGEOWNER: false,
           ADDCONTROLLER: false,
-          CHANGEPERMISSIONS: false,
+          EDITPERMISSIONS: false,
           ADDEXTENSIONS: false,
           CHANGEEXTENSIONS: false,
           ADDUNIVERSALRECEIVERDELEGATE: false,
@@ -1004,7 +1004,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         permissions: {
           CHANGEOWNER: false,
           ADDCONTROLLER: false,
-          CHANGEPERMISSIONS: false,
+          EDITPERMISSIONS: false,
           ADDEXTENSIONS: false,
           CHANGEEXTENSIONS: false,
           ADDUNIVERSALRECEIVERDELEGATE: false,
@@ -1031,7 +1031,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         permissions: {
           CHANGEOWNER: false,
           ADDCONTROLLER: false,
-          CHANGEPERMISSIONS: false,
+          EDITPERMISSIONS: false,
           ADDEXTENSIONS: false,
           CHANGEEXTENSIONS: false,
           ADDUNIVERSALRECEIVERDELEGATE: false,
@@ -1058,7 +1058,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         permissions: {
           CHANGEOWNER: false,
           ADDCONTROLLER: false,
-          CHANGEPERMISSIONS: true,
+          EDITPERMISSIONS: true,
           ADDEXTENSIONS: false,
           CHANGEEXTENSIONS: false,
           ADDUNIVERSALRECEIVERDELEGATE: false,
@@ -1085,7 +1085,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         permissions: {
           CHANGEOWNER: false,
           ADDCONTROLLER: false,
-          CHANGEPERMISSIONS: false,
+          EDITPERMISSIONS: false,
           ADDEXTENSIONS: false,
           CHANGEEXTENSIONS: false,
           ADDUNIVERSALRECEIVERDELEGATE: false,
@@ -1129,14 +1129,14 @@ describe('Running @erc725/erc725.js tests...', () => {
       it('Defaults permissions to false if not passed', () => {
         assert.deepStrictEqual(
           ERC725.encodePermissions({
-            CHANGEPERMISSIONS: true,
+            EDITPERMISSIONS: true,
             SETDATA: true,
           }),
           '0x0000000000000000000000000000000000000000000000000000000000040004',
         );
         assert.deepStrictEqual(
           erc725Instance.encodePermissions({
-            CHANGEPERMISSIONS: true,
+            EDITPERMISSIONS: true,
             SETDATA: true,
           }),
           '0x0000000000000000000000000000000000000000000000000000000000040004',
@@ -1165,7 +1165,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           {
             CHANGEOWNER: true,
             ADDCONTROLLER: true,
-            CHANGEPERMISSIONS: true,
+            EDITPERMISSIONS: true,
             ADDEXTENSIONS: true,
             CHANGEEXTENSIONS: true,
             ADDUNIVERSALRECEIVERDELEGATE: true,
@@ -1194,7 +1194,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           {
             CHANGEOWNER: true,
             ADDCONTROLLER: true,
-            CHANGEPERMISSIONS: true,
+            EDITPERMISSIONS: true,
             ADDEXTENSIONS: true,
             CHANGEEXTENSIONS: true,
             ADDUNIVERSALRECEIVERDELEGATE: true,
