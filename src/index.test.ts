@@ -48,7 +48,7 @@ import {
   SUPPORTED_HASH_FUNCTION_STRINGS,
 } from './constants/constants';
 import { decodeKey } from './lib/decodeData';
-import { INTERFACE_IDS_0_7_0 } from './constants/interfaces';
+import { INTERFACE_IDS_0_10_2 } from './constants/interfaces';
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
 
@@ -1294,7 +1294,7 @@ describe('supportsInterface', () => {
     chaiAssert.typeOf(erc725Instance.supportsInterface, 'function');
   });
 
-  const interfaceId = INTERFACE_IDS_0_7_0.LSP1UniversalReceiver;
+  const interfaceId = INTERFACE_IDS_0_10_2.LSP1UniversalReceiver;
   const rpcUrl = 'https://my.test.provider';
   const contractAddress = '0xcafecafecafecafecafecafecafecafecafecafe';
 
