@@ -342,6 +342,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         value: '0x36e4Eb6Ee168EF54B1E8e850ACBE51045214B313',
       },
     ];
+
     it('with web3.currentProvider [ERC725Y_BATCH]', async () => {
       const erc725 = new ERC725(
         e2eSchema,
