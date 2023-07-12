@@ -459,7 +459,7 @@ export class ERC725 {
     const result = {
       CHANGEOWNER: false,
       ADDCONTROLLER: false,
-      CHANGEPERMISSIONS: false,
+      EDITPERMISSIONS: false,
       ADDEXTENSIONS: false,
       CHANGEEXTENSIONS: false,
       ADDUNIVERSALRECEIVERDELEGATE: false,
