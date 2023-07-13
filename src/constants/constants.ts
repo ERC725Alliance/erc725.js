@@ -34,6 +34,7 @@ export const ERC725Y_INTERFACE_IDS = {
   //     - getData(bytes32[])
   //     - setData(bytes32[],bytes[])
   '3.0': '0x714df77c',
+  // InterfaceId of version 3 == interfaceId of version 4
   // version 5.0.0 removed function overloading
   // interface functions:
   //     - getData(bytes32)
