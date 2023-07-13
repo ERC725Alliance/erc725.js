@@ -68,6 +68,18 @@ describe('encoder', () => {
         encodedValue: '0x1337',
       },
       {
+        valueType: 'bytes',
+        decodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000001337',
+        encodedValue:
+          '0x0000000000000000000000000000000000000000000000000000000000001337',
+      },
+      {
+        valueType: 'bytes',
+        decodedValue: '0xaabbccddeeff1122334455',
+        encodedValue: '0xaabbccddeeff1122334455',
+      },
+      {
         valueType: 'string[]',
         decodedValue: ['a', 'b'],
         encodedValue:
