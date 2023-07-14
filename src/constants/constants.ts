@@ -34,12 +34,24 @@ export const ERC725Y_INTERFACE_IDS = {
   //     - getData(bytes32[])
   //     - setData(bytes32[],bytes[])
   '3.0': '0x714df77c',
+  // InterfaceId of version 3 == interfaceId of version 4
+  // version 5.0.0 removed function overloading
+  // interface functions:
+  //     - getData(bytes32)
+  //     - setData(bytes32,bytes)
+  //     - getDataBatch(bytes32[])
+  //     - setDataBatch(bytes32[],bytes[])
+  '5.0': '0x629aa694',
 };
 
 export enum ERC725_VERSION {
-  ERC725 = 'ERC725', // https://github.com/ERC725Alliance/ERC725/commit/cca7f98cdf243f1ebf1c0a3ae89b1e46931481b0
-  ERC725_LEGACY = 'ERC725_LEGACY',
   NOT_ERC725 = 'NOT_ERC725',
+  // The ERC725Y_LEGACY version uses getData(bytes32) function
+  ERC725_LEGACY = 'ERC725_LEGACY',
+  // The ERC725_v2 version uses getData(bytes32[]) function, as well as v3 and v4
+  ERC725_v2 = 'ERC725_v2', // https://github.com/ERC725Alliance/ERC725/releases/tag/v2.2.0
+  // The ERC725_v5 version uses getDataBatch(bytes32[]) function
+  ERC725_v5 = 'ERC725_v5', // https://github.com/ERC725Alliance/ERC725/releases/tag/v5.0.0
 }
 
 export const METHODS: Record<Method, MethodData> = {
@@ -52,8 +64,16 @@ export const METHODS: Record<Method, MethodData> = {
     returnEncoding: Encoding.BYTES,
   },
   [Method.GET_DATA]: {
-    // https://github.com/ERC725Alliance/erc725/blob/main/docs/ERC-725.md#erc725y
+    // https://github.com/ERC725Alliance/ERC725/blob/v4.0.0/docs/ERC-725.md#erc725y
     sig: '0x4e3e6e9c',
+    gas: numberToHex(2000000),
+    gasPrice: numberToHex(100000000),
+    value: numberToHex(0),
+    returnEncoding: Encoding.BYTES_ARRAY,
+  },
+  [Method.GET_DATA_BATCH]: {
+    // https://github.com/ERC725Alliance/ERC725/blob/v5.1.0/docs/ERC-725.md#erc725y
+    sig: '0xdedff9c6',
     gas: numberToHex(2000000),
     gasPrice: numberToHex(100000000),
     value: numberToHex(0),
