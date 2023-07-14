@@ -249,7 +249,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       ]);
     });
 
-    const e2eSchema: any = [
+    const e2eSchema: ERC725JSONSchema[] = [
       {
         name: 'LSP3Profile',
         key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
@@ -309,7 +309,7 @@ describe('Running @erc725/erc725.js tests...', () => {
     const ERC725_V5_CONTRACT_ADDRESS =
       '0x4b30900F119E11D2A8CAe18176c4f9840E586Cc4';
 
-    const e2eSchema: any = [
+    const e2eSchema: ERC725JSONSchema[] = [
       {
         name: 'LSP3Profile',
         key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
