@@ -85,6 +85,7 @@ export class HttpProvider {
             });
             break;
           }
+          case METHODS[Method.GET_DATA_BATCH].sig:
           case METHODS[Method.GET_DATA].sig:
             // The new ERC725Y allows requesting multiple items in one call
             // getData([A]), getData([A, B, C])...
@@ -147,6 +148,7 @@ export class HttpProvider {
             result = foundResult ? foundResult.value : '0x';
           }
           break;
+        case METHODS[Method.GET_DATA_BATCH].sig:
         case METHODS[Method.GET_DATA].sig:
           {
             const keyParam = '0x' + payload.params[0].data.slice(138);
