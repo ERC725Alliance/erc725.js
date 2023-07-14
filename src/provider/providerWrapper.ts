@@ -61,31 +61,32 @@ export class ProviderWrapper {
   }
 
   async getErc725YVersion(address: string): Promise<ERC725_VERSION> {
-    const isErc725YBatch = await this.supportsInterface(
+    const isErc725Yv5 = await this.supportsInterface(
       address,
       ERC725Y_INTERFACE_IDS['5.0'],
     );
 
-    if (isErc725YBatch) {
-      return ERC725_VERSION.ERC725_BATCH;
+    if (isErc725Yv5) {
+      return ERC725_VERSION.ERC725_v5;
     }
 
-    const isErc725Y = await this.supportsInterface(
+    const isErc725Yv3 = await this.supportsInterface(
       address,
       ERC725Y_INTERFACE_IDS['3.0'],
     );
 
-    if (isErc725Y) {
-      return ERC725_VERSION.ERC725;
+    // The version 3 of the package can use the getData function from v2, still compatible
+    if (isErc725Yv3) {
+      return ERC725_VERSION.ERC725_v2;
     }
 
-    const isErc725Yv200 = await this.supportsInterface(
+    const isErc725Yv2 = await this.supportsInterface(
       address,
       ERC725Y_INTERFACE_IDS['2.0'],
     );
 
-    if (isErc725Yv200) {
-      return ERC725_VERSION.ERC725;
+    if (isErc725Yv2) {
+      return ERC725_VERSION.ERC725_v2;
     }
 
     // v0.2.0 and v0.6.0 have the same function signatures for getData, only versions before v0.2.0 requires a different call
@@ -206,9 +207,9 @@ export class ProviderWrapper {
     }
 
     switch (erc725Version) {
-      case ERC725_VERSION.ERC725_BATCH:
+      case ERC725_VERSION.ERC725_v5:
         return this._getAllDataBatch(address, keyHashes);
-      case ERC725_VERSION.ERC725:
+      case ERC725_VERSION.ERC725_v2:
         return this._getAllData(address, keyHashes);
       case ERC725_VERSION.ERC725_LEGACY:
         return this._getAllDataLegacy(address, keyHashes);

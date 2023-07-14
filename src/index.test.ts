@@ -306,7 +306,7 @@ describe('Running @erc725/erc725.js tests...', () => {
 
   describe('Getting data (using new getDataBatch) in schema by provider [e2e] - luksoTestnet', () => {
     const web3 = new Web3('https://rpc.testnet.lukso.network');
-    const ERC725_BATCH_CONTRACT_ADDRESS =
+    const ERC725_V5_CONTRACT_ADDRESS =
       '0x4b30900F119E11D2A8CAe18176c4f9840E586Cc4';
 
     const e2eSchema: any = [
@@ -346,7 +346,7 @@ describe('Running @erc725/erc725.js tests...', () => {
     it('with web3.currentProvider [ERC725Y_BATCH]', async () => {
       const erc725 = new ERC725(
         e2eSchema,
-        ERC725_BATCH_CONTRACT_ADDRESS,
+        ERC725_V5_CONTRACT_ADDRESS,
         web3.currentProvider,
       );
       const result = await erc725.getData();
