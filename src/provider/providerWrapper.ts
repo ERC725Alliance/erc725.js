@@ -208,9 +208,13 @@ export class ProviderWrapper {
 
     switch (erc725Version) {
       case ERC725_VERSION.ERC725_v5:
-        return this._getAllDataBatch(address, keyHashes);
+        return this._getAllDataGeneric(
+          address,
+          keyHashes,
+          Method.GET_DATA_BATCH,
+        );
       case ERC725_VERSION.ERC725_v2:
-        return this._getAllData(address, keyHashes);
+        return this._getAllDataGeneric(address, keyHashes, Method.GET_DATA);
       case ERC725_VERSION.ERC725_LEGACY:
         return this._getAllDataLegacy(address, keyHashes);
       default:
@@ -218,20 +222,21 @@ export class ProviderWrapper {
     }
   }
 
-  private async _getAllDataBatch(
+  private async _getAllDataGeneric(
     address: string,
     keyHashes: string[],
+    method: Method,
   ): Promise<GetDataReturn[]> {
     if (this.type === ProviderTypes.ETHEREUM) {
       const encodedResults = await this.callContract(
         constructJSONRPC(
           address,
-          Method.GET_DATA_BATCH,
+          method,
           abiCoder.encodeParameter('bytes32[]', keyHashes),
         ),
       );
 
-      const decodedValues = decodeResult(Method.GET_DATA_BATCH, encodedResults);
+      const decodedValues = decodeResult(method, encodedResults);
 
       return keyHashes.map<GetDataReturn>((keyHash, index) => ({
         key: keyHash,
@@ -242,54 +247,13 @@ export class ProviderWrapper {
     const payload: JsonRpc[] = [
       constructJSONRPC(
         address,
-        Method.GET_DATA_BATCH,
+        method,
         abiCoder.encodeParameter('bytes32[]', keyHashes),
       ),
     ];
 
     const results: any = await this.callContract(payload);
-    const decodedValues = decodeResult(
-      Method.GET_DATA_BATCH,
-      results[0].result,
-    );
-
-    return keyHashes.map<GetDataReturn>((key, index) => ({
-      key,
-      value: decodedValues ? decodedValues[index] : decodedValues,
-    }));
-  }
-
-  private async _getAllData(
-    address: string,
-    keyHashes: string[],
-  ): Promise<GetDataReturn[]> {
-    if (this.type === ProviderTypes.ETHEREUM) {
-      const encodedResults = await this.callContract(
-        constructJSONRPC(
-          address,
-          Method.GET_DATA,
-          abiCoder.encodeParameter('bytes32[]', keyHashes),
-        ),
-      );
-
-      const decodedValues = decodeResult(Method.GET_DATA, encodedResults);
-
-      return keyHashes.map<GetDataReturn>((keyHash, index) => ({
-        key: keyHash,
-        value: decodedValues ? decodedValues[index] : decodedValues,
-      }));
-    }
-
-    const payload: JsonRpc[] = [
-      constructJSONRPC(
-        address,
-        Method.GET_DATA,
-        abiCoder.encodeParameter('bytes32[]', keyHashes),
-      ),
-    ];
-
-    const results: any = await this.callContract(payload);
-    const decodedValues = decodeResult(Method.GET_DATA, results[0].result);
+    const decodedValues = decodeResult(method, results[0].result);
 
     return keyHashes.map<GetDataReturn>((key, index) => ({
       key,
