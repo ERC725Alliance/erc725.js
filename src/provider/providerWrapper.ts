@@ -225,7 +225,7 @@ export class ProviderWrapper {
   private async _getAllDataGeneric(
     address: string,
     keyHashes: string[],
-    method: Method,
+    method: Method.GET_DATA | Method.GET_DATA_BATCH,
   ): Promise<GetDataReturn[]> {
     if (this.type === ProviderTypes.ETHEREUM) {
       const encodedResults = await this.callContract(
