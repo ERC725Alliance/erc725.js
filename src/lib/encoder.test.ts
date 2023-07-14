@@ -47,6 +47,11 @@ describe('encoder', () => {
           '0x000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec7',
       },
       {
+        valueType: 'uint128',
+        decodedValue: 11,
+        encodedValue: '0x0000000000000000000000000000000b',
+      },
+      {
         valueType: 'uint256',
         decodedValue: '1337',
         encodedValue:

@@ -516,6 +516,61 @@ describe('utils', () => {
       });
     });
 
+    it('encodes array', () => {
+      const encodedDataWithMultipleKeys = encodeData(
+        [
+          {
+            keyName: 'LSP3IssuedAssets[]',
+            value: [
+              '0x6413255d24b8fbf81D2d65214C485c694Cb3d4B4',
+              '0xd6c68c2C94AF899CE43ff1863693016A711ae7C7',
+              '0x79B698f4bC3051f18b5f94046f09d70823A8fD44',
+              '0x72BeBf88546525a5888F188B390701Bb0fD9B1A5',
+              '0x882aca051979E32E787e8815D9880759f91e7124',
+              '0x78827c8f8205072858a8CCe39B8724D948327ba0',
+              '0xE27cD9C132677cdcE2e9eFA43B040DE35cEff069',
+              '0x072616745957b45C8989e12b9563390fafAC4ebe',
+              '0xfd5A7C50C0CF665A772407AF3f05522784589c44',
+              '0x13DE082Cf8A499EEE75B0681CfA0141A145f15D9',
+              '0xE3610D0EB167fE7A7B7c25D0aEE8874eB8b113ef',
+            ],
+          },
+        ],
+        schemas,
+      );
+
+      assert.deepStrictEqual(encodedDataWithMultipleKeys, {
+        keys: [
+          '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000002',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000003',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000004',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000005',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000006',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000007',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000008',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000009',
+          '0x3a47ab5bd3a594c3a8995f8fa58d08760000000000000000000000000000000a',
+        ],
+        values: [
+          '0x0000000000000000000000000000000b',
+          '0x6413255d24b8fbf81d2d65214c485c694cb3d4b4',
+          '0xd6c68c2c94af899ce43ff1863693016a711ae7c7',
+          '0x79b698f4bc3051f18b5f94046f09d70823a8fd44',
+          '0x72bebf88546525a5888f188b390701bb0fd9b1a5',
+          '0x882aca051979e32e787e8815d9880759f91e7124',
+          '0x78827c8f8205072858a8cce39b8724d948327ba0',
+          '0xe27cd9c132677cdce2e9efa43b040de35ceff069',
+          '0x072616745957b45c8989e12b9563390fafac4ebe',
+          '0xfd5a7c50c0cf665a772407af3f05522784589c44',
+          '0x13de082cf8a499eee75b0681cfa0141a145f15d9',
+          '0xe3610d0eb167fe7a7b7c25d0aee8874eb8b113ef',
+        ],
+      });
+    });
+
     it('encodes multiple keys', () => {
       const encodedMultipleKeys = encodeData(
         [
