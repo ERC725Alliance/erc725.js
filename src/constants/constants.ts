@@ -49,7 +49,7 @@ export enum ERC725_VERSION {
   // The ERC725Y_LEGACY version uses getData(bytes32) function
   ERC725_LEGACY = 'ERC725_LEGACY',
   // The ERC725_v2 version uses getData(bytes32[]) function, as well as v3 and v4
-  ERC725_v2 = 'ERC725', // https://github.com/ERC725Alliance/ERC725/releases/tag/v2.2.0
+  ERC725_v2 = 'ERC725_v2', // https://github.com/ERC725Alliance/ERC725/releases/tag/v2.2.0
   // The ERC725_v5 version uses getDataBatch(bytes32[]) function
   ERC725_v5 = 'ERC725_v5', // https://github.com/ERC725Alliance/ERC725/releases/tag/v5.0.0
 }
