@@ -225,6 +225,20 @@ describe('encoder', () => {
       });
     });
 
+    it('throws when trying to encode a string as `uint128`', () => {
+      assert.throws(() => encodeValueType('uint128', 'helloWorld'));
+    });
+    it('throws when trying to encode a bytes17 as `uint128`', () => {
+      assert.throws(() =>
+        encodeValueType('uint128', '340282366920938463463374607431768211456'),
+      );
+    });
+    it('throws when trying to decode a bytes17 as `uint128`', () => {
+      assert.throws(() =>
+        decodeValueType('uint128', '0x000000000000000000000000000000ffff'),
+      );
+    });
+
     describe('when encoding bytes[CompactBytesArray]', () => {
       it('should encode `0x` elements as `0x0000`', async () => {
         const testCase = {
