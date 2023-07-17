@@ -309,19 +309,6 @@ const decodeStringCompactBytesArray = (compactBytesArray: string): string[] => {
   return stringValues;
 };
 
-const uint128ToHex = (value: string | number) => {
-  const bigNum = BigNumber(value).toString();
-  return '0x' + abiCoder.encodeParameter('uint128', bigNum).substring(34, 66);
-};
-
-const hexToUint128 = (value: string) => {
-  if (!isHex(value)) throw new Error(`${value} is not hex.`);
-  if (value.length > 34)
-    throw new Error(`Too many bytes. ${value.length - 2 / 2} > 16`);
-
-  return BigNumber(value).toNumber();
-};
-
 const valueTypeEncodingMap = {
   bool: {
     encode: (value: boolean) => abiCoder.encodeParameter('bool', value),
@@ -341,8 +328,20 @@ const valueTypeEncodingMap = {
   },
   // NOTE: We could add conditional handling of numeric values here...
   uint128: {
-    encode: (value: string | number) => uint128ToHex(value),
-    decode: (value: string) => hexToUint128(value),
+    encode: (value: string | number) =>
+      '0x' + abiCoder.encodeParameter('uint128', value).substring(34, 66),
+    decode: (value: string) => {
+      if (!isHex(value))
+        throw new Error(`Can't convert ${value} to uint128, value is not hex.`);
+      if (value.length > 34)
+        throw new Error(
+          `Can't convert hex value ${value} to uint128. Too many bytes. ${
+            (value.length - 2) / 2
+          } > 16`,
+        );
+
+      return BigNumber(value).toNumber();
+    },
   },
   uint256: {
     encode: (value: string | number) =>
