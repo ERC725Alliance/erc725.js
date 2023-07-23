@@ -37,6 +37,8 @@ import {
   toChecksumAddress,
   utf8ToHex,
   stripHexPrefix,
+  hexToBytes,
+  bytesToHex,
 } from 'web3-utils';
 
 import BigNumber from 'bignumber.js';
@@ -328,17 +330,23 @@ const valueTypeEncodingMap = {
   },
   // NOTE: We could add conditional handling of numeric values here...
   uint128: {
-    encode: (value: string | number) =>
-      '0x' + abiCoder.encodeParameter('uint128', value).substring(34, 66),
+    encode: (value: string | number) => {
+      const abiEncodedValue = abiCoder.encodeParameter('uint128', value);
+      const bytesArray = hexToBytes(abiEncodedValue);
+      return bytesToHex(bytesArray.slice(16));
+    },
     decode: (value: string) => {
-      if (!isHex(value))
+      if (!isHex(value)) {
         throw new Error(`Can't convert ${value} to uint128, value is not hex.`);
-      if (value.length > 34)
+      }
+
+      if (value.length > 34) {
         throw new Error(
           `Can't convert hex value ${value} to uint128. Too many bytes. ${
             (value.length - 2) / 2
           } > 16`,
         );
+      }
 
       return BigNumber(value).toNumber();
     },
