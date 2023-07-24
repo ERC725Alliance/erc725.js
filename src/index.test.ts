@@ -776,7 +776,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             if (i === 0) {
               // Push the array length into the first element of results array
               results.push(
-                leftPad(numberToHex(schemaElement.expectedResult.length), 64),
+                leftPad(numberToHex(schemaElement.expectedResult.length), 32),
               );
             }
 

@@ -47,6 +47,11 @@ describe('encoder', () => {
           '0x000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec7',
       },
       {
+        valueType: 'uint128',
+        decodedValue: 11,
+        encodedValue: '0x0000000000000000000000000000000b',
+      },
+      {
         valueType: 'uint256',
         decodedValue: '1337',
         encodedValue:
@@ -218,6 +223,27 @@ describe('encoder', () => {
           testCase.decodedValue,
         );
       });
+    });
+
+    it('throws when trying to encode a string as `uint128`', () => {
+      assert.throws(() => encodeValueType('uint128', 'helloWorld'));
+    });
+
+    it('throws when trying to encode a bytes17  as `uint128`', () => {
+      assert.throws(() =>
+        encodeValueType('uint128', '340282366920938463463374607431768211456'),
+      );
+      assert.throws(() =>
+        encodeValueType('uint128', '0x0100000000000000000000000000000000'),
+      );
+    });
+
+    it('throws when trying to decode a bytes17  as `uint128`', () => {
+      expect(() =>
+        decodeValueType('uint128', '0x000000000000000000000000000000ffff'),
+      ).to.throw(
+        "Can't convert hex value 0x000000000000000000000000000000ffff to uint128. Too many bytes. 17 > 16",
+      );
     });
 
     describe('when encoding bytes[CompactBytesArray]', () => {

@@ -259,14 +259,10 @@ export function encodeKey(
         const dataElement = value[index];
         if (index === 0) {
           // This is arrayLength as the first element in the raw array
+          // encoded as uint128
           results.push({
             key: schema.key,
-            value: encodeKeyValue(
-              'Number',
-              'uint256',
-              value.length.toString(),
-              schema.name,
-            ) as string,
+            value: encodeValueType('uint128', value.length),
           });
         }
 
