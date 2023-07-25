@@ -24,6 +24,7 @@ import {
   isAddress,
   numberToHex,
   padLeft,
+  stripHexPrefix,
 } from 'web3-utils';
 import { arrToBufArr } from 'ethereumjs-util';
 
@@ -572,4 +573,8 @@ export function patchIPFSUrlsIfApplicable(
   }
 
   return receivedData;
+}
+
+export function countNumberOfBytes(data: string) {
+  return stripHexPrefix(data).length / 2;
 }
