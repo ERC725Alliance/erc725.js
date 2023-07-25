@@ -37,9 +37,11 @@ import {
   toChecksumAddress,
   utf8ToHex,
   stripHexPrefix,
-  padRight,
-  toHex,
+  hexToBytes,
+  bytesToHex,
 } from 'web3-utils';
+
+import BigNumber from 'bignumber.js';
 
 import { JSONURLDataToEncode, URLDataWithHash } from '../types';
 import { AssetURLEncode } from '../types/encodeData';
@@ -328,6 +330,28 @@ const valueTypeEncodingMap = {
     decode: (value: string) => toChecksumAddress(value),
   },
   // NOTE: We could add conditional handling of numeric values here...
+  uint128: {
+    encode: (value: string | number) => {
+      const abiEncodedValue = abiCoder.encodeParameter('uint128', value);
+      const bytesArray = hexToBytes(abiEncodedValue);
+      return bytesToHex(bytesArray.slice(16));
+    },
+    decode: (value: string) => {
+      if (!isHex(value)) {
+        throw new Error(`Can't convert ${value} to uint128, value is not hex.`);
+      }
+
+      if (value.length > 34) {
+        throw new Error(
+          `Can't convert hex value ${value} to uint128. Too many bytes. ${
+            (value.length - 2) / 2
+          } > 16`,
+        );
+      }
+
+      return BigNumber(value).toNumber();
+    },
+  },
   uint256: {
     encode: (value: string | number) => padLeft(numberToHex(value), 64),
     decode: (value: string) => hexToNumber(value),
@@ -404,14 +428,6 @@ export const valueContentEncodingMap = (valueContent: string) => {
         decode: (value: string) => value,
       };
     }
-    // NOTE: Deprecated. For reference/testing in future
-    case 'ArrayLength': {
-      return {
-        type: 'uint256',
-        encode: (value: number | string) => padLeft(numberToHex(value), 64),
-        decode: (value: string) => hexToNumber(value),
-      };
-    }
     case 'Number': {
       return {
         type: 'uint256',
@@ -426,7 +442,7 @@ export const valueContentEncodingMap = (valueContent: string) => {
 
           return padLeft(numberToHex(parsedValue), 64);
         },
-        decode: (value) => '' + hexToNumber(value),
+        decode: (value) => hexToNumber(value).toString(),
       };
     }
     // NOTE: This is not symmetrical, and always returns a checksummed address

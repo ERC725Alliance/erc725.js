@@ -41,7 +41,7 @@ const getArrayValues = async (
 
   const arrayLength = await decodeKeyValue(
     'Number',
-    'uint256',
+    'uint128',
     value.value,
     schema.name,
   ); // get the int array length

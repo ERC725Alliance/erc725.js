@@ -12,18 +12,22 @@
     along with @erc725/erc725.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// from @lukso/lsp-smart-contracts v0.7.0, erc725.js should stay independent
-export const INTERFACE_IDS_0_7_0 = {
+// from @lukso/lsp-smart-contracts v0.10.2, erc725.js should stay independent
+export const INTERFACE_IDS_0_10_2 = {
   ERC1271: '0x1626ba7e',
-  ERC725X: '0x44c028fe',
-  ERC725Y: '0x714df77c',
-  LSP0ERC725Account: '0xeb6be62e',
+  ERC725X: '0x7545acac',
+  ERC725Y: '0x629aa694',
+  LSP0ERC725Account: '0x3e89ad98',
   LSP1UniversalReceiver: '0x6bb56a14',
-  LSP1UniversalReceiverDelegate: '0xa245bbda',
-  LSP6KeyManager: '0xc403d48f',
-  LSP7DigitalAsset: '0x5fcaac27',
-  LSP8IdentifiableDigitalAsset: '0x49399145',
-  LSP9Vault: '0xfd4d5c50',
+  LSP6KeyManager: '0x38bb3cdb',
+  LSP7DigitalAsset: '0xda1f85e4',
+  LSP8IdentifiableDigitalAsset: '0x622e7a01',
+  LSP9Vault: '0x28af17e6',
+  LSP14Ownable2Step: '0x94be5999',
+  LSP17Extendable: '0xa918fa6b',
+  LSP17Extension: '0xcee78b40',
+  LSP20CallVerification: '0x1a0eb6a5',
+  LSP20CallVerifier: '0x480c0ec2',
 };
 
 export interface AddressProviderOptions {
