@@ -54,6 +54,8 @@ import {
 } from '../constants/constants';
 import { getHashFunction, hashData, countNumberOfBytes } from './utils';
 
+const abiCoder = AbiCoder;
+
 const bytesNRegex = /Bytes(\d+)/;
 
 const ALLOWED_BYTES_SIZES = [2, 4, 8, 16, 32, 64, 128, 256];
@@ -72,8 +74,6 @@ const encodeDataSourceWithHash = (
   );
 };
 
-const abiCoder = AbiCoder;
-
 const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   const hashFunctionSig = value.slice(0, 10);
   const hashFunction = getHashFunction(hashFunctionSig);
@@ -83,6 +83,42 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   const dataSource = hexToUtf8('0x' + encodedData.slice(64)); // Get remainder as URI
 
   return { hashFunction: hashFunction.name, hash: dataHash, url: dataSource };
+};
+
+const encodeToBytesN = (
+  bytesN: 'bytes32' | 'bytes4',
+  value: string | number,
+): string => {
+  let valueToEncode: string;
+
+  if (typeof value === 'string' && !isHex(value)) {
+    // if we receive a plain string (e.g: "hey!"), convert it to utf8-hex data
+    valueToEncode = toHex(value);
+  } else if (typeof value === 'number') {
+    // if we receive a number as input, convert it to hex
+    valueToEncode = numberToHex(value);
+  } else {
+    valueToEncode = value;
+  }
+
+  const numberOfBytesInType = parseInt(bytesN.slice(5), 10);
+  const numberOfBytesInValue = countNumberOfBytes(valueToEncode);
+
+  if (numberOfBytesInValue > numberOfBytesInType) {
+    throw new Error(
+      `Can't convert ${value} to ${bytesN}. Too many bytes, expected at most ${numberOfBytesInType} bytes, received ${numberOfBytesInValue}.`,
+    );
+  }
+
+  const abiEncodedValue = abiCoder.encodeParameter(bytesN, valueToEncode);
+
+  // abi-encoding right pads to 32 bytes, if we need less, we need to remove the padding
+  if (numberOfBytesInType === 32) {
+    return abiEncodedValue;
+  }
+
+  const bytesArray = hexToBytes(abiEncodedValue);
+  return bytesToHex(bytesArray.slice(0, 4));
 };
 
 /**
@@ -336,8 +372,13 @@ const valueTypeEncodingMap = {
   },
   address: {
     encode: (value: string) => {
+      // abi-encode pads to 32 x 00 bytes on the left, so we need to remove them
       const abiEncodedValue = abiCoder.encodeParameter('address', value);
+
+      // convert to an array of individual bytes
       const bytesArray = hexToBytes(abiEncodedValue);
+
+      // just keep the last 20 bytes, starting at index 12
       return bytesToHex(bytesArray.slice(12));
     },
     decode: (value: string) => toChecksumAddress(value),
@@ -378,7 +419,7 @@ const valueTypeEncodingMap = {
 
       if (numberOfBytes > 32) {
         throw new Error(
-          `Can't convert hex value ${value} to uint256. Too many bytes. ${numberOfBytes} is above the maximal number of bytes 32`,
+          `Can't convert hex value ${value} to uint256. Too many bytes. ${numberOfBytes} is above the maximal number of bytes 32.`,
         );
       }
 
@@ -386,59 +427,11 @@ const valueTypeEncodingMap = {
     },
   },
   bytes32: {
-    encode: (value: string | number) => {
-      let valueToEncode: string;
-
-      if (typeof value === 'string' && !isHex(value)) {
-        // if we receive a plain string (e.g: "hey!"), convert it to utf8-hex data
-        valueToEncode = toHex(value);
-      } else if (typeof value === 'number') {
-        // if we receive a number as input, convert it to hex
-        valueToEncode = numberToHex(value);
-      } else {
-        valueToEncode = value;
-      }
-
-      const numberOfBytes = countNumberOfBytes(valueToEncode);
-
-      // CHECK that there is not more than 4 bytes
-      if (numberOfBytes > 32) {
-        throw new Error(
-          `Can't convert ${value} to bytes32. Too many bytes, expected at most 32 bytes, received ${numberOfBytes}.`,
-        );
-      }
-
-      return abiCoder.encodeParameter('bytes32', valueToEncode);
-    },
+    encode: (value: string | number) => encodeToBytesN('bytes32', value),
     decode: (value: string) => abiCoder.decodeParameter('bytes32', value),
   },
   bytes4: {
-    encode: (value: string | number) => {
-      let valueToEncode: string;
-
-      if (typeof value === 'string' && !isHex(value)) {
-        // if we receive a plain string (e.g: "hey!"), convert it to utf8-hex data
-        valueToEncode = toHex(value);
-      } else if (typeof value === 'number') {
-        // if we receive a number as input, convert it to hex
-        valueToEncode = numberToHex(value);
-      } else {
-        valueToEncode = value;
-      }
-
-      const numberOfBytes = countNumberOfBytes(valueToEncode);
-
-      // CHECK that there is not more than 32 bytes
-      if (numberOfBytes > 4) {
-        throw new Error(
-          `Can't convert ${value} to bytes4. Too many bytes, expected at most 4 bytes, received ${numberOfBytes}.`,
-        );
-      }
-
-      const abiEncodedValue = abiCoder.encodeParameter('bytes4', valueToEncode);
-      const bytesArray = hexToBytes(abiEncodedValue);
-      return bytesToHex(bytesArray.slice(0, 4));
-    },
+    encode: (value: string | number) => encodeToBytesN('bytes4', value),
     decode: (value: string) => {
       // we need to abi-encode the value again to ensure that:
       //  - that data to decode does not go over 4 bytes.

@@ -55,11 +55,13 @@ function decodeKeyPart(
         ? 0
         : encodedKeyPart.length - bytesLength;
     decodedKey = encodedKeyPart.slice(sliceFrom);
-  } else {
+  } else if (type === 'address') {
     // this is required if the 2nd word is an address in a MappingWithGrouping
     const leftPaddedAddress = padLeft('0x' + encodedKeyPart, 40);
 
     decodedKey = decodeValueType(type, leftPaddedAddress);
+  } else {
+    decodedKey = decodeValueType(type, encodedKeyPart);
   }
 
   return { type, value: decodedKey };

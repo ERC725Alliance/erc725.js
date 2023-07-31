@@ -105,15 +105,15 @@ describe('encoder', () => {
       const errorEncodingTestCases = [
         {
           valueType: 'bytes4',
-          input: '0x000000000001337',
+          input: '0x000000000001337', // more than 4 bytes
         },
         {
           valueType: 'bytes4',
-          input: '0xcafecafecafecafe',
+          input: '0xcafecafecafecafe', // more than 4 bytes
         },
         {
           valueType: 'bytes4',
-          input: 'hello there', // more than 4 characters
+          input: 'hello there', // string input that converts to more than 4 bytes in hex
         },
         {
           valueType: 'bytes4',
