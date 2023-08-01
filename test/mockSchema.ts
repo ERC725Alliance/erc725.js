@@ -331,7 +331,7 @@ export const mockSchema: (ERC725JSONSchema & {
     ]),
     returnGraphData:
       '0x0000000000000000000000000000000000000000000000000000000000000063',
-    expectedResult: '99', // TODO: BUG: This should not need to be string to work?
+    expectedResult: 99,
   },
 
   // Case 13
