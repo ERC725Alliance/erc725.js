@@ -169,8 +169,8 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
   const strippedCompactBytesArray = stripHexPrefix(compactBytesArray);
 
   while (pointer < strippedCompactBytesArray.length) {
-    const length = hexToNumber(
-      '0x' + strippedCompactBytesArray.slice(pointer, pointer + 4),
+    const length = Number(
+      hexToNumber('0x' + strippedCompactBytesArray.slice(pointer, pointer + 4)),
     );
 
     if (length === 0) {
@@ -303,7 +303,7 @@ const decodeUintNCompactBytesArray = (
           numberOfBytes * 8
         } value at index ${index} does not fit in ${numberOfBytes} bytes`,
       );
-    return hexToNumber(hexValue);
+    return Number(hexToNumber(hexValue));
   });
 };
 
