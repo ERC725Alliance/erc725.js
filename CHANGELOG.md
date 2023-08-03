@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.18.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.17.2...v0.18.0) (2023-08-03)
+
+### ⚠ BREAKING CHANGES
+
+- new encoding for static value types (not arrays `[]`) (#288)
+- change `ArrayLength` value from `uint256` to `uint128` (#287)
+
+### Features
+
+- add checkPermissions function ([17d2258](https://github.com/ERC725Alliance/erc725.js/commit/17d225843c236951ef1515a0ff91095b5ef27cd3))
+- Add new feature "Decode Mapping Key" ([8c1f1fc](https://github.com/ERC725Alliance/erc725.js/commit/8c1f1fcfb15fa43d1d3934b0b15f09d47902bb41))
+
+### Bug Fixes
+
+- decode any uint256 as number not string ([#289](https://github.com/ERC725Alliance/erc725.js/issues/289)) ([37203f1](https://github.com/ERC725Alliance/erc725.js/commit/37203f14d313a0caff75724dc74175c741c1b540))
+- variable naming ([44b4785](https://github.com/ERC725Alliance/erc725.js/commit/44b47851ed63b817edc21c63655d67bac13a7e7f))
+
+### improvement
+
+- change `ArrayLength` value from `uint256` to `uint128` ([#287](https://github.com/ERC725Alliance/erc725.js/issues/287)) ([c95ee8a](https://github.com/ERC725Alliance/erc725.js/commit/c95ee8a53bf25bcf47777054af27cae1fbad8b2f))
+- new encoding for static value types (not arrays `[]`) ([#288](https://github.com/ERC725Alliance/erc725.js/issues/288)) ([f0b04da](https://github.com/ERC725Alliance/erc725.js/commit/f0b04daa57a281c537a8f28594439573188f0dce))
+
 ### [0.17.2](https://github.com/ERC725Alliance/erc725.js/compare/v0.17.1...v0.17.2) (2023-03-14)
 
 - removed ERC725JSONSchemaKeyType duplicate value ([060ee6c](https://github.com/ERC725Alliance/erc725.js/commit/060ee6ce23bda328f727140419de7590f48fc394))
@@ -103,7 +125,6 @@ Minor update to update the LSP-2 schemas.
 
 ### improvement
 
-- change fetchData output to non object ([1d4d570](https://github.com/ERC725Alliance/erc725.js/commit/1d4d57077a7766b3490477efb20f194fc4e00da4))
 - fetchData as same output as decodeData ([59c3a87](https://github.com/ERC725Alliance/erc725.js/commit/59c3a879fefb2b9bfe46b9bea91ff6bd2a528df1))
 - getData as same output as decodeData ([0f3b149](https://github.com/ERC725Alliance/erc725.js/commit/0f3b149f2280e6025a05e8e9ed306facfa63601a))
 - use array for decodeData ([261d100](https://github.com/ERC725Alliance/erc725.js/commit/261d1007f4ff63abd9d794f4e64e5b408ce7c1a3))

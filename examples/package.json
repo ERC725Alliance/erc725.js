@@ -9,8 +9,8 @@
     "decodeData": "node src/decodeData.js"
   },
   "dependencies": {
-    "@erc725/erc725.js": "^0.14.0-beta.0",
-    "web3": "1.8.0"
+    "@erc725/erc725.js": "^0.17.2",
+    "web3": "^1.10.0"
   },
   "devDependencies": {
     "isomorphic-fetch": "^3.0.0"

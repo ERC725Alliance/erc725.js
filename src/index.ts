@@ -59,7 +59,7 @@ import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
-import { supportsInterface } from './lib/detector';
+import { supportsInterface, checkPermissions } from './lib/detector';
 import { decodeMappingKey } from './lib/decodeMappingKey';
 
 /* eslint-disable-next-line */
@@ -430,7 +430,7 @@ export class ERC725 {
   static encodePermissions(permissions: Permissions): string {
     const result = Object.keys(permissions).reduce((previous, key) => {
       return permissions[key]
-        ? previous + hexToNumber(LSP6_DEFAULT_PERMISSIONS[key])
+        ? previous + Number(hexToNumber(LSP6_DEFAULT_PERMISSIONS[key]))
         : previous;
     }, 0);
 
@@ -459,7 +459,7 @@ export class ERC725 {
     const result = {
       CHANGEOWNER: false,
       ADDCONTROLLER: false,
-      CHANGEPERMISSIONS: false,
+      EDITPERMISSIONS: false,
       ADDEXTENSIONS: false,
       CHANGEEXTENSIONS: false,
       ADDUNIVERSALRECEIVERDELEGATE: false,
@@ -489,11 +489,11 @@ export class ERC725 {
       return result;
     }
 
-    const passedPermissionDecimal = hexToNumber(permissionHex);
+    const passedPermissionDecimal = Number(hexToNumber(permissionHex));
 
     permissionsToTest.forEach((testPermission) => {
-      const decimalTestPermission = hexToNumber(
-        LSP6_DEFAULT_PERMISSIONS[testPermission],
+      const decimalTestPermission = Number(
+        hexToNumber(LSP6_DEFAULT_PERMISSIONS[testPermission]),
       );
       const isPermissionIncluded =
         (passedPermissionDecimal & decimalTestPermission) ===
@@ -612,6 +612,36 @@ export class ERC725 {
       address: options.address,
       provider: this.initializeProvider(options.rpcUrl),
     });
+  }
+
+  /**
+   * Check if the required permissions are included in the granted permissions as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param requiredPermissions An array of required permissions or a single required permission.
+   * @param grantedPermissions The granted permissions as a 32-byte hex string.
+   * @return A boolean value indicating whether the required permissions are included in the granted permissions.
+   */
+  static checkPermissions(
+    requiredPermissions: string[] | string,
+    grantedPermissions: string,
+  ): boolean {
+    return checkPermissions(requiredPermissions, grantedPermissions);
+  }
+
+  /**
+   * Check if the required permissions are included in the granted permissions as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param requiredPermissions An array of required permissions or a single required permission.
+   * @param grantedPermissions The granted permissions as a 32-byte hex string.
+   * @return A boolean value indicating whether the required permissions are included in the granted permissions.
+   */
+  checkPermissions(
+    requiredPermissions: string[] | string,
+    grantedPermissions: string,
+  ): boolean {
+    return ERC725.checkPermissions(requiredPermissions, grantedPermissions);
   }
 }
 

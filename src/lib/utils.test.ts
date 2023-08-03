@@ -59,8 +59,7 @@ describe('utils', () => {
         encodedValue: [
           {
             key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
-            value:
-              '0x0000000000000000000000000000000000000000000000000000000000000002',
+            value: '0x00000000000000000000000000000002',
           },
           {
             key: '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
@@ -95,8 +94,7 @@ describe('utils', () => {
         encodedValue: [
           {
             key: '0x9985edaf12cbacf5ac7d6ed54f0445cc0ea56075aee9b9942e4ab3bf4239f950',
-            value:
-              '0x0000000000000000000000000000000000000000000000000000000000000002',
+            value: '0x00000000000000000000000000000002',
           },
           {
             key: '0x9985edaf12cbacf5ac7d6ed54f0445cc00000000000000000000000000000000',
@@ -118,7 +116,7 @@ describe('utils', () => {
           valueType: '(bytes4,bytes8)',
           valueContent: '(Bytes4,Number)',
         },
-        decodedValue: ['0xcafecafe', '11'],
+        decodedValue: ['0xcafecafe', 11],
         encodedValue: '0xcafecafe000000000000000b',
       },
       {
@@ -129,7 +127,7 @@ describe('utils', () => {
           valueType: '(bytes4,bytes8,bytes4)',
           valueContent: '(Bytes4,Number,Number)',
         },
-        decodedValue: ['0xcafecafe', '11', '8'],
+        decodedValue: ['0xcafecafe', 11, 8],
         encodedValue: '0xcafecafe000000000000000b00000008',
       },
       {
@@ -247,7 +245,7 @@ describe('utils', () => {
       {
         valueContent: 'Number',
         valueType: 'uint256[]',
-        decodedValue: ['123', '456'],
+        decodedValue: [123, 456],
         encodedValue:
           '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000007b00000000000000000000000000000000000000000000000000000000000001c8',
       },
@@ -512,9 +510,52 @@ describe('utils', () => {
           '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
         ],
         values: [
-          '0x0000000000000000000000000000000000000000000000000000000000000001',
+          '0x00000000000000000000000000000001',
           '0xa3e6f38477d45727f6e6f853cdb479b0d60c0ac9',
         ],
+      });
+    });
+
+    it('encodes array', () => {
+      const addressArray = [
+        '0x6413255d24b8fbf81d2d65214c485c694cb3d4b4',
+        '0xd6c68c2c94af899ce43ff1863693016a711ae7c7',
+        '0x79b698f4bc3051f18b5f94046f09d70823a8fd44',
+        '0x72bebf88546525a5888f188b390701bb0fd9b1a5',
+        '0x882aca051979e32e787e8815d9880759f91e7124',
+        '0x78827c8f8205072858a8cce39b8724d948327ba0',
+        '0xe27cd9c132677cdce2e9efa43b040de35ceff069',
+        '0x072616745957b45c8989e12b9563390fafac4ebe',
+        '0xfd5a7c50c0cf665a772407af3f05522784589c44',
+        '0x13de082cf8a499eee75b0681cfa0141a145f15d9',
+        '0xe3610d0eb167fe7a7b7c25d0aee8874eb8b113ef',
+      ];
+      const encodedDataWithMultipleKeys = encodeData(
+        [
+          {
+            keyName: 'LSP3IssuedAssets[]',
+            value: addressArray,
+          },
+        ],
+        schemas,
+      );
+
+      assert.deepStrictEqual(encodedDataWithMultipleKeys, {
+        keys: [
+          '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000002',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000003',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000004',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000005',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000006',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000007',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000008',
+          '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000009',
+          '0x3a47ab5bd3a594c3a8995f8fa58d08760000000000000000000000000000000a',
+        ],
+        values: ['0x0000000000000000000000000000000b', ...addressArray],
       });
     });
 
@@ -554,7 +595,7 @@ describe('utils', () => {
         ],
         values: [
           '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
-          '0x0000000000000000000000000000000000000000000000000000000000000002',
+          '0x00000000000000000000000000000002',
           '0xd94353d9b005b3c0a9da169b768a31c57844e490',
           '0xdaea594e385fc724449e3118b2db7e86dfba1826',
           '0x1183790f29be3cdfd0a102862fea1a4a30b3adab',

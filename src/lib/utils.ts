@@ -24,6 +24,7 @@ import {
   isAddress,
   numberToHex,
   padLeft,
+  stripHexPrefix,
 } from 'web3-utils';
 import { arrToBufArr } from 'ethereumjs-util';
 
@@ -234,10 +235,9 @@ export function encodeKey(
   schema: ERC725JSONSchema,
   value:
     | string
-    | string[]
-    | string[][]
     | number
-    | number[]
+    | (string | number)[]
+    | string[][]
     | JSONURLDataToEncode
     | JSONURLDataToEncode[]
     | boolean,
@@ -259,14 +259,10 @@ export function encodeKey(
         const dataElement = value[index];
         if (index === 0) {
           // This is arrayLength as the first element in the raw array
+          // encoded as uint128
           results.push({
             key: schema.key,
-            value: encodeKeyValue(
-              'Number',
-              'uint256',
-              value.length.toString(),
-              schema.name,
-            ) as string,
+            value: encodeValueType('uint128', value.length),
           });
         }
 
@@ -576,4 +572,8 @@ export function patchIPFSUrlsIfApplicable(
   }
 
   return receivedData;
+}
+
+export function countNumberOfBytes(data: string) {
+  return stripHexPrefix(data).length / 2;
 }

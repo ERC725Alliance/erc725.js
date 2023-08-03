@@ -38,7 +38,7 @@ import ERC725 from '@erc725/erc725.js';
 
 If you install it on the backend side, you may need to also install [`isomorphic-fetch`](https://www.npmjs.com/package/isomorphic-fetch).
 
-## Example Instantiation
+## Usage
 
 ```js
 import { ERC725 } from '@erc725/erc725.js';
@@ -71,18 +71,18 @@ const schema = [
 ];
 
 const address = '0x3000783905Cc7170cCCe49a4112Deda952DDBe24';
-const RPC_URL = 'https://rpc.l16.lukso.network';
+const RPC_URL = 'https://rpc.testnet.lukso.network';
 const config = {
   ipfsGateway: 'https://2eff.lukso.dev/ipfs/',
 };
 
-const erc725 = new ERC725(schema, address, RPC_URL, config);
+const myErc725 = new ERC725(schema, address, RPC_URL, config);
 ```
 
 ## Usage
 
 ```js
-await erc725.getOwner();
+await myErc725.getOwner();
 // > '0x28D25E70819140daF65b724158D00c373D1a18ee'
 
 await myErc725.getData();

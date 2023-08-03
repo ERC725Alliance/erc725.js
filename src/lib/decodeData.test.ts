@@ -102,7 +102,7 @@ describe('decodeData', () => {
       [schema],
     );
 
-    expect(decodedData.value).to.eql(['0x11223344', '12']); // TODO: we may want to return a number instead of a string.
+    expect(decodedData.value).to.eql(['0x11223344', 12]);
   });
 
   it('parses type Array correctly', () => {
@@ -112,8 +112,7 @@ describe('decodeData', () => {
         value: [
           {
             key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
-            value:
-              '0x0000000000000000000000000000000000000000000000000000000000000002',
+            value: '0x00000000000000000000000000000002',
           },
           {
             key: '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000000',
@@ -184,7 +183,7 @@ describe('tuple', () => {
         valueContent: '(Bytes4,Number)',
         valueType: '(bytes4,bytes8)',
         encodedValue: '0xdeadbeaf000000000000000c',
-        decodedValue: ['0xdeadbeaf', '12'],
+        decodedValue: ['0xdeadbeaf', 12],
       },
     ]; // TODO: add more cases? Address, etc.
 
@@ -258,13 +257,12 @@ describe('tuple', () => {
         isTuple: false,
         shouldThrow: true, // valueContent is not a valid hex value
       },
-      // TODO: add feature for this test
-      // {
-      //   valueType: '(bytes4,bytes4)',
-      //   valueContent: '(Number,0x1122334455)',
-      //   isTuple: false,
-      //   shouldThrow: true, // valueContent is bytes5 vs bytes4
-      // },
+      {
+        valueType: '(bytes4,bytes4)',
+        valueContent: '(Number,0x1122334455)',
+        isTuple: false,
+        shouldThrow: true, // valueContent is bytes5 vs bytes4
+      },
     ];
 
     testCases.forEach((testCase) => {

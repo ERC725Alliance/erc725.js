@@ -23,10 +23,6 @@ import { decodeValueType } from './encoder';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { DynamicKeyPart } from '../types/dynamicKeys';
 
-function make32BytesLong(s: string): string {
-  return padLeft(s, 64);
-}
-
 function isDynamicKeyPart(keyPartName: string): boolean {
   return (
     keyPartName.slice(0, 1) === '<' &&
@@ -59,7 +55,14 @@ function decodeKeyPart(
         ? 0
         : encodedKeyPart.length - bytesLength;
     decodedKey = encodedKeyPart.slice(sliceFrom);
-  } else decodedKey = decodeValueType(type, make32BytesLong(encodedKeyPart));
+  } else if (type === 'address') {
+    // this is required if the 2nd word is an address in a MappingWithGrouping
+    const leftPaddedAddress = padLeft('0x' + encodedKeyPart, 40);
+
+    decodedKey = decodeValueType(type, leftPaddedAddress);
+  } else {
+    decodedKey = decodeValueType(type, encodedKeyPart);
+  }
 
   return { type, value: decodedKey };
 }
