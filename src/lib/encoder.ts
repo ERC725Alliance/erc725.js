@@ -18,7 +18,7 @@
  * @author Hugo Masclet <@Hugoo>
  * @author Callum Grindle <@CallumGrindle>
  * @author Jean Cavallera <@CJ42>
- * @date 2020
+ * @date 2023
  */
 
 /*
@@ -41,9 +41,8 @@ import {
   hexToBytes,
   bytesToHex,
   toHex,
+  toBN,
 } from 'web3-utils';
-
-import BigNumber from 'bignumber.js';
 
 import { JSONURLDataToEncode, URLDataWithHash } from '../types';
 import { AssetURLEncode } from '../types/encodeData';
@@ -403,7 +402,7 @@ const valueTypeEncodingMap = {
         );
       }
 
-      return BigNumber(value).toNumber();
+      return toBN(value).toNumber();
     },
   },
   uint256: {
@@ -423,7 +422,7 @@ const valueTypeEncodingMap = {
         );
       }
 
-      return BigNumber(value).toNumber();
+      return toBN(value).toNumber();
     },
   },
   bytes32: {
