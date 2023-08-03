@@ -5,8 +5,8 @@ import { ERC725 } from '@erc725/erc725.js';
 // isomorphic-fetch is not needed in a browser environment
 import 'isomorphic-fetch';
 
-const RPC_ENDPOINT = 'https://rpc.l14.lukso.network';
-const IPFS_GATEWAY = 'https://cloudflare-ipfs.com/ipfs/';
+const RPC_ENDPOINT = 'https://rpc.testnet.lukso.network';
+const IPFS_GATEWAY = 'https://2eff.lukso.dev/ipfs/';
 
 export function getInstance() {
   const schema = [
@@ -40,7 +40,7 @@ export function getInstance() {
     },
   ];
 
-  const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
+  const address = '0x7b2C957209897bc4423162e57D8C3CA863DCfBCc';
   const provider = new Web3.providers.HttpProvider(RPC_ENDPOINT);
   const config = {
     ipfsGateway: IPFS_GATEWAY,
