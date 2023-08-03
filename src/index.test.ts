@@ -1414,6 +1414,45 @@ describe('supportsInterface', () => {
   // TODO: add test to test the actual behavior of the function.
 });
 
+describe('checkPermissions', () => {
+  const erc725Instance = new ERC725([]);
+
+  it('is available on instance', () => {
+    chaiAssert.typeOf(erc725Instance.checkPermissions, 'function');
+
+    const requiredPermissions = [
+      '0x0000000000000000000000000000000000000000000000000000000000000004',
+      '0x0000000000000000000000000000000000000000000000000000000000000800',
+    ];
+    const grantedPermissions =
+      '0x000000000000000000000000000000000000000000000000000000000000ff51';
+    const result = erc725Instance.checkPermissions(
+      requiredPermissions,
+      grantedPermissions,
+    );
+
+    assert.equal(result, false);
+  });
+
+  it('is available on class', () => {
+    chaiAssert.typeOf(ERC725.checkPermissions, 'function');
+
+    const requiredPermissions = [
+      '0x0000000000000000000000000000000000000000000000000000000000000004',
+      '0x0000000000000000000000000000000000000000000000000000000000000800',
+    ];
+    const grantedPermissions =
+      '0x000000000000000000000000000000000000000000000000000000000000ff51';
+
+    const result = ERC725.checkPermissions(
+      requiredPermissions,
+      grantedPermissions,
+    );
+
+    assert.equal(result, false);
+  });
+});
+
 describe('decodeMappingKey', () => {
   const erc725Instance = new ERC725([]);
 
