@@ -17,10 +17,10 @@
  * @author Robert McLeod <@robertdavid010>
  * @author Hugo Masclet <@Hugoo>
  * @author Callum Grindle <@CallumGrindle>
- * @date 2020
+ * @date 2023
  */
 
-import { isHex } from 'web3-utils';
+import { isHexStrict } from 'web3-utils';
 import { COMPACT_BYTES_ARRAY_STRING } from '../constants/constants';
 
 import { DecodeDataInput, DecodeDataOutput } from '../types/decodeData';
@@ -59,6 +59,7 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
   const valueTypeParts = valueTypeToDecode
     .substring(1, valueTypeToDecode.length - 1)
     .split(',');
+
   const valueContentParts = valueContent
     .substring(1, valueContent.length - 1)
     .split(',');
@@ -85,12 +86,13 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
       );
     }
 
+    const valueTypeBytesLength = valueTypeParts[i].split('bytes')[1];
+
     if (
       valueTypeParts[i].match(tupleValueTypesRegex) &&
       valueContentParts[i].match(valueContentsBytesRegex)
     ) {
-      const valueTypeBytesLength = valueTypeParts[i].slice(4);
-      const valueContentBytesLength = valueContentParts[i].slice(4);
+      const valueContentBytesLength = valueContentParts[i].slice(5);
 
       if (valueTypeBytesLength > valueContentBytesLength) {
         throw new Error(
@@ -109,16 +111,22 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
       );
     }
 
-    if (
-      valueContentParts[i].slice(0, 2) === '0x' &&
-      !isHex(valueContentParts[i])
-    ) {
+    if (isHexStrict(valueContentParts[i])) {
+      // check if length of a hex literal in valueContent (e.g: 0x122334455)
+      // is compatible with the valueType (e.g: bytes4)
+      const hexLiteralLength = valueContentParts[i].length - 2;
+
+      if (parseInt(valueTypeBytesLength, 10) < hexLiteralLength) {
+        throw new Error(
+          `Invalid tuple (${valueType},${valueContent}: ${valueContent[i]} cannot fit in ${valueType[i]}`,
+        );
+      }
+    } else if (valueContentParts[i].startsWith('0x')) {
+      // Value starts with 0x bit is not hex... hmmm... weird :)
       throw new Error(
         `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. valueContent of type: ${valueContentParts[i]} is not a valid hex value`,
       );
     }
-
-    // TODO: check if length of 0x112233 is compatible with of bytesX
   }
 
   return true;

@@ -116,7 +116,7 @@ describe('utils', () => {
           valueType: '(bytes4,bytes8)',
           valueContent: '(Bytes4,Number)',
         },
-        decodedValue: ['0xcafecafe', '11'],
+        decodedValue: ['0xcafecafe', 11],
         encodedValue: '0xcafecafe000000000000000b',
       },
       {
@@ -127,7 +127,7 @@ describe('utils', () => {
           valueType: '(bytes4,bytes8,bytes4)',
           valueContent: '(Bytes4,Number,Number)',
         },
-        decodedValue: ['0xcafecafe', '11', '8'],
+        decodedValue: ['0xcafecafe', 11, 8],
         encodedValue: '0xcafecafe000000000000000b00000008',
       },
       {
@@ -245,7 +245,7 @@ describe('utils', () => {
       {
         valueContent: 'Number',
         valueType: 'uint256[]',
-        decodedValue: ['123', '456'],
+        decodedValue: [123, 456],
         encodedValue:
           '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000007b00000000000000000000000000000000000000000000000000000000000001c8',
       },

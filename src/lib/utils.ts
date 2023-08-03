@@ -235,10 +235,9 @@ export function encodeKey(
   schema: ERC725JSONSchema,
   value:
     | string
-    | string[]
-    | string[][]
     | number
-    | number[]
+    | (string | number)[]
+    | string[][]
     | JSONURLDataToEncode
     | JSONURLDataToEncode[]
     | boolean,
