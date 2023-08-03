@@ -17,10 +17,10 @@
  * @author Robert McLeod <@robertdavid010>
  * @author Hugo Masclet <@Hugoo>
  * @author Callum Grindle <@CallumGrindle>
- * @date 2020
+ * @date 2023
  */
 
-import { isHex } from 'web3-utils';
+import { isHexStrict } from 'web3-utils';
 import { COMPACT_BYTES_ARRAY_STRING } from '../constants/constants';
 
 import { DecodeDataInput, DecodeDataOutput } from '../types/decodeData';
@@ -111,15 +111,7 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
       );
     }
 
-    const isValueContentHexLiteral = valueContentParts[i].startsWith('0x');
-
-    if (isValueContentHexLiteral) {
-      if (!isHex(valueContentParts[i])) {
-        throw new Error(
-          `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. valueContent of type: ${valueContentParts[i]} is not a valid hex value`,
-        );
-      }
-
+    if (isHexStrict(valueContentParts[i])) {
       // check if length of a hex literal in valueContent (e.g: 0x122334455)
       // is compatible with the valueType (e.g: bytes4)
       const hexLiteralLength = valueContentParts[i].length - 2;
@@ -129,6 +121,11 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
           `Invalid tuple (${valueType},${valueContent}: ${valueContent[i]} cannot fit in ${valueType[i]}`,
         );
       }
+    } else if (valueContentParts[i].startsWith('0x')) {
+      // Value starts with 0x bit is not hex... hmmm... weird :)
+      throw new Error(
+        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. valueContent of type: ${valueContentParts[i]} is not a valid hex value`,
+      );
     }
   }
 
