@@ -446,9 +446,9 @@ describe('Running @erc725/erc725.js tests...', () => {
                 '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000141098603b193d276f5fa176cc02007b609f9dae6b000000000000000000000000',
             },
             {
-              key: '0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38', // SupportedStandards:LSP3UniversalProfile
+              key: '0xeafec4d89fa9619884b600005ef83ad9559033e6e941db7d7c495acdce616347', // SupportedStandards:LSP3Profile
               value:
-                '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000004abe425d600000000000000000000000000000000000000000000000000000000',
+                '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000045ef83ad900000000000000000000000000000000000000000000000000000000',
             },
           ],
         },
@@ -464,10 +464,10 @@ describe('Running @erc725/erc725.js tests...', () => {
             valueType: 'bytes',
           },
           {
-            name: 'SupportedStandards:LSP3UniversalProfile',
-            key: '0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38',
+            name: 'SupportedStandards:LSP3Profile',
+            key: '0xeafec4d89fa9619884b600005ef83ad9559033e6e941db7d7c495acdce616347',
             keyType: 'Mapping',
-            valueContent: '0xabe425d6',
+            valueContent: '0x5ef83ad9',
             valueType: 'bytes',
           },
           {
@@ -488,7 +488,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           keyName: 'LSP12IssuedAssetsMap:<address>',
           dynamicKeyParts: '0xb74a88C43BCf691bd7A851f6603cb1868f6fc147',
         },
-        'SupportedStandards:LSP3UniversalProfile',
+        'SupportedStandards:LSP3Profile',
       ]);
       assert.deepStrictEqual(data, [
         {
@@ -502,9 +502,9 @@ describe('Running @erc725/erc725.js tests...', () => {
           value: '0x1098603B193d276f5fA176CC02007B609F9DAE6b',
         },
         {
-          key: '0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38',
-          name: 'SupportedStandards:LSP3UniversalProfile',
-          value: '0xabe425d6',
+          key: '0xeafec4d89fa9619884b600005ef83ad9559033e6e941db7d7c495acdce616347',
+          name: 'SupportedStandards:LSP3Profile',
+          value: '0x5ef83ad9',
         },
       ]);
     });
