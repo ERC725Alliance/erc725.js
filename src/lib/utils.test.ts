@@ -689,7 +689,7 @@ describe('utils', () => {
       },
       {
         keyType: 'Mapping',
-        keyName: 'SupportedStandards:LSP3UniversalProfile',
+        keyName: 'SupportedStandards:LSP3Profile',
       },
       {
         keyType: 'Mapping',

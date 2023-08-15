@@ -26,7 +26,7 @@ Current provided LSPs are:
 
 ```
 LSP1UniversalReceiverDelegate.json
-LSP3UniversalProfileMetadata.json
+LSP3ProfileMetadata.json
 LSP4DigitalAssetLegacy.json
 LSP4DigitalAsset.json
 LSP5ReceivedAssets.json
@@ -39,7 +39,7 @@ LSP12IssuedAssets.json
 You can import them from:
 
 ```js
-import LSP3 from '@erc725/erc725.js/schemas/LSP3UniversalProfileMetadata.json';
+import LSP3 from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import LSP5 from '@erc725/erc725.js/schemas/LSP5ReceivedAssets.json';
 // ...
 

@@ -35,11 +35,11 @@ import Web3 from 'web3';
 // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
 const schemas = [
   {
-    name: 'SupportedStandards:LSP3UniversalProfile',
-    key: '0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38',
+    name: 'SupportedStandards:LSP3Profile',
+    key: '0xeafec4d89fa9619884b600005ef83ad9559033e6e941db7d7c495acdce616347',
     keyType: 'Mapping',
     valueType: 'bytes',
-    valueContent: '0xabe425d6',
+    valueContent: '0x5ef83ad9',
   },
   {
     name: 'LSP3Profile',
@@ -72,16 +72,16 @@ const erc725 = new ERC725(schemas, address, RPC_URL, config);
 await erc725.getOwner();
 // > '0x28D25E70819140daF65b724158D00c373D1a18ee'
 
-await erc725.getData('SupportedStandards:LSP3UniversalProfile');
+await erc725.getData('SupportedStandards:LSP3Profile');
 /**
 {
-  'SupportedStandards:LSP3UniversalProfile': '0xabe425d6'
+  'SupportedStandards:LSP3Profile': '0x5ef83ad9'
 }
 */
 
 await erc725.getData([
   'LSP3Profile',
-  'SupportedStandards:LSP3UniversalProfile',
+  'SupportedStandards:LSP3Profile',
 ]);
 /**
 {
@@ -90,7 +90,7 @@ await erc725.getData([
     hash: '0xb4f9d72e83bbe7e250ed9ec80332c493b7b3d73e0d72f7b2c7ab01c39216eb1a',
     hashFunction: 'keccak256(utf8)'
   },
-  'SupportedStandards:LSP3UniversalProfile': '0xabe425d6'
+  'SupportedStandards:LSP3Profile': '0x5ef83ad9'
 }
 */
 

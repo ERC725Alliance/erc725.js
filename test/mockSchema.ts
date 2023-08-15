@@ -17,16 +17,16 @@ export const mockSchema: (ERC725JSONSchema & {
 })[] = [
   // Case 1
   {
-    name: 'SupportedStandards:LSP3UniversalProfile',
-    key: '0xeafec4d89fa9619884b60000abe425d64acd861a49b8ddf5c0b6962110481f38',
+    name: 'SupportedStandards:LSP3Profile',
+    key: '0xeafec4d89fa9619884b600005ef83ad9559033e6e941db7d7c495acdce616347',
     keyType: 'Mapping',
-    valueContent: '0xabe425d6',
+    valueContent: '0x5ef83ad9',
     valueType: 'bytes',
     // Testing data
-    returnRawData: abiCoder.encodeParameter('bytes', '0xabe425d6'),
-    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0xabe425d6']),
-    returnGraphData: '0xabe425d6',
-    expectedResult: '0xabe425d6',
+    returnRawData: abiCoder.encodeParameter('bytes', '0x5ef83ad9'),
+    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0x5ef83ad9']),
+    returnGraphData: '0x5ef83ad9',
+    expectedResult: '0x5ef83ad9',
   },
 
   // Case 2
@@ -571,25 +571,25 @@ export const mockSchema: (ERC725JSONSchema & {
     name: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
     key: '0x22496f48a493035f0ab40000cafecafecafecafecafecafecafecafecafecafe',
     keyType: 'Mapping',
-    valueContent: '0xabe425d6',
+    valueContent: '0x5ef83ad9',
     valueType: 'bytes',
     // Testing data
-    returnRawData: abiCoder.encodeParameter('bytes', '0xabe425d6'),
-    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0xabe425d6']),
-    returnGraphData: '0xabe425d6',
-    expectedResult: '0xabe425d6',
+    returnRawData: abiCoder.encodeParameter('bytes', '0x5ef83ad9'),
+    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0x5ef83ad9']),
+    returnGraphData: '0x5ef83ad9',
+    expectedResult: '0x5ef83ad9',
   },
   {
     name: 'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
     key: '0x4b80742de2bf82acb3630000cafecafecafecafecafecafecafecafecafecafe',
     keyType: 'MappingWithGrouping',
-    valueContent: '0xabe425d6',
+    valueContent: '0x5ef83ad9',
     valueType: 'bytes',
     // Testing data
-    returnRawData: abiCoder.encodeParameter('bytes', '0xabe425d6'),
-    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0xabe425d6']),
-    returnGraphData: '0xabe425d6',
-    expectedResult: '0xabe425d6',
+    returnRawData: abiCoder.encodeParameter('bytes', '0x5ef83ad9'),
+    returnRawDataArray: abiCoder.encodeParameter('bytes[]', ['0x5ef83ad9']),
+    returnGraphData: '0x5ef83ad9',
+    expectedResult: '0x5ef83ad9',
   },
   {
     name: 'Hello:<address>',
