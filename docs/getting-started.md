@@ -58,7 +58,7 @@ const schemas = [
 ];
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
-const RPC_URL = 'https://rpc.l16.lukso.network';
+const RPC_URL = 'https://rpc.testnet.lukso.network';
 const config = {
   ipfsGateway: 'https://YOUR-IPFS-GATEWAY/ipfs/',
 };
@@ -79,10 +79,7 @@ await erc725.getData('SupportedStandards:LSP3Profile');
 }
 */
 
-await erc725.getData([
-  'LSP3Profile',
-  'SupportedStandards:LSP3Profile',
-]);
+await erc725.getData(['LSP3Profile', 'SupportedStandards:LSP3Profile']);
 /**
 {
   LSP3Profile: {
