@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.19.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.18.0...v0.19.0) (2023-10-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* change LSP3 to SupportedStandards:LSP3Profile ([#307](https://github.com/ERC725Alliance/erc725.js/issues/307))
+* new encoding for static value types (not arrays `[]`) ([#288](https://github.com/ERC725Alliance/erc725.js/issues/288))
+* change `ArrayLength` value from `uint256` to `uint128` ([#287](https://github.com/ERC725Alliance/erc725.js/issues/287))
+
+### Features
+
+* add checkPermissions function ([17d2258](https://github.com/ERC725Alliance/erc725.js/commit/17d225843c236951ef1515a0ff91095b5ef27cd3))
+* add schemas for LSP8 + LSP17 ([#311](https://github.com/ERC725Alliance/erc725.js/issues/311)) ([1e8dbf7](https://github.com/ERC725Alliance/erc725.js/commit/1e8dbf765c6c5e250539b402e9bd5a395966a8c2))
+
+
+### Bug Fixes
+
+* decode any uint256 as number not string ([#289](https://github.com/ERC725Alliance/erc725.js/issues/289)) ([37203f1](https://github.com/ERC725Alliance/erc725.js/commit/37203f14d313a0caff75724dc74175c741c1b540))
+* dependencies & example ([#302](https://github.com/ERC725Alliance/erc725.js/issues/302)) ([9979e89](https://github.com/ERC725Alliance/erc725.js/commit/9979e89e438cd9f7cc586d7dc271de969f13b125))
+* incorrect value in schema for array length in `...Map` ([#310](https://github.com/ERC725Alliance/erc725.js/issues/310)) ([0d28b13](https://github.com/ERC725Alliance/erc725.js/commit/0d28b1317dc085078090a8babacf4db517d91a87))
+* Remove hardcoded require ([5279278](https://github.com/ERC725Alliance/erc725.js/commit/527927812b1a05b13f8dc6b14aecaa6d24e98d61))
+* variable naming ([44b4785](https://github.com/ERC725Alliance/erc725.js/commit/44b47851ed63b817edc21c63655d67bac13a7e7f))
+
+
+### Code Refactoring
+
+* change `ArrayLength` value from `uint256` to `uint128` ([#287](https://github.com/ERC725Alliance/erc725.js/issues/287)) ([c95ee8a](https://github.com/ERC725Alliance/erc725.js/commit/c95ee8a53bf25bcf47777054af27cae1fbad8b2f))
+* change LSP3 to SupportedStandards:LSP3Profile ([#307](https://github.com/ERC725Alliance/erc725.js/issues/307)) ([73f3481](https://github.com/ERC725Alliance/erc725.js/commit/73f34818fe152c3ab5299177adc0eddfed6886c5))
+* new encoding for static value types (not arrays `[]`) ([#288](https://github.com/ERC725Alliance/erc725.js/issues/288)) ([f0b04da](https://github.com/ERC725Alliance/erc725.js/commit/f0b04daa57a281c537a8f28594439573188f0dce))
+
 ## [0.18.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.17.2...v0.18.0) (2023-08-03)
 
 ### ⚠ BREAKING CHANGES
