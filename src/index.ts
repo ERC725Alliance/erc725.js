@@ -21,6 +21,7 @@
  */
 
 import { hexToNumber, isAddress, leftPad, toHex } from 'web3-utils';
+import HttpProvider from 'web3-providers-http';
 
 import { ProviderWrapper } from './provider/providerWrapper';
 
@@ -61,9 +62,6 @@ import { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
 import { supportsInterface, checkPermissions } from './lib/detector';
 import { decodeMappingKey } from './lib/decodeMappingKey';
-
-/* eslint-disable-next-line */
-const HttpProvider = require('web3-providers-http');
 
 export {
   ERC725JSONSchema,

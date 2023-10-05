@@ -15,7 +15,7 @@ An RPC URL can be passed when instantiating the `ERC725` class.
 ```javascript
 import ERC725 from '@erc725/erc725.js';
 
-const RPC_URL = 'https://rpc.l16.lukso.network';
+const RPC_URL = 'https://rpc.testnet.lukso.network';
 
 const erc725 = new ERC725([], '0x...', RPC_URL);
 ```
@@ -47,7 +47,7 @@ import Web3 from 'web3';
 import ERC725 from '@erc725/erc725.js';
 
 const web3provider = new Web3(
-  new Web3.providers.HttpProvider('https://rpc.l16.lukso.network'),
+  new Web3.providers.HttpProvider('https://rpc.testnet.lukso.network'),
 );
 
 const erc725 = new ERC725([], '0x...', web3provider);

@@ -1,60 +1,63 @@
 # Release Process
 
-Releases are published to NPM when `develop` is merged into `main` AND when the merged code contains a version bump in the `package.json`.
+Releases are published to npm using [Release Please](https://github.com/googleapis/release-please).
 
-## Create and publish a new release:
+This package automates CHANGELOG generation, version bumps and npm releases by parsing the
+git history, looking for [Conventional Commit messages](https://www.conventionalcommits.org/).
 
-### Bump version
+When changes and feature PRs are merged from develop to main, `release-please` will open and maintain a release PR with the updated CHANGELOG and new version number. When this PR is merged, a release will be created and the package published to NPM.
 
-You can manually trigger the [Bump version](https://github.com/ERC725Alliance/erc725.js/actions/workflows/bump-version.yml) workflow from the `develop` branch.
+1. Merge develop into main.
+2. Release Please will create the release PR going to main.
+3. Merge the generated release PR.
+4. Package will be published to NPM.
 
-To bump locally:
+## Conventional Commit prefixes?
 
-1. Checkout to a new release branch from `develop`.
-2. Bump version with [standard-version](https://github.com/conventional-changelog/standard-version). To create pre-release or specific versions, see below.
+Commits should follow the [Conventional Commit messages standard](https://www.conventionalcommits.org/).
 
-```bash
-npm run release
-```
-3. Push the changes to origin. A git tag is created by the release CI so do **not** push tags here.
+The following commit prefixes will result in changes in the CHANGELOG:
 
-```bash
-git push origin
-```
+- `fix:` which represents bug fixes, and correlates to a [SemVer](https://semver.org/)
+  patch.
+- `feat:` which represents a new feature, and correlates to a minor version increase.
+  (indicated by the `!`) and will result in a SemVer major version increase.
+- `feat!:`, or `fix!:`, `refactor!:`, etc., which represent a breaking change
+- `build:` Changes that affect the build system or external dependencies.
+- `ci:` Changes to our CI configuration files and scripts.
+- `docs:` Documentation only changes.
+- `perf:` A code change that improves performance.
+- `refactor:` A code change that neither fixes a bug nor adds a feature.
+- `style:` Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc).
+- `test:` Adding missing tests or correcting existing tests.
+- `chore:` Other
 
-4. Open a PR from your release branch to `develop` and merge it.
+## Release with a custom version number
 
-### Release
+When a commit to the main branch has `Release-As: x.x.x` (case insensitive) in the **commit body**, Release Please will open a new pull request for the specified version.
 
-- Merge `develop` into `main` through a PR.
-- The CI will create a GitHub release and publish to NPM.
+`git commit --allow-empty -m "chore: release 2.0.0" -m "Release-As: 2.0.0"` results in the following commit message:
 
-If it fails, you can manually trigger the workflow from the [Actions](https://github.com/ERC725Alliance/erc725.js/actions/workflows/release.yml) tab.
+```txt
+chore: release 2.0.0
 
-## Specific Version Increases
-
-To ignore the automatic version increase in favour of a custom version use the `--release-as` flag with the argument `major`, `minor` or `patch` or a specific version number:
-
-```bash
-npm run release -- --release-as minor
-# Or
-npm run release -- --release-as 1.1.0
-```
-
-## Prerelease versions
-
-To create a pre-release run:
-
-```bash
-npm run release -- --prerelease
+Release-As: 2.0.0
 ```
 
-If the lastest version is 1.0.0, the pre-release command will change the version to: `1.0.1-0`
+## How can I fix release notes?
 
-To name the pre-release, set the name by adding `--prerelease <name>`
+If you have merged a pull request and would like to amend the commit message
+used to generate the release notes for that commit, you can edit the body of
+the merged pull requests and add a section like:
 
-```bash
-npm run release -- --prerelease alpha
+```
+BEGIN_COMMIT_OVERRIDE
+feat: add ability to override merged commit message
+
+fix: another message
+chore: a third message
+END_COMMIT_OVERRIDE
 ```
 
-If the latest version is 1.0.0 this will change the version to: `1.0.1-alpha.0`
+The next time Release Please runs, it will use that override section as the
+commit message instead of the merged commit message.
