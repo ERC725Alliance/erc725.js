@@ -1060,7 +1060,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           ENCRYPT: true,
           DECRYPT: true,
           SIGN: true,
-          EXECUTE_RELAY_CALL: false
+          EXECUTE_RELAY_CALL: false,
         },
         hex: '0x00000000000000000000000000000000000000000000000000000000003f3f7f',
       },
@@ -1088,7 +1088,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           ENCRYPT: false,
           DECRYPT: false,
           SIGN: false,
-          EXECUTE_RELAY_CALL: false
+          EXECUTE_RELAY_CALL: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000000000',
       },
@@ -1116,7 +1116,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           ENCRYPT: false,
           DECRYPT: false,
           SIGN: true,
-          EXECUTE_RELAY_CALL: false
+          EXECUTE_RELAY_CALL: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000200a00',
       },
@@ -1144,7 +1144,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           ENCRYPT: false,
           DECRYPT: false,
           SIGN: false,
-          EXECUTE_RELAY_CALL: false
+          EXECUTE_RELAY_CALL: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000040800',
       },
@@ -1172,7 +1172,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           ENCRYPT: false,
           DECRYPT: false,
           SIGN: false,
-          EXECUTE_RELAY_CALL: false
+          EXECUTE_RELAY_CALL: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000040004',
       },
@@ -1200,7 +1200,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           ENCRYPT: false,
           DECRYPT: false,
           SIGN: false,
-          EXECUTE_RELAY_CALL: false
+          EXECUTE_RELAY_CALL: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000000a00',
       },
@@ -1281,7 +1281,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             ENCRYPT: true,
             DECRYPT: true,
             SIGN: true,
-            EXECUTE_RELAY_CALL: true
+            EXECUTE_RELAY_CALL: true,
           },
         );
         assert.deepStrictEqual(
@@ -1311,7 +1311,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             ENCRYPT: true,
             DECRYPT: true,
             SIGN: true,
-            EXECUTE_RELAY_CALL: true
+            EXECUTE_RELAY_CALL: true,
           },
         );
       });
