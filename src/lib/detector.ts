@@ -23,40 +23,6 @@
 
 import { LSP6_DEFAULT_PERMISSIONS } from '../constants/constants';
 
-import {
-  AddressProviderOptions,
-  INTERFACE_IDS_0_10_2,
-} from '../constants/interfaces';
-
-/**
- * Check if a smart contract address
- * supports a certain interface.
- *
- * @param {string} interfaceId  Interface ID or supported interface name.
- * @param options Object with address and RPC URL.
- * @returns {Promise<boolean>} if interface is supported.
- */
-export const supportsInterface = async (
-  interfaceIdOrName: string,
-  options: AddressProviderOptions,
-): Promise<boolean> => {
-  let plainInterfaceId: string;
-  if (INTERFACE_IDS_0_10_2[interfaceIdOrName]) {
-    plainInterfaceId = INTERFACE_IDS_0_10_2[interfaceIdOrName];
-  } else {
-    plainInterfaceId = interfaceIdOrName;
-  }
-
-  try {
-    return await options.provider.supportsInterface(
-      options.address,
-      plainInterfaceId,
-    );
-  } catch (error) {
-    throw new Error(`Error checking the interface: ${error}`);
-  }
-};
-
 /**
  * @notice Check if the given string is a valid 32-byte hex string.
  * @param str The string to be checked.
