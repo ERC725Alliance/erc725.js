@@ -48,4 +48,5 @@ export interface Permissions {
   ENCRYPT?: boolean;
   DECRYPT?: boolean;
   SIGN?: boolean;
+  EXECUTE_RELAY_CALL?: boolean;
 }
