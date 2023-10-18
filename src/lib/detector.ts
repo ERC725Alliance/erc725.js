@@ -25,7 +25,7 @@ import { LSP6_DEFAULT_PERMISSIONS } from '../constants/constants';
 
 import {
   AddressProviderOptions,
-  INTERFACE_IDS_0_10_2,
+  INTERFACE_IDS_0_12_0,
 } from '../constants/interfaces';
 
 /**
@@ -41,8 +41,8 @@ export const supportsInterface = async (
   options: AddressProviderOptions,
 ): Promise<boolean> => {
   let plainInterfaceId: string;
-  if (INTERFACE_IDS_0_10_2[interfaceIdOrName]) {
-    plainInterfaceId = INTERFACE_IDS_0_10_2[interfaceIdOrName];
+  if (INTERFACE_IDS_0_12_0[interfaceIdOrName]) {
+    plainInterfaceId = INTERFACE_IDS_0_12_0[interfaceIdOrName];
   } else {
     plainInterfaceId = interfaceIdOrName;
   }
