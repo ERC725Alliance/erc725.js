@@ -22,7 +22,7 @@
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { INTERFACE_IDS_0_10_2 } from '../constants/interfaces';
+import { INTERFACE_IDS_0_12_0 } from '../constants/interfaces';
 
 import { supportsInterface, checkPermissions } from './detector';
 
@@ -34,7 +34,7 @@ describe('supportsInterface', () => {
     const providerStub = { supportsInterface: sinon.stub() };
 
     providerStub.supportsInterface
-      .withArgs(contractAddress, INTERFACE_IDS_0_10_2[interfaceName])
+      .withArgs(contractAddress, INTERFACE_IDS_0_12_0[interfaceName])
       .returns(Promise.resolve(true));
 
     const doesSupportInterface = await supportsInterface(interfaceName, {
@@ -47,7 +47,7 @@ describe('supportsInterface', () => {
 
   it('it should return true if the contract supports the interface with interfaceId', async () => {
     const contractAddress = '0xcafecafecafecafecafecafecafecafecafecafe';
-    const interfaceId = INTERFACE_IDS_0_10_2.LSP1UniversalReceiver;
+    const interfaceId = INTERFACE_IDS_0_12_0.LSP1UniversalReceiver;
 
     const providerStub = { supportsInterface: sinon.stub() };
 
