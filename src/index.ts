@@ -428,7 +428,7 @@ export class ERC725 {
   static encodePermissions(permissions: Permissions): string {
     const result = Object.keys(permissions).reduce((previous, key) => {
       return permissions[key]
-        ? previous + Number(hexToNumber(LSP6_DEFAULT_PERMISSIONS[key]))
+        ? previous | Number(hexToNumber(LSP6_DEFAULT_PERMISSIONS[key]))
         : previous;
     }, 0);
 
@@ -477,6 +477,7 @@ export class ERC725 {
       ENCRYPT: false,
       DECRYPT: false,
       SIGN: false,
+      EXECUTE_RELAY_CALL: false,
     };
 
     const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);
