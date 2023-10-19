@@ -31,9 +31,11 @@ LSP4DigitalAssetLegacy.json
 LSP4DigitalAsset.json
 LSP5ReceivedAssets.json
 LSP6KeyManager.json
+LSP8IdentifiableDigitalAsset.json
 LSP9Vault.json
 LSP10ReceivedVaults.json
 LSP12IssuedAssets.json
+LSP17ContractExtension.json
 ```
 
 You can import them from:
@@ -47,5 +49,5 @@ import LSP5 from '@erc725/erc725.js/schemas/LSP5ReceivedAssets.json';
 const myErc725Contract = new ERC725js(LSP3, address, web3.currentProvider);
 
 // You can retrieve the current loaded schema via
-myErc725Contract.options.schemas
+myErc725Contract.options.schemas;
 ```
