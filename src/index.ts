@@ -61,6 +61,7 @@ import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
 import { supportsInterface, checkPermissions } from './lib/detector';
+import { decodeValueType, encodeValueType } from './lib/encoder';
 import { decodeMappingKey } from './lib/decodeMappingKey';
 
 export {
@@ -168,6 +169,21 @@ export class ERC725 {
 
     throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
   }
+
+  private getAddressAndProvider() {
+    if (!this.options.address || !isAddress(this.options.address)) {
+      throw new Error('Missing ERC725 contract address.');
+    }
+    if (!this.options.provider) {
+      throw new Error('Missing provider.');
+    }
+
+    return {
+      address: this.options.address,
+      provider: this.options.provider,
+    };
+  }
+
   /**
    * Gets **decoded data** for one, many or all keys of the specified `ERC725` smart-contract.
    * When omitting the `keyOrKeys` parameter, it will get all the keys (as per {@link ERC725JSONSchema | ERC725JSONSchema} definition).
@@ -404,20 +420,6 @@ export class ERC725 {
     );
   }
 
-  private getAddressAndProvider() {
-    if (!this.options.address || !isAddress(this.options.address)) {
-      throw new Error('Missing ERC725 contract address.');
-    }
-    if (!this.options.provider) {
-      throw new Error('Missing provider.');
-    }
-
-    return {
-      address: this.options.address,
-      provider: this.options.provider,
-    };
-  }
-
   /**
    * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
    *
@@ -641,6 +643,38 @@ export class ERC725 {
     grantedPermissions: string,
   ): boolean {
     return ERC725.checkPermissions(requiredPermissions, grantedPermissions);
+  }
+
+  /**
+   * @param type The valueType to encode the value as
+   * @param value The value to encode
+   * @returns The encoded value
+   */
+  static encodeValueType(
+    type: string,
+    value: string | string[] | number | number[] | boolean | boolean[],
+  ): string {
+    return encodeValueType(type, value);
+  }
+
+  encodeValueType(
+    type: string,
+    value: string | string[] | number | number[] | boolean | boolean[],
+  ): string {
+    return ERC725.encodeValueType(type, value);
+  }
+
+  /**
+   * @param type The valueType to decode the value as
+   * @param value The value to decode
+   * @returns The decoded value
+   */
+  static decodeValueType(type: string, value: string) {
+    return decodeValueType(type, value);
+  }
+
+  decodeValueType(type: string, value: string) {
+    return ERC725.decodeValueType(type, value);
   }
 }
 
