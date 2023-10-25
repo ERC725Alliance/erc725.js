@@ -324,30 +324,6 @@ const returnTypesOfUintNCompactBytesArray = () => {
   return types;
 };
 
-/**
- * Encodes any set of strings to string[CompactBytesArray]
- *
- * @param values An array of non restricted strings
- * @returns string[CompactBytesArray]
- */
-const encodeStringCompactBytesArray = (values: string[]): string => {
-  const hexValues: string[] = values.map((element) => utf8ToHex(element));
-
-  return encodeCompactBytesArray(hexValues);
-};
-
-/**
- * Decode a string[CompactBytesArray] to an array of strings
- * @param compactBytesArray A string[CompactBytesArray]
- * @returns An array of strings
- */
-const decodeStringCompactBytesArray = (compactBytesArray: string): string[] => {
-  const hexValues: string[] = decodeCompactBytesArray(compactBytesArray);
-  const stringValues: string[] = hexValues.map((element) => hexToUtf8(element));
-
-  return stringValues;
-};
-
 const valueTypeEncodingMap = {
   bool: {
     encode: (value: boolean) => (value ? '0x01' : '0x00'),
@@ -486,8 +462,17 @@ const valueTypeEncodingMap = {
     decode: (value: string) => decodeCompactBytesArray(value),
   },
   'string[CompactBytesArray]': {
-    encode: (value: string[]) => encodeStringCompactBytesArray(value),
-    decode: (value: string) => decodeStringCompactBytesArray(value),
+    encode: (values: string[]) => {
+      const hexValues: string[] = values.map((element) => utf8ToHex(element));
+      return encodeCompactBytesArray(hexValues);
+    },
+    decode: (value: string) => {
+      const hexValues: string[] = decodeCompactBytesArray(value);
+      const stringValues: string[] = hexValues.map((element) =>
+        hexToUtf8(element),
+      );
+      return stringValues;
+    },
   },
   ...returnTypesOfBytesNCompactBytesArray(),
   ...returnTypesOfUintNCompactBytesArray(),

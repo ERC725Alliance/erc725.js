@@ -44,6 +44,7 @@ import { decodeKey } from './decodeData';
 describe('utils', () => {
   describe('encodeKey/decodeKey', () => {
     const testCases = [
+      // test encoding an array of address
       {
         schema: {
           name: 'LSP3IssuedAssets[]',
@@ -222,6 +223,7 @@ describe('utils', () => {
           encodeKey(testCase.schema as ERC725JSONSchema, testCase.decodedValue),
           testCase.encodedValue,
         );
+
         assert.deepStrictEqual(
           decodeKey(testCase.schema as ERC725JSONSchema, testCase.encodedValue),
           testCase.decodedValue,
@@ -396,6 +398,21 @@ describe('utils', () => {
       expectedValues.forEach((expectedValue, index) => {
         assert.strictEqual(encodeArrayKey(key, index), expectedValue);
       });
+    });
+
+    it('should encode the array length only if passing a number', async () => {
+      const schema: ERC725JSONSchema = {
+        name: 'LSP3IssuedAssets[]',
+        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+        keyType: 'Array',
+        valueContent: 'Address',
+        valueType: 'address',
+      };
+
+      const decodedValue = 3;
+      const encodedValue = '0x00000000000000000000000000000003';
+
+      assert.equal(encodeKey(schema, decodedValue), encodedValue);
     });
   });
 
