@@ -33,16 +33,33 @@ import { decodeKeyValue, encodeArrayKey } from './utils';
 const tupleValueTypesRegex = /bytes(\d+)/;
 const valueContentsBytesRegex = /Bytes(\d+)/;
 
-export const isValidTuple = (valueType: string, valueContent: string) => {
-  if (valueType.length <= 2 && valueContent.length <= 2) {
+const isValidTupleDefinition = (tupleContent: string): boolean => {
+  if (tupleContent.length <= 2) {
+    return false;
+  }
+  if (tupleContent[0] !== '(' && tupleContent.at(-1) !== ')') {
     return false;
   }
 
+  return true;
+};
+
+const extractValueTypesFromTuple = (tupleContent: string): string[] => {
+  let valueTypeToDecode = tupleContent;
+
+  if (tupleContent.includes(COMPACT_BYTES_ARRAY_STRING)) {
+    valueTypeToDecode = tupleContent.replace(COMPACT_BYTES_ARRAY_STRING, '');
+  }
+
+  return valueTypeToDecode
+    .substring(1, valueTypeToDecode.length - 1)
+    .split(',');
+};
+
+export const isValidTuple = (valueType: string, valueContent: string) => {
   if (
-    valueType[0] !== '(' &&
-    valueType[valueType.length - 1] !== ')' &&
-    valueContent[0] !== '(' &&
-    valueContent[valueContent.length - 1] !== ')'
+    !isValidTupleDefinition(valueType) ||
+    !isValidTupleDefinition(valueContent)
   ) {
     return false;
   }
@@ -50,15 +67,7 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
   // At this stage, we can assume the user is trying to use a tuple, let's throw errors instead of returning
   // false
 
-  let valueTypeToDecode = valueType;
-
-  if (valueType.includes(COMPACT_BYTES_ARRAY_STRING)) {
-    valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
-  }
-
-  const valueTypeParts = valueTypeToDecode
-    .substring(1, valueTypeToDecode.length - 1)
-    .split(',');
+  const valueTypeParts = extractValueTypesFromTuple(valueType);
 
   const valueContentParts = valueContent
     .substring(1, valueContent.length - 1)
@@ -139,15 +148,8 @@ export const decodeTupleKeyValue = (
 ): Array<string> => {
   // We assume data has already been validated at this stage
 
-  let valueTypeToDecode = valueType;
+  const valueTypeParts = extractValueTypesFromTuple(valueType);
 
-  if (valueType.includes('[CompactBytesArray')) {
-    valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
-  }
-
-  const valueTypeParts = valueTypeToDecode
-    .substring(1, valueTypeToDecode.length - 1)
-    .split(',');
   const valueContentParts = valueContent
     .substring(1, valueContent.length - 1)
     .split(',');
