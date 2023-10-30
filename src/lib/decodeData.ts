@@ -50,6 +50,18 @@ const isValidTupleDefinition = (tupleContent: string): boolean => {
   return true;
 };
 
+const extractValueTypesFromTuple = (tupleContent: string): string[] => {
+  let valueTypeToDecode = tupleContent;
+
+  if (tupleContent.includes(COMPACT_BYTES_ARRAY_STRING)) {
+    valueTypeToDecode = tupleContent.replace(COMPACT_BYTES_ARRAY_STRING, '');
+  }
+
+  return valueTypeToDecode
+    .substring(1, valueTypeToDecode.length - 1)
+    .split(',');
+};
+
 const extractTupleElements = (tupleContent: string): string[] =>
   tupleContent.substring(1, tupleContent.length - 1).split(',');
 
@@ -136,11 +148,11 @@ export const decodeTupleKeyValue = (
 ): Array<string> => {
   // We assume data has already been validated at this stage
 
-  // Sanitize the string to keep only the tuple, if we are dealing with `CompactBytesArray`
-  const valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
+  const valueTypeParts = extractValueTypesFromTuple(valueType);
 
-  const valueTypeParts = extractTupleElements(valueTypeToDecode);
-  const valueContentParts = extractTupleElements(valueContent);
+  const valueContentParts = valueContent
+    .substring(1, valueContent.length - 1)
+    .split(',');
 
   const bytesLengths: number[] = [];
 
