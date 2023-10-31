@@ -11,6 +11,7 @@ export interface ERC725Config {
    * Another example: `https://cloudflare-ipfs.com/ipfs/`
    */
   ipfsGateway: string;
+  gas: number;
 }
 
 export interface ERC725Options {

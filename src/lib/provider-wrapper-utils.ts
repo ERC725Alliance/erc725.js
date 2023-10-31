@@ -13,6 +13,7 @@
 */
 
 import * as abi from 'web3-eth-abi';
+import { numberToHex } from 'web3-utils';
 
 import {
   JsonRpc,
@@ -49,6 +50,7 @@ export function decodeResult(method: Method, hexString: string) {
 const constructJSONRPCParams = (
   address: string,
   method: Method,
+  gasInfo: number,
   methodParam?: string,
 ): JsonRpcEthereumProviderParamsWithLatest => {
   const data = methodParam
@@ -59,7 +61,7 @@ const constructJSONRPCParams = (
     {
       to: address,
       value: METHODS[method].value,
-      gas: METHODS[method].gas,
+      gas: numberToHex(gasInfo),
       data,
     },
     'latest',
@@ -69,13 +71,14 @@ const constructJSONRPCParams = (
 export function constructJSONRPC(
   address: string,
   method: Method,
+  gasInfo: number,
   methodParam?: string,
 ): JsonRpc {
   idCount += 1;
   return {
     jsonrpc: '2.0',
     method: 'eth_call',
-    params: constructJSONRPCParams(address, method, methodParam),
+    params: constructJSONRPCParams(address, method, gasInfo, methodParam),
     id: idCount,
   };
 }
