@@ -5,13 +5,14 @@ export interface ERC725Config {
    * ```js title=Example
    * const config = {
    *   ipfsGateway: 'https://ipfs.lukso.network/ipfs/'
+   *   gas: 20_000_000 // Optional, default 2_000_000
    * };
    * ```
    * Make sure to use the following format: `<url>/ipfs/`.<br/>
    * Another example: `https://cloudflare-ipfs.com/ipfs/`
    */
   ipfsGateway: string;
-  gas: number;
+  gas?: number;
 }
 
 export interface ERC725Options {
