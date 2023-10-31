@@ -118,8 +118,8 @@ await myErc725.getData();
     name: 'LSP3Profile',
     key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
     value: {
-      hashFunction: 'keccak256(utf8)',
-      hash: '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
+      validationFunction: 'keccak256(utf8)',
+      validation: '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
       url: 'ipfs://QmecrGejUQVXpW4zS948pNvcnQrJ1KiAoM6bdfrVcWZsn5',
     },
   },

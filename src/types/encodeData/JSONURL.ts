@@ -1,4 +1,4 @@
-import { SUPPORTED_HASH_FUNCTIONS } from '../../constants/constants';
+import { SUPPORTED_VERIFICATION_FUNCTIONS } from '../../constants/constants';
 
 export interface KeyValuePair {
   key: string;
@@ -10,14 +10,14 @@ interface URLData {
 }
 
 export interface URLDataWithHash extends URLData {
-  hash: string;
-  hashFunction: SUPPORTED_HASH_FUNCTIONS | string; // | string is to allow use of string directly without importing the enum
+  verificationData: string;
+  verificationFunction: SUPPORTED_VERIFICATION_FUNCTIONS | string; // | string is to allow use of string directly without importing the enum
   json?: never;
 }
 
 export interface URLDataWithJson extends URLData {
-  hash?: never;
-  hashFunction?: never;
+  verificationData?: never;
+  verificationFunction?: never;
   json: Record<string, any>;
 }
 

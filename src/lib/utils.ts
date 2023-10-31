@@ -41,8 +41,8 @@ import {
 
 import {
   HASH_FUNCTIONS,
-  SUPPORTED_HASH_FUNCTIONS,
-  SUPPORTED_HASH_FUNCTIONS_LIST,
+  SUPPORTED_VERIFICATION_FUNCTIONS,
+  SUPPORTED_VERIFICATION_FUNCTIONS_LIST,
   COMPACT_BYTES_ARRAY_STRING,
 } from '../constants/constants';
 import {
@@ -468,25 +468,29 @@ export function encodeData(
   );
 }
 
-export function getHashFunction(hashFunctionNameOrHash: string) {
-  const hashFunction = HASH_FUNCTIONS[hashFunctionNameOrHash];
+export function getVerificationFunction(
+  verificationFunctionNameOrHash: string,
+) {
+  const verificationFunction = HASH_FUNCTIONS[verificationFunctionNameOrHash];
 
-  if (!hashFunction) {
+  if (!verificationFunction) {
     throw new Error(
-      `Chosen hashFunction '${hashFunctionNameOrHash}' is not supported. Supported hashFunctions: ${SUPPORTED_HASH_FUNCTIONS_LIST}`,
+      `Chosen verificationFunction '${verificationFunctionNameOrHash}' is not supported. Supported verificationFunctions: ${SUPPORTED_VERIFICATION_FUNCTIONS_LIST}`,
     );
   }
 
-  return hashFunction;
+  return verificationFunction;
 }
 
 export function hashData(
   data: string | Uint8Array | Record<string, any>,
-  hashFunctionNameOrHash: SUPPORTED_HASH_FUNCTIONS,
+  verificationFunctionNameOrHash: SUPPORTED_VERIFICATION_FUNCTIONS,
 ): string {
-  const hashFunction = getHashFunction(hashFunctionNameOrHash);
+  const verificationFunction = getVerificationFunction(
+    verificationFunctionNameOrHash,
+  );
 
-  return hashFunction.method(data);
+  return verificationFunction.method(data);
 }
 
 /**
@@ -496,14 +500,14 @@ export function hashData(
 export function isDataAuthentic(
   data: string | Uint8Array,
   expectedHash: string,
-  lowerCaseHashFunction: SUPPORTED_HASH_FUNCTIONS,
+  lowerCaseVerificationFunction: SUPPORTED_VERIFICATION_FUNCTIONS,
 ): boolean {
   let dataHash: string;
 
   if (data instanceof Uint8Array) {
-    dataHash = hashData(arrToBufArr(data), lowerCaseHashFunction);
+    dataHash = hashData(arrToBufArr(data), lowerCaseVerificationFunction);
   } else {
-    dataHash = hashData(data, lowerCaseHashFunction);
+    dataHash = hashData(data, lowerCaseVerificationFunction);
   }
 
   if (dataHash !== expectedHash) {
