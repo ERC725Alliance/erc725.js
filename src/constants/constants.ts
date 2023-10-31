@@ -172,4 +172,4 @@ export const LSP6_ALL_PERMISSIONS =
 
 export const COMPACT_BYTES_ARRAY_STRING = '[CompactBytesArray]';
 
-export const DEFAULT_GAS_VALUE = 2000000;
+export const DEFAULT_GAS_VALUE = 2_000_000;
