@@ -19,8 +19,6 @@ export enum Encoding {
 
 export interface MethodData {
   sig: string;
-  gas: string;
-  gasPrice: string;
   value: string;
   returnEncoding: Encoding;
 }

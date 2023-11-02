@@ -58,47 +58,35 @@ export const METHODS: Record<Method, MethodData> = {
   [Method.GET_DATA_LEGACY]: {
     // Legacy version of ERC725Y - before v0.3.0
     sig: '0x54f6127f',
-    gas: numberToHex(2000000),
-    gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES,
   },
   [Method.GET_DATA]: {
     // https://github.com/ERC725Alliance/ERC725/blob/v4.0.0/docs/ERC-725.md#erc725y
     sig: '0x4e3e6e9c',
-    gas: numberToHex(2000000),
-    gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES_ARRAY,
   },
   [Method.GET_DATA_BATCH]: {
     // https://github.com/ERC725Alliance/ERC725/blob/v5.1.0/docs/ERC-725.md#erc725y
     sig: '0xdedff9c6',
-    gas: numberToHex(2000000),
-    gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES_ARRAY,
   },
   [Method.OWNER]: {
     sig: '0x8da5cb5b',
-    gas: numberToHex(2000000),
-    gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.ADDRESS,
   },
   [Method.SUPPORTS_INTERFACE]: {
     // https://eips.ethereum.org/EIPS/eip-165
     sig: '0x01ffc9a7',
-    gas: numberToHex(2000000),
-    gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.BOOL,
   },
   [Method.IS_VALID_SIGNATURE]: {
     // https://eips.ethereum.org/EIPS/eip-1271
     sig: '0x1626ba7e',
-    gas: numberToHex(2000000),
-    gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES4,
   },
@@ -184,3 +172,5 @@ export const LSP6_ALL_PERMISSIONS =
   '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
 export const COMPACT_BYTES_ARRAY_STRING = '[CompactBytesArray]';
+
+export const DEFAULT_GAS_VALUE = 1_000_000;
