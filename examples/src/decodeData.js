@@ -17,8 +17,8 @@ const decodedDataOneKey = myERC725.decodeData([
     name: 'LSP3Profile',
     key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
     value: {
-      hashFunction: 'keccak256(utf8)',
-      hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+      verificationFunction: 'keccak256(utf8)',
+      verificationData: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
       url: 'ipfs://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx'
     }
   }
@@ -56,8 +56,8 @@ const decodedDataManyKeys = myERC725.decodeData([
     name: 'LSP3Profile',
     key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
     value: {
-      hashFunction: 'keccak256(utf8)',
-      hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+      verificationFunction: 'keccak256(utf8)',
+      verificationData: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
       url: 'ipfs://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx'
     }
   },

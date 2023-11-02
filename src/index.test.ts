@@ -45,7 +45,7 @@ import 'isomorphic-fetch';
 
 import {
   ERC725Y_INTERFACE_IDS,
-  SUPPORTED_HASH_FUNCTION_STRINGS,
+  SUPPORTED_VERIFICATION_FUNCTION_STRINGS,
 } from './constants/constants';
 import { decodeKey } from './lib/decodeData';
 import { INTERFACE_IDS_0_12_0 } from './constants/interfaces';
@@ -271,8 +271,9 @@ describe('Running @erc725/erc725.js tests...', () => {
         name: 'LSP3Profile',
         key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
         value: {
-          hashFunction: 'keccak256(utf8)',
-          hash: '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
+          verificationFunction: 'keccak256(utf8)',
+          verificationData:
+            '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
           url: 'ipfs://QmecrGejUQVXpW4zS948pNvcnQrJ1KiAoM6bdfrVcWZsn5',
         },
       },
@@ -370,8 +371,9 @@ describe('Running @erc725/erc725.js tests...', () => {
           name: 'LSP3Profile',
           key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
           value: {
-            hashFunction: 'keccak256(utf8)',
-            hash: '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
+            verificationFunction: 'keccak256(utf8)',
+            verificationData:
+              '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
             url: 'ipfs://QmecrGejUQVXpW4zS948pNvcnQrJ1KiAoM6bdfrVcWZsn5',
           },
         },
@@ -678,8 +680,8 @@ describe('Running @erc725/erc725.js tests...', () => {
 
                 // Encoded value of:
                 // {
-                //   hashFunction: 'keccak256(bytes)', // 0x8019f9b1
-                //   hash: '0xc41589e7559804ea4a2080dad19d876a024ccb05117835447d72ce08c1d020ec',
+                //   verificationFunction: 'keccak256(bytes)', // 0x8019f9b1
+                //   verificationData: '0xc41589e7559804ea4a2080dad19d876a024ccb05117835447d72ce08c1d020ec',
                 //   url: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
                 // },
               ],
@@ -971,15 +973,17 @@ describe('Running @erc725/erc725.js tests...', () => {
         {
           width: 1350,
           height: 1800,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0x229b60ea5b58e1ab8e6f1063300be110bb4fa663ba75d3814d60104ac6b74497',
+          verificationFunction: 'keccak256(bytes)',
+          verificationData:
+            '0x229b60ea5b58e1ab8e6f1063300be110bb4fa663ba75d3814d60104ac6b74497',
           url: 'ipfs://Qmbv9j6iCDDYJ1NXHTZnNHDJ6qaaKkZsf79jhUMFAXcfDR',
         },
         {
           width: 768,
           height: 1024,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0x320db57770084f114988c8a94bcf219ca66c69421590466a45f382cd84995c2b',
+          verificationFunction: 'keccak256(bytes)',
+          verificationData:
+            '0x320db57770084f114988c8a94bcf219ca66c69421590466a45f382cd84995c2b',
           url: 'ipfs://QmS4m2LmRpay7Jij4DCpvaW5zKZYy43ATZdRxUkUND6nG3',
         },
       ],
@@ -987,15 +991,17 @@ describe('Running @erc725/erc725.js tests...', () => {
         {
           width: 1024,
           height: 768,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0xbe2d39fe1e0b1911155afc74010db3483528a2b645dea8fcf47bdc34147769be',
+          verificationFunction: 'keccak256(bytes)',
+          verificationData:
+            '0xbe2d39fe1e0b1911155afc74010db3483528a2b645dea8fcf47bdc34147769be',
           url: 'ipfs://QmQ6ujfKSc91F44KtMe6WRTSCXoSdCjomQUy8hCUxHMr28',
         },
         {
           width: 640,
           height: 480,
-          hashFunction: 'keccak256(bytes)',
-          hash: '0xb115f2bf09994e79726db27a7b8d5a0de41a5b81d11b59b3038fa158718266ff',
+          verificationFunction: 'keccak256(bytes)',
+          verificationData:
+            '0xb115f2bf09994e79726db27a7b8d5a0de41a5b81d11b59b3038fa158718266ff',
           url: 'ipfs://QmakaRZxJMMqwQFJY98J3wjbqYVDnaSZ9sEqBF9iMv3GNX',
         },
       ],
@@ -1025,12 +1031,12 @@ describe('Running @erc725/erc725.js tests...', () => {
       'ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
     );
     assert.deepStrictEqual(
-      decodedData[0].value.hash,
-      hashData(json, SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8),
+      decodedData[0].value.verificationData,
+      hashData(json, SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8),
     );
     assert.deepStrictEqual(
-      decodedData[0].value.hashFunction,
-      SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+      decodedData[0].value.verificationFunction,
+      SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8,
     );
   });
 

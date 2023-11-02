@@ -25,8 +25,8 @@ import {
 } from '../types/decodeData';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import {
-  SUPPORTED_HASH_FUNCTIONS,
-  SUPPORTED_HASH_FUNCTION_STRINGS,
+  SUPPORTED_VERIFICATION_FUNCTIONS,
+  SUPPORTED_VERIFICATION_FUNCTION_STRINGS,
 } from '../constants/constants';
 import { isDataAuthentic, patchIPFSUrlsIfApplicable } from './utils';
 
@@ -81,8 +81,8 @@ export const getDataFromExternalSources = (
 
       receivedData = await fetch(url).then(async (response) => {
         if (
-          urlDataWithHash.hashFunction ===
-          SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_BYTES
+          urlDataWithHash.verificationFunction ===
+          SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_BYTES
         ) {
           return response
             .arrayBuffer()
@@ -98,8 +98,8 @@ export const getDataFromExternalSources = (
 
     return isDataAuthentic(
       receivedData,
-      urlDataWithHash.hash,
-      urlDataWithHash.hashFunction as SUPPORTED_HASH_FUNCTIONS,
+      urlDataWithHash.verificationData,
+      urlDataWithHash.verificationFunction as SUPPORTED_VERIFICATION_FUNCTIONS,
     )
       ? { ...dataEntry, value: receivedData }
       : { ...dataEntry, value: null };

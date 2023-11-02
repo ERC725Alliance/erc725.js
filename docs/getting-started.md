@@ -61,6 +61,7 @@ const address = '0x0Dc07C77985fE31996Ed612F568eb441afe5768D';
 const RPC_URL = 'https://rpc.testnet.lukso.network';
 const config = {
   ipfsGateway: 'https://YOUR-IPFS-GATEWAY/ipfs/',
+  gas: 20_000_000, // optional, default is 1_000_000
 };
 
 const erc725 = new ERC725(schemas, address, RPC_URL, config);
@@ -84,8 +85,8 @@ await erc725.getData(['LSP3Profile', 'SupportedStandards:LSP3Profile']);
 {
   LSP3Profile: {
     url: 'ipfs://QmXybv2LdJWscy1C6yRKUjvnaj6aqKktZX4g4xmz2nyYj2',
-    hash: '0xb4f9d72e83bbe7e250ed9ec80332c493b7b3d73e0d72f7b2c7ab01c39216eb1a',
-    hashFunction: 'keccak256(utf8)'
+    verificationData: '0xb4f9d72e83bbe7e250ed9ec80332c493b7b3d73e0d72f7b2c7ab01c39216eb1a',
+    verificationFunction: 'keccak256(utf8)'
   },
   'SupportedStandards:LSP3Profile': '0x5ef83ad9'
 }
@@ -110,7 +111,7 @@ await erc725.fetchData('LSP3Profile'); // downloads and verifies the linked JSON
 ```
 
 :::tip Try it out
-You can run the code snippit within your browser using the corresponding [StackBlitz example](https://stackblitz.com/edit/erc725js-instantiation?devtoolsheight=66&file=index.js).
+You can run the code snippet within your browser using the corresponding [StackBlitz example](https://stackblitz.com/edit/erc725js-instantiation?devtoolsheight=66&file=index.js).
 
 :::note
 Whenever you can you should import `ERC725` via the named export. However currently we are also providing a default export.
@@ -127,6 +128,7 @@ After the instance has been created, it is still possible to change settings thr
 myERC725.options.schema = '<schema>' // change schema
 myERC725.options.address '<address>' // change address
 myERC725.options.ipfsGateway = '<url>' // used for fetchData(), default: 'https://cloudflare-ipfs.com/ipfs/'
+myERC725.options.gas = 20_000_000 // change gas setting
 
 // NOTE: ERC725.provider can not be changed
 ```

@@ -58,68 +58,56 @@ export const METHODS: Record<Method, MethodData> = {
   [Method.GET_DATA_LEGACY]: {
     // Legacy version of ERC725Y - before v0.3.0
     sig: '0x54f6127f',
-    gas: numberToHex(2000000),
-    gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES,
   },
   [Method.GET_DATA]: {
     // https://github.com/ERC725Alliance/ERC725/blob/v4.0.0/docs/ERC-725.md#erc725y
     sig: '0x4e3e6e9c',
-    gas: numberToHex(2000000),
-    gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES_ARRAY,
   },
   [Method.GET_DATA_BATCH]: {
     // https://github.com/ERC725Alliance/ERC725/blob/v5.1.0/docs/ERC-725.md#erc725y
     sig: '0xdedff9c6',
-    gas: numberToHex(2000000),
-    gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES_ARRAY,
   },
   [Method.OWNER]: {
     sig: '0x8da5cb5b',
-    gas: numberToHex(2000000),
-    gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.ADDRESS,
   },
   [Method.SUPPORTS_INTERFACE]: {
     // https://eips.ethereum.org/EIPS/eip-165
     sig: '0x01ffc9a7',
-    gas: numberToHex(2000000),
-    gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.BOOL,
   },
   [Method.IS_VALID_SIGNATURE]: {
     // https://eips.ethereum.org/EIPS/eip-1271
     sig: '0x1626ba7e',
-    gas: numberToHex(2000000),
-    gasPrice: numberToHex(100000000),
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES4,
   },
 };
 
-export enum SUPPORTED_HASH_FUNCTION_STRINGS {
+export enum SUPPORTED_VERIFICATION_FUNCTION_STRINGS {
   KECCAK256_UTF8 = 'keccak256(utf8)',
   KECCAK256_BYTES = 'keccak256(bytes)',
 }
 
-export enum SUPPORTED_HASH_FUNCTION_HASHES {
+export enum SUPPORTED_VERIFICATION_FUNCTION_HASHES {
   HASH_KECCAK256_UTF8 = '0x6f357c6a',
   HASH_KECCAK256_BYTES = '0x8019f9b1',
 }
 
-export type SUPPORTED_HASH_FUNCTIONS =
-  | SUPPORTED_HASH_FUNCTION_STRINGS
-  | SUPPORTED_HASH_FUNCTION_HASHES;
+export type SUPPORTED_VERIFICATION_FUNCTIONS =
+  | SUPPORTED_VERIFICATION_FUNCTION_STRINGS
+  | SUPPORTED_VERIFICATION_FUNCTION_HASHES;
 
-export const SUPPORTED_HASH_FUNCTIONS_LIST = Object.values(
-  SUPPORTED_HASH_FUNCTION_STRINGS,
+export const SUPPORTED_VERIFICATION_FUNCTIONS_LIST = Object.values(
+  SUPPORTED_VERIFICATION_FUNCTION_STRINGS,
 );
 
 function keccak256Utf8(data) {
@@ -128,27 +116,28 @@ function keccak256Utf8(data) {
 
 const KECCAK256_UTF8 = {
   method: keccak256Utf8,
-  name: SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
-  sig: SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_UTF8,
+  name: SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8,
+  sig: SUPPORTED_VERIFICATION_FUNCTION_HASHES.HASH_KECCAK256_UTF8,
 };
 
 const KECCAK256_BYTES = {
   method: keccak256,
-  name: SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_BYTES,
-  sig: SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_BYTES,
+  name: SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_BYTES,
+  sig: SUPPORTED_VERIFICATION_FUNCTION_HASHES.HASH_KECCAK256_BYTES,
 };
 
 export const HASH_FUNCTIONS: {
   [key: string]: {
     method: Function;
-    name: SUPPORTED_HASH_FUNCTION_STRINGS;
-    sig: SUPPORTED_HASH_FUNCTIONS;
+    name: SUPPORTED_VERIFICATION_FUNCTION_STRINGS;
+    sig: SUPPORTED_VERIFICATION_FUNCTIONS;
   };
 } = {
-  [SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8]: KECCAK256_UTF8,
-  [SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_UTF8]: KECCAK256_UTF8,
-  [SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_BYTES]: KECCAK256_BYTES,
-  [SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_BYTES]: KECCAK256_BYTES,
+  [SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8]: KECCAK256_UTF8,
+  [SUPPORTED_VERIFICATION_FUNCTION_HASHES.HASH_KECCAK256_UTF8]: KECCAK256_UTF8,
+  [SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_BYTES]: KECCAK256_BYTES,
+  [SUPPORTED_VERIFICATION_FUNCTION_HASHES.HASH_KECCAK256_BYTES]:
+    KECCAK256_BYTES,
 };
 
 // TODO: These values can be imported from lsp-smartcontracts lib after release
@@ -183,3 +172,5 @@ export const LSP6_ALL_PERMISSIONS =
   '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
 export const COMPACT_BYTES_ARRAY_STRING = '[CompactBytesArray]';
+
+export const DEFAULT_GAS_VALUE = 1_000_000;

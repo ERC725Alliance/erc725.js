@@ -37,6 +37,7 @@ import { isValidSignature } from './lib/isValidSignature';
 import {
   LSP6_ALL_PERMISSIONS,
   LSP6_DEFAULT_PERMISSIONS,
+  DEFAULT_GAS_VALUE,
 } from './constants/constants';
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
@@ -80,7 +81,7 @@ export { encodeData } from './lib/utils';
  *
  */
 export class ERC725 {
-  options: ERC725Options & ERC725Config;
+  options: ERC725Options;
 
   /**
    * Creates an instance of ERC725.
@@ -105,15 +106,20 @@ export class ERC725 {
 
     const defaultConfig = {
       ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/',
+      gas: DEFAULT_GAS_VALUE,
     };
 
     this.options = {
       schemas: this.validateSchemas(schemas),
       address,
-      provider: ERC725.initializeProvider(provider),
+      provider: ERC725.initializeProvider(
+        provider,
+        config?.gas ? config?.gas : defaultConfig.gas,
+      ),
       ipfsGateway: config?.ipfsGateway
         ? convertIPFSGatewayUrl(config?.ipfsGateway)
         : defaultConfig.ipfsGateway,
+      gas: config?.gas ? config?.gas : defaultConfig.gas,
     };
   }
 
@@ -151,20 +157,20 @@ export class ERC725 {
     });
   }
 
-  private static initializeProvider(providerOrRpcUrl) {
+  private static initializeProvider(providerOrRpcUrl, gasInfo) {
     // do not fail on no-provider
     if (!providerOrRpcUrl) return undefined;
 
     // if provider is a string, assume it's a rpcUrl
     if (typeof providerOrRpcUrl === 'string') {
-      return new ProviderWrapper(new HttpProvider(providerOrRpcUrl));
+      return new ProviderWrapper(new HttpProvider(providerOrRpcUrl), gasInfo);
     }
 
     if (
       typeof providerOrRpcUrl.request === 'function' ||
       typeof providerOrRpcUrl.send === 'function'
     )
-      return new ProviderWrapper(providerOrRpcUrl);
+      return new ProviderWrapper(providerOrRpcUrl, gasInfo);
 
     throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
   }
@@ -593,12 +599,12 @@ export class ERC725 {
    * supports a certain interface.
    *
    * @param {string} interfaceIdOrName Interface ID or supported interface name.
-   * @param options Object of address and RPC URL.
+   * @param options Object of address, RPC URL and optional gas.
    * @returns {Promise<boolean>} if interface is supported.
    */
   static async supportsInterface(
     interfaceIdOrName: string,
-    options: { address: string; rpcUrl: string },
+    options: { address: string; rpcUrl: string; gas?: number },
   ): Promise<boolean> {
     if (!isAddress(options.address)) {
       throw new Error('Invalid address');
@@ -609,7 +615,10 @@ export class ERC725 {
 
     return supportsInterface(interfaceIdOrName, {
       address: options.address,
-      provider: this.initializeProvider(options.rpcUrl),
+      provider: this.initializeProvider(
+        options.rpcUrl,
+        options?.gas ? options?.gas : DEFAULT_GAS_VALUE,
+      ),
     });
   }
 

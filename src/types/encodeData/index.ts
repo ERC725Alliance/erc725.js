@@ -1,7 +1,7 @@
-import { SUPPORTED_HASH_FUNCTIONS } from '../../constants/constants';
+import { SUPPORTED_VERIFICATION_FUNCTIONS } from '../../constants/constants';
 
 export interface AssetURLEncode {
-  hashFunction: SUPPORTED_HASH_FUNCTIONS;
-  hash: string;
+  verificationFunction: SUPPORTED_VERIFICATION_FUNCTIONS;
+  verificationData: string;
   url: string;
 }
