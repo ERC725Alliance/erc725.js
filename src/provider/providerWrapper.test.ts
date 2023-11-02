@@ -3,7 +3,7 @@ import assert from 'assert';
 import { ProviderWrapper } from './providerWrapper';
 
 const erc725AccountAddress = '0x214be121bB52e6909c5158579b3458f8760f1b2f';
-const defaultGas = 2_000_000;
+const defaultGas = 1_000_000;
 
 describe('ProviderWrapper', () => {
   describe('#getOwner', () => {

@@ -81,7 +81,7 @@ export { encodeData } from './lib/utils';
  *
  */
 export class ERC725 {
-  options: ERC725Options & ERC725Config;
+  options: ERC725Options;
 
   /**
    * Creates an instance of ERC725.

@@ -61,7 +61,7 @@ const address = '0x0Dc07C77985fE31996Ed612F568eb441afe5768D';
 const RPC_URL = 'https://rpc.testnet.lukso.network';
 const config = {
   ipfsGateway: 'https://YOUR-IPFS-GATEWAY/ipfs/',
-  gas: 20_000_000, // optional, default is 2_000_000
+  gas: 20_000_000, // optional, default is 1_000_000
 };
 
 const erc725 = new ERC725(schemas, address, RPC_URL, config);
