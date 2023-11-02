@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.21.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.20.1...v0.21.0) (2023-11-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* update lsp3/lsp4 verificationData
+
+### Features
+
+* new gas parameter ([82e3833](https://github.com/ERC725Alliance/erc725.js/commit/82e383345a712619b5c6a1030b124d2625115fc1))
+
+
+### Code Refactoring
+
+* update lsp3/lsp4 verificationData ([9640d9f](https://github.com/ERC725Alliance/erc725.js/commit/9640d9fbf88c7cf694b9e82cc3a711350334b097))
+
 ## [0.20.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.20.0...v0.20.1) (2023-10-30)
 
 
