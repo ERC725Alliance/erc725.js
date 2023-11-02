@@ -120,7 +120,8 @@ export const profileJson = {
         width: 640,
         height: 360,
         verificationFunction: 'keccak256(bytes)',
-        hash: '0x10a5cf2479992f1c555ad71e0a2866827f66fef6941a0c99f8d3b03e6b8b4009',
+        verificationData:
+          '0x10a5cf2479992f1c555ad71e0a2866827f66fef6941a0c99f8d3b03e6b8b4009',
         url: 'ipfs://QmbP3eTmUx1UQ2eZ8hrDz8j98yP2CTmsJvfp72LZKnkKj1',
       },
     ],
