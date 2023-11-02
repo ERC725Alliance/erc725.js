@@ -11,8 +11,8 @@ const dataAllKeys = await myERC725.getData();
     name: 'LSP3Profile',
     key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
     value: {
-      hashFunction: 'keccak256(utf8)',
-      hash: '0xd96ff7776660095f661d16010c4349aa7478a9129ce0670f771596a6ff2d864a',
+      verificationFunction: 'keccak256(utf8)',
+      verificationData: '0xd96ff7776660095f661d16010c4349aa7478a9129ce0670f771596a6ff2d864a',
       url: 'ipfs://QmbTmcbp8ZW23vkQrqkasMFqNg2z1iP4e3BCUMz9PKDsSV'
     }
   },
@@ -46,8 +46,8 @@ const dataOneKey = await myERC725.getData('LSP3Profile');
   key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
   name: 'LSP3Profile',
   value: {
-    hashFunction: 'keccak256(utf8)',
-    hash: '0xd96ff7776660095f661d16010c4349aa7478a9129ce0670f771596a6ff2d864a',
+    verificationFunction: 'keccak256(utf8)',
+    verificationData: '0xd96ff7776660095f661d16010c4349aa7478a9129ce0670f771596a6ff2d864a',
     url: 'ipfs://QmbTmcbp8ZW23vkQrqkasMFqNg2z1iP4e3BCUMz9PKDsSV'
   }
 }
@@ -63,8 +63,8 @@ const dataManyKeys = await myERC725.getData([
     key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
     name: 'LSP3Profile',
     value: {
-      hashFunction: 'keccak256(utf8)',
-      hash: '0xd96ff7776660095f661d16010c4349aa7478a9129ce0670f771596a6ff2d864a',
+      verificationFunction: 'keccak256(utf8)',
+      verificationData: '0xd96ff7776660095f661d16010c4349aa7478a9129ce0670f771596a6ff2d864a',
       url: 'ipfs://QmbTmcbp8ZW23vkQrqkasMFqNg2z1iP4e3BCUMz9PKDsSV'
     }
   },

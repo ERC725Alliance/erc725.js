@@ -84,8 +84,8 @@ await erc725.getData(['LSP3Profile', 'SupportedStandards:LSP3Profile']);
 {
   LSP3Profile: {
     url: 'ipfs://QmXybv2LdJWscy1C6yRKUjvnaj6aqKktZX4g4xmz2nyYj2',
-    hash: '0xb4f9d72e83bbe7e250ed9ec80332c493b7b3d73e0d72f7b2c7ab01c39216eb1a',
-    hashFunction: 'keccak256(utf8)'
+    verificationData: '0xb4f9d72e83bbe7e250ed9ec80332c493b7b3d73e0d72f7b2c7ab01c39216eb1a',
+    verificationFunction: 'keccak256(utf8)'
   },
   'SupportedStandards:LSP3Profile': '0x5ef83ad9'
 }

@@ -26,8 +26,8 @@ import {
   decodeValueContent,
 } from './encoder';
 import {
-  SUPPORTED_HASH_FUNCTION_HASHES,
-  SUPPORTED_HASH_FUNCTION_STRINGS,
+  SUPPORTED_VERIFICATION_FUNCTION_HASHES,
+  SUPPORTED_VERIFICATION_FUNCTION_STRINGS,
 } from '../constants/constants';
 import { JSONURLDataToEncode, URLDataWithHash } from '../types';
 
@@ -867,8 +867,10 @@ describe('encoder', () => {
       {
         valueContent: 'AssetURL',
         decodedValue: {
-          hashFunction: SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
-          hash: '0x027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168',
+          verificationFunction:
+            SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8,
+          verificationData:
+            '0x027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168',
           url: 'http://test.com/asset.glb',
         },
         encodedValue:
@@ -922,19 +924,21 @@ describe('encoder', () => {
       };
       const encodedValue = encodeValueContent('JSONURL', dataToEncode);
 
-      const hashFunction = SUPPORTED_HASH_FUNCTION_HASHES.HASH_KECCAK256_UTF8;
+      const verificationFunction =
+        SUPPORTED_VERIFICATION_FUNCTION_HASHES.HASH_KECCAK256_UTF8;
       const hexUrl = utf8ToHex(dataToEncode.url).substring(2);
-      const jsonDataHash = keccak256(
+      const jsonVerificationData = keccak256(
         JSON.stringify(dataToEncode.json),
       ).substring(2);
       assert.deepStrictEqual(
         encodedValue,
-        hashFunction + jsonDataHash + hexUrl,
+        verificationFunction + jsonVerificationData + hexUrl,
       );
 
       const expectedDecodedValue: URLDataWithHash = {
-        hash: `0x${jsonDataHash}`,
-        hashFunction: SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+        verificationData: `0x${jsonVerificationData}`,
+        verificationFunction:
+          SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8,
         url: dataToEncode.url,
       };
 
@@ -977,37 +981,37 @@ describe('encoder', () => {
     });
 
     describe('JSONURL', () => {
-      it('throws when the hashFunction of JSON of JSONURL to encode is not keccak256(utf8)', () => {
+      it('throws when the verificationFunction of JSON of JSONURL to encode is not keccak256(utf8)', () => {
         assert.throws(
           () => {
             valueContentEncodingMap('JSONURL').encode({
               // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
-              hashFunction: 'whatever',
+              verificationFunction: 'whatever',
               url: 'https://file-desination.com/file-name',
-              hash: '0x321',
+              verificationData: '0x321',
             });
           },
           (error: any) => {
             return (
               error.message ===
-              `Chosen hashFunction 'whatever' is not supported. Supported hashFunctions: keccak256(utf8),keccak256(bytes)`
+              `Chosen verificationFunction 'whatever' is not supported. Supported verificationFunctions: keccak256(utf8),keccak256(bytes)`
             );
           },
         );
       });
 
-      it('throws when JSONURL encode a JSON without json or hash key', () => {
+      it('throws when JSONURL encode a JSON without json or verificationData key', () => {
         assert.throws(
           () => {
             valueContentEncodingMap('JSONURL').encode({
               // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
-              hashFunction: 'keccak256(utf8)',
+              verificationFunction: 'keccak256(utf8)',
               url: 'https://file-desination.com/file-name',
             });
           },
           (error: any) =>
             error.message ===
-            'You have to provide either the hash or the json via the respective properties',
+            'You have to provide either the verificationData or the json via the respective properties',
         );
       });
     });
