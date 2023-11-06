@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.21.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.21.0...v0.21.1) (2023-11-06)
+
+
+### Bug Fixes
+
+* incorrect hex for `LSP8MetadataTokenURI` ([0500a75](https://github.com/ERC725Alliance/erc725.js/commit/0500a752e3117c5c7e9df8cfed22cb5d6fee20c5))
+
 ## [0.21.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.20.1...v0.21.0) (2023-11-02)
 
 
