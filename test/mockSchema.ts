@@ -47,9 +47,10 @@ export const mockSchema: (ERC725JSONSchema & {
     returnGraphData:
       '0x6f357c6a733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
     expectedResult: {
-      verificationFunction: 'keccak256(utf8)',
-      verificationData:
-        '0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d', // hash of stringified json
+      verification: {
+        method: 'keccak256(utf8)',
+        data: '0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d', // hash of stringified json
+      },
       url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd', // same JSON url from LSP3Profile below
     },
   },
@@ -72,9 +73,10 @@ export const mockSchema: (ERC725JSONSchema & {
     returnGraphData:
       '0x6f357c6aa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
     expectedResult: {
-      verificationFunction: 'keccak256(utf8)',
-      verificationData:
-        '0xa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81', // hash of address '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
+      verification: {
+        method: 'keccak256(utf8)',
+        data: '0xa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81', // hash of address '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
+      },
       url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd', // FAKE. just used from above TODO: fix this is not an asset URL but a JSON url !!
     },
   },
@@ -285,16 +287,18 @@ export const mockSchema: (ERC725JSONSchema & {
     expectedResult: [
       // This JSON from JSONURL above...
       {
-        verificationFunction: 'keccak256(utf8)',
-        verificationData:
-          '0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d', // hash of stringified json
+        verification: {
+          method: 'keccak256(utf8)',
+          data: '0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d', // hash of stringified json
+        },
         url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd', // same JSON url from LSP3Profile below
       },
       // this JSON hash is = {"test1":"value1","test2":"value2","test3":"value3"}
       {
-        verificationFunction: 'keccak256(utf8)',
-        verificationData:
-          '0x81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88', // hash of stringified json
+        verification: {
+          method: 'keccak256(utf8)',
+          data: '0x81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88', // hash of stringified json
+        },
         url: 'ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd', // dummy url
       },
     ],
@@ -612,9 +616,10 @@ export const mockSchema: (ERC725JSONSchema & {
     ]),
     returnGraphData: '0x0c03fba782b07bcf810deb3b7f0595024a444f4e',
     expectedResult: {
-      verificationFunction: 'keccak256(utf8)',
-      verificationData:
-        '0xa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81', // hash of address '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
+      verification: {
+        method: 'keccak256(utf8)',
+        data: '0xa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81', // hash of address '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
+      },
       url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd', // FAKE. just used from above TODO: fix this is not an asset URL but a JSON url !!
     },
   },

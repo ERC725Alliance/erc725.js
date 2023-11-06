@@ -25,7 +25,7 @@ import {
 } from '../types/ERC725JSONSchema';
 import { GetDataDynamicKey } from '../types/GetData';
 
-import { SUPPORTED_VERIFICATION_FUNCTION_STRINGS } from '../constants/constants';
+import { SUPPORTED_VERIFICATION_METHOD_STRINGS } from '../constants/constants';
 import {
   guessKeyTypeFromKeyName,
   isDataAuthentic,
@@ -81,17 +81,17 @@ describe('utils', () => {
         },
         decodedValue: [
           {
-            verificationFunction:
-              SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8,
-            verificationData:
-              '0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d',
+            verification: {
+              method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+              data: '0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d',
+            },
             url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
           },
           {
-            verificationFunction:
-              SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8,
-            verificationData:
-              '0x81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88',
+            verification: {
+              method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+              data: '0x81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88',
+            },
             url: 'ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd',
           },
         ],
@@ -292,10 +292,10 @@ describe('utils', () => {
         valueContent: 'AssetURL',
         valueType: 'bytes',
         decodedValue: {
-          verificationFunction:
-            SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8,
-          verificationData:
-            '0x81dadadadadadadadadadadadadadadf00a4bdfa8fcaf3791d25f69b497abf88',
+          verification: {
+            method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+            data: '0x81dadadadadadadadadadadadadadadf00a4bdfa8fcaf3791d25f69b497abf88',
+          },
           url: 'http://day.night/asset.glb',
         },
         encodedValue:
@@ -305,10 +305,10 @@ describe('utils', () => {
         valueContent: 'JSONURL',
         valueType: 'bytes',
         decodedValue: {
-          verificationFunction:
-            SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8,
-          verificationData:
-            '0x81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88',
+          verification: {
+            method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+            data: '0x81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88',
+          },
           url: 'ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd',
         },
         encodedValue:
@@ -573,9 +573,10 @@ describe('utils', () => {
           {
             keyName: 'LSP3Profile',
             value: {
-              verificationFunction: 'keccak256(utf8)',
-              verificationData:
-                '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+              verification: {
+                method: 'keccak256(utf8)',
+                data: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+              },
               url: 'ipfs://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
             },
           },
@@ -664,11 +665,10 @@ describe('utils', () => {
       const data = 'h3ll0HowAreYou?';
       const expectedHash = keccak256(data);
 
-      const isAuthentic = isDataAuthentic(
-        data,
-        expectedHash,
-        SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_BYTES,
-      );
+      const isAuthentic = isDataAuthentic(data, {
+        data: expectedHash,
+        method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES,
+      });
 
       assert.ok(isAuthentic);
     });
@@ -676,11 +676,10 @@ describe('utils', () => {
       const data = 'h3ll0HowAreYou?';
       const expectedHash = 'wrongHash';
 
-      const isAuthentic = isDataAuthentic(
-        data,
-        expectedHash,
-        SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_BYTES,
-      );
+      const isAuthentic = isDataAuthentic(data, {
+        data: expectedHash,
+        method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES,
+      });
 
       assert.strictEqual(isAuthentic, false);
     });

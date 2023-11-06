@@ -77,7 +77,9 @@
     "web3": "^1.10.0"
   },
   "dependencies": {
+    "@types/jest": "^29.5.7",
     "ethereumjs-util": "^7.1.5",
+    "jest": "^27.5.1",
     "web3-eth-abi": "^1.10.0",
     "web3-providers-http": "^1.10.0",
     "web3-utils": "^1.10.0"

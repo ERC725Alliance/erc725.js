@@ -1,7 +1,6 @@
-import { SUPPORTED_VERIFICATION_FUNCTIONS } from '../../constants/constants';
+import { Verification } from './JSONURL';
 
 export interface AssetURLEncode {
-  verificationFunction: SUPPORTED_VERIFICATION_FUNCTIONS;
-  verificationData: string;
+  verification: Verification;
   url: string;
 }
