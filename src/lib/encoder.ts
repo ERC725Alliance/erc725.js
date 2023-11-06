@@ -66,7 +66,7 @@ const encodeDataSourceWithHash = (
   const verificationMethod = getVerificationMethod(verification.method);
   return (
     keccak256(verificationMethod.name).slice(0, 10) +
-    verification.data.slice(2) +
+    stripHexPrefix(verification.data) +
     utf8ToHex(dataSource).slice(2)
   );
 };
