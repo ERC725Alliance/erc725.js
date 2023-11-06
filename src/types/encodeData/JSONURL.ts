@@ -1,4 +1,4 @@
-import { SUPPORTED_VERIFICATION_FUNCTIONS } from '../../constants/constants';
+import { SUPPORTED_VERIFICATION_METHODS } from '../../constants/constants';
 
 export interface KeyValuePair {
   key: string;
@@ -11,7 +11,7 @@ interface URLData {
 
 export interface Verification {
   data: string;
-  method: SUPPORTED_VERIFICATION_FUNCTIONS | string;
+  method: SUPPORTED_VERIFICATION_METHODS | string;
   source?: string;
 }
 

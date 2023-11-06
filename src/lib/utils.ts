@@ -41,8 +41,8 @@ import {
 } from '../types/ERC725JSONSchema';
 
 import {
-  HASH_FUNCTIONS,
-  SUPPORTED_VERIFICATION_FUNCTIONS,
+  HASH_METHODS,
+  SUPPORTED_VERIFICATION_METHODS,
   SUPPORTED_VERIFICATION_METHODS_LIST,
   COMPACT_BYTES_ARRAY_STRING,
 } from '../constants/constants';
@@ -470,7 +470,7 @@ export function encodeData(
 }
 
 export function getVerificationMethod(nameOrSig: string) {
-  const verificationMethod = Object.values(HASH_FUNCTIONS).find(
+  const verificationMethod = Object.values(HASH_METHODS).find(
     ({ name, sig }) => name === nameOrSig || sig === nameOrSig,
   );
 
@@ -485,7 +485,7 @@ export function getVerificationMethod(nameOrSig: string) {
 
 export function hashData(
   data: string | Uint8Array | Record<string, any>,
-  nameOrSig: SUPPORTED_VERIFICATION_FUNCTIONS | string,
+  nameOrSig: SUPPORTED_VERIFICATION_METHODS | string,
 ): string {
   return getVerificationMethod(nameOrSig).method(data);
 }
