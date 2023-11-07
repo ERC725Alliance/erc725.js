@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.21.2](https://github.com/ERC725Alliance/erc725.js/compare/v0.21.1...v0.21.2) (2023-11-07)
+
+
+### Bug Fixes
+
+* Add for unknown verification method to allow for null verification data in LSP2 ([f205818](https://github.com/ERC725Alliance/erc725.js/commit/f205818af348471bde8f88af2008497b8c13e258))
+* Add more fixes per PR comments ([e7302e4](https://github.com/ERC725Alliance/erc725.js/commit/e7302e4504408e2f4f6304badd2024bfe05fcf47))
+* Change to verification object ([ddd2ab2](https://github.com/ERC725Alliance/erc725.js/commit/ddd2ab23d1c5181745827f338d9abaea48c772f7))
+* More renames _FUNCTIONS to _METHODS ([1a96be1](https://github.com/ERC725Alliance/erc725.js/commit/1a96be1dd15942d2a844bc26b9ab73e053e3b766))
+* Move @types/jest and jest ([852918c](https://github.com/ERC725Alliance/erc725.js/commit/852918c72228b3839ba60730dadef66837008f5a))
+
 ## [0.21.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.21.0...v0.21.1) (2023-11-06)
 
 
