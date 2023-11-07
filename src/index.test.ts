@@ -18,8 +18,7 @@
  */
 
 // Tests for the @erc725/erc725.js package
-import assert from 'assert';
-import { assert as chaiAssert } from 'chai';
+import { assert } from 'chai';
 
 import Web3 from 'web3';
 import * as sinon from 'sinon';
@@ -45,7 +44,7 @@ import 'isomorphic-fetch';
 
 import {
   ERC725Y_INTERFACE_IDS,
-  SUPPORTED_VERIFICATION_FUNCTION_STRINGS,
+  SUPPORTED_VERIFICATION_METHOD_STRINGS,
 } from './constants/constants';
 import { decodeKey } from './lib/decodeData';
 import { INTERFACE_IDS_0_12_0 } from './constants/interfaces';
@@ -54,26 +53,19 @@ const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
 
 describe('Running @erc725/erc725.js tests...', () => {
   it('should throw when no arguments are supplied', () => {
-    assert.throws(
-      () => {
-        // @ts-ignore
-        // eslint-disable-next-line no-new
-        new ERC725();
-      },
-      (error: any) => error.message === 'Missing schema.',
-    );
+    assert.throws(() => {
+      // @ts-ignore
+      // eslint-disable-next-line no-new
+      new ERC725();
+    }, 'Missing schema.');
   });
 
   it('should throw when incorrect or unsupported provider is provided', () => {
-    assert.throws(
-      () => {
-        // @ts-ignore
-        // eslint-disable-next-line no-new
-        new ERC725(mockSchema, address, { test: false });
-      },
-      (error: any) =>
-        error.message.indexOf('Incorrect or unsupported provider') >= -1,
-    );
+    assert.throws(() => {
+      // @ts-ignore
+      // eslint-disable-next-line no-new
+      new ERC725(mockSchema, address, { test: false });
+    }, /Incorrect or unsupported provider/);
   });
 
   it('should throw when calling getData without address & provider options set', async () => {
@@ -271,9 +263,10 @@ describe('Running @erc725/erc725.js tests...', () => {
         name: 'LSP3Profile',
         key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
         value: {
-          verificationFunction: 'keccak256(utf8)',
-          verificationData:
-            '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
+          verification: {
+            method: 'keccak256(utf8)',
+            data: '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
+          },
           url: 'ipfs://QmecrGejUQVXpW4zS948pNvcnQrJ1KiAoM6bdfrVcWZsn5',
         },
       },
@@ -371,9 +364,10 @@ describe('Running @erc725/erc725.js tests...', () => {
           name: 'LSP3Profile',
           key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
           value: {
-            verificationFunction: 'keccak256(utf8)',
-            verificationData:
-              '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
+            verification: {
+              method: 'keccak256(utf8)',
+              data: '0x70546a2accab18748420b63c63b5af4cf710848ae83afc0c51dd8ad17fb5e8b3',
+            },
             url: 'ipfs://QmecrGejUQVXpW4zS948pNvcnQrJ1KiAoM6bdfrVcWZsn5',
           },
         },
@@ -680,8 +674,10 @@ describe('Running @erc725/erc725.js tests...', () => {
 
                 // Encoded value of:
                 // {
-                //   verificationFunction: 'keccak256(bytes)', // 0x8019f9b1
-                //   verificationData: '0xc41589e7559804ea4a2080dad19d876a024ccb05117835447d72ce08c1d020ec',
+                //   verification: {
+                //     method: 'keccak256(bytes)', // 0x8019f9b1
+                //     data: '0xc41589e7559804ea4a2080dad19d876a024ccb05117835447d72ce08c1d020ec',
+                //   },
                 //   url: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
                 // },
               ],
@@ -973,17 +969,19 @@ describe('Running @erc725/erc725.js tests...', () => {
         {
           width: 1350,
           height: 1800,
-          verificationFunction: 'keccak256(bytes)',
-          verificationData:
-            '0x229b60ea5b58e1ab8e6f1063300be110bb4fa663ba75d3814d60104ac6b74497',
+          verification: {
+            method: 'keccak256(bytes)',
+            data: '0x229b60ea5b58e1ab8e6f1063300be110bb4fa663ba75d3814d60104ac6b74497',
+          },
           url: 'ipfs://Qmbv9j6iCDDYJ1NXHTZnNHDJ6qaaKkZsf79jhUMFAXcfDR',
         },
         {
           width: 768,
           height: 1024,
-          verificationFunction: 'keccak256(bytes)',
-          verificationData:
-            '0x320db57770084f114988c8a94bcf219ca66c69421590466a45f382cd84995c2b',
+          verification: {
+            method: 'keccak256(bytes)',
+            data: '0x320db57770084f114988c8a94bcf219ca66c69421590466a45f382cd84995c2b',
+          },
           url: 'ipfs://QmS4m2LmRpay7Jij4DCpvaW5zKZYy43ATZdRxUkUND6nG3',
         },
       ],
@@ -991,17 +989,19 @@ describe('Running @erc725/erc725.js tests...', () => {
         {
           width: 1024,
           height: 768,
-          verificationFunction: 'keccak256(bytes)',
-          verificationData:
-            '0xbe2d39fe1e0b1911155afc74010db3483528a2b645dea8fcf47bdc34147769be',
+          verification: {
+            method: 'keccak256(bytes)',
+            data: '0xbe2d39fe1e0b1911155afc74010db3483528a2b645dea8fcf47bdc34147769be',
+          },
           url: 'ipfs://QmQ6ujfKSc91F44KtMe6WRTSCXoSdCjomQUy8hCUxHMr28',
         },
         {
           width: 640,
           height: 480,
-          verificationFunction: 'keccak256(bytes)',
-          verificationData:
-            '0xb115f2bf09994e79726db27a7b8d5a0de41a5b81d11b59b3038fa158718266ff',
+          verification: {
+            method: 'keccak256(bytes)',
+            data: '0xb115f2bf09994e79726db27a7b8d5a0de41a5b81d11b59b3038fa158718266ff',
+          },
           url: 'ipfs://QmakaRZxJMMqwQFJY98J3wjbqYVDnaSZ9sEqBF9iMv3GNX',
         },
       ],
@@ -1031,12 +1031,12 @@ describe('Running @erc725/erc725.js tests...', () => {
       'ipfs://QmbKvCVEePiDKxuouyty9bMsWBAxZDGr2jhxd4pLGLx95D',
     );
     assert.deepStrictEqual(
-      decodedData[0].value.verificationData,
-      hashData(json, SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8),
+      decodedData[0].value.verification.data,
+      hashData(json, SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8),
     );
     assert.deepStrictEqual(
-      decodedData[0].value.verificationFunction,
-      SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8,
+      decodedData[0].value.verification.method,
+      SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
     );
   });
 
@@ -1394,8 +1394,8 @@ describe('supportsInterface', () => {
   const erc725Instance = new ERC725([]);
 
   it('is available on instance and class', () => {
-    chaiAssert.typeOf(ERC725.supportsInterface, 'function');
-    chaiAssert.typeOf(erc725Instance.supportsInterface, 'function');
+    assert.typeOf(ERC725.supportsInterface, 'function');
+    assert.typeOf(erc725Instance.supportsInterface, 'function');
   });
 
   const interfaceId = INTERFACE_IDS_0_12_0.LSP1UniversalReceiver;
@@ -1432,7 +1432,7 @@ describe('checkPermissions', () => {
   const erc725Instance = new ERC725([]);
 
   it('is available on instance', () => {
-    chaiAssert.typeOf(erc725Instance.checkPermissions, 'function');
+    assert.typeOf(erc725Instance.checkPermissions, 'function');
 
     const requiredPermissions = [
       '0x0000000000000000000000000000000000000000000000000000000000000004',
@@ -1449,7 +1449,7 @@ describe('checkPermissions', () => {
   });
 
   it('is available on class', () => {
-    chaiAssert.typeOf(ERC725.checkPermissions, 'function');
+    assert.typeOf(ERC725.checkPermissions, 'function');
 
     const requiredPermissions = [
       '0x0000000000000000000000000000000000000000000000000000000000000004',

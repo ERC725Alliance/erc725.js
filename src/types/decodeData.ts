@@ -15,13 +15,14 @@ export interface DecodeDataInput extends DataInput {
 }
 
 export interface DecodeDataOutput {
-  value: string | string[] | URLDataWithHash;
+  value: string | string[] | URLDataWithHash | null;
   name: string;
   key: string;
 }
 
 export interface FetchDataOutput {
   value:
+    | null
     | string
     | string[]
     | { LSP3Profile: Record<string, any> }

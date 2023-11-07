@@ -14,9 +14,8 @@
 
 /* eslint-disable no-unused-expressions */
 
-import { expect } from 'chai';
+import { expect, assert } from 'chai';
 
-import assert from 'assert';
 import { keccak256, utf8ToHex, stripHexPrefix, toBN, toHex } from 'web3-utils';
 import {
   valueContentEncodingMap,
@@ -26,8 +25,8 @@ import {
   decodeValueContent,
 } from './encoder';
 import {
-  SUPPORTED_VERIFICATION_FUNCTION_HASHES,
-  SUPPORTED_VERIFICATION_FUNCTION_STRINGS,
+  SUPPORTED_VERIFICATION_METHOD_HASHES,
+  SUPPORTED_VERIFICATION_METHOD_STRINGS,
 } from '../constants/constants';
 import { JSONURLDataToEncode, URLDataWithHash } from '../types';
 
@@ -814,18 +813,12 @@ describe('encoder', () => {
     });
 
     it('should throw when valueType is unknown', () => {
-      assert.throws(
-        () => {
-          encodeValueType('????', 'hi');
-        },
-        () => true,
-      );
-      assert.throws(
-        () => {
-          decodeValueType('whatIsthisType', 'hi');
-        },
-        () => true,
-      );
+      assert.throws(() => {
+        encodeValueType('????', 'hi');
+      });
+      assert.throws(() => {
+        decodeValueType('whatIsthisType', 'hi');
+      });
     });
   });
 
@@ -867,10 +860,10 @@ describe('encoder', () => {
       {
         valueContent: 'AssetURL',
         decodedValue: {
-          verificationFunction:
-            SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8,
-          verificationData:
-            '0x027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168',
+          verification: {
+            method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+            data: '0x027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168',
+          },
           url: 'http://test.com/asset.glb',
         },
         encodedValue:
@@ -906,7 +899,9 @@ describe('encoder', () => {
 
         assert.deepStrictEqual(encodedValue, testCase.encodedValue);
         assert.deepStrictEqual(
-          decodeValueContent(testCase.valueContent, encodedValue),
+          encodedValue !== false
+            ? decodeValueContent(testCase.valueContent, encodedValue)
+            : false,
           testCase.decodedValue,
         );
       });
@@ -924,26 +919,29 @@ describe('encoder', () => {
       };
       const encodedValue = encodeValueContent('JSONURL', dataToEncode);
 
-      const verificationFunction =
-        SUPPORTED_VERIFICATION_FUNCTION_HASHES.HASH_KECCAK256_UTF8;
+      const verificationMethod =
+        SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8;
       const hexUrl = utf8ToHex(dataToEncode.url).substring(2);
       const jsonVerificationData = keccak256(
         JSON.stringify(dataToEncode.json),
       ).substring(2);
       assert.deepStrictEqual(
         encodedValue,
-        verificationFunction + jsonVerificationData + hexUrl,
+        verificationMethod + jsonVerificationData + hexUrl,
       );
 
       const expectedDecodedValue: URLDataWithHash = {
-        verificationData: `0x${jsonVerificationData}`,
-        verificationFunction:
-          SUPPORTED_VERIFICATION_FUNCTION_STRINGS.KECCAK256_UTF8,
+        verification: {
+          data: `0x${jsonVerificationData}`,
+          method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+        },
         url: dataToEncode.url,
       };
 
       assert.deepStrictEqual(
-        decodeValueContent('JSONURL', encodedValue),
+        encodedValue !== false
+          ? decodeValueContent('JSONURL', encodedValue)
+          : false,
         expectedDecodedValue,
       );
     });
@@ -958,18 +956,12 @@ describe('encoder', () => {
     });
 
     it('should throw when valueContent is unknown', () => {
-      assert.throws(
-        () => {
-          encodeValueContent('wrongContent', 'hi');
-        },
-        () => true,
-      );
-      assert.throws(
-        () => {
-          decodeValueContent('wrongContent', 'hi');
-        },
-        () => true,
-      );
+      assert.throws(() => {
+        encodeValueContent('wrongContent', 'hi');
+      });
+      assert.throws(() => {
+        decodeValueContent('wrongContent', 'hi');
+      });
     });
 
     it('should return the value if the valueContent == value', () => {
@@ -981,38 +973,29 @@ describe('encoder', () => {
     });
 
     describe('JSONURL', () => {
-      it('throws when the verificationFunction of JSON of JSONURL to encode is not keccak256(utf8)', () => {
-        assert.throws(
-          () => {
-            valueContentEncodingMap('JSONURL').encode({
-              // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
-              verificationFunction: 'whatever',
-              url: 'https://file-desination.com/file-name',
-              verificationData: '0x321',
-            });
-          },
-          (error: any) => {
-            return (
-              error.message ===
-              `Chosen verificationFunction 'whatever' is not supported. Supported verificationFunctions: keccak256(utf8),keccak256(bytes)`
-            );
-          },
-        );
+      it('throws when the verification method of JSON of JSONURL to encode is not keccak256(utf8)', () => {
+        assert.throws(() => {
+          valueContentEncodingMap('JSONURL').encode({
+            // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
+            verification: {
+              method: 'whatever',
+              data: '0x321',
+            },
+            url: 'https://file-desination.com/file-name',
+          });
+        }, `Chosen verification method 'whatever' is not supported. Supported verification methods: keccak256(utf8),keccak256(bytes)`);
       });
 
       it('throws when JSONURL encode a JSON without json or verificationData key', () => {
-        assert.throws(
-          () => {
-            valueContentEncodingMap('JSONURL').encode({
-              // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
-              verificationFunction: 'keccak256(utf8)',
-              url: 'https://file-desination.com/file-name',
-            });
-          },
-          (error: any) =>
-            error.message ===
-            'You have to provide either the verificationData or the json via the respective properties',
-        );
+        assert.throws(() => {
+          valueContentEncodingMap('JSONURL').encode({
+            // @ts-ignore to still run the test (incase someone is using the library in a non TS environment)
+            verification: {
+              method: 'keccak256(utf8)',
+            },
+            url: 'https://file-desination.com/file-name',
+          });
+        }, 'You have to provide either the verification.data or the json via the respective properties');
       });
     });
   });
