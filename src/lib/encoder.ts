@@ -47,7 +47,10 @@ import {
 import { JSONURLDataToEncode, URLDataWithHash, Verification } from '../types';
 import { AssetURLEncode } from '../types/encodeData';
 
-import { SUPPORTED_VERIFICATION_METHOD_STRINGS } from '../constants/constants';
+import {
+  SUPPORTED_VERIFICATION_METHOD_STRINGS,
+  UNKNOWN_VERIFICATION_METHOD,
+} from '../constants/constants';
 import { getVerificationMethod, hashData, countNumberOfBytes } from './utils';
 
 const abiCoder = AbiCoder;
@@ -60,14 +63,15 @@ const encodeDataSourceWithHash = (
   verification: undefined | Verification,
   dataSource: string,
 ): string => {
-  if (!verification || !verification.method || !verification.data) {
-    throw new TypeError('No verification function or data provided.');
-  }
-  const verificationMethod = getVerificationMethod(verification.method);
+  const verificationMethod = getVerificationMethod(
+    verification?.method || UNKNOWN_VERIFICATION_METHOD,
+  );
   return (
-    keccak256(verificationMethod.name).slice(0, 10) +
-    stripHexPrefix(verification.data) +
-    utf8ToHex(dataSource).slice(2)
+    (verificationMethod
+      ? keccak256(verificationMethod.name).slice(0, 10)
+      : padLeft(0, 8)) +
+    stripHexPrefix(verification ? verification.data : padLeft(0, 64)) +
+    stripHexPrefix(utf8ToHex(dataSource))
   );
 };
 
@@ -81,7 +85,7 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
 
   return {
     verification: {
-      method: verificationMethod.name,
+      method: verificationMethod?.name || UNKNOWN_VERIFICATION_METHOD,
       data: dataHash,
     },
     url: dataSource,
