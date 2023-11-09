@@ -71,7 +71,7 @@ import { isValidTuple } from './decodeData';
  */
 export function encodeKeyValue(
   valueContent: string,
-  valueType: ERC725JSONSchemaValueType,
+  valueType: ERC725JSONSchemaValueType | string,
   decodedValue:
     | string
     | string[]
@@ -360,7 +360,7 @@ export function encodeKey(
  */
 export function decodeKeyValue(
   valueContent: string,
-  valueType: ERC725JSONSchemaValueType,
+  valueType: ERC725JSONSchemaValueType | string, // string for tuples and CompactBytesArray
   value,
   name?: string,
 ) {
