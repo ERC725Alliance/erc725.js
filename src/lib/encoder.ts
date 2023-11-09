@@ -52,6 +52,7 @@ import {
   UNKNOWN_VERIFICATION_METHOD,
 } from '../constants/constants';
 import { getVerificationMethod, hashData, countNumberOfBytes } from './utils';
+import { ERC725JSONSchemaValueType } from '../types/ERC725JSONSchema';
 
 const abiCoder = AbiCoder;
 
@@ -726,13 +727,9 @@ export const valueContentEncodingMap = (valueContent: string) => {
 };
 
 export function encodeValueType(
-  type: string,
+  type: ERC725JSONSchemaValueType | string, // for tuples and CompactBytesArray,
   value: string | string[] | number | number[] | boolean | boolean[],
 ): string {
-  if (!valueTypeEncodingMap[type]) {
-    throw new Error('Could not encode valueType: "' + type + '".');
-  }
-
   if (typeof value === 'undefined' || value === null) {
     return value;
   }
@@ -740,11 +737,10 @@ export function encodeValueType(
   return valueTypeEncodingMap[type].encode(value);
 }
 
-export function decodeValueType(type: string, value: string) {
-  if (!valueTypeEncodingMap[type]) {
-    throw new Error('Could not decode valueType: "' + type + '".');
-  }
-
+export function decodeValueType(
+  type: ERC725JSONSchemaValueType | string, // for tuples and CompactBytesArray
+  value: string,
+) {
   if (value === '0x') return null;
 
   if (typeof value === 'undefined' || value === null) {

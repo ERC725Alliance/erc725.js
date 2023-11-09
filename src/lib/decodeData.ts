@@ -23,7 +23,11 @@ import { isHexStrict } from 'web3-utils';
 import { COMPACT_BYTES_ARRAY_STRING } from '../constants/constants';
 
 import { DecodeDataInput, DecodeDataOutput } from '../types/decodeData';
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
+import {
+  ALL_VALUE_TYPES,
+  ERC725JSONSchema,
+  isValidValueType,
+} from '../types/ERC725JSONSchema';
 import { isDynamicKeyName } from './encodeKeyName';
 import { valueContentEncodingMap, decodeValueType } from './encoder';
 import { getSchemaElement } from './getSchemaElement';
@@ -66,15 +70,6 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
   const valueTypeParts = extractTupleElements(valueTypeToDecode);
   const valueContentParts = extractTupleElements(valueContent);
 
-  const tuplesValidValueTypes = [
-    'bytes2',
-    'bytes4',
-    'bytes8',
-    'bytes16',
-    'bytes32',
-    'address',
-  ];
-
   if (valueTypeParts.length !== valueContentParts.length) {
     throw new Error(
       `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. They should have the same number of elements. Got: ${valueTypeParts.length} and ${valueContentParts.length}`,
@@ -82,9 +77,9 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
   }
 
   for (let i = 0; i < valueTypeParts.length; i++) {
-    if (!tuplesValidValueTypes.includes(valueTypeParts[i])) {
+    if (!isValidValueType(valueTypeParts[i])) {
       throw new Error(
-        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. Type: ${valueTypeParts[i]} is not valid. Valid types are: ${tuplesValidValueTypes}`,
+        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. Type: ${valueTypeParts[i]} is not valid. Valid types are: ${ALL_VALUE_TYPES}`,
       );
     }
 
