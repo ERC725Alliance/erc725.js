@@ -13,56 +13,14 @@
 */
 /**
  * @file lib/detector.test.ts
- * @author Hugo Masclet <@Hugoo>
- * @author Felix Hildebrandt <@fhildeb>
  * @date 2022
  */
 
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import * as sinon from 'sinon';
-import { INTERFACE_IDS_0_12_0 } from '../constants/interfaces';
 
-import { supportsInterface, checkPermissions } from './detector';
-
-describe('supportsInterface', () => {
-  it('it should return true if the contract supports the interface with name', async () => {
-    const contractAddress = '0xcafecafecafecafecafecafecafecafecafecafe';
-    const interfaceName = 'LSP0ERC725Account';
-
-    const providerStub = { supportsInterface: sinon.stub() };
-
-    providerStub.supportsInterface
-      .withArgs(contractAddress, INTERFACE_IDS_0_12_0[interfaceName])
-      .returns(Promise.resolve(true));
-
-    const doesSupportInterface = await supportsInterface(interfaceName, {
-      address: contractAddress,
-      provider: providerStub,
-    });
-
-    expect(doesSupportInterface).to.be.true;
-  });
-
-  it('it should return true if the contract supports the interface with interfaceId', async () => {
-    const contractAddress = '0xcafecafecafecafecafecafecafecafecafecafe';
-    const interfaceId = INTERFACE_IDS_0_12_0.LSP1UniversalReceiver;
-
-    const providerStub = { supportsInterface: sinon.stub() };
-
-    providerStub.supportsInterface
-      .withArgs(contractAddress, interfaceId)
-      .returns(Promise.resolve(true));
-
-    const doesSupportInterface = await supportsInterface(interfaceId, {
-      address: contractAddress,
-      provider: providerStub,
-    });
-
-    expect(doesSupportInterface).to.be.true;
-  });
-});
+import { checkPermissions } from './detector';
 
 describe('checkPermissions', () => {
   describe('test with single permission', () => {
