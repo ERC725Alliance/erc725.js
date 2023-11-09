@@ -17,8 +17,8 @@
     "name": "AddressPermissions:AllowedCalls:<address>",
     "key": "0x4b80742de2bf393a64c70000<address>",
     "keyType": "MappingWithGrouping",
-    "valueType": "(bytes4,address,bytes4)[CompactBytesArray]",
-    "valueContent": "(Bytes4,Address,Bytes4)"
+    "valueType": "(bytes4,address,bytes4,bytes4)[CompactBytesArray]",
+    "valueContent": "(BitArray,Address,Bytes4,Bytes4)"
   },
   {
     "name": "AddressPermissions:AllowedERC725YDataKeys:<address>",
