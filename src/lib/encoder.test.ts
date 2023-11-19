@@ -327,8 +327,39 @@ describe('encoder', () => {
       });
     });
 
-    describe('`uint128` type', () => {
+    describe('`uintN` type', () => {
       const validTestCases = [
+        {
+          valueType: 'uint256',
+          decodedValue: 1337,
+          encodedValue:
+            '0x0000000000000000000000000000000000000000000000000000000000000539',
+        },
+        {
+          valueType: 'uint8',
+          decodedValue: 10,
+          encodedValue: '0x0a',
+        },
+        {
+          valueType: 'uint16',
+          decodedValue: 10,
+          encodedValue: '0x000a',
+        },
+        {
+          valueType: 'uint24',
+          decodedValue: 10,
+          encodedValue: '0x00000a',
+        },
+        {
+          valueType: 'uint32',
+          decodedValue: 10,
+          encodedValue: '0x0000000a',
+        },
+        {
+          valueType: 'uint64',
+          decodedValue: 25,
+          encodedValue: '0x0000000000000019',
+        },
         {
           valueType: 'uint128',
           decodedValue: 11,
@@ -350,30 +381,10 @@ describe('encoder', () => {
           );
         });
       });
-    });
 
-    describe('`uint256` type', () => {
-      const validTestCases = [
-        {
-          valueType: 'uint256',
-          decodedValue: 1337,
-          encodedValue:
-            '0x0000000000000000000000000000000000000000000000000000000000000539',
-        },
-      ];
-
-      validTestCases.forEach((testCase) => {
-        it(`encodes/decodes: ${testCase.decodedValue} as ${testCase.valueType}`, () => {
-          const encodedValue = encodeValueType(
-            testCase.valueType,
-            testCase.decodedValue,
-          );
-
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
-          assert.deepStrictEqual(
-            decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
+      ['uint1', 'uint129', 'uint257'].forEach((invalidUintType) => {
+        it(`should error with invalid valueType for type ${invalidUintType}`, async () => {
+          assert.throws(() => encodeValueType(invalidUintType, '12345'));
         });
       });
     });

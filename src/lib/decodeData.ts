@@ -53,9 +53,6 @@ const isValidTupleDefinition = (tupleContent: string): boolean => {
 const extractTupleElements = (tupleContent: string): string[] =>
   tupleContent.substring(1, tupleContent.length - 1).split(',');
 
-const extractTupleElements = (tupleContent: string): string[] =>
-  tupleContent.substring(1, tupleContent.length - 1).split(',');
-
 export const isValidTuple = (valueType: string, valueContent: string) => {
   if (
     !isValidTupleDefinition(valueType) ||
