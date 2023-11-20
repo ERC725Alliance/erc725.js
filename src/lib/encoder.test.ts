@@ -387,6 +387,20 @@ describe('encoder', () => {
           assert.throws(() => encodeValueType(invalidUintType, '12345'));
         });
       });
+
+      [
+        { type: 'uint8', value: -1 },
+        { type: 'uint64', value: -567 },
+        { type: 'uint256', value: -1000 },
+      ].forEach((testCase) => {
+        it(`should throw when giving a negative number for unsigned integers. type: ${testCase.type}; value: ${testCase.value}`, async () => {
+          assert.throws(() => encodeValueType(testCase.type, testCase.value));
+        });
+      });
+
+      it('should revert when value is bigger than max value allowed by the `uintN` type chosen', async () => {
+        assert.throws(() => encodeValueType('uint8', 300));
+      });
     });
 
     describe('`string` type', () => {
