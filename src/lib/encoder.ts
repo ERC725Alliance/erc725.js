@@ -740,18 +740,18 @@ export function encodeValueType(
   return valueTypeEncodingMap[type].encode(value);
 }
 
-export function decodeValueType(type: string, value: string) {
+export function decodeValueType(type: string, data: string) {
   if (!valueTypeEncodingMap[type]) {
     throw new Error('Could not decode valueType: "' + type + '".');
   }
 
-  if (value === '0x') return null;
+  if (data === '0x') return null;
 
-  if (typeof value === 'undefined' || value === null) {
-    return value;
+  if (typeof data === 'undefined' || data === null) {
+    return data;
   }
 
-  return valueTypeEncodingMap[type].decode(value);
+  return valueTypeEncodingMap[type].decode(data);
 }
 
 export function encodeValueContent(
