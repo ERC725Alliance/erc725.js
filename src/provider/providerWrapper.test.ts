@@ -3,6 +3,7 @@ import assert from 'assert';
 import { ProviderWrapper } from './providerWrapper';
 
 const erc725AccountAddress = '0x214be121bB52e6909c5158579b3458f8760f1b2f';
+const defaultGas = 1_000_000;
 
 describe('ProviderWrapper', () => {
   describe('#getOwner', () => {
@@ -15,7 +16,7 @@ describe('ProviderWrapper', () => {
           });
         },
       };
-      const ethSource = new ProviderWrapper(mockProvider);
+      const ethSource = new ProviderWrapper(mockProvider, defaultGas);
 
       const owner = await ethSource.getOwner(erc725AccountAddress);
       assert.deepStrictEqual(
@@ -30,7 +31,7 @@ describe('ProviderWrapper', () => {
           cb(new Error('some error'));
         },
       };
-      const ethSource = new ProviderWrapper(mockProvider);
+      const ethSource = new ProviderWrapper(mockProvider, defaultGas);
 
       try {
         await ethSource.getOwner(erc725AccountAddress);
@@ -47,7 +48,7 @@ describe('ProviderWrapper', () => {
           });
         },
       };
-      const ethSource = new ProviderWrapper(mockProvider);
+      const ethSource = new ProviderWrapper(mockProvider, defaultGas);
 
       try {
         await ethSource.getOwner(erc725AccountAddress);

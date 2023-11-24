@@ -1,7 +1,6 @@
-import { SUPPORTED_HASH_FUNCTIONS } from '../../constants/constants';
+import { Verification } from './JSONURL';
 
 export interface AssetURLEncode {
-  hashFunction: SUPPORTED_HASH_FUNCTIONS;
-  hash: string;
+  verification: Verification;
   url: string;
 }

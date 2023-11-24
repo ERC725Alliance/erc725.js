@@ -44,14 +44,14 @@ import {
   toBN,
 } from 'web3-utils';
 
-import { JSONURLDataToEncode, URLDataWithHash } from '../types';
+import { JSONURLDataToEncode, URLDataWithHash, Verification } from '../types';
 import { AssetURLEncode } from '../types/encodeData';
 
 import {
-  SUPPORTED_HASH_FUNCTIONS,
-  SUPPORTED_HASH_FUNCTION_STRINGS,
+  SUPPORTED_VERIFICATION_METHOD_STRINGS,
+  UNKNOWN_VERIFICATION_METHOD,
 } from '../constants/constants';
-import { getHashFunction, hashData, countNumberOfBytes } from './utils';
+import { getVerificationMethod, hashData, countNumberOfBytes } from './utils';
 
 const abiCoder = AbiCoder;
 
@@ -60,28 +60,36 @@ const bytesNRegex = /Bytes(\d+)/;
 const ALLOWED_BYTES_SIZES = [2, 4, 8, 16, 32, 64, 128, 256];
 
 const encodeDataSourceWithHash = (
-  hashType: SUPPORTED_HASH_FUNCTIONS,
-  dataHash: string,
+  verification: undefined | Verification,
   dataSource: string,
 ): string => {
-  const hashFunction = getHashFunction(hashType);
-
+  const verificationMethod = getVerificationMethod(
+    verification?.method || UNKNOWN_VERIFICATION_METHOD,
+  );
   return (
-    keccak256(hashFunction.name).slice(0, 10) +
-    dataHash.slice(2) +
-    utf8ToHex(dataSource).slice(2)
+    (verificationMethod
+      ? keccak256(verificationMethod.name).slice(0, 10)
+      : padLeft(0, 8)) +
+    stripHexPrefix(verification ? verification.data : padLeft(0, 64)) +
+    stripHexPrefix(utf8ToHex(dataSource))
   );
 };
 
 const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
-  const hashFunctionSig = value.slice(0, 10);
-  const hashFunction = getHashFunction(hashFunctionSig);
+  const verificationMethodSig = value.slice(0, 10);
+  const verificationMethod = getVerificationMethod(verificationMethodSig);
 
   const encodedData = value.replace('0x', '').slice(8); // Rest of data string after function hash
   const dataHash = '0x' + encodedData.slice(0, 64); // Get jsonHash 32 bytes
   const dataSource = hexToUtf8('0x' + encodedData.slice(64)); // Get remainder as URI
 
-  return { hashFunction: hashFunction.name, hash: dataHash, url: dataSource };
+  return {
+    verification: {
+      method: verificationMethod?.name || UNKNOWN_VERIFICATION_METHOD,
+      data: dataHash,
+    },
+    url: dataSource,
+  };
 };
 
 const encodeToBytesN = (
@@ -548,7 +556,7 @@ export const valueContentEncodingMap = (valueContent: string) => {
       return {
         type: 'custom',
         encode: (value: AssetURLEncode) =>
-          encodeDataSourceWithHash(value.hashFunction, value.hash, value.url),
+          encodeDataSourceWithHash(value.verification, value.url),
         decode: (value: string) => decodeDataSourceWithHash(value),
       };
     }
@@ -557,32 +565,39 @@ export const valueContentEncodingMap = (valueContent: string) => {
       return {
         type: 'custom',
         encode: (dataToEncode: JSONURLDataToEncode) => {
-          const { hash, json, hashFunction, url } = dataToEncode;
+          const {
+            verification: { data, method } = {},
+            json,
+            url,
+          } = dataToEncode;
 
-          let hashedJson = hash;
+          let hashedJson = data;
 
           if (json) {
-            if (hashFunction) {
+            if (method) {
               throw new Error(
-                'When passing in the `json` property, we use "keccak256(utf8)" as a default hashingFunction. You do not need to set a `hashFunction`.',
+                'When passing in the `json` property, we use "keccak256(utf8)" as a default verification method. You do not need to set a `verification.method`.',
               );
             }
             hashedJson = hashData(
               json,
-              SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
+              SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
             );
           }
 
           if (!hashedJson) {
             throw new Error(
-              'You have to provide either the hash or the json via the respective properties',
+              'You have to provide either the verification.data or the json via the respective properties',
             );
           }
 
           return encodeDataSourceWithHash(
-            (hashFunction as SUPPORTED_HASH_FUNCTION_STRINGS) ||
-              SUPPORTED_HASH_FUNCTION_STRINGS.KECCAK256_UTF8,
-            hashedJson,
+            {
+              method:
+                (method as SUPPORTED_VERIFICATION_METHOD_STRINGS) ||
+                SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+              data: hashedJson,
+            },
             url,
           );
         },

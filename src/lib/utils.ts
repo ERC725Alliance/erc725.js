@@ -32,6 +32,7 @@ import {
   JSONURLDataToEncode,
   EncodeDataReturn,
   URLDataWithHash,
+  Verification,
 } from '../types';
 import {
   ERC725JSONSchema,
@@ -40,9 +41,9 @@ import {
 } from '../types/ERC725JSONSchema';
 
 import {
-  HASH_FUNCTIONS,
-  SUPPORTED_HASH_FUNCTIONS,
-  SUPPORTED_HASH_FUNCTIONS_LIST,
+  HASH_METHODS,
+  SUPPORTED_VERIFICATION_METHODS,
+  SUPPORTED_VERIFICATION_METHODS_LIST,
   COMPACT_BYTES_ARRAY_STRING,
 } from '../constants/constants';
 import {
@@ -473,25 +474,25 @@ export function encodeData(
   );
 }
 
-export function getHashFunction(hashFunctionNameOrHash: string) {
-  const hashFunction = HASH_FUNCTIONS[hashFunctionNameOrHash];
+export function getVerificationMethod(nameOrSig: string) {
+  const verificationMethod = Object.values(HASH_METHODS).find(
+    ({ name, sig }) => name === nameOrSig || sig === nameOrSig,
+  );
 
-  if (!hashFunction) {
+  if (!verificationMethod) {
     throw new Error(
-      `Chosen hashFunction '${hashFunctionNameOrHash}' is not supported. Supported hashFunctions: ${SUPPORTED_HASH_FUNCTIONS_LIST}`,
+      `Chosen verification method '${nameOrSig}' is not supported. Supported verification methods: ${SUPPORTED_VERIFICATION_METHODS_LIST}`,
     );
   }
 
-  return hashFunction;
+  return verificationMethod;
 }
 
 export function hashData(
   data: string | Uint8Array | Record<string, any>,
-  hashFunctionNameOrHash: SUPPORTED_HASH_FUNCTIONS,
+  nameOrSig: SUPPORTED_VERIFICATION_METHODS | string,
 ): string {
-  const hashFunction = getHashFunction(hashFunctionNameOrHash);
-
-  return hashFunction.method(data);
+  return getVerificationMethod(nameOrSig).method(data);
 }
 
 /**
@@ -500,20 +501,23 @@ export function hashData(
  */
 export function isDataAuthentic(
   data: string | Uint8Array,
-  expectedHash: string,
-  lowerCaseHashFunction: SUPPORTED_HASH_FUNCTIONS,
+  options: Verification,
 ): boolean {
   let dataHash: string;
 
-  if (data instanceof Uint8Array) {
-    dataHash = hashData(arrToBufArr(data), lowerCaseHashFunction);
-  } else {
-    dataHash = hashData(data, lowerCaseHashFunction);
+  if (!options || !options.method) {
+    return true;
   }
 
-  if (dataHash !== expectedHash) {
+  if (data instanceof Uint8Array) {
+    dataHash = hashData(arrToBufArr(data), options.method);
+  } else {
+    dataHash = hashData(data, options.method);
+  }
+
+  if (dataHash !== options.data) {
     console.error(
-      `Hash mismatch, returned JSON hash ("${dataHash}") is different from expected hash: "${expectedHash}"`,
+      `Hash mismatch, returned JSON hash ("${dataHash}") is different from expected hash: "${options.method}"`,
     );
     return false;
   }
