@@ -810,15 +810,15 @@ export function encodeValueType(
 
 export function decodeValueType(
   type: ERC725JSONSchemaValueType | string, // for tuples and CompactBytesArray
-  value: string,
+  data: string,
 ) {
-  if (value === '0x') return null;
+  if (data === '0x') return null;
 
-  if (typeof value === 'undefined' || value === null) {
-    return value;
+  if (typeof data === 'undefined' || data === null) {
+    return data;
   }
 
-  return valueTypeEncodingMap(type).decode(value);
+  return valueTypeEncodingMap(type).decode(data);
 }
 
 export function encodeValueContent(

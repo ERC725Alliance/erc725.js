@@ -249,6 +249,11 @@ export function encodeKey(
 
   switch (lowerCaseKeyType) {
     case 'array': {
+      // if we are encoding only the Array length
+      if (typeof value === 'number') {
+        return encodeValueType('uint128', value);
+      }
+
       if (!Array.isArray(value)) {
         console.error("Can't encode a non array for key of type array");
         return null;
