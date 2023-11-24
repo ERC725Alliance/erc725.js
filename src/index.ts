@@ -631,15 +631,15 @@ export class ERC725 {
 
   /**
    * @param type The valueType to decode the value as
-   * @param value The value to decode
+   * @param data The data to decode
    * @returns The decoded value
    */
-  static decodeValueType(type: string, value: string) {
-    return decodeValueType(type, value);
+  static decodeValueType(type: string, data: string) {
+    return decodeValueType(type, data);
   }
 
-  decodeValueType(type: string, value: string) {
-    return ERC725.decodeValueType(type, value);
+  decodeValueType(type: string, data: string) {
+    return ERC725.decodeValueType(type, data);
   }
 }
 
