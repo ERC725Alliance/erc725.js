@@ -40,18 +40,20 @@ interface GetDataReturn {
 export class ProviderWrapper {
   type: ProviderTypes;
   provider: any;
-  constructor(provider: any) {
+  gas: number;
+  constructor(provider: any, gasInfo: number) {
     if (typeof provider.request === 'function') {
       this.type = ProviderTypes.ETHEREUM;
     } else {
       this.type = ProviderTypes.WEB3;
     }
     this.provider = provider;
+    this.gas = gasInfo;
   }
 
   async getOwner(address: string) {
     const result = await this.callContract(
-      constructJSONRPC(address, Method.OWNER),
+      constructJSONRPC(address, Method.OWNER, this.gas),
     );
     if (result.error) {
       throw result.error;
@@ -115,6 +117,7 @@ export class ProviderWrapper {
       constructJSONRPC(
         address,
         Method.SUPPORTS_INTERFACE,
+        this.gas,
         `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
       ),
     );
@@ -152,7 +155,12 @@ export class ProviderWrapper {
       );
 
       const result = await this.callContract(
-        constructJSONRPC(address, Method.IS_VALID_SIGNATURE, encodedParams),
+        constructJSONRPC(
+          address,
+          Method.IS_VALID_SIGNATURE,
+          this.gas,
+          encodedParams,
+        ),
       );
 
       if (result.error) {
@@ -172,7 +180,12 @@ export class ProviderWrapper {
     );
 
     const results = await this.callContract([
-      constructJSONRPC(address, Method.IS_VALID_SIGNATURE, encodedParams),
+      constructJSONRPC(
+        address,
+        Method.IS_VALID_SIGNATURE,
+        this.gas,
+        encodedParams,
+      ),
     ]);
     if (results.error) {
       throw results.error;
@@ -232,6 +245,7 @@ export class ProviderWrapper {
         constructJSONRPC(
           address,
           method,
+          this.gas,
           abiCoder.encodeParameter('bytes32[]', keyHashes),
         ),
       );
@@ -248,6 +262,7 @@ export class ProviderWrapper {
       constructJSONRPC(
         address,
         method,
+        this.gas,
         abiCoder.encodeParameter('bytes32[]', keyHashes),
       ),
     ];
@@ -270,7 +285,7 @@ export class ProviderWrapper {
       // But this is already legacy and it won't be used anymore..
       const encodedResultsPromises = keyHashes.map((keyHash) =>
         this.callContract(
-          constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHash),
+          constructJSONRPC(address, Method.GET_DATA_LEGACY, this.gas, keyHash),
         ),
       );
 
@@ -287,7 +302,12 @@ export class ProviderWrapper {
     // But this is already legacy and it won't be used anymore..
     for (let index = 0; index < keyHashes.length; index++) {
       payload.push(
-        constructJSONRPC(address, Method.GET_DATA_LEGACY, keyHashes[index]),
+        constructJSONRPC(
+          address,
+          Method.GET_DATA_LEGACY,
+          this.gas,
+          keyHashes[index],
+        ),
       );
     }
 

@@ -19,7 +19,6 @@
  * @author Callum Grindle <@CallumGrindle>
  * @date 2023
  */
-
 import { isHexStrict } from 'web3-utils';
 import { COMPACT_BYTES_ARRAY_STRING } from '../constants/constants';
 
@@ -33,36 +32,39 @@ import { decodeKeyValue, encodeArrayKey } from './utils';
 const tupleValueTypesRegex = /bytes(\d+)/;
 const valueContentsBytesRegex = /Bytes(\d+)/;
 
-export const isValidTuple = (valueType: string, valueContent: string) => {
-  if (valueType.length <= 2 && valueContent.length <= 2) {
+const isValidTupleDefinition = (tupleContent: string): boolean => {
+  if (tupleContent.length <= 2) {
     return false;
   }
-
   if (
-    valueType[0] !== '(' &&
-    valueType[valueType.length - 1] !== ')' &&
-    valueContent[0] !== '(' &&
-    valueContent[valueContent.length - 1] !== ')'
+    tupleContent[0] !== '(' &&
+    tupleContent[tupleContent.length - 1] !== ')'
   ) {
     return false;
   }
 
-  // At this stage, we can assume the user is trying to use a tuple, let's throw errors instead of returning
-  // false
+  return true;
+};
 
-  let valueTypeToDecode = valueType;
+const extractTupleElements = (tupleContent: string): string[] =>
+  tupleContent.substring(1, tupleContent.length - 1).split(',');
 
-  if (valueType.includes(COMPACT_BYTES_ARRAY_STRING)) {
-    valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
+export const isValidTuple = (valueType: string, valueContent: string) => {
+  if (
+    !isValidTupleDefinition(valueType) ||
+    !isValidTupleDefinition(valueContent)
+  ) {
+    return false;
   }
 
-  const valueTypeParts = valueTypeToDecode
-    .substring(1, valueTypeToDecode.length - 1)
-    .split(',');
+  // At this stage, we can assume the user is trying to use a tuple,
+  // let's throw errors instead of returning false
 
-  const valueContentParts = valueContent
-    .substring(1, valueContent.length - 1)
-    .split(',');
+  // Sanitize the string to keep only the tuple, if we are dealing with `CompactBytesArray`
+  const valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
+
+  const valueTypeParts = extractTupleElements(valueTypeToDecode);
+  const valueContentParts = extractTupleElements(valueContent);
 
   const tuplesValidValueTypes = [
     'bytes2',
@@ -139,27 +141,19 @@ export const decodeTupleKeyValue = (
 ): Array<string> => {
   // We assume data has already been validated at this stage
 
-  let valueTypeToDecode = valueType;
+  // Sanitize the string to keep only the tuple, if we are dealing with `CompactBytesArray`
+  const valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
 
-  if (valueType.includes('[CompactBytesArray')) {
-    valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
-  }
-
-  const valueTypeParts = valueTypeToDecode
-    .substring(1, valueTypeToDecode.length - 1)
-    .split(',');
-  const valueContentParts = valueContent
-    .substring(1, valueContent.length - 1)
-    .split(',');
+  const valueTypeParts = extractTupleElements(valueTypeToDecode);
+  const valueContentParts = extractTupleElements(valueContent);
 
   const bytesLengths: number[] = [];
+
   valueTypeParts.forEach((valueTypePart) => {
     const regexMatch = valueTypePart.match(tupleValueTypesRegex);
 
     // if we are dealing with `bytesN`
-    if (regexMatch) {
-      bytesLengths.push(parseInt(regexMatch[1], 10));
-    }
+    if (regexMatch) bytesLengths.push(parseInt(regexMatch[1], 10));
 
     if (valueTypePart === 'address') bytesLengths.push(20);
   });

@@ -25,8 +25,10 @@ const encodedDataOneKey = myERC725.encodeData({
 const encodedDataOneKeyV2 = myERC725.encodeData({
   keyName: 'LSP3Profile',
   value: {
-    hashFunction: 'keccak256(utf8)',
-    hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+    verification: {
+      method: 'keccak256(utf8)',
+      data: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+    },
     url: 'ipfs://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
   },
 });
@@ -45,8 +47,10 @@ const encodedDataManyKeys = myERC725.encodeData([
   {
     keyName: 'LSP3Profile',
     value: {
-      hashFunction: 'keccak256(utf8)',
-      hash: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+      verification: {
+        method: 'keccak256(utf8)',
+        data: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+      },
       url: 'ipfs://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
     },
   },

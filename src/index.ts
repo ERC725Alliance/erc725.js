@@ -37,6 +37,7 @@ import { isValidSignature } from './lib/isValidSignature';
 import {
   LSP6_ALL_PERMISSIONS,
   LSP6_DEFAULT_PERMISSIONS,
+  DEFAULT_GAS_VALUE,
 } from './constants/constants';
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
@@ -60,7 +61,7 @@ import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
-import { supportsInterface, checkPermissions } from './lib/detector';
+import { checkPermissions } from './lib/detector';
 import { decodeValueType, encodeValueType } from './lib/encoder';
 import { decodeMappingKey } from './lib/decodeMappingKey';
 
@@ -81,7 +82,7 @@ export { encodeData } from './lib/utils';
  *
  */
 export class ERC725 {
-  options: ERC725Options & ERC725Config;
+  options: ERC725Options;
 
   /**
    * Creates an instance of ERC725.
@@ -106,15 +107,20 @@ export class ERC725 {
 
     const defaultConfig = {
       ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/',
+      gas: DEFAULT_GAS_VALUE,
     };
 
     this.options = {
       schemas: this.validateSchemas(schemas),
       address,
-      provider: ERC725.initializeProvider(provider),
+      provider: ERC725.initializeProvider(
+        provider,
+        config?.gas ? config?.gas : defaultConfig.gas,
+      ),
       ipfsGateway: config?.ipfsGateway
         ? convertIPFSGatewayUrl(config?.ipfsGateway)
         : defaultConfig.ipfsGateway,
+      gas: config?.gas ? config?.gas : defaultConfig.gas,
     };
   }
 
@@ -152,20 +158,20 @@ export class ERC725 {
     });
   }
 
-  private static initializeProvider(providerOrRpcUrl) {
+  private static initializeProvider(providerOrRpcUrl, gasInfo) {
     // do not fail on no-provider
     if (!providerOrRpcUrl) return undefined;
 
     // if provider is a string, assume it's a rpcUrl
     if (typeof providerOrRpcUrl === 'string') {
-      return new ProviderWrapper(new HttpProvider(providerOrRpcUrl));
+      return new ProviderWrapper(new HttpProvider(providerOrRpcUrl), gasInfo);
     }
 
     if (
       typeof providerOrRpcUrl.request === 'function' ||
       typeof providerOrRpcUrl.send === 'function'
     )
-      return new ProviderWrapper(providerOrRpcUrl);
+      return new ProviderWrapper(providerOrRpcUrl, gasInfo);
 
     throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
   }
@@ -572,47 +578,6 @@ export class ERC725 {
     keyNameOrSchema: string | ERC725JSONSchema,
   ): DynamicKeyPart[] {
     return decodeMappingKey(keyHash, keyNameOrSchema);
-  }
-
-  /**
-   * Check if the ERC725 object supports
-   * a certain interface.
-   *
-   * @param interfaceIdOrName Interface ID or supported interface name.
-   * @returns {Promise<boolean>} if interface is supported.
-   */
-  async supportsInterface(interfaceIdOrName: string): Promise<boolean> {
-    const { address, provider } = this.getAddressAndProvider();
-
-    return supportsInterface(interfaceIdOrName, {
-      address,
-      provider,
-    });
-  }
-
-  /**
-   * Check if a smart contract address
-   * supports a certain interface.
-   *
-   * @param {string} interfaceIdOrName Interface ID or supported interface name.
-   * @param options Object of address and RPC URL.
-   * @returns {Promise<boolean>} if interface is supported.
-   */
-  static async supportsInterface(
-    interfaceIdOrName: string,
-    options: { address: string; rpcUrl: string },
-  ): Promise<boolean> {
-    if (!isAddress(options.address)) {
-      throw new Error('Invalid address');
-    }
-    if (!options.rpcUrl) {
-      throw new Error('Missing RPC URL');
-    }
-
-    return supportsInterface(interfaceIdOrName, {
-      address: options.address,
-      provider: this.initializeProvider(options.rpcUrl),
-    });
   }
 
   /**
