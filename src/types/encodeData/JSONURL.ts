@@ -27,7 +27,12 @@ export interface URLDataWithJson extends URLData {
 
 export type JSONURLDataToEncode = URLDataWithHash | URLDataWithJson;
 
-export type EncodeDataType = string | string[] | JSONURLDataToEncode | boolean;
+export type EncodeDataType =
+  | string
+  | string[]
+  | JSONURLDataToEncode
+  | boolean
+  | number;
 
 export interface EncodeDataReturn {
   keys: string[];
