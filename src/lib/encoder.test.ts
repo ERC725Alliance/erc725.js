@@ -382,10 +382,31 @@ describe('encoder', () => {
         });
       });
 
-      ['uint1', 'uint129', 'uint257'].forEach((invalidUintType) => {
-        it(`should error with invalid valueType for type ${invalidUintType}`, async () => {
-          assert.throws(() => encodeValueType(invalidUintType, '12345'));
-        });
+      it('should throw an error when trying to encode/decode with an invalid `uintN` type', async () => {
+        for (let ii = 1; ii <= 256; ii++) {
+          // only test for uintN where N is a multiple of 8
+          if (ii % 8 !== 0) {
+            assert.throws(() => encodeValueType(`uint${ii}`, 12345));
+            assert.throws(() => decodeValueType(`uint${ii}`, '0x00000001'));
+
+            // test that `uintN` are encoded / decode correct when N is not a multiple of 8
+          } else {
+            const expectedEncodedValue = `0x${'00'.repeat(ii / 8 - 1)}0a`;
+            const expectedDecodedValue = 10;
+
+            const encodedValue = encodeValueType(
+              `uint${ii}`,
+              expectedDecodedValue,
+            );
+            assert.equal(encodedValue, expectedEncodedValue);
+
+            const decodedValue = decodeValueType(
+              `uint${ii}`,
+              expectedEncodedValue,
+            );
+            assert.equal(decodedValue, expectedDecodedValue);
+          }
+        }
       });
     });
 

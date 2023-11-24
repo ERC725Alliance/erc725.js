@@ -51,12 +51,17 @@ import {
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
   UNKNOWN_VERIFICATION_METHOD,
 } from '../constants/constants';
-import { getVerificationMethod, hashData, countNumberOfBytes } from './utils';
+import {
+  getVerificationMethod,
+  hashData,
+  countNumberOfBytes,
+  isValidUintSize,
+} from './utils';
 import { ERC725JSONSchemaValueType } from '../types/ERC725JSONSchema';
 
 const abiCoder = AbiCoder;
 
-const uintNValueTypeRegex = /^uint(?:8|[1-9]\d|1[0-9]{2}|2[0-4]\d|25[0-6])$/;
+const uintNValueTypeRegex = /^uint(\d+)$/;
 
 const BytesNValueContentRegex = /Bytes(\d+)/;
 
@@ -425,6 +430,11 @@ const valueTypeEncodingMap = (
     case `uint${uintLength}`:
       return {
         encode: (value: string | number) => {
+          if (!isValidUintSize(uintLength as number)) {
+            throw new Error(
+              `Can't encode ${value} as ${type}. Invalid \`uintN\` provided. Expected a multiple of 8 bits between 8 and 256.`,
+            );
+          }
           const abiEncodedValue = abiCoder.encodeParameter(type, value);
 
           const bytesArray = hexToBytes(abiEncodedValue);
@@ -440,6 +450,12 @@ const valueTypeEncodingMap = (
           if (!isHex(value)) {
             throw new Error(
               `Can't convert ${value} to ${type}, value is not hex.`,
+            );
+          }
+
+          if (!isValidUintSize(uintLength as number)) {
+            throw new Error(
+              `Can't decode ${value} as ${type}. Invalid \`uintN\` provided. Expected a multiple of 8 bits between 8 and 256.`,
             );
           }
 
