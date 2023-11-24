@@ -125,7 +125,7 @@ export class ERC725 {
   }
 
   /**
-   * To prevent weird behovior from the lib, we must make sure all the schemas are correct before loading them.
+   * To prevent weird behavior from the lib, we must make sure all the schemas are correct before loading them.
    *
    * @param schemas
    * @returns
