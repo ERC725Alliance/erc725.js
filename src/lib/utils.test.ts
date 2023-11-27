@@ -36,6 +36,8 @@ import {
   convertIPFSGatewayUrl,
   generateSchemasFromDynamicKeys,
   encodeTupleKeyValue,
+  duplicateMultiTypeERC725SchemaEntry,
+  splitMultiDynamicKeyNamePart,
 } from './utils';
 import { isDynamicKeyName } from './encodeKeyName';
 import { decodeKey } from './decodeData';
@@ -839,6 +841,183 @@ describe('utils', () => {
           'generated schema key should not be dynamic',
         ).to.be.false;
       });
+    });
+  });
+
+  describe('splitMultiDynamicKeyNamePart', () => {
+    it('returns the exact input string if it is not a dynamic string', () => {
+      const keyName = 'ImNotDynamic';
+
+      assert.deepStrictEqual(splitMultiDynamicKeyNamePart(keyName), [keyName]);
+    });
+    it('returns an array with each type when the input is a dynamic string', () => {
+      const keyName = '<address|bytes32|uint256>';
+
+      assert.deepStrictEqual(splitMultiDynamicKeyNamePart(keyName), [
+        'address',
+        'bytes32',
+        'uint256',
+      ]);
+    });
+  });
+
+  describe('duplicateMultiTypeERC725SchemaEntry', () => {
+    it('returns the exact input in an array if there is no dynamic type in it', () => {
+      const schema: ERC725JSONSchema = {
+        name: 'AddressPermissions[]', // This type is not dynamic
+        key: '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3',
+        keyType: 'Array',
+        valueType: 'address',
+        valueContent: 'Address',
+      };
+
+      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema);
+
+      assert.deepStrictEqual(duplicatedSchemas, [schema]);
+    });
+    it('returns the exact input in an array if there is only one dynamic type in it for Mapping', () => {
+      const schema: ERC725JSONSchema = {
+        name: 'LSP1UniversalReceiverDelegate:<bytes32>',
+        key: '0x0cfc51aec37c55a4d0b10000<bytes32>',
+        keyType: 'Mapping',
+        valueType: 'address',
+        valueContent: 'Address',
+      };
+
+      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema);
+
+      assert.deepStrictEqual(duplicatedSchemas, [schema]);
+    });
+    it('returns the exact input in an array if there is only one dynamic type in it for MappingWithGrouping', () => {
+      const schema: ERC725JSONSchema = {
+        name: 'AddressPermissions:AllowedCalls:<address>',
+        key: '0x4b80742de2bf393a64c70000<address>',
+        keyType: 'MappingWithGrouping',
+        valueType: '(bytes4,address,bytes4,bytes4)[CompactBytesArray]',
+        valueContent: '(BitArray,Address,Bytes4,Bytes4)',
+      };
+
+      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema);
+
+      assert.deepStrictEqual(duplicatedSchemas, [schema]);
+    });
+    it('splits and returns one schema for each dynamic name type for Mapping', () => {
+      const schema: ERC725JSONSchema = {
+        name: 'LSP8MetadataTokenURI:<address|uint256|bytes32|string>',
+        key: '0x1339e76a390b7b9ec9010000<address|uint256|bytes32|string>',
+        keyType: 'Mapping',
+        valueType: '(bytes4,string)',
+        valueContent: '(Bytes4,URI)',
+      };
+
+      const expectedSchemas: ERC725JSONSchema[] = [
+        {
+          name: 'LSP8MetadataTokenURI:<address>',
+          key: '0x1339e76a390b7b9ec9010000<address>',
+          keyType: 'Mapping',
+          valueType: '(bytes4,string)',
+          valueContent: '(Bytes4,URI)',
+        },
+        {
+          name: 'LSP8MetadataTokenURI:<uint256>',
+          key: '0x1339e76a390b7b9ec9010000<uint256>',
+          keyType: 'Mapping',
+          valueType: '(bytes4,string)',
+          valueContent: '(Bytes4,URI)',
+        },
+        {
+          name: 'LSP8MetadataTokenURI:<bytes32>',
+          key: '0x1339e76a390b7b9ec9010000<bytes32>',
+          keyType: 'Mapping',
+          valueType: '(bytes4,string)',
+          valueContent: '(Bytes4,URI)',
+        },
+        {
+          name: 'LSP8MetadataTokenURI:<string>',
+          key: '0x1339e76a390b7b9ec9010000<string>',
+          keyType: 'Mapping',
+          valueType: '(bytes4,string)',
+          valueContent: '(Bytes4,URI)',
+        },
+      ];
+
+      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema);
+
+      assert.deepStrictEqual(duplicatedSchemas, expectedSchemas);
+    });
+    it('splits and returns one schema for each dynamic name type for MappingWithGrouping', () => {
+      const schema: ERC725JSONSchema = {
+        name: 'AddressPermissions:AllowedCalls:<address|string>',
+        key: '0x4b80742de2bf393a64c70000<address|string>',
+        keyType: 'MappingWithGrouping',
+        valueType: 'address',
+        valueContent: 'Address',
+      };
+
+      const expectedSchemas: ERC725JSONSchema[] = [
+        {
+          name: 'AddressPermissions:AllowedCalls:<address>',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: 'address',
+          valueContent: 'Address',
+        },
+        {
+          name: 'AddressPermissions:AllowedCalls:<string>',
+          key: '0x4b80742de2bf393a64c70000<string>',
+          keyType: 'MappingWithGrouping',
+          valueType: 'address',
+          valueContent: 'Address',
+        },
+      ];
+
+      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema);
+
+      assert.deepStrictEqual(duplicatedSchemas, expectedSchemas);
+    });
+    it('splits and returns one schema for each dynamic name type for MappingWithGrouping with multiple types', () => {
+      const schema: ERC725JSONSchema = {
+        name: 'MyKeyName:<bytes2|address>:<uint32|address>',
+        key: '0x35e6950bc8d2<bytes2|address><uint32|address>',
+        keyType: 'MappingWithGrouping',
+        valueType: 'address',
+        valueContent: 'Address',
+      };
+
+      const expectedSchemas: ERC725JSONSchema[] = [
+        {
+          name: 'MyKeyName:<bytes2>:<uint32>',
+          key: '0x35e6950bc8d2<bytes2><uint32>',
+          keyType: 'MappingWithGrouping',
+          valueType: 'address',
+          valueContent: 'Address',
+        },
+        {
+          name: 'MyKeyName:<bytes2>:<address>',
+          key: '0x35e6950bc8d2<bytes2><address>',
+          keyType: 'MappingWithGrouping',
+          valueType: 'address',
+          valueContent: 'Address',
+        },
+        {
+          name: 'MyKeyName:<address>:<uint32>',
+          key: '0x35e6950bc8d2<address><uint32>',
+          keyType: 'MappingWithGrouping',
+          valueType: 'address',
+          valueContent: 'Address',
+        },
+        {
+          name: 'MyKeyName:<address>:<address>',
+          key: '0x35e6950bc8d2<address><address>',
+          keyType: 'MappingWithGrouping',
+          valueType: 'address',
+          valueContent: 'Address',
+        },
+      ];
+
+      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema);
+
+      assert.deepStrictEqual(duplicatedSchemas, expectedSchemas);
     });
   });
 });

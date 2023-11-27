@@ -588,6 +588,170 @@ export function countNumberOfBytes(data: string) {
 }
 
 /**
+ * Given an input string which can define dynamic types, will return an array with all types
+ * In: <address|uint256>
+ * Out: ['address', 'uint256']
+ *
+ * In: NotDynamic
+ * Out: ['NotDynamic']
+ *
+ * It does not veryfi whether these types are valid. It just processes the string.
+ *
+ * @param keyName
+ */
+export const splitMultiDynamicKeyNamePart = (keyName: string): string[] => {
+  if (keyName.length <= 1) {
+    return [keyName];
+  }
+
+  if (keyName.charAt(0) !== '<' || keyName.slice(-1) !== '>') {
+    return [keyName];
+  }
+
+  return keyName.substring(1, keyName.length - 1).split('|');
+};
+
+/**
+ * This function helps to duplicate schema entries with multiple types to prepare schemas loaded on init.
+ * It does not check whether the input schema is valid or not, as long as it have the name, key and keyType keys, it will proceed.
+ *
+ * Input:
+ * {
+ *   "name": "LSP8MetadataTokenURI:<address|uint256>",
+ *   "key": "0x1339e76a390b7b9ec9010000<address|uint256>",
+ *   "keyType": "Mapping",
+ *   "valueType": "(bytes4,string)",
+ *   "valueContent": "(Bytes4,URI)"
+ * }
+ *
+ * Output:
+ *
+ * [{
+ *   "name": "LSP8MetadataTokenURI:<address>",
+ *   "key": "0x1339e76a390b7b9ec9010000<address>",
+ *   "keyType": "Mapping",
+ *   "valueType": "(bytes4,string)",
+ *   "valueContent": "(Bytes4,URI)"
+ * },
+ * {
+ *   "name": "LSP8MetadataTokenURI:<uint256>",
+ *   "key": "0x1339e76a390b7b9ec9010000<uint256>",
+ *   "keyType": "Mapping",
+ *   "valueType": "(bytes4,string)",
+ *   "valueContent": "(Bytes4,URI)"
+ * }]
+ *
+ * Having such a duplicated schema for lookup will allow the rest of the lib to behave the same way as it was.
+ *
+ * @param schema
+ */
+export const duplicateMultiTypeERC725SchemaEntry = (
+  schema: ERC725JSONSchema,
+): ERC725JSONSchema[] => {
+  if (Array.isArray(schema)) {
+    throw new Error(
+      'Input schema should be a ERC725JSONSchema and not an array.',
+    );
+  }
+
+  if (!('name' in schema) || !('key' in schema) || !('keyType' in schema)) {
+    throw new Error(
+      "Input schema object is missing 'name', 'key' and 'keyType' properties. Did you pass a valid ERC725JSONSchema object?",
+    );
+  }
+
+  const lowerCaseKeyType = schema.keyType.toLowerCase();
+
+  if (
+    lowerCaseKeyType !== 'mapping' &&
+    lowerCaseKeyType !== 'mappingwithgrouping'
+  ) {
+    return [schema];
+  }
+
+  // A very naive way to check for dynamic parts...
+  if (
+    !schema.name.includes('<') ||
+    !schema.name.includes('|') ||
+    !schema.name.includes('>')
+  ) {
+    return [schema];
+  }
+
+  if (schema.name.indexOf(':') === -1) {
+    throw new Error(
+      `Input schema type is Mapping or MappingWithGroups but the key: ${schema.key} is not valid (missing ':').`,
+    );
+  }
+
+  const nameGroups = schema.name.split(':'); // The check above ensures this split is ok
+  const baseKey = schema.key.substring(0, schema.key.indexOf('<'));
+
+  const baseSchema: ERC725JSONSchema = {
+    ...schema,
+    name: nameGroups.shift() as string, // The first element of the key name is never dynamic.
+    key: baseKey,
+  };
+
+  // Case for Mapping, there is only one group left, and this group is dynamic
+  if (nameGroups.length === 1) {
+    const dynamicTypes = splitMultiDynamicKeyNamePart(nameGroups[0]);
+    const finalSchemas = dynamicTypes.map((dynamicType) => {
+      return {
+        ...baseSchema,
+        name: `${baseSchema.name}:<${dynamicType}>`,
+        key: `${baseSchema.key}<${dynamicType}>`,
+      };
+    });
+
+    return finalSchemas;
+  }
+
+  // Case MappingWithGrouping (name groups had multiple :)
+  // We have 2 cases:
+  //    1. One dynamic type: Name:LastName:<address|uint256>
+  //    2. Two dynamic types: Name:<address|bytes>:<address|uint256>
+
+  let finalSchemas: ERC725JSONSchema[];
+
+  // Case 1 - middle part is not dynamic
+  if (nameGroups[0].charAt(0) !== '<' || nameGroups[0].slice(-1) !== '>') {
+    finalSchemas = [
+      {
+        ...baseSchema,
+        name: `${baseSchema.name}:${nameGroups[0]}`,
+        key: `${baseSchema.key}`,
+      },
+    ];
+  } else {
+    // Case 2 - middle part is dynamic
+    const dynamicTypes = splitMultiDynamicKeyNamePart(nameGroups[0]);
+    finalSchemas = dynamicTypes.map((dynamicType) => {
+      return {
+        ...baseSchema,
+        name: `${baseSchema.name}:<${dynamicType}>`,
+        key: `${baseSchema.key}<${dynamicType}>`,
+      };
+    });
+  }
+
+  // Processing of the last part of the group - which is dynamic
+  const lastDynamicTypes = splitMultiDynamicKeyNamePart(nameGroups[1]);
+
+  return finalSchemas
+    .map((finalSchema) => {
+      return lastDynamicTypes.map((lastDynamicType) => {
+        return {
+          ...finalSchema,
+          name: `${finalSchema.name}:<${lastDynamicType}>`,
+          key: `${finalSchema.key}<${lastDynamicType}>`,
+        };
+      });
+    })
+    .flat();
+};
+
+/*
  * `uintN` must be a valid number of bits between 8 and 256, in multiple of 8
  * e.g: uint8, uint16, uint24, uint32, ..., uint256
  *

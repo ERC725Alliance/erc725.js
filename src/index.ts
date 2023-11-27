@@ -29,6 +29,7 @@ import {
   encodeData,
   convertIPFSGatewayUrl,
   generateSchemasFromDynamicKeys,
+  duplicateMultiTypeERC725SchemaEntry,
 } from './lib/utils';
 
 import { getSchema } from './lib/schemaParser';
@@ -111,7 +112,11 @@ export class ERC725 {
     };
 
     this.options = {
-      schemas: this.validateSchemas(schemas),
+      schemas: this.validateSchemas(
+        schemas
+          .map((schema) => duplicateMultiTypeERC725SchemaEntry(schema))
+          .flat(),
+      ),
       address,
       provider: ERC725.initializeProvider(
         provider,

@@ -136,6 +136,7 @@ export const encodeDynamicKeyPart = (
   }
 };
 
+// This function does not support multi dynamic types such as MyName:<string|address>
 export function isDynamicKeyName(name: string) {
   const keyNameParts = name.split(':');
 
