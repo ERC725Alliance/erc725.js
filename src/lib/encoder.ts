@@ -51,11 +51,19 @@ import {
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
   UNKNOWN_VERIFICATION_METHOD,
 } from '../constants/constants';
-import { getVerificationMethod, hashData, countNumberOfBytes } from './utils';
+import {
+  getVerificationMethod,
+  hashData,
+  countNumberOfBytes,
+  isValidUintSize,
+} from './utils';
+import { ERC725JSONSchemaValueType } from '../types/ERC725JSONSchema';
 
 const abiCoder = AbiCoder;
 
-const bytesNRegex = /Bytes(\d+)/;
+const uintNValueTypeRegex = /^uint(\d+)$/;
+
+const BytesNValueContentRegex = /Bytes(\d+)/;
 
 const ALLOWED_BYTES_SIZES = [2, 4, 8, 16, 32, 64, 128, 256];
 
@@ -332,165 +340,244 @@ const returnTypesOfUintNCompactBytesArray = () => {
   return types;
 };
 
-const valueTypeEncodingMap = {
-  bool: {
-    encode: (value: boolean) => (value ? '0x01' : '0x00'),
-    decode: (value: string) => value === '0x01',
-  },
-  boolean: {
-    encode: (value: boolean) => (value ? '0x01' : '0x00'),
-    decode: (value: string) => value === '0x01',
-  },
-  string: {
-    encode: (value: string | number) => {
-      // if we receive a number as input,
-      // convert each letter to its utf8 hex representation
-      if (typeof value === 'number') {
-        return utf8ToHex(`${value}`);
-      }
+/**
+ * Encodes any set of strings to string[CompactBytesArray]
+ *
+ * @param values An array of non restricted strings
+ * @returns string[CompactBytesArray]
+ */
+const encodeStringCompactBytesArray = (values: string[]): string => {
+  const hexValues: string[] = values.map((element) => utf8ToHex(element));
 
-      return utf8ToHex(value);
-    },
-    decode: (value: string) => hexToUtf8(value),
-  },
-  address: {
-    encode: (value: string) => {
-      // abi-encode pads to 32 x 00 bytes on the left, so we need to remove them
-      const abiEncodedValue = abiCoder.encodeParameter('address', value);
+  return encodeCompactBytesArray(hexValues);
+};
 
-      // convert to an array of individual bytes
-      const bytesArray = hexToBytes(abiEncodedValue);
+/**
+ * Decode a string[CompactBytesArray] to an array of strings
+ * @param compactBytesArray A string[CompactBytesArray]
+ * @returns An array of strings
+ */
+const decodeStringCompactBytesArray = (compactBytesArray: string): string[] => {
+  const hexValues: string[] = decodeCompactBytesArray(compactBytesArray);
+  const stringValues: string[] = hexValues.map((element) => hexToUtf8(element));
 
-      // just keep the last 20 bytes, starting at index 12
-      return bytesToHex(bytesArray.slice(12));
-    },
-    decode: (value: string) => toChecksumAddress(value),
-  },
-  // NOTE: We could add conditional handling of numeric values here...
-  uint128: {
-    encode: (value: string | number) => {
-      const abiEncodedValue = abiCoder.encodeParameter('uint128', value);
-      const bytesArray = hexToBytes(abiEncodedValue);
-      return bytesToHex(bytesArray.slice(16));
-    },
-    decode: (value: string) => {
-      if (!isHex(value)) {
-        throw new Error(`Can't convert ${value} to uint128, value is not hex.`);
-      }
+  return stringValues;
+};
 
-      if (value.length > 34) {
-        throw new Error(
-          `Can't convert hex value ${value} to uint128. Too many bytes. ${
-            (value.length - 2) / 2
-          } > 16`,
-        );
-      }
+const valueTypeEncodingMap = (
+  type: string,
+): {
+  encode: (value: any) => string;
+  decode: (value: string) => any;
+} => {
+  const uintNRegexMatch = type.match(uintNValueTypeRegex);
 
-      return toBN(value).toNumber();
-    },
-  },
-  uint256: {
-    encode: (value: string | number) => {
-      return abiCoder.encodeParameter('uint256', value);
-    },
-    decode: (value: string) => {
-      if (!isHex(value)) {
-        throw new Error(`Can't convert ${value} to uint256, value is not hex.`);
-      }
+  const uintLength = uintNRegexMatch
+    ? parseInt(uintNRegexMatch[0].slice(4), 10)
+    : '';
 
-      const numberOfBytes = countNumberOfBytes(value);
+  if (type.includes('[CompactBytesArray]')) {
+    const compactBytesArrayMap = {
+      'bytes[CompactBytesArray]': {
+        encode: (value: string[]) => encodeCompactBytesArray(value),
+        decode: (value: string) => decodeCompactBytesArray(value),
+      },
+      'string[CompactBytesArray]': {
+        encode: (value: string[]) => encodeStringCompactBytesArray(value),
+        decode: (value: string) => decodeStringCompactBytesArray(value),
+      },
+      ...returnTypesOfBytesNCompactBytesArray(),
+      ...returnTypesOfUintNCompactBytesArray(),
+    };
 
-      if (numberOfBytes > 32) {
-        throw new Error(
-          `Can't convert hex value ${value} to uint256. Too many bytes. ${numberOfBytes} is above the maximal number of bytes 32.`,
-        );
-      }
+    return compactBytesArrayMap[type];
+  }
 
-      return toBN(value).toNumber();
-    },
-  },
-  bytes32: {
-    encode: (value: string | number) => encodeToBytesN('bytes32', value),
-    decode: (value: string) => abiCoder.decodeParameter('bytes32', value),
-  },
-  bytes4: {
-    encode: (value: string | number) => encodeToBytesN('bytes4', value),
-    decode: (value: string) => {
-      // we need to abi-encode the value again to ensure that:
-      //  - that data to decode does not go over 4 bytes.
-      //  - if the data is less than 4 bytes, that it gets padded to 4 bytes long.
-      const reEncodedData = abiCoder.encodeParameter('bytes4', value);
-      return abiCoder.decodeParameter('bytes4', reEncodedData);
-    },
-  },
-  bytes: {
-    encode: (value: string) => toHex(value),
-    decode: (value: string) => value,
-  },
-  'bool[]': {
-    encode: (value: boolean) => abiCoder.encodeParameter('bool[]', value),
-    decode: (value: string) => abiCoder.decodeParameter('bool[]', value),
-  },
-  'boolean[]': {
-    encode: (value: boolean) => abiCoder.encodeParameter('bool[]', value),
-    decode: (value: string) => abiCoder.decodeParameter('bool[]', value),
-  },
-  'string[]': {
-    encode: (value: string[]) => abiCoder.encodeParameter('string[]', value),
-    decode: (value: string) => abiCoder.decodeParameter('string[]', value),
-  },
-  'address[]': {
-    encode: (value: string[]) => abiCoder.encodeParameter('address[]', value),
-    decode: (value: string) => abiCoder.decodeParameter('address[]', value),
-  },
-  'uint256[]': {
-    encode: (value: Array<number | string>) =>
-      abiCoder.encodeParameter('uint256[]', value),
-    decode: (value: string) => {
-      // we want to return an array of numbers as [1, 2, 3], not an array of strings as [ '1', '2', '3']
-      return abiCoder
-        .decodeParameter('uint256[]', value)
-        .map((numberAsString) => parseInt(numberAsString, 10));
-    },
-  },
-  'bytes32[]': {
-    encode: (value: string[]) => abiCoder.encodeParameter('bytes32[]', value),
-    decode: (value: string) => abiCoder.decodeParameter('bytes32[]', value),
-  },
-  'bytes4[]': {
-    encode: (value: string[]) => abiCoder.encodeParameter('bytes4[]', value),
-    decode: (value: string) => abiCoder.decodeParameter('bytes4[]', value),
-  },
-  'bytes[]': {
-    encode: (value: string[]) => abiCoder.encodeParameter('bytes[]', value),
-    decode: (value: string) => abiCoder.decodeParameter('bytes[]', value),
-  },
-  'bytes[CompactBytesArray]': {
-    encode: (value: string[]) => encodeCompactBytesArray(value),
-    decode: (value: string) => decodeCompactBytesArray(value),
-  },
-  'string[CompactBytesArray]': {
-    encode: (values: string[]) => {
-      const hexValues: string[] = values.map((element) => utf8ToHex(element));
-      return encodeCompactBytesArray(hexValues);
-    },
-    decode: (value: string) => {
-      const hexValues: string[] = decodeCompactBytesArray(value);
-      const stringValues: string[] = hexValues.map((element) =>
-        hexToUtf8(element),
-      );
-      return stringValues;
-    },
-  },
-  ...returnTypesOfBytesNCompactBytesArray(),
-  ...returnTypesOfUintNCompactBytesArray(),
+  switch (type) {
+    case 'bool':
+    case 'boolean':
+      return {
+        encode: (value: boolean) => (value ? '0x01' : '0x00'),
+        decode: (value: string) => value === '0x01',
+      };
+    case 'string':
+      return {
+        encode: (value: string | number) => {
+          // if we receive a number as input, convert each letter to its utf8 hex representation
+          if (typeof value === 'number') {
+            return utf8ToHex(`${value}`);
+          }
+
+          return utf8ToHex(value);
+        },
+        decode: (value: string) => hexToUtf8(value),
+      };
+    case 'address':
+      return {
+        encode: (value: string) => {
+          // abi-encode pads to 32 x 00 bytes on the left, so we need to remove them
+          const abiEncodedValue = abiCoder.encodeParameter('address', value);
+
+          // convert to an array of individual bytes
+          const bytesArray = hexToBytes(abiEncodedValue);
+
+          // just keep the last 20 bytes, starting at index 12
+          return bytesToHex(bytesArray.slice(12));
+        },
+        decode: (value: string) => toChecksumAddress(value),
+      };
+    // NOTE: We could add conditional handling of numeric values here...
+    case `uint${uintLength}`:
+      return {
+        encode: (value: string | number) => {
+          if (!isValidUintSize(uintLength as number)) {
+            throw new Error(
+              `Can't encode ${value} as ${type}. Invalid \`uintN\` provided. Expected a multiple of 8 bits between 8 and 256.`,
+            );
+          }
+          const abiEncodedValue = abiCoder.encodeParameter(type, value);
+
+          const bytesArray = hexToBytes(abiEncodedValue);
+          const numberOfBytes = (uintLength as number) / 8;
+
+          // abi-encoding always pad to 32 bytes. We need to keep the `n` rightmost bytes.
+          // where `n` = `numberOfBytes`
+          const startIndex = 32 - numberOfBytes;
+
+          return bytesToHex(bytesArray.slice(startIndex));
+        },
+        decode: (value: string) => {
+          if (!isHex(value)) {
+            throw new Error(
+              `Can't convert ${value} to ${type}, value is not hex.`,
+            );
+          }
+
+          if (!isValidUintSize(uintLength as number)) {
+            throw new Error(
+              `Can't decode ${value} as ${type}. Invalid \`uintN\` provided. Expected a multiple of 8 bits between 8 and 256.`,
+            );
+          }
+
+          const numberOfBytes = countNumberOfBytes(value);
+
+          if (numberOfBytes > (uintLength as number) / 8) {
+            throw new Error(
+              `Can't convert hex value ${value} to ${type}. Too many bytes. ${numberOfBytes} > 16`,
+            );
+          }
+
+          return toBN(value).toNumber();
+        },
+      };
+    case 'bytes32':
+      return {
+        encode: (value: string | number) => encodeToBytesN('bytes32', value),
+        decode: (value: string) => abiCoder.decodeParameter('bytes32', value),
+      };
+    case 'bytes4':
+      return {
+        encode: (value: string | number) => encodeToBytesN('bytes4', value),
+        decode: (value: string) => {
+          // we need to abi-encode the value again to ensure that:
+          //  - that data to decode does not go over 4 bytes.
+          //  - if the data is less than 4 bytes, that it gets padded to 4 bytes long.
+          const reEncodedData = abiCoder.encodeParameter('bytes4', value);
+          return abiCoder.decodeParameter('bytes4', reEncodedData);
+        },
+      };
+    case 'bytes':
+      return {
+        encode: (value: string) => toHex(value),
+        decode: (value: string) => value,
+      };
+    case 'bool[]':
+      return {
+        encode: (value: boolean) => abiCoder.encodeParameter('bool[]', value),
+        decode: (value: string) => abiCoder.decodeParameter('bool[]', value),
+      };
+    case 'boolean[]':
+      return {
+        encode: (value: boolean) => abiCoder.encodeParameter('bool[]', value),
+        decode: (value: string) => abiCoder.decodeParameter('bool[]', value),
+      };
+    case 'string[]':
+      return {
+        encode: (value: string[]) =>
+          abiCoder.encodeParameter('string[]', value),
+        decode: (value: string) => abiCoder.decodeParameter('string[]', value),
+      };
+    case 'address[]':
+      return {
+        encode: (value: string[]) =>
+          abiCoder.encodeParameter('address[]', value),
+        decode: (value: string) => abiCoder.decodeParameter('address[]', value),
+      };
+    case 'uint256[]':
+      return {
+        encode: (value: Array<number | string>) =>
+          abiCoder.encodeParameter('uint256[]', value),
+        decode: (value: string) => {
+          // we want to return an array of numbers as [1, 2, 3], not an array of strings as [ '1', '2', '3']
+          return abiCoder
+            .decodeParameter('uint256[]', value)
+            .map((numberAsString) => parseInt(numberAsString, 10));
+        },
+      };
+    case 'bytes32[]':
+      return {
+        encode: (value: string[]) =>
+          abiCoder.encodeParameter('bytes32[]', value),
+        decode: (value: string) => abiCoder.decodeParameter('bytes32[]', value),
+      };
+    case 'bytes4[]':
+      return {
+        encode: (value: string[]) =>
+          abiCoder.encodeParameter('bytes4[]', value),
+        decode: (value: string) => abiCoder.decodeParameter('bytes4[]', value),
+      };
+    case 'bytes[]':
+      return {
+        encode: (value: string[]) => abiCoder.encodeParameter('bytes[]', value),
+        decode: (value: string) => abiCoder.decodeParameter('bytes[]', value),
+      };
+    case 'bytes[CompactBytesArray]':
+      return {
+        encode: (value: string[]) => encodeCompactBytesArray(value),
+        decode: (value: string) => decodeCompactBytesArray(value),
+      };
+    case 'string[CompactBytesArray]':
+      return {
+        encode: (value: string[]) => encodeStringCompactBytesArray(value),
+        decode: (value: string) => decodeStringCompactBytesArray(value),
+      };
+    default:
+      return {
+        encode: (value: any) => {
+          throw new Error(
+            `Could not encode ${value}. Value type ${type} is unknown`,
+          );
+        },
+        decode: (value: any) => {
+          throw new Error(
+            `Could not decode ${value}. Value type ${type} is unknown`,
+          );
+        },
+      };
+  }
 };
 
 // Use enum for type below
 // Is it this enum ERC725JSONSchemaValueType? (If so, custom is missing from enum)
 
-export const valueContentEncodingMap = (valueContent: string) => {
-  const bytesNRegexMatch = valueContent.match(bytesNRegex);
+export const valueContentEncodingMap = (
+  valueContent: string,
+): {
+  type: string;
+  encode: (value: any) => string;
+  decode: (value: string) => any;
+} => {
+  const bytesNRegexMatch = valueContent.match(BytesNValueContentRegex);
   const bytesLength = bytesNRegexMatch ? parseInt(bytesNRegexMatch[1], 10) : '';
 
   switch (valueContent) {
@@ -678,12 +765,12 @@ export const valueContentEncodingMap = (valueContent: string) => {
     case 'Boolean': {
       return {
         type: 'bool',
-        encode: (value): string => {
-          return valueTypeEncodingMap.bool.encode(value);
+        encode: (value: boolean): string => {
+          return valueTypeEncodingMap('bool').encode(value);
         },
         decode: (value: string): boolean => {
           try {
-            return valueTypeEncodingMap.bool.decode(value) as any as boolean;
+            return valueTypeEncodingMap('bool').decode(value) as any as boolean;
           } catch (error) {
             throw new Error(`Value ${value} is not a boolean`);
           }
@@ -711,32 +798,27 @@ export const valueContentEncodingMap = (valueContent: string) => {
 };
 
 export function encodeValueType(
-  type: string,
+  type: ERC725JSONSchemaValueType | string, // for tuples and CompactBytesArray,
   value: string | string[] | number | number[] | boolean | boolean[],
 ): string {
-  if (!valueTypeEncodingMap[type]) {
-    throw new Error('Could not encode valueType: "' + type + '".');
-  }
-
   if (typeof value === 'undefined' || value === null) {
     return value;
   }
 
-  return valueTypeEncodingMap[type].encode(value);
+  return valueTypeEncodingMap(type).encode(value);
 }
 
-export function decodeValueType(type: string, data: string) {
-  if (!valueTypeEncodingMap[type]) {
-    throw new Error('Could not decode valueType: "' + type + '".');
-  }
-
+export function decodeValueType(
+  type: ERC725JSONSchemaValueType | string, // for tuples and CompactBytesArray
+  data: string,
+) {
   if (data === '0x') return null;
 
   if (typeof data === 'undefined' || data === null) {
     return data;
   }
 
-  return valueTypeEncodingMap[type].decode(data);
+  return valueTypeEncodingMap(type).decode(data);
 }
 
 export function encodeValueContent(

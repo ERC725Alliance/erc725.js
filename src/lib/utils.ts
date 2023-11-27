@@ -71,7 +71,7 @@ import { isValidTuple } from './decodeData';
  */
 export function encodeKeyValue(
   valueContent: string,
-  valueType: ERC725JSONSchemaValueType,
+  valueType: ERC725JSONSchemaValueType | string,
   decodedValue:
     | string
     | string[]
@@ -365,7 +365,7 @@ export function encodeKey(
  */
 export function decodeKeyValue(
   valueContent: string,
-  valueType: ERC725JSONSchemaValueType,
+  valueType: ERC725JSONSchemaValueType | string, // string for tuples and CompactBytesArray
   value,
   name?: string,
 ) {
@@ -585,4 +585,14 @@ export function patchIPFSUrlsIfApplicable(
 
 export function countNumberOfBytes(data: string) {
   return stripHexPrefix(data).length / 2;
+}
+
+/**
+ * `uintN` must be a valid number of bits between 8 and 256, in multiple of 8
+ * e.g: uint8, uint16, uint24, uint32, ..., uint256
+ *
+ * @param bitSize the size of the uint in bits
+ */
+export function isValidUintSize(bitSize: number) {
+  return bitSize >= 8 && bitSize <= 256 && bitSize % 8 === 0;
 }
