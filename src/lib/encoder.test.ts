@@ -327,8 +327,39 @@ describe('encoder', () => {
       });
     });
 
-    describe('`uint128` type', () => {
+    describe('`uintN` type', () => {
       const validTestCases = [
+        {
+          valueType: 'uint256',
+          decodedValue: 1337,
+          encodedValue:
+            '0x0000000000000000000000000000000000000000000000000000000000000539',
+        },
+        {
+          valueType: 'uint8',
+          decodedValue: 10,
+          encodedValue: '0x0a',
+        },
+        {
+          valueType: 'uint16',
+          decodedValue: 10,
+          encodedValue: '0x000a',
+        },
+        {
+          valueType: 'uint24',
+          decodedValue: 10,
+          encodedValue: '0x00000a',
+        },
+        {
+          valueType: 'uint32',
+          decodedValue: 10,
+          encodedValue: '0x0000000a',
+        },
+        {
+          valueType: 'uint64',
+          decodedValue: 25,
+          encodedValue: '0x0000000000000019',
+        },
         {
           valueType: 'uint128',
           decodedValue: 11,
@@ -350,31 +381,32 @@ describe('encoder', () => {
           );
         });
       });
-    });
 
-    describe('`uint256` type', () => {
-      const validTestCases = [
-        {
-          valueType: 'uint256',
-          decodedValue: 1337,
-          encodedValue:
-            '0x0000000000000000000000000000000000000000000000000000000000000539',
-        },
-      ];
+      it('should throw an error when trying to encode/decode with an invalid `uintN` type', async () => {
+        for (let ii = 1; ii <= 256; ii++) {
+          // only test for uintN where N is a multiple of 8
+          if (ii % 8 !== 0) {
+            assert.throws(() => encodeValueType(`uint${ii}`, 12345));
+            assert.throws(() => decodeValueType(`uint${ii}`, '0x00000001'));
 
-      validTestCases.forEach((testCase) => {
-        it(`encodes/decodes: ${testCase.decodedValue} as ${testCase.valueType}`, () => {
-          const encodedValue = encodeValueType(
-            testCase.valueType,
-            testCase.decodedValue,
-          );
+            // test that `uintN` are encoded / decode correct when N is not a multiple of 8
+          } else {
+            const expectedEncodedValue = `0x${'00'.repeat(ii / 8 - 1)}0a`;
+            const expectedDecodedValue = 10;
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
-          assert.deepStrictEqual(
-            decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
+            const encodedValue = encodeValueType(
+              `uint${ii}`,
+              expectedDecodedValue,
+            );
+            assert.equal(encodedValue, expectedEncodedValue);
+
+            const decodedValue = decodeValueType(
+              `uint${ii}`,
+              expectedEncodedValue,
+            );
+            assert.equal(decodedValue, expectedDecodedValue);
+          }
+        }
       });
     });
 

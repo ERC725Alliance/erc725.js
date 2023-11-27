@@ -29,7 +29,6 @@ import { SUPPORTED_VERIFICATION_METHOD_STRINGS } from '../constants/constants';
 import {
   guessKeyTypeFromKeyName,
   isDataAuthentic,
-  encodeArrayKey,
   encodeKeyValue,
   decodeKeyValue,
   encodeKey,
@@ -46,6 +45,7 @@ import { decodeKey } from './decodeData';
 describe('utils', () => {
   describe('encodeKey/decodeKey', () => {
     const testCases = [
+      // test encoding an array of address
       {
         schema: {
           name: 'LSP3IssuedAssets[]',
@@ -228,11 +228,27 @@ describe('utils', () => {
           encodeKey(testCase.schema as ERC725JSONSchema, testCase.decodedValue),
           testCase.encodedValue,
         );
+
         assert.deepStrictEqual(
           decodeKey(testCase.schema as ERC725JSONSchema, testCase.encodedValue),
           testCase.decodedValue,
         );
       });
+    });
+
+    it('should encode the array length only if passing a number', async () => {
+      const schema: ERC725JSONSchema = {
+        name: 'LSP3IssuedAssets[]',
+        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+        keyType: 'Array',
+        valueContent: 'Address',
+        valueType: 'address',
+      };
+
+      const decodedValue = 3;
+      const encodedValue = '0x00000000000000000000000000000003';
+
+      assert.equal(encodeKey(schema, decodedValue), encodedValue);
     });
   });
 
@@ -393,19 +409,19 @@ describe('utils', () => {
   });
 
   describe('encodeArrayKey', () => {
-    it('encodes array key correctly', () => {
-      const key =
-        '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0';
+    it('should encode the array length only if passing a number', async () => {
+      const schema: ERC725JSONSchema = {
+        name: 'LSP3IssuedAssets[]',
+        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+        keyType: 'Array',
+        valueContent: 'Address',
+        valueType: 'address',
+      };
 
-      const expectedValues = [
-        '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
-        '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
-        '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000002',
-      ];
+      const decodedValue = 3;
+      const encodedValue = '0x00000000000000000000000000000003';
 
-      expectedValues.forEach((expectedValue, index) => {
-        assert.strictEqual(encodeArrayKey(key, index), expectedValue);
-      });
+      assert.equal(encodeKey(schema, decodedValue), encodedValue);
     });
   });
 
@@ -566,6 +582,27 @@ describe('utils', () => {
           '0x3a47ab5bd3a594c3a8995f8fa58d08760000000000000000000000000000000a',
         ],
         values: ['0x0000000000000000000000000000000b', ...addressArray],
+      });
+    });
+
+    it('encodes array length only if giving a number', () => {
+      const length = 5;
+
+      const encodedArrayLengthKey = encodeData(
+        [
+          {
+            keyName: 'LSP3IssuedAssets[]',
+            value: length,
+          },
+        ],
+        schemas,
+      );
+
+      assert.deepStrictEqual(encodedArrayLengthKey, {
+        keys: [
+          '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+        ],
+        values: ['0x00000000000000000000000000000005'],
       });
     });
 
