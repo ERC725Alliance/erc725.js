@@ -1,14 +1,18 @@
-# erc725.js &middot; [![GitHub license](https://img.shields.io/badge/license-Apache-blue.svg)](./LICENSE) [![npm version](https://img.shields.io/npm/v/@erc725/erc725.js.svg?style=flat)](https://www.npmjs.com/package/@erc725/erc725.js)
-
 <p align="center">
- <h2 align="center"><strong>@erc725/erc725.js</strong></h2>
- <p align="center">Allows for interfacing with <a href="https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md">ERC725Y</a> compliant contracts on an EVM blockchain.</p>
+ <h1 align="center"><strong>@erc725/erc725.js</strong></h1>
+ <p align="center">Allows for interacting with <a href="https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md">ERC725Y</a> compliant contracts on an EVM blockchain.</p>
 </p>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/@erc725/erc725.js">
+    <img alt="NPM version" src="https://img.shields.io/npm/v/@erc725/erc725.js.svg?style=flat" />
+  </a>
   <a href="https://github.com/ERC725Alliance/erc725.js/actions">
     <img alt="Tests Passing" src="https://github.com/ERC725Alliance/erc725.js/actions/workflows/lint-test-build.yml/badge.svg" />
   </a>
+</p>
+
+<p align="center">
   <a href="https://codecov.io/gh/ERC725Alliance/erc725.js">
     <img src="https://codecov.io/gh/ERC725Alliance/erc725.js/branch/main/graph/badge.svg" />
   </a>
@@ -19,12 +23,9 @@
     <img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/ERC725Alliance/erc725.js?color=0088ff" />
   </a>
 </p>
-<p align="center">For more information see <a href="https://docs.lukso.tech/tools/erc725js/getting-started">Documentation</a>.</p>
+<p align="center">For more information see the <a href="https://docs.lukso.tech/tools/erc725js/getting-started">Documentation</a>.</p>
 
 ## Installation
-
-| :warning: | _This package is currently in early stages of development,<br/> use for testing or experimentation purposes only._ |
-| :-------: | :----------------------------------------------------------------------------------------------------------------- |
 
 ```shell script
 npm install @erc725/erc725.js
@@ -38,11 +39,12 @@ import ERC725 from '@erc725/erc725.js';
 
 If you install it on the backend side, you may need to also install [`isomorphic-fetch`](https://www.npmjs.com/package/isomorphic-fetch).
 
-## Usage
+## Instantiation
+
+You need to initialise it with a [schema](https://docs.lukso.tech/tools/erc725js/schemas), a contract address and an RPC URL.
 
 ```js
 import { ERC725 } from '@erc725/erc725.js';
-import Web3 from 'web3';
 
 // Part of LSP3-Profile Schema
 // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-Profile-Metadata.md
@@ -166,10 +168,12 @@ await myErc725.fetchData();
 */
 ```
 
+For more information 👉 [check the docs](https://docs.lukso.tech/tools/erc725js/classes/ERC725).
+
 ## Contributing
 
 Please check [CONTRIBUTING](./CONTRIBUTING.md).
 
-### License
+## License
 
 erc725.js is [Apache 2.0 licensed](./LICENSE).

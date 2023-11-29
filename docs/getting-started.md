@@ -29,7 +29,6 @@ If you install it on the backend side, you may need to also install [`isomorphic
 
 ```js
 import { ERC725 } from '@erc725/erc725.js';
-import Web3 from 'web3';
 
 // Part of LSP3-UniversalProfile Schema
 // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
