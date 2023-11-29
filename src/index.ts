@@ -29,6 +29,7 @@ import {
   encodeData,
   convertIPFSGatewayUrl,
   generateSchemasFromDynamicKeys,
+  duplicateMultiTypeERC725SchemaEntry,
 } from './lib/utils';
 
 import { getSchema } from './lib/schemaParser';
@@ -61,6 +62,7 @@ import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
+import { decodeValueType, encodeValueType } from './lib/encoder';
 import { supportsInterface, checkPermissions } from './lib/detector';
 import { decodeMappingKey } from './lib/decodeMappingKey';
 
@@ -110,7 +112,11 @@ export class ERC725 {
     };
 
     this.options = {
-      schemas: this.validateSchemas(schemas),
+      schemas: this.validateSchemas(
+        schemas
+          .map((schema) => duplicateMultiTypeERC725SchemaEntry(schema))
+          .flat(),
+      ),
       address,
       provider: ERC725.initializeProvider(
         provider,
@@ -124,7 +130,7 @@ export class ERC725 {
   }
 
   /**
-   * To prevent weird behovior from the lib, we must make sure all the schemas are correct before loading them.
+   * To prevent weird behavior from the lib, we must make sure all the schemas are correct before loading them.
    *
    * @param schemas
    * @returns
@@ -174,6 +180,21 @@ export class ERC725 {
 
     throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
   }
+
+  private getAddressAndProvider() {
+    if (!this.options.address || !isAddress(this.options.address)) {
+      throw new Error('Missing ERC725 contract address.');
+    }
+    if (!this.options.provider) {
+      throw new Error('Missing provider.');
+    }
+
+    return {
+      address: this.options.address,
+      provider: this.options.provider,
+    };
+  }
+
   /**
    * Gets **decoded data** for one, many or all keys of the specified `ERC725` smart-contract.
    * When omitting the `keyOrKeys` parameter, it will get all the keys (as per {@link ERC725JSONSchema | ERC725JSONSchema} definition).
@@ -410,20 +431,6 @@ export class ERC725 {
     );
   }
 
-  private getAddressAndProvider() {
-    if (!this.options.address || !isAddress(this.options.address)) {
-      throw new Error('Missing ERC725 contract address.');
-    }
-    if (!this.options.provider) {
-      throw new Error('Missing provider.');
-    }
-
-    return {
-      address: this.options.address,
-      provider: this.options.provider,
-    };
-  }
-
   /**
    * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
    *
@@ -650,6 +657,38 @@ export class ERC725 {
     grantedPermissions: string,
   ): boolean {
     return ERC725.checkPermissions(requiredPermissions, grantedPermissions);
+  }
+
+  /**
+   * @param type The valueType to encode the value as
+   * @param value The value to encode
+   * @returns The encoded value
+   */
+  static encodeValueType(
+    type: string,
+    value: string | string[] | number | number[] | boolean | boolean[],
+  ): string {
+    return encodeValueType(type, value);
+  }
+
+  encodeValueType(
+    type: string,
+    value: string | string[] | number | number[] | boolean | boolean[],
+  ): string {
+    return ERC725.encodeValueType(type, value);
+  }
+
+  /**
+   * @param type The valueType to decode the value as
+   * @param data The data to decode
+   * @returns The decoded value
+   */
+  static decodeValueType(type: string, data: string) {
+    return decodeValueType(type, data);
+  }
+
+  decodeValueType(type: string, data: string) {
+    return ERC725.decodeValueType(type, data);
   }
 }
 
