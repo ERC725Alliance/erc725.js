@@ -16,10 +16,46 @@
 
 /**
  * @file detector.ts
+ * @author Hugo Masclet <@Hugoo>
+ * @author Felix Hildebrandt <@fhildeb>
  * @date 2022
  */
 
 import { LSP6_DEFAULT_PERMISSIONS } from '../constants/constants';
+
+import {
+  AddressProviderOptions,
+  INTERFACE_IDS_0_12_0,
+} from '../constants/interfaces';
+
+/**
+ * Check if a smart contract address
+ * supports a certain interface.
+ *
+ * @param {string} interfaceId  Interface ID or supported interface name.
+ * @param options Object with address and RPC URL.
+ * @returns {Promise<boolean>} if interface is supported.
+ */
+export const supportsInterface = async (
+  interfaceIdOrName: string,
+  options: AddressProviderOptions,
+): Promise<boolean> => {
+  let plainInterfaceId: string;
+  if (INTERFACE_IDS_0_12_0[interfaceIdOrName]) {
+    plainInterfaceId = INTERFACE_IDS_0_12_0[interfaceIdOrName];
+  } else {
+    plainInterfaceId = interfaceIdOrName;
+  }
+
+  try {
+    return await options.provider.supportsInterface(
+      options.address,
+      plainInterfaceId,
+    );
+  } catch (error) {
+    throw new Error(`Error checking the interface: ${error}`);
+  }
+};
 
 /**
  * @notice Check if the given string is a valid 32-byte hex string.
