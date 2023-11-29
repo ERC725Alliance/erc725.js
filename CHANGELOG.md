@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.21.3](https://github.com/ERC725Alliance/erc725.js/compare/v0.21.2...v0.21.3) (2023-11-29)
+
+
+### Features
+
+* add `encode/decodeValueType` as public callable methods ([#325](https://github.com/ERC725Alliance/erc725.js/issues/325)) ([a6fe7c8](https://github.com/ERC725Alliance/erc725.js/commit/a6fe7c8470688f573426b59fc2023a08da0cbd36))
+* add more schemas available to parse via `getSchema` ([#351](https://github.com/ERC725Alliance/erc725.js/issues/351)) ([b882379](https://github.com/ERC725Alliance/erc725.js/commit/b8823796c5f99d89d56954c894dfb6964adc552a))
+* add support for multi types in mappings ([#357](https://github.com/ERC725Alliance/erc725.js/issues/357)) ([ba92903](https://github.com/ERC725Alliance/erc725.js/commit/ba9290326efad0aab3855ad3f0ed2722180980ed))
+* add support to encode / decode any `uint8` to `uint256` types ([#355](https://github.com/ERC725Alliance/erc725.js/issues/355)) ([417a4e8](https://github.com/ERC725Alliance/erc725.js/commit/417a4e8ff2c74f3f9e35d0018a4973c97c6ac997))
+* allow to encode LSP2 Array length only ([#326](https://github.com/ERC725Alliance/erc725.js/issues/326)) ([3a6be55](https://github.com/ERC725Alliance/erc725.js/commit/3a6be551d889904b7d95e2630ab637f2a31feb50))
+
+
+### Bug Fixes
+
+* update lsp6 schema ([75c4044](https://github.com/ERC725Alliance/erc725.js/commit/75c40444e407d93076cc1e49ad706cc0055f383b))
+
 ## [0.21.2](https://github.com/ERC725Alliance/erc725.js/compare/v0.21.1...v0.21.2) (2023-11-07)
 
 
