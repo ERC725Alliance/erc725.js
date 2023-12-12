@@ -44,7 +44,7 @@ import {
   toBN,
 } from 'web3-utils';
 
-import { JSONURLDataToEncode, URLDataWithHash, Verification } from '../types';
+import { URLDataToEncode, URLDataWithHash, Verification } from '../types';
 import { AssetURLEncode } from '../types/encodeData';
 
 import {
@@ -687,7 +687,7 @@ export const valueContentEncodingMap = (
     case 'VerifiableURL': {
       return {
         type: 'custom',
-        encode: (dataToEncode: JSONURLDataToEncode) => {
+        encode: (dataToEncode: URLDataToEncode) => {
           const {
             verification: { data, method } = {},
             json,
@@ -859,7 +859,7 @@ export function decodeValueType(
 
 export function encodeValueContent(
   valueContent: string,
-  value: string | number | AssetURLEncode | JSONURLDataToEncode | boolean,
+  value: string | number | AssetURLEncode | URLDataToEncode | boolean,
 ): string | false {
   if (valueContent.slice(0, 2) === '0x') {
     return valueContent === value ? value : false;

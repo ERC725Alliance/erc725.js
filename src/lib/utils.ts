@@ -29,7 +29,7 @@ import {
 import { arrToBufArr } from 'ethereumjs-util';
 
 import {
-  JSONURLDataToEncode,
+  URLDataToEncode,
   EncodeDataReturn,
   URLDataWithHash,
   Verification,
@@ -77,8 +77,8 @@ export function encodeKeyValue(
     | string[]
     | number
     | number[]
-    | JSONURLDataToEncode
-    | JSONURLDataToEncode[]
+    | URLDataToEncode
+    | URLDataToEncode[]
     | boolean,
   name?: string,
 ): string | false {
@@ -176,7 +176,7 @@ export function guessKeyTypeFromKeyName(
 export const encodeTupleKeyValue = (
   valueContent: string, // i.e. (bytes4,Number,bytes16)
   valueType: string, // i.e. (bytes4,bytes8,bytes16)
-  decodedValues: Array<string | number | JSONURLDataToEncode | string[]>,
+  decodedValues: Array<string | number | URLDataToEncode | string[]>,
 ) => {
   // We assume data has already been validated at this stage
 
@@ -239,8 +239,8 @@ export function encodeKey(
     | number
     | (string | number)[]
     | string[][]
-    | JSONURLDataToEncode
-    | JSONURLDataToEncode[]
+    | URLDataToEncode
+    | URLDataToEncode[]
     | boolean,
 ) {
   // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
@@ -340,8 +340,8 @@ export function encodeKey(
           | string[]
           | number
           | number[]
-          | JSONURLDataToEncode
-          | JSONURLDataToEncode[],
+          | URLDataToEncode
+          | URLDataToEncode[],
         schema.name,
       );
     default:

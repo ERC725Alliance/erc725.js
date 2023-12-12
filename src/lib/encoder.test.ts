@@ -35,7 +35,7 @@ import {
   SUPPORTED_VERIFICATION_METHOD_HASHES,
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
 } from '../constants/constants';
-import { JSONURLDataToEncode, URLDataWithHash } from '../types';
+import { URLDataToEncode, URLDataWithHash } from '../types';
 
 describe('encoder', () => {
   describe('valueType', () => {
@@ -947,7 +947,7 @@ describe('encoder', () => {
     });
 
     it('encodes/decodes: JSONURL', () => {
-      const dataToEncode: JSONURLDataToEncode = {
+      const dataToEncode: URLDataToEncode = {
         url: 'ipfs://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
         json: {
           myProperty: 'is a string',
