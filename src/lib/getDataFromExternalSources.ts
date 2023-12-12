@@ -44,14 +44,14 @@ export const getDataFromExternalSources = (
     }
 
     if (
-      !['jsonurl', 'asseturl'].includes(
+      !['jsonurl', 'asseturl', 'verifiableurl'].includes(
         schemaElement.valueContent.toLowerCase(),
       )
     ) {
       return dataEntry;
     }
 
-    // At this stage, value should be of type jsonurl or asseturl
+    // At this stage, value should be of type jsonurl, verifiableurl or asseturl
     if (typeof dataEntry.value === 'string') {
       console.error(
         `Value of key: ${dataEntry.name} (${dataEntry.value}) is string but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,

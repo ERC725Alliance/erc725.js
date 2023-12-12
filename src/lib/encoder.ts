@@ -74,23 +74,58 @@ const encodeDataSourceWithHash = (
   const verificationMethod = getVerificationMethod(
     verification?.method || UNKNOWN_VERIFICATION_METHOD,
   );
-  return (
-    (verificationMethod
-      ? keccak256(verificationMethod.name).slice(0, 10)
-      : padLeft(0, 8)) +
-    stripHexPrefix(verification ? verification.data : padLeft(0, 64)) +
-    stripHexPrefix(utf8ToHex(dataSource))
-  );
+  return [
+    padLeft(0, 4),
+    stripHexPrefix(
+      verificationMethod
+        ? padLeft(keccak256(verificationMethod.name).slice(0, 10), 8)
+        : padLeft(0, 8),
+    ),
+    stripHexPrefix(
+      verification?.data
+        ? padLeft(verification.data.slice(2).length / 2, 4)
+        : padLeft(0, 4),
+    ),
+    stripHexPrefix(
+      verification?.data ? stripHexPrefix(verification?.data) : '',
+    ),
+    stripHexPrefix(utf8ToHex(dataSource)),
+  ].join('');
 };
 
 const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
+  if (value.slice(0, 6) === '0x0000') {
+    /*
+      0        1         2         3         4         5         6         7         8
+      12345678901234567890123456789012345678901234567890123456789012345678901234567890
+      0x0000 code
+            6f357c6a hash fn [6]
+                    0020 data len [14]
+                        820464ddfac1be...[18 + data len]
+                                                       [18 + data len]...696670733a2f2...[...rest]
+    */
+    const verificationMethodSig = `0x${value.slice(6, 14)}`;
+    const verificationMethod = getVerificationMethod(verificationMethodSig);
+    if (verificationMethod !== undefined) {
+      const encodedLength = `0x${value.slice(14, 18)}`; // Rest of data string after function hash
+      const dataLength = hexToNumber(encodedLength, false) as number;
+      const dataHash = `0x${value.slice(18, 18 + dataLength * 2)}`; // Get jsonHash 32 bytes
+      const dataSource = hexToUtf8('0x' + value.slice(18 + dataLength * 2)); // Get remainder as URI
+      return {
+        verification: {
+          method: verificationMethod.name,
+          data: dataHash,
+        },
+        url: dataSource,
+      };
+    }
+  }
+
   const verificationMethodSig = value.slice(0, 10);
   const verificationMethod = getVerificationMethod(verificationMethodSig);
-
-  const encodedData = value.replace('0x', '').slice(8); // Rest of data string after function hash
+  const encodedData = value.slice(10); // Rest of data string after function hash
   const dataHash = '0x' + encodedData.slice(0, 64); // Get jsonHash 32 bytes
   const dataSource = hexToUtf8('0x' + encodedData.slice(64)); // Get remainder as URI
-
   return {
     verification: {
       method: verificationMethod?.name || UNKNOWN_VERIFICATION_METHOD,
@@ -648,7 +683,8 @@ export const valueContentEncodingMap = (
       };
     }
     // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
-    case 'JSONURL': {
+    case 'JSONURL':
+    case 'VerifiableURL': {
       return {
         type: 'custom',
         encode: (dataToEncode: JSONURLDataToEncode) => {

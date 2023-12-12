@@ -16,7 +16,14 @@
 
 import { expect, assert } from 'chai';
 
-import { keccak256, utf8ToHex, stripHexPrefix, toBN, toHex } from 'web3-utils';
+import {
+  keccak256,
+  utf8ToHex,
+  stripHexPrefix,
+  toBN,
+  toHex,
+  padLeft,
+} from 'web3-utils';
 import {
   valueContentEncodingMap,
   encodeValueType,
@@ -899,7 +906,7 @@ describe('encoder', () => {
           url: 'http://test.com/asset.glb',
         },
         encodedValue:
-          '0x6f357c6a027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168687474703a2f2f746573742e636f6d2f61737365742e676c62',
+          '0x00006f357c6a0020027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168687474703a2f2f746573742e636f6d2f61737365742e676c62',
       },
       {
         valueContent: 'BitArray',
@@ -959,7 +966,9 @@ describe('encoder', () => {
       ).substring(2);
       assert.deepStrictEqual(
         encodedValue,
-        verificationMethod + jsonVerificationData + hexUrl,
+        `0x0000${stripHexPrefix(verificationMethod)}${stripHexPrefix(
+          padLeft(jsonVerificationData.length / 2, 4),
+        )}${jsonVerificationData}${hexUrl}`,
       );
 
       const expectedDecodedValue: URLDataWithHash = {

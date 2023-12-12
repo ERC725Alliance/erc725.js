@@ -38,16 +38,30 @@ describe('decodeData', () => {
     {
       name: 'MyKeyName:<bytes32>:<bool>',
       key: '0x',
-      keyType: 'Singleton',
+      keyType: 'MappingWithGrouping',
       valueType: 'bytes',
       valueContent: 'JSONURL',
     },
     {
+      name: 'MyKeyName2:<bytes32>:<bool>',
+      key: '0x',
+      keyType: 'MappingWithGrouping',
+      valueType: 'bytes',
+      valueContent: 'VerifiableURL',
+    },
+    {
       name: 'MyDynamicKey:<address>',
       key: '0x',
-      keyType: 'Singleton',
+      keyType: 'Mapping',
       valueType: 'bytes',
       valueContent: 'JSONURL',
+    },
+    {
+      name: 'MyDynamicKey2:<address>',
+      key: '0x',
+      keyType: 'Mapping',
+      valueType: 'bytes',
+      valueContent: 'VerifiableURL',
     },
   ];
 
@@ -161,6 +175,21 @@ describe('decodeData', () => {
             '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
         },
         {
+          keyName: 'MyKeyName2:<bytes32>:<bool>',
+          dynamicKeyParts: [
+            '0xaaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa',
+            'true',
+          ],
+          value:
+            '0x00006f357c6a0020820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+        },
+        {
+          keyName: 'MyDynamicKey2:<address>',
+          dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
+          value:
+            '0x00006f357c6a0020820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+        },
+        {
           keyName: 'KeyTwo',
           value: '0x2222',
         },
@@ -171,6 +200,8 @@ describe('decodeData', () => {
     expect(decodedData.map(({ name }) => name)).to.eql([
       'MyKeyName:aaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa:true',
       'MyDynamicKey:cafecafecafecafecafecafecafecafecafecafe',
+      'MyKeyName2:aaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa:true',
+      'MyDynamicKey2:cafecafecafecafecafecafecafecafecafecafe',
       'KeyTwo',
     ]);
   });
