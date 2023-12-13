@@ -47,7 +47,7 @@ describe('decodeData', () => {
       key: '0x',
       keyType: 'MappingWithGrouping',
       valueType: 'bytes',
-      valueContent: 'VerifiableURL',
+      valueContent: 'VerifiableURI',
     },
     {
       name: 'MyDynamicKey:<address>',
@@ -61,7 +61,7 @@ describe('decodeData', () => {
       key: '0x',
       keyType: 'Mapping',
       valueType: 'bytes',
-      valueContent: 'VerifiableURL',
+      valueContent: 'VerifiableURI',
     },
   ];
 

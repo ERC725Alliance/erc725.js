@@ -99,7 +99,7 @@ const decodedDataManyKeys = myERC725.decodeData([
 ]
 */
 console.log('/*--------------------------------------------/*');
-console.log('/* decodeData - one key (VerifiableURL)       /*');
+console.log('/* decodeData - one key (VerifiableURI)       /*');
 console.log('/*--------------------------------------------/*');
 console.log(decodedDataOneKey);
 console.log('/*--------------------------------------------/*');

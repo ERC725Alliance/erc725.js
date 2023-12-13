@@ -684,7 +684,7 @@ export const valueContentEncodingMap = (
     }
     // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
     case 'JSONURL':
-    case 'VerifiableURL': {
+    case 'VerifiableURI': {
       return {
         type: 'custom',
         encode: (dataToEncode: URLDataToEncode) => {
