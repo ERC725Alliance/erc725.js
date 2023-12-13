@@ -75,16 +75,16 @@ const encodeDataSourceWithHash = (
     verification?.method || UNKNOWN_VERIFICATION_METHOD,
   );
   return [
-    padLeft(0, 4),
+    '0x0000',
     stripHexPrefix(
       verificationMethod
         ? padLeft(keccak256(verificationMethod.name).slice(0, 10), 8)
-        : padLeft(0, 8),
+        : '00000000',
     ),
     stripHexPrefix(
       verification?.data
         ? padLeft(verification.data.slice(2).length / 2, 4)
-        : padLeft(0, 4),
+        : '0000',
     ),
     stripHexPrefix(
       verification?.data ? stripHexPrefix(verification?.data) : '',
