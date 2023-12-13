@@ -106,19 +106,25 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
     */
     const verificationMethodSig = `0x${value.slice(6, 14)}`;
     const verificationMethod = getVerificationMethod(verificationMethodSig);
-    if (verificationMethod !== undefined) {
-      const encodedLength = `0x${value.slice(14, 18)}`; // Rest of data string after function hash
-      const dataLength = hexToNumber(encodedLength, false) as number;
-      const dataHash = `0x${value.slice(18, 18 + dataLength * 2)}`; // Get jsonHash 32 bytes
-      const dataSource = hexToUtf8('0x' + value.slice(18 + dataLength * 2)); // Get remainder as URI
-      return {
-        verification: {
-          method: verificationMethod.name,
-          data: dataHash,
-        },
-        url: dataSource,
-      };
+
+    if (verificationMethod === undefined) {
+      throw new Error(
+        "Couldn't decode DataSourceWithHash: `verificationMethod` is undefined",
+      );
     }
+
+    const encodedLength = `0x${value.slice(14, 18)}`; // Rest of data string after function hash
+    const dataLength = hexToNumber(encodedLength, false) as number;
+    const dataHash = `0x${value.slice(18, 18 + dataLength * 2)}`; // Get jsonHash 32 bytes
+    const dataSource = hexToUtf8('0x' + value.slice(18 + dataLength * 2)); // Get remainder as URI
+
+    return {
+      verification: {
+        method: verificationMethod.name,
+        data: dataHash,
+      },
+      url: dataSource,
+    };
   }
 
   const verificationMethodSig = value.slice(0, 10);
@@ -126,6 +132,7 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   const encodedData = value.slice(10); // Rest of data string after function hash
   const dataHash = '0x' + encodedData.slice(0, 64); // Get jsonHash 32 bytes
   const dataSource = hexToUtf8('0x' + encodedData.slice(64)); // Get remainder as URI
+
   return {
     verification: {
       method: verificationMethod?.name || UNKNOWN_VERIFICATION_METHOD,
