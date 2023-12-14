@@ -104,12 +104,14 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
                         820464ddfac1be...[18 + data len]
                                                        [18 + data len]...696670733a2f2...[...rest]
     */
-    const verificationMethodSig = `0x${value.slice(6, 14)}`;
-    // NOTE: verificationMethodSig can be 0x00000000 if no verification method is used
+    const verificationMethodSignature = `0x${value.slice(6, 14)}`;
+    // NOTE: verificationMethodSignature can be 0x00000000 if no verification method is used
     // this means that an invalid verification method should still return all data
     // and not be an error. It's up to the method calling this to figure out
     // whether an unknown verification method is an error or not.
-    const verificationMethod = getVerificationMethod(verificationMethodSig);
+    const verificationMethod = getVerificationMethod(
+      verificationMethodSignature,
+    );
     const encodedLength = `0x${value.slice(14, 18)}`; // Rest of data string after function hash
     const dataLength = hexToNumber(encodedLength, false) as number;
     const dataHash = `0x${value.slice(18, 18 + dataLength * 2)}`; // Get jsonHash 32 bytes
@@ -124,8 +126,8 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
     };
   }
 
-  const verificationMethodSig = value.slice(0, 10);
-  const verificationMethod = getVerificationMethod(verificationMethodSig);
+  const verificationMethodSignature = value.slice(0, 10);
+  const verificationMethod = getVerificationMethod(verificationMethodSignature);
   const encodedData = value.slice(10); // Rest of data string after function hash
   const dataHash = '0x' + encodedData.slice(0, 64); // Get jsonHash 32 bytes
   const dataSource = hexToUtf8('0x' + encodedData.slice(64)); // Get remainder as URI
@@ -678,16 +680,9 @@ export const valueContentEncodingMap = (
         decode: (value: string) => hexToUtf8(value),
       };
     }
-    case 'AssetURL': {
-      return {
-        type: 'custom',
-        encode: (value: AssetURLEncode) =>
-          encodeDataSourceWithHash(value.verification, value.url),
-        decode: (value: string) => decodeDataSourceWithHash(value),
-      };
-    }
     // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
-    case 'JSONURL':
+    case 'AssetURL': // Deprecated since v0.22.0
+    case 'JSONURL': // Deprecated since v0.22.0
     case 'VerifiableURI': {
       return {
         type: 'custom',

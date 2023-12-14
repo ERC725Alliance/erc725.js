@@ -78,7 +78,7 @@ describe('utils', () => {
           name: 'TestObjArray[]',
           key: '0x9985edaf12cbacf5ac7d6ed54f0445cc0ea56075aee9b9942e4ab3bf4239f950',
           keyType: 'Array',
-          valueContent: 'JSONURL',
+          valueContent: 'JSONURL', // Deprecated - we keep it for backward compatibility
           valueType: 'bytes',
         },
         decodedValue: [

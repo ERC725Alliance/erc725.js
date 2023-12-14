@@ -896,8 +896,24 @@ describe('encoder', () => {
         decodedValue: 'http://test.com',
         encodedValue: '0x687474703a2f2f746573742e636f6d',
       },
+      // AssetURL is deprecated since:
+      // https://github.com/lukso-network/LIPs/pull/263
+      // We keep it in our tests for backward compatibility testing for v0.22.0 release
       {
         valueContent: 'AssetURL',
+        decodedValue: {
+          verification: {
+            method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+            data: '0x027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168',
+          },
+          url: 'http://test.com/asset.glb',
+        },
+        // Starting from v0.22.0, we force AssetURL encode to VerifiableURI as AssetURL is deprecated
+        encodedValue:
+          '0x00006f357c6a0020027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168687474703a2f2f746573742e636f6d2f61737365742e676c62',
+      },
+      {
+        valueContent: 'VerifiableURI',
         decodedValue: {
           verification: {
             method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
@@ -964,6 +980,8 @@ describe('encoder', () => {
       const jsonVerificationData = keccak256(
         JSON.stringify(dataToEncode.json),
       ).substring(2);
+
+      // Starting from v0.22.0, we force JSONURL encode to VerifiableURI as JSONURL is deprecated
       assert.deepStrictEqual(
         encodedValue,
         `0x0000${stripHexPrefix(verificationMethod)}${stripHexPrefix(
