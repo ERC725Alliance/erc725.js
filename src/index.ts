@@ -138,14 +138,23 @@ export class ERC725 {
   // eslint-disable-next-line class-methods-use-this
   private validateSchemas(schemas: ERC725JSONSchema[]) {
     return schemas.filter((schema) => {
+      if (
+        schema.valueContent === 'AssetURL' ||
+        schema.valueContent === 'JSONURL'
+      ) {
+        console.warn(
+          `[Deprecation notice] The schema with keyName: ${schema.name} uses deprecated valueContent: ${schema.valueContent}. It has been replaced by VerifiableURI. Decoding is backward compatible but value will be encoded as VerifiableURI.`,
+        );
+      }
+
       try {
         const encodedKeyName = encodeKeyName(schema.name);
 
         const isKeyValid = schema.key === encodedKeyName;
 
         if (!isKeyValid) {
-          console.log(
-            `The schema with keyName: ${schema.key} is skipped because its key hash does not match its key name (expected: ${encodedKeyName}, got: ${schema.key}).`,
+          console.warn(
+            `The schema with keyName: ${schema.name} is skipped because its key hash does not match its key name (expected: ${encodedKeyName}, got: ${schema.key}).`,
           );
         }
 

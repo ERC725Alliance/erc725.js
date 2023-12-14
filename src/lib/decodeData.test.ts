@@ -38,16 +38,30 @@ describe('decodeData', () => {
     {
       name: 'MyKeyName:<bytes32>:<bool>',
       key: '0x',
-      keyType: 'Singleton',
+      keyType: 'MappingWithGrouping',
       valueType: 'bytes',
-      valueContent: 'JSONURL',
+      valueContent: 'JSONURL', // Deprecated - We keep it for backward compatibility between v0.21.3 and v0.22.0
+    },
+    {
+      name: 'MyKeyName2:<bytes32>:<bool>',
+      key: '0x',
+      keyType: 'MappingWithGrouping',
+      valueType: 'bytes',
+      valueContent: 'VerifiableURI',
     },
     {
       name: 'MyDynamicKey:<address>',
       key: '0x',
-      keyType: 'Singleton',
+      keyType: 'Mapping',
       valueType: 'bytes',
-      valueContent: 'JSONURL',
+      valueContent: 'JSONURL', // Deprecated - We keep it for backward compatibility between v0.21.3 and v0.22.0
+    },
+    {
+      name: 'MyDynamicKey2:<address>',
+      key: '0x',
+      keyType: 'Mapping',
+      valueType: 'bytes',
+      valueContent: 'VerifiableURI',
     },
   ];
 
@@ -67,6 +81,56 @@ describe('decodeData', () => {
     );
 
     expect(decodedData.map(({ name }) => name)).to.eql(['KeyOne', 'KeyTwo']);
+  });
+
+  it('is backward compatible with JSONURL and AssetURL and decodes these encoding correctly', () => {
+    const decodedData = decodeData(
+      [
+        {
+          keyName: 'JSONURLCase',
+          value:
+            '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+        },
+        {
+          keyName: 'AssetURLCase',
+          value:
+            '0x8019f9b1d47cf10786205bb08ce508e91c424d413d0f6c48e24dbfde2920d16a9561a723697066733a2f2f516d57346e554e7933767476723344785a48754c66534c6e687a4b4d6532576d67735573454750504668385a7470',
+        },
+      ],
+      [
+        {
+          name: 'JSONURLCase',
+          key: '0x9136feeb09af67b63993b586ce46a43bd3456990d3fdb39d07beab9dee8d5910',
+          keyType: 'Singleton',
+          valueType: 'bytes',
+          valueContent: 'JSONURL', // Deprecated - We keep it for backward compatibility between v0.21.3 and v0.22.0
+        },
+        {
+          name: 'AssetURLCase',
+          key: '0xbda5878fa57d8da097bf7cfd78c28e75f2c2c7b028e4e056d16d7e4b83f98081',
+          keyType: 'Singleton',
+          valueType: 'bytes',
+          valueContent: 'AssetURL', // Deprecated - We keep it for backward compatibility between v0.21.3 and v0.22.0
+        },
+      ],
+    );
+
+    expect(decodedData.map(({ value }) => value)).to.eql([
+      {
+        verification: {
+          method: 'keccak256(utf8)', // 0x6f357c6a
+          data: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+        },
+        url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+      },
+      {
+        verification: {
+          method: 'keccak256(bytes)', // 0x8019f9b1
+          data: '0xd47cf10786205bb08ce508e91c424d413d0f6c48e24dbfde2920d16a9561a723',
+        },
+        url: 'ipfs://QmW4nUNy3vtvr3DxZHuLfSLnhzKMe2WmgsUsEGPPFh8Ztp',
+      },
+    ]);
   });
 
   it('parses non array input correctly', () => {
@@ -146,19 +210,19 @@ describe('decodeData', () => {
     const decodedData = decodeData(
       [
         {
-          keyName: 'MyKeyName:<bytes32>:<bool>',
+          keyName: 'MyKeyName2:<bytes32>:<bool>',
           dynamicKeyParts: [
             '0xaaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa',
             'true',
           ],
           value:
-            '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+            '0x00006f357c6a0020820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
         },
         {
-          keyName: 'MyDynamicKey:<address>',
+          keyName: 'MyDynamicKey2:<address>',
           dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
           value:
-            '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+            '0x00006f357c6a0020820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
         },
         {
           keyName: 'KeyTwo',
@@ -169,8 +233,8 @@ describe('decodeData', () => {
     );
 
     expect(decodedData.map(({ name }) => name)).to.eql([
-      'MyKeyName:aaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa:true',
-      'MyDynamicKey:cafecafecafecafecafecafecafecafecafecafe',
+      'MyKeyName2:aaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa:true',
+      'MyDynamicKey2:cafecafecafecafecafecafecafecafecafecafe',
       'KeyTwo',
     ]);
   });

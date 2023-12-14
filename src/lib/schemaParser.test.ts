@@ -28,7 +28,7 @@ describe('schemaParser getSchema', () => {
         name: 'LSP3Profile',
         key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
         keyType: 'Singleton',
-        valueContent: 'JSONURL',
+        valueContent: 'VerifiableURI',
         valueType: 'bytes',
       });
     });
