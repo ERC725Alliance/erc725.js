@@ -1,24 +1,17 @@
 [
   {
-    "name": "LSP8TokenIdType",
-    "key": "0x715f248956de7ce65e94d9d836bfead479f7e70d69b718d47bfe7b00e05b4fe4",
+    "name": "LSP8TokenIdFormat",
+    "key": "0xf675e9361af1c1664c1868cfa3eb97672d6b1a513aa5b81dec34c9ee330e818d",
     "keyType": "Singleton",
     "valueType": "uint256",
     "valueContent": "Number"
   },
   {
-    "name": "LSP8MetadataTokenURI:<address|uint256|bytes32|string>",
-    "key": "0x1339e76a390b7b9ec9010000<address|uint256|bytes32|string>",
-    "keyType": "Mapping",
-    "valueType": "(bytes4,string)",
-    "valueContent": "(Bytes4,URI)"
-  },
-  {
     "name": "LSP8TokenMetadataBaseURI",
     "key": "0x1a7628600c3bac7101f53697f48df381ddc36b9015e7d7c9c5633d1252aa2843",
     "keyType": "Singleton",
-    "valueType": "(bytes4,string)",
-    "valueContent": "(Bytes4,URI)"
+    "valueType": "bytes",
+    "valueContent": "VerifiableURI"
   },
   {
     "name": "LSP8ReferenceContract",
