@@ -25,7 +25,7 @@
     "key": "0x9afb95cacc9f95858ec44aa8c3b685511002e30ae54415823f406128b85b238e",
     "keyType": "Singleton",
     "valueType": "bytes",
-    "valueContent": "JSONURL"
+    "valueContent": "VerifiableURI"
   },
   {
     "name": "LSP4Creators[]",
