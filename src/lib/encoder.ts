@@ -105,14 +105,11 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
                                                        [18 + data len]...696670733a2f2...[...rest]
     */
     const verificationMethodSig = `0x${value.slice(6, 14)}`;
+    // NOTE: verificationMethodSig can be 0x00000000 if no verification method is used
+    // this means that an invalid verification method should still return all data
+    // and not be an error. It's up to the method calling this to figure out
+    // whether an unknown verification method is an error or not.
     const verificationMethod = getVerificationMethod(verificationMethodSig);
-
-    if (verificationMethod === undefined) {
-      throw new Error(
-        "Couldn't decode DataSourceWithHash: `verificationMethod` is undefined",
-      );
-    }
-
     const encodedLength = `0x${value.slice(14, 18)}`; // Rest of data string after function hash
     const dataLength = hexToNumber(encodedLength, false) as number;
     const dataHash = `0x${value.slice(18, 18 + dataLength * 2)}`; // Get jsonHash 32 bytes
@@ -120,7 +117,7 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
 
     return {
       verification: {
-        method: verificationMethod.name,
+        method: verificationMethod?.name || UNKNOWN_VERIFICATION_METHOD,
         data: dataHash,
       },
       url: dataSource,

@@ -22,6 +22,7 @@
 import {
   checkAddressChecksum,
   isAddress,
+  leftPad,
   numberToHex,
   padLeft,
   stripHexPrefix,
@@ -479,7 +480,7 @@ export function getVerificationMethod(nameOrSig: string) {
     ({ name, sig }) => name === nameOrSig || sig === nameOrSig,
   );
 
-  if (!verificationMethod) {
+  if (!verificationMethod && nameOrSig !== '0x00000000') {
     throw new Error(
       `Chosen verification method '${nameOrSig}' is not supported. Supported verification methods: ${SUPPORTED_VERIFICATION_METHODS_LIST}`,
     );
@@ -492,7 +493,7 @@ export function hashData(
   data: string | Uint8Array | Record<string, any>,
   nameOrSig: SUPPORTED_VERIFICATION_METHODS | string,
 ): string {
-  return getVerificationMethod(nameOrSig).method(data);
+  return getVerificationMethod(nameOrSig)?.method(data) || leftPad(0, 64);
 }
 
 /**
