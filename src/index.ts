@@ -153,7 +153,7 @@ export class ERC725 {
         const isKeyValid = schema.key === encodedKeyName;
 
         if (!isKeyValid) {
-          console.log(
+          console.warn(
             `The schema with keyName: ${schema.name} is skipped because its key hash does not match its key name (expected: ${encodedKeyName}, got: ${schema.key}).`,
           );
         }

@@ -680,7 +680,7 @@ export const valueContentEncodingMap = (
         decode: (value: string) => hexToUtf8(value),
       };
     }
-    // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md#jsonurl
+    // https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#verifiableuri
     case 'AssetURL': // Deprecated since v0.22.0
     case 'JSONURL': // Deprecated since v0.22.0
     case 'VerifiableURI': {
