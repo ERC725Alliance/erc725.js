@@ -22,6 +22,7 @@
 import {
   checkAddressChecksum,
   isAddress,
+  leftPad,
   numberToHex,
   padLeft,
   stripHexPrefix,
@@ -29,7 +30,7 @@ import {
 import { arrToBufArr } from 'ethereumjs-util';
 
 import {
-  JSONURLDataToEncode,
+  URLDataToEncode,
   EncodeDataReturn,
   URLDataWithHash,
   Verification,
@@ -77,8 +78,8 @@ export function encodeKeyValue(
     | string[]
     | number
     | number[]
-    | JSONURLDataToEncode
-    | JSONURLDataToEncode[]
+    | URLDataToEncode
+    | URLDataToEncode[]
     | boolean,
   name?: string,
 ): string | false {
@@ -176,7 +177,7 @@ export function guessKeyTypeFromKeyName(
 export const encodeTupleKeyValue = (
   valueContent: string, // i.e. (bytes4,Number,bytes16)
   valueType: string, // i.e. (bytes4,bytes8,bytes16)
-  decodedValues: Array<string | number | JSONURLDataToEncode | string[]>,
+  decodedValues: Array<string | number | URLDataToEncode | string[]>,
 ) => {
   // We assume data has already been validated at this stage
 
@@ -239,8 +240,8 @@ export function encodeKey(
     | number
     | (string | number)[]
     | string[][]
-    | JSONURLDataToEncode
-    | JSONURLDataToEncode[]
+    | URLDataToEncode
+    | URLDataToEncode[]
     | boolean,
 ) {
   // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
@@ -340,8 +341,8 @@ export function encodeKey(
           | string[]
           | number
           | number[]
-          | JSONURLDataToEncode
-          | JSONURLDataToEncode[],
+          | URLDataToEncode
+          | URLDataToEncode[],
         schema.name,
       );
     default:
@@ -479,7 +480,7 @@ export function getVerificationMethod(nameOrSig: string) {
     ({ name, sig }) => name === nameOrSig || sig === nameOrSig,
   );
 
-  if (!verificationMethod) {
+  if (!verificationMethod && nameOrSig !== '0x00000000') {
     throw new Error(
       `Chosen verification method '${nameOrSig}' is not supported. Supported verification methods: ${SUPPORTED_VERIFICATION_METHODS_LIST}`,
     );
@@ -492,7 +493,7 @@ export function hashData(
   data: string | Uint8Array | Record<string, any>,
   nameOrSig: SUPPORTED_VERIFICATION_METHODS | string,
 ): string {
-  return getVerificationMethod(nameOrSig).method(data);
+  return getVerificationMethod(nameOrSig)?.method(data) || leftPad(0, 64);
 }
 
 /**

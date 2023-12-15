@@ -25,12 +25,12 @@ export interface URLDataWithJson extends URLData {
   json: Record<string, any>;
 }
 
-export type JSONURLDataToEncode = URLDataWithHash | URLDataWithJson;
+export type URLDataToEncode = URLDataWithHash | URLDataWithJson;
 
 export type EncodeDataType =
   | string
   | string[]
-  | JSONURLDataToEncode
+  | URLDataToEncode
   | boolean
   | number;
 

@@ -8,7 +8,7 @@ const decodedDataOneKey = myERC725.decodeData([
   {
     keyName: 'LSP3Profile',
     value:
-      '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+      '0x00006f357c6a0020820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
   },
 ]);
 /**
@@ -31,7 +31,7 @@ const decodedDataManyKeys = myERC725.decodeData([
   {
     keyName: 'LSP3Profile',
     value:
-      '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+      '0x00006f357c6a0020820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
   },
   {
     keyName: 'LSP3IssuedAssets[]',
@@ -76,7 +76,7 @@ const decodedDataManyKeys = myERC725.decodeData([
 ]
 */
 console.log('/*--------------------------------------------/*');
-console.log('/* decodeData - one key                       /*');
+console.log('/* decodeData - one key (VerifiableURI)       /*');
 console.log('/*--------------------------------------------/*');
 console.log(decodedDataOneKey);
 console.log('/*--------------------------------------------/*');

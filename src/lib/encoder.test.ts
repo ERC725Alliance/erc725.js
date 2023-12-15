@@ -16,7 +16,14 @@
 
 import { expect, assert } from 'chai';
 
-import { keccak256, utf8ToHex, stripHexPrefix, toBN, toHex } from 'web3-utils';
+import {
+  keccak256,
+  utf8ToHex,
+  stripHexPrefix,
+  toBN,
+  toHex,
+  padLeft,
+} from 'web3-utils';
 import {
   valueContentEncodingMap,
   encodeValueType,
@@ -28,7 +35,7 @@ import {
   SUPPORTED_VERIFICATION_METHOD_HASHES,
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
 } from '../constants/constants';
-import { JSONURLDataToEncode, URLDataWithHash } from '../types';
+import { URLDataToEncode, URLDataWithHash } from '../types';
 
 describe('encoder', () => {
   describe('valueType', () => {
@@ -889,6 +896,9 @@ describe('encoder', () => {
         decodedValue: 'http://test.com',
         encodedValue: '0x687474703a2f2f746573742e636f6d',
       },
+      // AssetURL is deprecated since:
+      // https://github.com/lukso-network/LIPs/pull/263
+      // We keep it in our tests for backward compatibility testing for v0.22.0 release
       {
         valueContent: 'AssetURL',
         decodedValue: {
@@ -898,8 +908,21 @@ describe('encoder', () => {
           },
           url: 'http://test.com/asset.glb',
         },
+        // Starting from v0.22.0, we force AssetURL encode to VerifiableURI as AssetURL is deprecated
         encodedValue:
-          '0x6f357c6a027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168687474703a2f2f746573742e636f6d2f61737365742e676c62',
+          '0x00006f357c6a0020027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168687474703a2f2f746573742e636f6d2f61737365742e676c62',
+      },
+      {
+        valueContent: 'VerifiableURI',
+        decodedValue: {
+          verification: {
+            method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+            data: '0x027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168',
+          },
+          url: 'http://test.com/asset.glb',
+        },
+        encodedValue:
+          '0x00006f357c6a0020027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168687474703a2f2f746573742e636f6d2f61737365742e676c62',
       },
       {
         valueContent: 'BitArray',
@@ -940,7 +963,7 @@ describe('encoder', () => {
     });
 
     it('encodes/decodes: JSONURL', () => {
-      const dataToEncode: JSONURLDataToEncode = {
+      const dataToEncode: URLDataToEncode = {
         url: 'ipfs://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
         json: {
           myProperty: 'is a string',
@@ -957,9 +980,13 @@ describe('encoder', () => {
       const jsonVerificationData = keccak256(
         JSON.stringify(dataToEncode.json),
       ).substring(2);
+
+      // Starting from v0.22.0, we force JSONURL encode to VerifiableURI as JSONURL is deprecated
       assert.deepStrictEqual(
         encodedValue,
-        verificationMethod + jsonVerificationData + hexUrl,
+        `0x0000${stripHexPrefix(verificationMethod)}${stripHexPrefix(
+          padLeft(jsonVerificationData.length / 2, 4),
+        )}${jsonVerificationData}${hexUrl}`,
       );
 
       const expectedDecodedValue: URLDataWithHash = {
