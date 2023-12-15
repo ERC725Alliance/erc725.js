@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.22.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.21.3...v0.22.0) (2023-12-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* update new LSP7/8 interface IDs ([#367](https://github.com/ERC725Alliance/erc725.js/issues/367))
+* `JSONURL` and `AssetURL` are now deprecated and have been replaced by `VerifiableURI`. The decoding is backward compatible but if you try to encode `JSONURL` and `AssetURL` value, they will be encoded as [`VerifiableURI`](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#verifiableuri). ([9aa87e5](https://github.com/ERC725Alliance/erc725.js/commit/9aa87e5ccc0fb1caac1f3291387370b3a980324b))
+
+### Bug Fixes
+
+* Rename JSONURLDataToEncode ([808f1b3](https://github.com/ERC725Alliance/erc725.js/commit/808f1b362bd2275424cf93ac6333049cde90216e))
+
 ## [0.21.3](https://github.com/ERC725Alliance/erc725.js/compare/v0.21.2...v0.21.3) (2023-11-29)
 
 
