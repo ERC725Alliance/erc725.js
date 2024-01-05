@@ -95,6 +95,9 @@ const encodeDataSourceWithHash = (
 
 const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   if (value.slice(0, 6) === '0x0000') {
+    // DEAL with VerifiableURI
+    // NOTE: A JSONURL with a 0x00000000 verification method is invalid.
+
     /*
       0        1         2         3         4         5         6         7         8
       12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -126,13 +129,23 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
     };
   }
 
+  // @Deprecated code here:
+
+  // Eventually we should no longer have JSONURL, AssetURL or (bytes4,URI)
+
+  // DEAL with JSONURL
+
   const verificationMethodSignature = value.slice(0, 10);
   const verificationMethod = getVerificationMethod(verificationMethodSignature);
   const encodedData = value.slice(10); // Rest of data string after function hash
 
   try {
+    // Special case where JSONURL is really (bytes4,URI) as specified
+    // by the old version of LSP8TokenMetadataBaseURI
+    // Catch error in case the buffor is not convertable to utf8.
     const dataSource = hexToUtf8('0x' + encodedData); // Get as URI
     if (encodedData.length < 64 || /^[a-z]{2,}:[/\S]/.test(dataSource)) {
+      // If the verification data starts with a utf8 sequence that looks like https:/ or data: or ar:/ for example.
       return {
         verification: {
           method: NONE_VERIFICATION_METHOD,
