@@ -136,7 +136,7 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
 
   try {
     const dataSource = hexToUtf8('0x' + encodedData); // Get as URI
-    if (encodedData.length < 64 || /^[a-z]{2,}:/.test(dataSource)) {
+    if (encodedData.length < 64 || /^[a-z]{2,}:[/\S]/.test(dataSource)) {
       return {
         verification: {
           method: NONE_VERIFICATION_METHOD,
