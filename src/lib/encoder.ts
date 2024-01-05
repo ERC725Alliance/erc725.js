@@ -119,11 +119,7 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
 
     return {
       verification: {
-        method:
-          verificationMethod?.name ||
-          (verificationMethodSignature === '0x00000000'
-            ? NONE_VERIFICATION_METHOD
-            : verificationMethodSignature),
+        method: verificationMethod?.name || verificationMethodSignature,
         data: dataHash,
       },
       url: dataSource,
@@ -154,11 +150,7 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
 
   return {
     verification: {
-      method:
-        verificationMethod?.name ||
-        (verificationMethodSignature === '0x00000000'
-          ? NONE_VERIFICATION_METHOD
-          : verificationMethodSignature),
+      method: verificationMethod?.name || verificationMethodSignature,
       data: dataHash,
     },
     url: dataSource,
