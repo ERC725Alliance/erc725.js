@@ -92,7 +92,7 @@ export const METHODS: Record<Method, MethodData> = {
   },
 };
 
-export const UNKNOWN_VERIFICATION_METHOD = 'unknown';
+export const NONE_VERIFICATION_METHOD = '0x00000000';
 
 export enum SUPPORTED_VERIFICATION_METHOD_STRINGS {
   KECCAK256_UTF8 = 'keccak256(utf8)',

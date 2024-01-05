@@ -49,7 +49,7 @@ import { AssetURLEncode } from '../types/encodeData';
 
 import {
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
-  UNKNOWN_VERIFICATION_METHOD,
+  NONE_VERIFICATION_METHOD,
 } from '../constants/constants';
 import {
   getVerificationMethod,
@@ -72,7 +72,7 @@ const encodeDataSourceWithHash = (
   dataSource: string,
 ): string => {
   const verificationMethod = getVerificationMethod(
-    verification?.method || UNKNOWN_VERIFICATION_METHOD,
+    verification?.method || '0x00000000',
   );
   return [
     '0x0000',
@@ -119,7 +119,11 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
 
     return {
       verification: {
-        method: verificationMethod?.name || UNKNOWN_VERIFICATION_METHOD,
+        method:
+          verificationMethod?.name ||
+          (verificationMethodSignature === '0x00000000'
+            ? NONE_VERIFICATION_METHOD
+            : verificationMethodSignature),
         data: dataHash,
       },
       url: dataSource,
@@ -129,12 +133,33 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   const verificationMethodSignature = value.slice(0, 10);
   const verificationMethod = getVerificationMethod(verificationMethodSignature);
   const encodedData = value.slice(10); // Rest of data string after function hash
+
+  try {
+    const dataSource = hexToUtf8('0x' + encodedData); // Get as URI
+    if (encodedData.length < 64 || /^(https?|ipfs):\/\//.test(dataSource)) {
+      console.log(dataSource);
+      return {
+        verification: {
+          method: NONE_VERIFICATION_METHOD,
+          data: '0x',
+        },
+        url: dataSource,
+      };
+    }
+  } catch {
+    // ignore
+  }
+
   const dataHash = '0x' + encodedData.slice(0, 64); // Get jsonHash 32 bytes
   const dataSource = hexToUtf8('0x' + encodedData.slice(64)); // Get remainder as URI
 
   return {
     verification: {
-      method: verificationMethod?.name || UNKNOWN_VERIFICATION_METHOD,
+      method:
+        verificationMethod?.name ||
+        (verificationMethodSignature === '0x00000000'
+          ? NONE_VERIFICATION_METHOD
+          : verificationMethodSignature),
       data: dataHash,
     },
     url: dataSource,
@@ -707,7 +732,7 @@ export const valueContentEncodingMap = (
             );
           }
 
-          if (!hashedJson) {
+          if (!hashedJson && method !== NONE_VERIFICATION_METHOD) {
             throw new Error(
               'You have to provide either the verification.data or the json via the respective properties',
             );
@@ -718,7 +743,7 @@ export const valueContentEncodingMap = (
               method:
                 (method as SUPPORTED_VERIFICATION_METHOD_STRINGS) ||
                 SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
-              data: hashedJson,
+              data: hashedJson || '',
             },
             url,
           );
