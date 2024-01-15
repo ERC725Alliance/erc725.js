@@ -1,6 +1,6 @@
 interface JsonRpcEthereumProviderParams {
   to: string;
-  gas: string;
+  gas?: string;
   value: string;
   data;
 }

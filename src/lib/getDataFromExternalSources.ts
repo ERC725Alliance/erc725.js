@@ -77,6 +77,9 @@ export const getDataFromExternalSources = (
       const { url } = patchIPFSUrlsIfApplicable(urlDataWithHash, ipfsGateway);
 
       receivedData = await fetch(url).then(async (response) => {
+        if (!response.ok) {
+          return undefined;
+        }
         if (
           urlDataWithHash.verification?.method ===
           SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES
@@ -85,7 +88,6 @@ export const getDataFromExternalSources = (
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
         }
-
         return response.json();
       });
     } catch (error) {

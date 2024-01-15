@@ -529,11 +529,12 @@ const valueTypeEncodingMap = (
             );
           }
 
+          // Although this is "wrong" making this a real Exception prevents people from using the library
+          // rather than encouraging them to fix the problem. Making this a console error.
           const numberOfBytes = countNumberOfBytes(value);
-
           if (numberOfBytes > (uintLength as number) / 8) {
-            throw new Error(
-              `Can't convert hex value ${value} to ${type}. Too many bytes. ${numberOfBytes} > 16`,
+            console.error(
+              `Invalid length hex value ${value} to ${type}. Too many bytes. ${numberOfBytes} > 16`,
             );
           }
 
