@@ -38,7 +38,7 @@ import {
 } from '../constants/constants';
 import { URLDataToEncode, URLDataWithHash } from '../types';
 
-describe.only('encoder', () => {
+describe('encoder', () => {
   describe('valueType', () => {
     describe('`bool`/`boolean` type', () => {
       const validTestCases = [
