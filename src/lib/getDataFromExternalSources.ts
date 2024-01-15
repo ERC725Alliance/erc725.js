@@ -77,7 +77,6 @@ export const getDataFromExternalSources = (
       const { url } = patchIPFSUrlsIfApplicable(urlDataWithHash, ipfsGateway);
 
       receivedData = await fetch(url).then(async (response) => {
-        console.log(receivedData, urlDataWithHash, response);
         if (!response.ok) {
           return undefined;
         }
@@ -91,12 +90,6 @@ export const getDataFromExternalSources = (
         }
         return response.json();
       });
-      console.log(
-        receivedData,
-        urlDataWithHash,
-        receivedData,
-        urlDataWithHash.verification,
-      );
       if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
         return { ...dataEntry, value: receivedData };
       }

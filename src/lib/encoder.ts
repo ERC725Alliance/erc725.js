@@ -506,19 +506,11 @@ const valueTypeEncodingMap = (
             );
           }
           const abiEncodedValue = abiCoder.encodeParameter(type, value);
-          console.log(value, abiEncodedValue);
           const bytesArray = hexToBytes(abiEncodedValue);
           const numberOfBytes = (uintLength as number) / 8;
           // abi-encoding always pad to 32 bytes. We need to keep the `n` rightmost bytes.
           // where `n` = `numberOfBytes`
           const startIndex = 32 - numberOfBytes;
-
-          console.log(
-            bytesArray,
-            startIndex,
-            bytesArray.slice(0, startIndex),
-            bytesArray.slice(startIndex),
-          );
           if (bytesArray.slice(0, startIndex).some((byte) => byte !== 0)) {
             throw Error(
               `Number ${value} is too large to be represented as ${type}`,
@@ -794,7 +786,7 @@ export const valueContentEncodingMap = (
         },
         decode: (value: string) => {
           if (typeof value !== 'string' || !isHex(value)) {
-            console.log(`Value: ${value} is not hex.`);
+            console.error(`Value: ${value} is not hex.`);
             return null;
           }
 
