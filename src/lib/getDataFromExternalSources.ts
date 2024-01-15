@@ -90,14 +90,17 @@ export const getDataFromExternalSources = (
         }
         return response.json();
       });
+      if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
+        return dataEntry;
+      }
+      console.error(
+        `GET request to ${urlDataWithHash.url} did not correctly validate`,
+      );
     } catch (error) {
       console.error(error, `GET request to ${urlDataWithHash.url} failed`);
-      throw error;
     }
-
-    return isDataAuthentic(receivedData, urlDataWithHash.verification)
-      ? { ...dataEntry, value: receivedData }
-      : { ...dataEntry, value: null };
+    // Invalid data
+    return { ...dataEntry, value: null };
   });
 
   return Promise.all(promises);
