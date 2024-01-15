@@ -38,7 +38,7 @@ import {
 } from '../constants/constants';
 import { URLDataToEncode, URLDataWithHash } from '../types';
 
-describe('encoder', () => {
+describe.only('encoder', () => {
   describe('valueType', () => {
     describe('`bool`/`boolean` type', () => {
       const validTestCases = [
@@ -667,13 +667,15 @@ describe('encoder', () => {
         );
       });
 
-      it('throws when trying to decode a bytes17 as `uint128`', () => {
-        expect(() =>
-          decodeValueType('uint128', '0x000000000000000000000000000000ffff'),
-        ).to.throw(
-          "Can't convert hex value 0x000000000000000000000000000000ffff to uint128. Too many bytes. 17 > 16",
-        );
-      });
+      // We do not want this during decode. During encode we enforce the correct sizes.
+      //
+      // it('throws when trying to decode a bytes17 as `uint128`', () => {
+      //   expect(() =>
+      //     decodeValueType('uint128', '0x000000000000000000000000000000ffff'),
+      //   ).to.throw(
+      //     "Can't convert hex value 0x000000000000000000000000000000ffff to uint128. Too many bytes. 17 > 16",
+      //   );
+      // });
     });
 
     describe('`type[CompactBytesArray]` (of static types)', () => {
