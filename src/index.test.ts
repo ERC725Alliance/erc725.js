@@ -569,7 +569,6 @@ describe('Running @erc725/erc725.js tests...', () => {
           ),
         );
         const result = await erc725.fetchData('TestJSONURL');
-        console.log(fetchStub.getCalls(), result);
         fetchStub.restore();
 
         assert.deepStrictEqual(result, {
