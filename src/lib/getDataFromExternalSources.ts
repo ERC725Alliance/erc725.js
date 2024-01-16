@@ -56,29 +56,28 @@ export const getDataFromExternalSources = (
       console.error(
         `Value of key: ${dataEntry.name} (${dataEntry.value}) is string but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,
       );
-      return dataEntry;
+      return { ...dataEntry, value: null };
     }
 
     if (!dataEntry.value) {
-      return dataEntry;
+      return { ...dataEntry, value: null };
     }
 
     if (Array.isArray(dataEntry.value)) {
       console.error(
         `Value of key: ${dataEntry.name} (${dataEntry.value}) is string[] but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,
       );
-      return dataEntry;
+      return { ...dataEntry, value: null };
     }
 
     const urlDataWithHash = dataEntry.value; // Type URLDataWithHash
 
     let receivedData;
+    const { url } = patchIPFSUrlsIfApplicable(urlDataWithHash, ipfsGateway);
     try {
-      const { url } = patchIPFSUrlsIfApplicable(urlDataWithHash, ipfsGateway);
-
       receivedData = await fetch(url).then(async (response) => {
         if (!response.ok) {
-          return undefined;
+          throw new Error(response.statusText);
         }
         if (
           urlDataWithHash.verification?.method ===
@@ -93,11 +92,12 @@ export const getDataFromExternalSources = (
       if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
         return { ...dataEntry, value: receivedData };
       }
+      throw new Error('result did not correctly validate');
+    } catch (error: any) {
       console.error(
-        `GET request to ${urlDataWithHash.url} did not correctly validate`,
+        error,
+        `GET request to ${urlDataWithHash.url} (resolved as ${url})`,
       );
-    } catch (error) {
-      console.error(error, `GET request to ${urlDataWithHash.url} failed`);
     }
     // Invalid data
     return { ...dataEntry, value: null };
