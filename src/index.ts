@@ -500,6 +500,7 @@ export class ERC725 {
       DECRYPT: false,
       SIGN: false,
       EXECUTE_RELAY_CALL: false,
+      ERC4337_PERMISSION: false,
     };
 
     const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);

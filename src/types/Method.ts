@@ -47,4 +47,5 @@ export interface Permissions {
   DECRYPT?: boolean;
   SIGN?: boolean;
   EXECUTE_RELAY_CALL?: boolean;
+  ERC4337_PERMISSION?: boolean;
 }
