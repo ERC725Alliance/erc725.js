@@ -760,7 +760,7 @@ export const valueContentEncodingMap = (
               method:
                 (method as SUPPORTED_VERIFICATION_METHOD_STRINGS) ||
                 SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
-              data: hashedJson,
+              data: hashedJson || '0x',
             },
             url,
           );
