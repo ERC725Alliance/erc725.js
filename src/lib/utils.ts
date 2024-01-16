@@ -21,6 +21,7 @@
 
 import {
   checkAddressChecksum,
+  hexToBytes,
   isAddress,
   leftPad,
   numberToHex,
@@ -586,6 +587,16 @@ export function patchIPFSUrlsIfApplicable(
 
 export function countNumberOfBytes(data: string) {
   return stripHexPrefix(data).length / 2;
+}
+
+export function countSignificantBits(data = '0x0') {
+  const bytes = hexToBytes(data);
+  for (let i = 0; i < bytes.length; i++) {
+    if (bytes[i] !== 0) {
+      return (bytes.length - i - 1) * 8 + 32 - Math.clz32(bytes[i]);
+    }
+  }
+  return 0;
 }
 
 /**

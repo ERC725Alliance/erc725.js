@@ -56,6 +56,7 @@ import {
   hashData,
   countNumberOfBytes,
   isValidUintSize,
+  countSignificantBits,
 } from './utils';
 import { ERC725JSONSchemaValueType } from '../types/ERC725JSONSchema';
 
@@ -506,17 +507,20 @@ const valueTypeEncodingMap = (
             );
           }
           const abiEncodedValue = abiCoder.encodeParameter(type, value);
-          const bytesArray = hexToBytes(abiEncodedValue);
-          const numberOfBytes = (uintLength as number) / 8;
-          // abi-encoding always pad to 32 bytes. We need to keep the `n` rightmost bytes.
-          // where `n` = `numberOfBytes`
-          const startIndex = 32 - numberOfBytes;
-          if (bytesArray.slice(0, startIndex).some((byte) => byte !== 0)) {
-            throw Error(
-              `Number ${value} is too large to be represented as ${type}`,
+
+          const numberOfBits = countSignificantBits(abiEncodedValue);
+          if (numberOfBits > (uintLength as number)) {
+            throw new Error(
+              `Can't represent value ${value} as ${type}. To many bits required ${numberOfBits} > ${uintLength}`,
             );
           }
 
+          const bytesArray = hexToBytes(abiEncodedValue);
+          const numberOfBytes = (uintLength as number) / 8;
+
+          // abi-encoding always pad to 32 bytes. We need to keep the `n` rightmost bytes.
+          // where `n` = `numberOfBytes`
+          const startIndex = 32 - numberOfBytes;
           return bytesToHex(bytesArray.slice(startIndex));
         },
         decode: (value: string) => {
@@ -532,12 +536,17 @@ const valueTypeEncodingMap = (
             );
           }
 
-          // Although this is "wrong" making this a real Exception prevents people from using the library
-          // rather than encouraging them to fix the problem. Making this a console error.
+          const numberOfBits = countSignificantBits(value);
+          if (numberOfBits > (uintLength as number)) {
+            throw new Error(
+              `Can't represent value ${value} as ${type}. To many bits required ${numberOfBits} > ${uintLength}`,
+            );
+          }
+
           const numberOfBytes = countNumberOfBytes(value);
           if (numberOfBytes > (uintLength as number) / 8) {
-            console.error(
-              `Invalid length hex value ${value} to ${type}. Too many bytes. ${numberOfBytes} > 16`,
+            console.debug(
+              `Value ${value} for ${type} is too long but value contains only ${numberOfBits}. Too many bytes. ${numberOfBytes} > 16`,
             );
           }
 
@@ -740,7 +749,7 @@ export const valueContentEncodingMap = (
             );
           }
 
-          if (!hashedJson && method !== NONE_VERIFICATION_METHOD) {
+          if (!hashedJson) {
             throw new Error(
               'You have to provide either the verification.data or the json via the respective properties',
             );
@@ -751,7 +760,7 @@ export const valueContentEncodingMap = (
               method:
                 (method as SUPPORTED_VERIFICATION_METHOD_STRINGS) ||
                 SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
-              data: hashedJson || '',
+              data: hashedJson,
             },
             url,
           );
@@ -786,7 +795,7 @@ export const valueContentEncodingMap = (
         },
         decode: (value: string) => {
           if (typeof value !== 'string' || !isHex(value)) {
-            console.error(`Value: ${value} is not hex.`);
+            console.log(`Value: ${value} is not hex.`);
             return null;
           }
 

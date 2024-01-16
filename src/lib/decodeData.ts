@@ -312,37 +312,33 @@ export function decodeData(
   data: DecodeDataInput | DecodeDataInput[],
   schema: ERC725JSONSchema[],
 ): DecodeDataOutput | DecodeDataOutput[] {
-  const processDataInput = ({
-    keyName,
-    dynamicKeyParts,
-    value,
-  }: DecodeDataInput) => {
+  const processDataInput = (
+    { keyName, dynamicKeyParts, value }: DecodeDataInput,
+    throwException = true,
+  ) => {
     const isDynamic = isDynamicKeyName(keyName);
 
-    let schemaElement: ERC725JSONSchema;
-    if (isDynamic) {
-      schemaElement = getSchemaElement(schema, keyName, dynamicKeyParts);
-
-      // NOTE: it might be confusing to use as the output will contain other keys as the ones used
-      // for the input
-      return {
-        key: schemaElement.key,
-        name: schemaElement.name,
-        value: decodeKey(schemaElement, value),
-      };
+    const schemaElement: ERC725JSONSchema = isDynamic
+      ? getSchemaElement(schema, keyName, dynamicKeyParts)
+      : getSchemaElement(schema, keyName);
+    let decodedValue: any = null;
+    try {
+      decodedValue = decodeKey(schemaElement, value);
+    } catch (error) {
+      if (throwException) {
+        throw error;
+      }
+      console.error(error);
     }
-
-    schemaElement = getSchemaElement(schema, keyName);
-
     return {
       key: schemaElement.key,
       name: schemaElement.name,
-      value: decodeKey(schemaElement, value),
+      value: decodedValue,
     };
   };
 
   if (Array.isArray(data)) {
-    return data.map((dataInput) => processDataInput(dataInput));
+    return data.map((dataInput) => processDataInput(dataInput, false));
   }
 
   return processDataInput(data);
