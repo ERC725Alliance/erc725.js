@@ -72,7 +72,7 @@ const encodeDataSourceWithHash = (
   dataSource: string,
 ): string => {
   const verificationMethod = getVerificationMethod(
-    verification?.method || '0x00000000',
+    verification?.method || NONE_VERIFICATION_METHOD,
   );
   return [
     '0x0000',
