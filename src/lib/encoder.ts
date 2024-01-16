@@ -795,7 +795,7 @@ export const valueContentEncodingMap = (
         },
         decode: (value: string) => {
           if (typeof value !== 'string' || !isHex(value)) {
-            console.log(`Value: ${value} is not hex.`);
+            console.error(`Value: ${value} is not hex.`);
             return null;
           }
 
@@ -940,7 +940,8 @@ export function decodeValueContent(
     return valueContent === value ? value : null;
   }
 
-  if (!value || value === '0x') {
+  if (value == null || value === '0x') {
+    // !value allows 0 values to become null.
     return null;
   }
 

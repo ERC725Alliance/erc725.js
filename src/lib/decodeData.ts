@@ -150,6 +150,10 @@ export const decodeTupleKeyValue = (
     // if we are dealing with `bytesN`
     if (regexMatch) bytesLengths.push(parseInt(regexMatch[1], 10));
 
+    const numericMatch = valueTypePart.match(/u?int(\d+)/);
+
+    if (numericMatch) bytesLengths.push(parseInt(numericMatch[1], 10) / 8);
+
     if (valueTypePart === 'address') bytesLengths.push(20);
   });
 

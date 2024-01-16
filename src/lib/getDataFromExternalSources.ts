@@ -26,11 +26,13 @@ import {
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { SUPPORTED_VERIFICATION_METHOD_STRINGS } from '../constants/constants';
 import { isDataAuthentic, patchIPFSUrlsIfApplicable } from './utils';
+import { URLDataWithHash } from '../types';
 
 export const getDataFromExternalSources = (
   schemas: ERC725JSONSchema[],
   dataFromChain: DecodeDataOutput[],
   ipfsGateway: string,
+  throwException = true,
 ): Promise<GetDataExternalSourcesOutput[]> => {
   const promises = dataFromChain.map(async (dataEntry) => {
     const schemaElement = schemas.find(
@@ -51,53 +53,61 @@ export const getDataFromExternalSources = (
       return dataEntry;
     }
 
-    // At this stage, value should be of type jsonurl, verifiableuri or asseturl
-    if (typeof dataEntry.value === 'string') {
-      console.error(
-        `Value of key: ${dataEntry.name} (${dataEntry.value}) is string but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,
-      );
-      return { ...dataEntry, value: null };
-    }
-
-    if (!dataEntry.value) {
-      return { ...dataEntry, value: null };
-    }
-
-    if (Array.isArray(dataEntry.value)) {
-      console.error(
-        `Value of key: ${dataEntry.name} (${dataEntry.value}) is string[] but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,
-      );
-      return { ...dataEntry, value: null };
-    }
-
-    const urlDataWithHash = dataEntry.value; // Type URLDataWithHash
-
-    let receivedData;
-    const { url } = patchIPFSUrlsIfApplicable(urlDataWithHash, ipfsGateway);
     try {
-      receivedData = await fetch(url).then(async (response) => {
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
-        if (
-          urlDataWithHash.verification?.method ===
-          SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES
-        ) {
-          return response
-            .arrayBuffer()
-            .then((buffer) => new Uint8Array(buffer));
-        }
-        return response.json();
-      });
-      if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
-        return { ...dataEntry, value: receivedData };
+      // At this stage, value should be of type jsonurl, verifiableuri or asseturl
+      if (typeof dataEntry.value === 'string') {
+        throw new Error(
+          `Value of key: ${dataEntry.name} (${dataEntry.value}) is string but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,
+        );
       }
-      throw new Error('result did not correctly validate');
-    } catch (error: any) {
-      console.error(
-        error,
-        `GET request to ${urlDataWithHash.url} (resolved as ${url})`,
+
+      if (!dataEntry.value) {
+        throw new Error(`Value of key: ${dataEntry.name} is empty`);
+      }
+
+      if (Array.isArray(dataEntry.value)) {
+        throw new Error(
+          `Value of key: ${dataEntry.name} (${dataEntry.value}) is string[] but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,
+        );
+      }
+
+      const urlDataWithHash: URLDataWithHash =
+        dataEntry.value as URLDataWithHash; // Type URLDataWithHash
+
+      let receivedData;
+      const { url } = patchIPFSUrlsIfApplicable(
+        urlDataWithHash as URLDataWithHash,
+        ipfsGateway,
       );
+      try {
+        receivedData = await fetch(url).then(async (response) => {
+          if (!response.ok) {
+            throw new Error(response.statusText);
+          }
+          if (
+            urlDataWithHash.verification?.method ===
+            SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES
+          ) {
+            return response
+              .arrayBuffer()
+              .then((buffer) => new Uint8Array(buffer));
+          }
+          return response.json();
+        });
+        if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
+          return { ...dataEntry, value: receivedData };
+        }
+        throw new Error('result did not correctly validate');
+      } catch (error: any) {
+        error.message = `GET request to ${urlDataWithHash.url} (resolved as ${url}) failed: ${error.message}`;
+        throw error;
+      }
+    } catch (error: any) {
+      error.message = `Value of key: ${dataEntry.name} has an error: ${error.message}`;
+      if (throwException) {
+        throw error;
+      }
+      console.error(error);
     }
     // Invalid data
     return { ...dataEntry, value: null };

@@ -341,6 +341,93 @@ describe('Running @erc725/erc725.js tests...', () => {
       });
     });
 
+    describe('By HttpProvider to retrieve single dynamic key with getDataBatch', () => {
+      const provider = new HttpProvider(
+        {
+          returnData: [
+            {
+              key: '0x4b80742de2bf82acb36300009139def55c73c12bcda9c44f12326686e3948634',
+              value:
+                '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002',
+            },
+          ],
+        },
+        [ERC725Y_INTERFACE_IDS['5.0']],
+      );
+
+      it('should return data even with a single BitArray key', async () => {
+        const erc725 = new ERC725(
+          [
+            {
+              name: 'AddressPermissions:Permissions:<address>',
+              key: '0x4b80742de2bf82acb3630000<address>',
+              keyType: 'MappingWithGrouping',
+              valueType: 'bytes32',
+              valueContent: 'BitArray',
+            },
+          ],
+          '0x24464DbA7e7781a21eD86133Ebe88Eb9C0762620',
+          provider,
+        );
+
+        const data = await erc725.getData([
+          {
+            keyName: 'AddressPermissions:Permissions:<address>',
+            dynamicKeyParts: '0x9139def55c73c12bcda9c44f12326686e3948634',
+          },
+        ]);
+        assert.deepStrictEqual(data[0], {
+          key: '0x4b80742de2bf82acb36300009139def55c73c12bcda9c44f12326686e3948634',
+          name: 'AddressPermissions:Permissions:9139def55c73c12bcda9c44f12326686e3948634',
+          value:
+            '0x0000000000000000000000000000000000000000000000000000000000000002',
+        });
+      });
+    });
+
+    describe('By HttpProvider to retrieve single dynamic key with getDataBatch', () => {
+      const provider = new HttpProvider(
+        {
+          returnData: [
+            {
+              key: '0x6de85eaf5d982b4e5da000009139def55c73c12bcda9c44f12326686e3948634',
+              value:
+                '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001424871b3d00000000000000000000000000000000000000000000000000000000',
+            },
+          ],
+        },
+        [ERC725Y_INTERFACE_IDS['5.0']],
+      );
+
+      it('should return data even with a single BitArray key', async () => {
+        const erc725 = new ERC725(
+          [
+            {
+              name: 'LSP4CreatorsMap:<address>',
+              key: '0x6de85eaf5d982b4e5da00000<address>',
+              keyType: 'Mapping',
+              valueType: '(bytes4,uint128)',
+              valueContent: '(Bytes4,Number)',
+            },
+          ],
+          '0x24464DbA7e7781a21eD86133Ebe88Eb9C0762620',
+          provider,
+        );
+
+        const data = await erc725.getData([
+          {
+            keyName: 'LSP4CreatorsMap:<address>',
+            dynamicKeyParts: '0x9139def55c73c12bcda9c44f12326686e3948634',
+          },
+        ]);
+        assert.deepStrictEqual(data[0], {
+          key: '0x6de85eaf5d982b4e5da000009139def55c73c12bcda9c44f12326686e3948634',
+          name: 'LSP4CreatorsMap:9139def55c73c12bcda9c44f12326686e3948634',
+          value: ['0x24871b3d', 0],
+        });
+      });
+    });
+
     describe('By provider [e2e] - luksoTestnet', () => {
       const e2eSchema: ERC725JSONSchema[] = [
         {
