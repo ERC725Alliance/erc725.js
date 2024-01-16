@@ -667,11 +667,16 @@ describe('encoder', () => {
         );
       });
 
+      // We do not want to throw an Exception during decode. During encode we enforce the correct sizes.
+      // If there is a value size exception then we should throw.
+
       it('throws when trying to decode a bytes17 as `uint128`', () => {
-        expect(() =>
+        assert.equal(
           decodeValueType('uint128', '0x000000000000000000000000000000ffff'),
-        ).to.throw(
-          "Can't convert hex value 0x000000000000000000000000000000ffff to uint128. Too many bytes. 17 > 16",
+          '0xffff',
+        );
+        assert.throws(() =>
+          decodeValueType('uint128', '0x0100000000000000000000000000000000'),
         );
       });
     });

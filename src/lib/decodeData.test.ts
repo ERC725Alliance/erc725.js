@@ -92,6 +92,11 @@ describe('decodeData', () => {
             '0x6f357c6a820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
         },
         {
+          keyName: 'JSONURLCase',
+          value:
+            '0x8019f9b1820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+        },
+        {
           keyName: 'AssetURLCase',
           value:
             '0x8019f9b1d47cf10786205bb08ce508e91c424d413d0f6c48e24dbfde2920d16a9561a723697066733a2f2f516d57346e554e7933767476723344785a48754c66534c6e687a4b4d6532576d67735573454750504668385a7470',
@@ -100,6 +105,13 @@ describe('decodeData', () => {
       [
         {
           name: 'JSONURLCase',
+          key: '0x9136feeb09af67b63993b586ce46a43bd3456990d3fdb39d07beab9dee8d5910',
+          keyType: 'Singleton',
+          valueType: 'bytes',
+          valueContent: 'JSONURL', // Deprecated - We keep it for backward compatibility between v0.21.3 and v0.22.0
+        },
+        {
+          name: 'JSONURLCase2',
           key: '0x9136feeb09af67b63993b586ce46a43bd3456990d3fdb39d07beab9dee8d5910',
           keyType: 'Singleton',
           valueType: 'bytes',
@@ -119,6 +131,13 @@ describe('decodeData', () => {
       {
         verification: {
           method: 'keccak256(utf8)', // 0x6f357c6a
+          data: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+        },
+        url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+      },
+      {
+        verification: {
+          method: 'keccak256(bytes)', // 0x8019f9b1
           data: '0x820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
         },
         url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
@@ -177,6 +196,44 @@ describe('decodeData', () => {
           {
             key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
             value: '0x00000000000000000000000000000002',
+          },
+          {
+            key: '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000000',
+            value: '0xd94353d9b005b3c0a9da169b768a31c57844e490',
+          },
+          {
+            key: '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000001',
+            value: '0xdaea594e385fc724449e3118b2db7e86dfba1826',
+          },
+        ],
+      },
+      [
+        {
+          name: 'LSP12IssuedAssets[]',
+          key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
+          keyType: 'Array',
+          valueContent: 'Address',
+          valueType: 'address',
+        },
+      ],
+    );
+
+    expect(decodedData.name).to.eql('LSP12IssuedAssets[]');
+    expect(decodedData.value).to.eql([
+      '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
+      '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826',
+    ]);
+  });
+
+  it('parses type Array correctly (even with uint256)', () => {
+    const decodedData = decodeData(
+      {
+        keyName: 'LSP12IssuedAssets[]',
+        value: [
+          {
+            key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
+            value:
+              '0x0000000000000000000000000000000000000000000000000000000000000002',
           },
           {
             key: '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000000',

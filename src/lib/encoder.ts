@@ -72,7 +72,7 @@ const encodeDataSourceWithHash = (
   dataSource: string,
 ): string => {
   const verificationMethod = getVerificationMethod(
-    verification?.method || '0x00000000',
+    verification?.method || NONE_VERIFICATION_METHOD,
   );
   return [
     '0x0000',
@@ -506,13 +506,16 @@ const valueTypeEncodingMap = (
             );
           }
           const abiEncodedValue = abiCoder.encodeParameter(type, value);
-
           const bytesArray = hexToBytes(abiEncodedValue);
           const numberOfBytes = (uintLength as number) / 8;
-
           // abi-encoding always pad to 32 bytes. We need to keep the `n` rightmost bytes.
           // where `n` = `numberOfBytes`
           const startIndex = 32 - numberOfBytes;
+          if (bytesArray.slice(0, startIndex).some((byte) => byte !== 0)) {
+            throw Error(
+              `Number ${value} is too large to be represented as ${type}`,
+            );
+          }
 
           return bytesToHex(bytesArray.slice(startIndex));
         },
@@ -529,11 +532,12 @@ const valueTypeEncodingMap = (
             );
           }
 
+          // Although this is "wrong" making this a real Exception prevents people from using the library
+          // rather than encouraging them to fix the problem. Making this a console error.
           const numberOfBytes = countNumberOfBytes(value);
-
           if (numberOfBytes > (uintLength as number) / 8) {
-            throw new Error(
-              `Can't convert hex value ${value} to ${type}. Too many bytes. ${numberOfBytes} > 16`,
+            console.error(
+              `Invalid length hex value ${value} to ${type}. Too many bytes. ${numberOfBytes} > 16`,
             );
           }
 
@@ -782,7 +786,7 @@ export const valueContentEncodingMap = (
         },
         decode: (value: string) => {
           if (typeof value !== 'string' || !isHex(value)) {
-            console.log(`Value: ${value} is not hex.`);
+            console.error(`Value: ${value} is not hex.`);
             return null;
           }
 

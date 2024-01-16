@@ -77,6 +77,9 @@ export const getDataFromExternalSources = (
       const { url } = patchIPFSUrlsIfApplicable(urlDataWithHash, ipfsGateway);
 
       receivedData = await fetch(url).then(async (response) => {
+        if (!response.ok) {
+          return undefined;
+        }
         if (
           urlDataWithHash.verification?.method ===
           SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES
@@ -85,17 +88,19 @@ export const getDataFromExternalSources = (
             .arrayBuffer()
             .then((buffer) => new Uint8Array(buffer));
         }
-
         return response.json();
       });
+      if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
+        return { ...dataEntry, value: receivedData };
+      }
+      console.error(
+        `GET request to ${urlDataWithHash.url} did not correctly validate`,
+      );
     } catch (error) {
       console.error(error, `GET request to ${urlDataWithHash.url} failed`);
-      throw error;
     }
-
-    return isDataAuthentic(receivedData, urlDataWithHash.verification)
-      ? { ...dataEntry, value: receivedData }
-      : { ...dataEntry, value: null };
+    // Invalid data
+    return { ...dataEntry, value: null };
   });
 
   return Promise.all(promises);
