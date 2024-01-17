@@ -770,13 +770,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           try {
             fetchStub
               .onCall(0)
-              .returns(
-                Promise.resolve(
-                  new Response(
-                    Uint8Array.from(Buffer.from('{"hello": "world"}')),
-                  ),
-                ),
-              );
+              .returns(Promise.resolve(new Response('{"hello": "world"}')));
 
             const provider = new HttpProvider(
               {
