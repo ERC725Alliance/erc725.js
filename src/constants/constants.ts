@@ -118,10 +118,12 @@ function keccak256Method(data: object | string | Uint8Array | null) {
     return keccak256('');
   }
   if (data instanceof Uint8Array) {
-    return keccak256(bufferToHex(arrToBufArr(data)));
+    const buffer = bufferToHex(arrToBufArr(data));
+    return keccak256(buffer);
   }
   if (typeof data === 'object') {
-    return keccak256(JSON.stringify(data));
+    const buffer = JSON.stringify(data);
+    return keccak256(buffer);
   }
   return keccak256(data);
 }

@@ -509,7 +509,7 @@ export function isDataAuthentic(
   }
 
   const dataHash = hashData(data, options.method);
-
+  console.log(dataHash, options.data, dataHash === options.data, options, data);
   if (dataHash !== options.data) {
     console.error(
       `Hash mismatch, returned JSON hash ("${dataHash}") is different from expected hash: "${options.method}"`,

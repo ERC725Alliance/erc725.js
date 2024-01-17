@@ -19,6 +19,9 @@
  * @date 2021
  */
 
+import { hexToUtf8, toHex } from 'web3-utils';
+import { arrToBufArr } from 'ethereumjs-util';
+
 import {
   DecodeDataOutput,
   GetDataExternalSourcesOutput,
@@ -73,25 +76,69 @@ export const getDataFromExternalSources = (
       const urlDataWithHash: URLDataWithHash =
         dataEntry.value as URLDataWithHash; // Type URLDataWithHash
 
-      let receivedData;
       const { url } = patchIPFSUrlsIfApplicable(
         urlDataWithHash as URLDataWithHash,
         ipfsGateway,
       );
       try {
-        receivedData = await fetch(url).then(async (response) => {
+        if (/[=?/]$/.test(url)) {
+          // this URL is not verifiable and the URL ends with a / or ? or = meaning it's not a file
+          // and more likely to be some kind of directory or query BaseURI
+          return dataEntry;
+        }
+        const receivedData = await fetch(url).then(async (response) => {
           if (!response.ok) {
             throw new Error(response.statusText);
           }
-          // Previously we used to return a Uint8Array in the case of a verification
-          // method of 'keccak256(bytes)' but since this is a JSONURL or VerifiableURI,
-          // all data has to be json for sure.
-          return response.json();
+          return response
+            .arrayBuffer()
+            .then((buffer) => new Uint8Array(buffer));
         });
+        if (receivedData.length >= 2) {
+          // JSON data cannot be less than 2 characters long.
+          try {
+            // - Build a string containing the first and last byte of the received data
+            //   and try to convert it to utf8. If that succeeds then
+            // - check whether those could represent valid JSON data.
+            // - then validate the data as JSON
+            // - then verfiy the data against the verification method
+            const key = hexToUtf8(
+              toHex(
+                `0x${arrToBufArr(
+                  new Uint8Array([
+                    receivedData[0],
+                    receivedData[receivedData.length - 1],
+                  ]),
+                ).toString('hex')}`,
+              ),
+            );
+            // Currently not supported even though they could be added and can represent valid JSON.
+            // " " => JSON.stringify("") NOT SUPPORTED as valid JSON
+            // t or f and e => JSON.stringify(true) or JSON.stringify(false) NOT SUPPORTED as valid JSON
+            // 0-9 => JSON.stringify(0) integer or float (note .5 is not legitimate JSON) NOT SUPPORTED as valid JSON
+            // if (/^(\[\]|\{\}|(tf)e|\d\d)$/.test(key)) {
+
+            // Check if the beginning or end are
+            // { and } => JSON.stringify({...}) => pretty much 100% of our JSON will be this.
+            // [ and ] => JSON.stringify([...])
+            if (/^(\[\]|\{\})$/.test(key)) {
+              const json = hexToUtf8(
+                `0x${arrToBufArr(receivedData).toString('hex')}`,
+              );
+              const value = JSON.parse(json);
+              console.log(json, value);
+              if (isDataAuthentic(value, urlDataWithHash.verification)) {
+                return { ...dataEntry, value };
+              }
+              throw new Error('result did not correctly validate');
+            }
+          } catch {
+            // ignore
+          }
+        }
         if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
           return { ...dataEntry, value: receivedData };
         }
-        console.log(receivedData, urlDataWithHash.verification);
         throw new Error('result did not correctly validate');
       } catch (error: any) {
         error.message = `GET request to ${urlDataWithHash.url} (resolved as ${url}) failed: ${error.message}`;
