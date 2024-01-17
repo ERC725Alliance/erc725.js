@@ -24,7 +24,6 @@ import {
   GetDataExternalSourcesOutput,
 } from '../types/decodeData';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
-import { SUPPORTED_VERIFICATION_METHOD_STRINGS } from '../constants/constants';
 import { isDataAuthentic, patchIPFSUrlsIfApplicable } from './utils';
 import { URLDataWithHash } from '../types';
 
@@ -84,19 +83,15 @@ export const getDataFromExternalSources = (
           if (!response.ok) {
             throw new Error(response.statusText);
           }
-          if (
-            urlDataWithHash.verification?.method ===
-            SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES
-          ) {
-            return response
-              .arrayBuffer()
-              .then((buffer) => new Uint8Array(buffer));
-          }
+          // Previously we used to return a Uint8Array in the case of a verification
+          // method of 'keccak256(bytes)' but since this is a JSONURL or VerifiableURI,
+          // all data has to be json for sure.
           return response.json();
         });
         if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
           return { ...dataEntry, value: receivedData };
         }
+        console.log(receivedData, urlDataWithHash.verification);
         throw new Error('result did not correctly validate');
       } catch (error: any) {
         error.message = `GET request to ${urlDataWithHash.url} (resolved as ${url}) failed: ${error.message}`;
