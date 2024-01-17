@@ -119,7 +119,6 @@ export const getDataFromExternalSources = (
             if (/^(\[\]|\{\})$/.test(key)) {
               const json = arrToBufArr(receivedData).toString();
               const value = JSON.parse(json);
-              console.log(json, value);
               if (isDataAuthentic(value, urlDataWithHash.verification)) {
                 return { ...dataEntry, value };
               }
