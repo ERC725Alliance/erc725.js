@@ -28,8 +28,6 @@ If you install it on the backend side, you may need to also install [`isomorphic
 ## Instantiation
 
 ```js
-import { ERC725 } from '@erc725/erc725.js';
-
 // Part of LSP3-UniversalProfile Schema
 // https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
 const schemas = [
@@ -62,6 +60,22 @@ const config = {
   ipfsGateway: 'https://YOUR-IPFS-GATEWAY/ipfs/',
   gas: 20_000_000, // optional, default is 1_000_000
 };
+```
+
+### TypeScript
+
+> If you are using ES6 `import` statements in Node.js, make sure your file has a `.mjs` extension, or that your project is set up to support ES6 modules.
+
+```ts
+import { ERC725 } from '@erc725/erc725.js';
+
+const erc725 = new ERC725(schemas as ERC725JSONSchema[], address, RPC_URL, config);
+```
+
+### JavaScript
+
+```js
+import { ERC725 } require('@erc725/erc725.js');
 
 const erc725 = new ERC725(schemas, address, RPC_URL, config);
 ```
