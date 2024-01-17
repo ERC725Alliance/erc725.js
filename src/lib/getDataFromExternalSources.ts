@@ -19,7 +19,6 @@
  * @date 2021
  */
 
-import { hexToUtf8, toHex } from 'web3-utils';
 import { arrToBufArr } from 'ethereumjs-util';
 
 import {
@@ -102,16 +101,12 @@ export const getDataFromExternalSources = (
             // - check whether those could represent valid JSON data.
             // - then validate the data as JSON
             // - then verfiy the data against the verification method
-            const key = hexToUtf8(
-              toHex(
-                `0x${arrToBufArr(
-                  new Uint8Array([
-                    receivedData[0],
-                    receivedData[receivedData.length - 1],
-                  ]),
-                ).toString('hex')}`,
-              ),
-            );
+            const key = arrToBufArr(
+              new Uint8Array([
+                receivedData[0],
+                receivedData[receivedData.length - 1],
+              ]),
+            ).toString();
             // Currently not supported even though they could be added and can represent valid JSON.
             // " " => JSON.stringify("") NOT SUPPORTED as valid JSON
             // t or f and e => JSON.stringify(true) or JSON.stringify(false) NOT SUPPORTED as valid JSON
@@ -122,9 +117,7 @@ export const getDataFromExternalSources = (
             // { and } => JSON.stringify({...}) => pretty much 100% of our JSON will be this.
             // [ and ] => JSON.stringify([...])
             if (/^(\[\]|\{\})$/.test(key)) {
-              const json = hexToUtf8(
-                `0x${arrToBufArr(receivedData).toString('hex')}`,
-              );
+              const json = arrToBufArr(receivedData).toString();
               const value = JSON.parse(json);
               console.log(json, value);
               if (isDataAuthentic(value, urlDataWithHash.verification)) {
