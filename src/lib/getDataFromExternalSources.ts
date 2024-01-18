@@ -101,12 +101,10 @@ export const getDataFromExternalSources = (
             // - check whether those could represent valid JSON data.
             // - then validate the data as JSON
             // - then verfiy the data against the verification method
-            const key = arrToBufArr(
-              new Uint8Array([
-                receivedData[0],
-                receivedData[receivedData.length - 1],
-              ]),
-            ).toString();
+            const key = String.fromCharCode(
+              receivedData[0],
+              receivedData[receivedData.length - 1],
+            );
             // Currently not supported even though they could be added and can represent valid JSON.
             // " " => JSON.stringify("") NOT SUPPORTED as valid JSON
             // t or f and e => JSON.stringify(true) or JSON.stringify(false) NOT SUPPORTED as valid JSON
