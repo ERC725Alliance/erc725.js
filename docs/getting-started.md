@@ -67,7 +67,7 @@ const config = {
 > If you are using ES6 `import` statements in Node.js, make sure your file has a `.mjs` extension, or that your project is set up to support ES6 modules.
 
 ```ts
-import { ERC725 } from '@erc725/erc725.js';
+import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
 
 const erc725 = new ERC725(schemas as ERC725JSONSchema[], address, RPC_URL, config);
 ```
