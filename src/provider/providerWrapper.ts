@@ -158,7 +158,7 @@ export class ProviderWrapper {
         constructJSONRPC(
           address,
           Method.IS_VALID_SIGNATURE,
-          this.gas,
+          undefined, // this.gas,
           encodedParams,
         ),
       );
@@ -183,7 +183,7 @@ export class ProviderWrapper {
       constructJSONRPC(
         address,
         Method.IS_VALID_SIGNATURE,
-        this.gas,
+        undefined, // this.gas,
         encodedParams,
       ),
     ]);
@@ -245,7 +245,7 @@ export class ProviderWrapper {
         constructJSONRPC(
           address,
           method,
-          this.gas,
+          undefined, // this.gas,
           abiCoder.encodeParameter('bytes32[]', keyHashes),
         ),
       );
@@ -262,7 +262,7 @@ export class ProviderWrapper {
       constructJSONRPC(
         address,
         method,
-        this.gas,
+        undefined, // this.gas,
         abiCoder.encodeParameter('bytes32[]', keyHashes),
       ),
     ];

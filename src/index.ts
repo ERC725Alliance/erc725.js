@@ -252,7 +252,7 @@ export class ERC725 {
     keyOrKeys?: GetDataInput,
   ): Promise<FetchDataOutput | FetchDataOutput[]> {
     let keyNames: Array<string | GetDataDynamicKey>;
-
+    let throwException = false;
     if (Array.isArray(keyOrKeys)) {
       keyNames = keyOrKeys;
     } else if (!keyOrKeys) {
@@ -260,6 +260,7 @@ export class ERC725 {
         .map((element) => element.name)
         .filter((key) => !isDynamicKeyName(key));
     } else {
+      throwException = true; // If it's explicitely a single key, then we allow throwing an exception
       keyNames = [keyOrKeys];
     }
 
@@ -276,6 +277,7 @@ export class ERC725 {
       schemas,
       dataFromChain,
       this.options.ipfsGateway,
+      throwException,
     );
 
     if (
@@ -500,6 +502,7 @@ export class ERC725 {
       DECRYPT: false,
       SIGN: false,
       EXECUTE_RELAY_CALL: false,
+      ERC4337_PERMISSION: false,
     };
 
     const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);

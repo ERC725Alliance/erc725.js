@@ -14,6 +14,7 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 import { numberToHex, keccak256 } from 'web3-utils';
+import { arrToBufArr, bufferToHex } from 'ethereumjs-util';
 
 import { MethodData, Encoding, Method } from '../types/Method';
 
@@ -92,7 +93,7 @@ export const METHODS: Record<Method, MethodData> = {
   },
 };
 
-export const UNKNOWN_VERIFICATION_METHOD = 'unknown';
+export const NONE_VERIFICATION_METHOD = '0x00000000';
 
 export enum SUPPORTED_VERIFICATION_METHOD_STRINGS {
   KECCAK256_UTF8 = 'keccak256(utf8)',
@@ -112,25 +113,36 @@ export const SUPPORTED_VERIFICATION_METHODS_LIST = Object.values(
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
 );
 
-function keccak256Utf8(data) {
-  return keccak256(JSON.stringify(data));
+function keccak256Method(data: object | string | Uint8Array | null) {
+  if (data === null) {
+    return keccak256('');
+  }
+  if (data instanceof Uint8Array) {
+    const buffer = bufferToHex(arrToBufArr(data));
+    return keccak256(buffer);
+  }
+  if (typeof data === 'object') {
+    const buffer = JSON.stringify(data);
+    return keccak256(buffer);
+  }
+  return keccak256(data);
 }
 
 const KECCAK256_UTF8 = {
-  method: keccak256Utf8,
+  method: keccak256Method,
   name: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
   sig: SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8,
 };
 
 const KECCAK256_BYTES = {
-  method: keccak256,
+  method: keccak256Method,
   name: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES,
   sig: SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_BYTES,
 };
 
 export const HASH_METHODS: {
   [key: string]: {
-    method: Function;
+    method: (data: object | string | Uint8Array | null) => string;
     name: SUPPORTED_VERIFICATION_METHOD_STRINGS;
     sig: SUPPORTED_VERIFICATION_METHODS;
   };
@@ -167,6 +179,7 @@ export const LSP6_DEFAULT_PERMISSIONS = {
   DECRYPT                          : "0x0000000000000000000000000000000000000000000000000000000000100000",
   SIGN                             : "0x0000000000000000000000000000000000000000000000000000000000200000",
   EXECUTE_RELAY_CALL               : "0x0000000000000000000000000000000000000000000000000000000000400000",
+  ERC4337_PERMISSION               : "0x0000000000000000000000000000000000000000000000000000000000800000"
 };
 
 export const LSP6_ALL_PERMISSIONS =

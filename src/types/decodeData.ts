@@ -14,8 +14,10 @@ export interface DecodeDataInput extends DataInput {
   value: string | { key: string; value: string | null }[];
 }
 
+export type Data = string | number | boolean | null;
+
 export interface DecodeDataOutput {
-  value: string | string[] | URLDataWithHash | null;
+  value: Data | Data[] | URLDataWithHash | null;
   name: string;
   key: string;
 }

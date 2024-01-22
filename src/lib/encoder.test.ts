@@ -32,6 +32,7 @@ import {
   decodeValueContent,
 } from './encoder';
 import {
+  NONE_VERIFICATION_METHOD,
   SUPPORTED_VERIFICATION_METHOD_HASHES,
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
 } from '../constants/constants';
@@ -666,11 +667,16 @@ describe('encoder', () => {
         );
       });
 
+      // We do not want to throw an Exception during decode. During encode we enforce the correct sizes.
+      // If there is a value size exception then we should throw.
+
       it('throws when trying to decode a bytes17 as `uint128`', () => {
-        expect(() =>
+        assert.equal(
           decodeValueType('uint128', '0x000000000000000000000000000000ffff'),
-        ).to.throw(
-          "Can't convert hex value 0x000000000000000000000000000000ffff to uint128. Too many bytes. 17 > 16",
+          '0xffff',
+        );
+        assert.throws(() =>
+          decodeValueType('uint128', '0x0100000000000000000000000000000000'),
         );
       });
     });
@@ -925,6 +931,20 @@ describe('encoder', () => {
           '0x00006f357c6a0020027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168687474703a2f2f746573742e636f6d2f61737365742e676c62',
       },
       {
+        valueContent: 'VerifiableURI', // Actual content is (bytes4,URI)
+        decodedValue: {
+          verification: {
+            method: NONE_VERIFICATION_METHOD,
+            data: '0x',
+          },
+          url: 'https://name.universal.page/',
+        },
+        encodedValue:
+          '0x6f357c6a68747470733a2f2f6e616d652e756e6976657273616c2e706167652f',
+        reencodedValue:
+          '0x000000000000000068747470733a2f2f6e616d652e756e6976657273616c2e706167652f',
+      },
+      {
         valueContent: 'BitArray',
         encodedValue:
           '0x0000000000000000000000000000000000000000000000000000000000000008', // ... 0000 0000 1000
@@ -952,7 +972,10 @@ describe('encoder', () => {
 
         encodeValueContent(testCase.valueContent, testCase.decodedValue);
 
-        assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+        assert.deepStrictEqual(
+          encodedValue,
+          testCase.reencodedValue || testCase.encodedValue,
+        );
         assert.deepStrictEqual(
           encodedValue !== false
             ? decodeValueContent(testCase.valueContent, encodedValue)

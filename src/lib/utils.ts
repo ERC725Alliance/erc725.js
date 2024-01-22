@@ -21,13 +21,13 @@
 
 import {
   checkAddressChecksum,
+  hexToBytes,
   isAddress,
   leftPad,
   numberToHex,
   padLeft,
   stripHexPrefix,
 } from 'web3-utils';
-import { arrToBufArr } from 'ethereumjs-util';
 
 import {
   URLDataToEncode,
@@ -504,18 +504,11 @@ export function isDataAuthentic(
   data: string | Uint8Array,
   options: Verification,
 ): boolean {
-  let dataHash: string;
-
   if (!options || !options.method) {
     return true;
   }
 
-  if (data instanceof Uint8Array) {
-    dataHash = hashData(arrToBufArr(data), options.method);
-  } else {
-    dataHash = hashData(data, options.method);
-  }
-
+  const dataHash = hashData(data, options.method);
   if (dataHash !== options.data) {
     console.error(
       `Hash mismatch, returned JSON hash ("${dataHash}") is different from expected hash: "${options.method}"`,
@@ -586,6 +579,22 @@ export function patchIPFSUrlsIfApplicable(
 
 export function countNumberOfBytes(data: string) {
   return stripHexPrefix(data).length / 2;
+}
+
+export function countSignificantBits(data: string) {
+  const bytes = hexToBytes(data);
+  for (let i = 0; i < bytes.length; i++) {
+    if (bytes[i] !== 0) {
+      return (
+        (bytes.length - i - 1) * 8 + // The number of bits with non-zero values from the right.
+        (32 - Math.clz32(bytes[i])) // The number of bits from the right of the current byte.
+        // The docs for Math.clz32 are:
+        //   Returns the number of leading zero bits in the 32-bit binary representation of a number.
+        //   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/clz32
+      );
+    }
+  }
+  return 0;
 }
 
 /**

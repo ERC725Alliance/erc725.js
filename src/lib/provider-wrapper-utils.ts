@@ -50,7 +50,7 @@ export function decodeResult(method: Method, hexString: string) {
 const constructJSONRPCParams = (
   address: string,
   method: Method,
-  gasInfo: number,
+  gasInfo?: number,
   methodParam?: string,
 ): JsonRpcEthereumProviderParamsWithLatest => {
   const data = methodParam
@@ -61,7 +61,7 @@ const constructJSONRPCParams = (
     {
       to: address,
       value: METHODS[method].value,
-      gas: numberToHex(gasInfo),
+      ...(gasInfo ? { gas: numberToHex(gasInfo) } : {}),
       data,
     },
     'latest',
@@ -71,7 +71,7 @@ const constructJSONRPCParams = (
 export function constructJSONRPC(
   address: string,
   method: Method,
-  gasInfo: number,
+  gasInfo?: number,
   methodParam?: string,
 ): JsonRpc {
   idCount += 1;

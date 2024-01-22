@@ -24,6 +24,9 @@ import Web3 from 'web3';
 import * as sinon from 'sinon';
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
 
+// examples of schemas to load (for testing)
+import { LSP1Schema, LSP12Schema, LSP3Schema, LSP6Schema } from './schemas';
+
 import ERC725 from '.';
 import {
   decodeKeyValue,
@@ -66,6 +69,18 @@ describe('Running @erc725/erc725.js tests...', () => {
       // eslint-disable-next-line no-new
       new ERC725(mockSchema, address, { test: false });
     }, /Incorrect or unsupported provider/);
+  });
+
+  it('should allow importing the schemas and instantiating with them', async () => {
+    const schemasToLoad = [
+      ...LSP1Schema,
+      ...LSP12Schema,
+      ...LSP3Schema,
+      ...LSP6Schema,
+    ];
+    const erc725 = new ERC725(schemasToLoad);
+
+    assert.deepStrictEqual(erc725.options.schemas, schemasToLoad);
   });
 
   it('should throw when calling getData without address & provider options set', async () => {
@@ -341,6 +356,93 @@ describe('Running @erc725/erc725.js tests...', () => {
       });
     });
 
+    describe('By HttpProvider to retrieve single dynamic key with getDataBatch', () => {
+      const provider = new HttpProvider(
+        {
+          returnData: [
+            {
+              key: '0x4b80742de2bf82acb36300009139def55c73c12bcda9c44f12326686e3948634',
+              value:
+                '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002',
+            },
+          ],
+        },
+        [ERC725Y_INTERFACE_IDS['5.0']],
+      );
+
+      it('should return data even with a single BitArray key', async () => {
+        const erc725 = new ERC725(
+          [
+            {
+              name: 'AddressPermissions:Permissions:<address>',
+              key: '0x4b80742de2bf82acb3630000<address>',
+              keyType: 'MappingWithGrouping',
+              valueType: 'bytes32',
+              valueContent: 'BitArray',
+            },
+          ],
+          '0x24464DbA7e7781a21eD86133Ebe88Eb9C0762620',
+          provider,
+        );
+
+        const data = await erc725.getData([
+          {
+            keyName: 'AddressPermissions:Permissions:<address>',
+            dynamicKeyParts: '0x9139def55c73c12bcda9c44f12326686e3948634',
+          },
+        ]);
+        assert.deepStrictEqual(data[0], {
+          key: '0x4b80742de2bf82acb36300009139def55c73c12bcda9c44f12326686e3948634',
+          name: 'AddressPermissions:Permissions:9139def55c73c12bcda9c44f12326686e3948634',
+          value:
+            '0x0000000000000000000000000000000000000000000000000000000000000002',
+        });
+      });
+    });
+
+    describe('By HttpProvider to retrieve single dynamic key with getDataBatch', () => {
+      const provider = new HttpProvider(
+        {
+          returnData: [
+            {
+              key: '0x6de85eaf5d982b4e5da000009139def55c73c12bcda9c44f12326686e3948634',
+              value:
+                '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001424871b3d00000000000000000000000000000000000000000000000000000000',
+            },
+          ],
+        },
+        [ERC725Y_INTERFACE_IDS['5.0']],
+      );
+
+      it('should return data even with a single BitArray key', async () => {
+        const erc725 = new ERC725(
+          [
+            {
+              name: 'LSP4CreatorsMap:<address>',
+              key: '0x6de85eaf5d982b4e5da00000<address>',
+              keyType: 'Mapping',
+              valueType: '(bytes4,uint128)',
+              valueContent: '(Bytes4,Number)',
+            },
+          ],
+          '0x24464DbA7e7781a21eD86133Ebe88Eb9C0762620',
+          provider,
+        );
+
+        const data = await erc725.getData([
+          {
+            keyName: 'LSP4CreatorsMap:<address>',
+            dynamicKeyParts: '0x9139def55c73c12bcda9c44f12326686e3948634',
+          },
+        ]);
+        assert.deepStrictEqual(data[0], {
+          key: '0x6de85eaf5d982b4e5da000009139def55c73c12bcda9c44f12326686e3948634',
+          name: 'LSP4CreatorsMap:9139def55c73c12bcda9c44f12326686e3948634',
+          value: ['0x24871b3d', 0],
+        });
+      });
+    });
+
     describe('By provider [e2e] - luksoTestnet', () => {
       const e2eSchema: ERC725JSONSchema[] = [
         {
@@ -561,15 +663,23 @@ describe('Running @erc725/erc725.js tests...', () => {
         const jsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
 
         const fetchStub = sinon.stub(global, 'fetch');
-        fetchStub.onCall(0).returns(Promise.resolve(new Response(jsonString)));
-        const result = await erc725.fetchData('TestJSONURL');
-        fetchStub.restore();
-
-        assert.deepStrictEqual(result, {
-          key: testJSONURLSchema.key,
-          name: testJSONURLSchema.name,
-          value: JSON.parse(jsonString),
-        });
+        try {
+          fetchStub.onCall(0).returns(
+            Promise.resolve(
+              new Response(jsonString, {
+                headers: { 'content-type': 'application/json' },
+              }),
+            ),
+          );
+          const result = await erc725.fetchData('TestJSONURL');
+          assert.deepStrictEqual(result, {
+            key: testJSONURLSchema.key,
+            name: testJSONURLSchema.name,
+            value: JSON.parse(jsonString),
+          });
+        } finally {
+          fetchStub.restore();
+        }
       });
 
       it('fetchData JSONURL with custom config.ipfsGateway', async () => {
@@ -584,7 +694,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           [contractVersion.interface],
         );
 
-        const ipfsGateway = 'https://2eff.lukso.dev';
+        const ipfsGateway = 'https://api.universalprofile.cloud';
 
         const erc725 = new ERC725([testJSONURLSchema], address, provider, {
           ipfsGateway,
@@ -593,20 +703,29 @@ describe('Running @erc725/erc725.js tests...', () => {
         const jsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
 
         const fetchStub = sinon.stub(global, 'fetch');
-        fetchStub.onCall(0).returns(Promise.resolve(new Response(jsonString)));
-        const result = await erc725.fetchData('TestJSONURL');
-        assert.deepStrictEqual(result, {
-          key: testJSONURLSchema.key,
-          name: testJSONURLSchema.name,
-          value: JSON.parse(jsonString),
-        });
-        fetchStub.restore();
+        try {
+          fetchStub.onCall(0).returns(
+            Promise.resolve(
+              new Response(jsonString, {
+                headers: { 'content-type': 'application/json' },
+              }),
+            ),
+          );
+          const result = await erc725.fetchData('TestJSONURL');
+          assert.deepStrictEqual(result, {
+            key: testJSONURLSchema.key,
+            name: testJSONURLSchema.name,
+            value: JSON.parse(jsonString),
+          });
 
-        assert.ok(
-          fetchStub.calledWith(
-            `${ipfsGateway}/ipfs/QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd`, // this value comes from the mockSchema
-          ),
-        );
+          assert.ok(
+            fetchStub.calledWith(
+              `${ipfsGateway}/ipfs/QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd`, // this value comes from the mockSchema
+            ),
+          );
+        } finally {
+          fetchStub.restore();
+        }
       });
 
       if (contractVersion.interface === ERC725Y_INTERFACE_IDS['3.0']) {
@@ -640,72 +759,77 @@ describe('Running @erc725/erc725.js tests...', () => {
           const jsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
 
           const fetchStub = sinon.stub(global, 'fetch');
-          fetchStub
-            .onCall(0)
-            .returns(Promise.resolve(new Response(jsonString)));
-          const result = await erc725.fetchData({
-            keyName: 'JSONForAddress:<address>',
-            dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
-          });
-          fetchStub.restore();
-          assert.deepStrictEqual(result, {
-            name: 'JSONForAddress:cafecafecafecafecafecafecafecafecafecafe',
-            key: '0x84b02f6e50a0a0819a4f0000cafecafecafecafecafecafecafecafecafecafe',
-            value: JSON.parse(jsonString),
-          });
+          try {
+            fetchStub
+              .onCall(0)
+              .returns(Promise.resolve(new Response(jsonString)));
+            const result = await erc725.fetchData({
+              keyName: 'JSONForAddress:<address>',
+              dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
+            });
+
+            assert.deepStrictEqual(result, {
+              name: 'JSONForAddress:cafecafecafecafecafecafecafecafecafecafe',
+              key: '0x84b02f6e50a0a0819a4f0000cafecafecafecafecafecafecafecafecafecafe',
+              value: JSON.parse(jsonString),
+            });
+          } finally {
+            fetchStub.restore();
+          }
         });
       }
 
       if (contractVersion.interface === ERC725Y_INTERFACE_IDS.legacy) {
         it('fetchData AssetURL', async () => {
           const fetchStub = sinon.stub(global, 'fetch');
-          fetchStub
-            .onCall(0)
-            .returns(Promise.resolve(new Response(new Uint8Array(5))));
+          try {
+            fetchStub
+              .onCall(0)
+              .returns(Promise.resolve(new Response('{"hello": "world"}')));
 
-          const provider = new HttpProvider(
-            {
-              returnData: [
-                {
-                  key: '0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee',
-                  value:
-                    '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000598019f9b1c41589e7559804ea4a2080dad19d876a024ccb05117835447d72ce08c1d020ec697066733a2f2f516d596f387967347a7a6d647532364e537674736f4b6555356f56523668326f686d6f61324378356939316d506600000000000000',
-                },
-
-                // Encoded value of:
-                // {
-                //   verification: {
-                //     method: 'keccak256(bytes)', // 0x8019f9b1
-                //     data: '0xc41589e7559804ea4a2080dad19d876a024ccb05117835447d72ce08c1d020ec',
-                //   },
-                //   url: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
-                // },
-              ],
-            },
-            [contractVersion.interface],
-          );
-
-          const erc725 = new ERC725(
-            [
+            const provider = new HttpProvider(
               {
-                name: 'TestAssetURL',
-                key: '0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee',
-                keyType: 'Singleton',
-                valueContent: 'AssetURL',
-                valueType: 'bytes',
+                returnData: [
+                  {
+                    key: '0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee',
+                    value:
+                      '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000598019f9b1586e9b1e1681ba3ebad5ff5e6f673d3e3aa129fcdb76f92083dbc386cdde4312697066733a2f2f516d596f387967347a7a6d647532364e537674736f4b6555356f56523668326f686d6f61324378356939316d506600000000000000',
+                  },
+
+                  // Encoded value of:
+                  // {
+                  //   verification: {
+                  //     method: 'keccak256(bytes)', // 0x8019f9b1
+                  //     data: '0xc41589e7559804ea4a2080dad19d876a024ccb05117835447d72ce08c1d020ec',
+                  //   },
+                  //   url: 'ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf',
+                  // },
+                ],
               },
-            ],
-            address,
-            provider,
-          );
-          const result = await erc725.fetchData('TestAssetURL');
+              [contractVersion.interface],
+            );
 
-          fetchStub.restore();
+            const erc725 = new ERC725(
+              [
+                {
+                  name: 'TestAssetURL',
+                  key: '0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee',
+                  keyType: 'Singleton',
+                  valueContent: 'AssetURL',
+                  valueType: 'bytes',
+                },
+              ],
+              address,
+              provider,
+            );
+            const result = await erc725.fetchData('TestAssetURL');
 
-          assert.strictEqual(
-            Object.prototype.toString.call(result.value),
-            '[object Uint8Array]',
-          );
+            assert.deepStrictEqual(result.value, {
+              hello: 'world',
+            });
+          } finally {
+            fetchStub.restore();
+          }
         });
       }
     });
@@ -1067,6 +1191,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           DECRYPT: true,
           SIGN: true,
           EXECUTE_RELAY_CALL: false,
+          ERC4337_PERMISSION: false,
         },
         hex: '0x00000000000000000000000000000000000000000000000000000000003f3f7f',
       },
@@ -1095,6 +1220,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           DECRYPT: false,
           SIGN: false,
           EXECUTE_RELAY_CALL: false,
+          ERC4337_PERMISSION: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000000000',
       },
@@ -1123,6 +1249,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           DECRYPT: false,
           SIGN: true,
           EXECUTE_RELAY_CALL: false,
+          ERC4337_PERMISSION: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000200a00',
       },
@@ -1151,6 +1278,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           DECRYPT: false,
           SIGN: false,
           EXECUTE_RELAY_CALL: false,
+          ERC4337_PERMISSION: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000040800',
       },
@@ -1179,6 +1307,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           DECRYPT: false,
           SIGN: false,
           EXECUTE_RELAY_CALL: false,
+          ERC4337_PERMISSION: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000040004',
       },
@@ -1207,6 +1336,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           DECRYPT: false,
           SIGN: false,
           EXECUTE_RELAY_CALL: false,
+          ERC4337_PERMISSION: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000000a00',
       },
@@ -1288,6 +1418,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             DECRYPT: true,
             SIGN: true,
             EXECUTE_RELAY_CALL: true,
+            ERC4337_PERMISSION: true,
           },
         );
         assert.deepStrictEqual(
@@ -1318,6 +1449,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             DECRYPT: true,
             SIGN: true,
             EXECUTE_RELAY_CALL: true,
+            ERC4337_PERMISSION: true,
           },
         );
       });

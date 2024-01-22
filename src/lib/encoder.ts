@@ -49,13 +49,14 @@ import { AssetURLEncode } from '../types/encodeData';
 
 import {
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
-  UNKNOWN_VERIFICATION_METHOD,
+  NONE_VERIFICATION_METHOD,
 } from '../constants/constants';
 import {
   getVerificationMethod,
   hashData,
   countNumberOfBytes,
   isValidUintSize,
+  countSignificantBits,
 } from './utils';
 import { ERC725JSONSchemaValueType } from '../types/ERC725JSONSchema';
 
@@ -72,7 +73,7 @@ const encodeDataSourceWithHash = (
   dataSource: string,
 ): string => {
   const verificationMethod = getVerificationMethod(
-    verification?.method || UNKNOWN_VERIFICATION_METHOD,
+    verification?.method || NONE_VERIFICATION_METHOD,
   );
   return [
     '0x0000',
@@ -95,6 +96,9 @@ const encodeDataSourceWithHash = (
 
 const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   if (value.slice(0, 6) === '0x0000') {
+    // DEAL with VerifiableURI
+    // NOTE: A JSONURL with a 0x00000000 verification method is invalid.
+
     /*
       0        1         2         3         4         5         6         7         8
       12345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -119,22 +123,48 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
 
     return {
       verification: {
-        method: verificationMethod?.name || UNKNOWN_VERIFICATION_METHOD,
+        method: verificationMethod?.name || verificationMethodSignature,
         data: dataHash,
       },
       url: dataSource,
     };
   }
 
+  // @Deprecated code here:
+
+  // Eventually we should no longer have JSONURL, AssetURL or (bytes4,URI)
+
+  // DEAL with JSONURL
+
   const verificationMethodSignature = value.slice(0, 10);
   const verificationMethod = getVerificationMethod(verificationMethodSignature);
   const encodedData = value.slice(10); // Rest of data string after function hash
+
+  try {
+    // Special case where JSONURL is really (bytes4,URI) as specified
+    // by the old version of LSP8TokenMetadataBaseURI
+    // Catch error in case the buffor is not convertable to utf8.
+    const dataSource = hexToUtf8('0x' + encodedData); // Get as URI
+    if (encodedData.length < 64 || /^[a-z]{2,}:[/\S]/.test(dataSource)) {
+      // If the verification data starts with a utf8 sequence that looks like https:/ or data: or ar:/ for example.
+      return {
+        verification: {
+          method: NONE_VERIFICATION_METHOD,
+          data: '0x',
+        },
+        url: dataSource,
+      };
+    }
+  } catch {
+    // ignore
+  }
+
   const dataHash = '0x' + encodedData.slice(0, 64); // Get jsonHash 32 bytes
   const dataSource = hexToUtf8('0x' + encodedData.slice(64)); // Get remainder as URI
 
   return {
     verification: {
-      method: verificationMethod?.name || UNKNOWN_VERIFICATION_METHOD,
+      method: verificationMethod?.name || verificationMethodSignature,
       data: dataHash,
     },
     url: dataSource,
@@ -478,13 +508,19 @@ const valueTypeEncodingMap = (
           }
           const abiEncodedValue = abiCoder.encodeParameter(type, value);
 
+          const numberOfBits = countSignificantBits(abiEncodedValue);
+          if (numberOfBits > (uintLength as number)) {
+            throw new Error(
+              `Can't represent value ${value} as ${type}. To many bits required ${numberOfBits} > ${uintLength}`,
+            );
+          }
+
           const bytesArray = hexToBytes(abiEncodedValue);
           const numberOfBytes = (uintLength as number) / 8;
 
           // abi-encoding always pad to 32 bytes. We need to keep the `n` rightmost bytes.
           // where `n` = `numberOfBytes`
           const startIndex = 32 - numberOfBytes;
-
           return bytesToHex(bytesArray.slice(startIndex));
         },
         decode: (value: string) => {
@@ -500,11 +536,17 @@ const valueTypeEncodingMap = (
             );
           }
 
-          const numberOfBytes = countNumberOfBytes(value);
-
-          if (numberOfBytes > (uintLength as number) / 8) {
+          const numberOfBits = countSignificantBits(value);
+          if (numberOfBits > (uintLength as number)) {
             throw new Error(
-              `Can't convert hex value ${value} to ${type}. Too many bytes. ${numberOfBytes} > 16`,
+              `Can't represent value ${value} as ${type}. To many bits required ${numberOfBits} > ${uintLength}`,
+            );
+          }
+
+          const numberOfBytes = countNumberOfBytes(value);
+          if (numberOfBytes > (uintLength as number) / 8) {
+            console.debug(
+              `Value ${value} for ${type} is too long but value contains only ${numberOfBits}. Too many bytes. ${numberOfBytes} > 16`,
             );
           }
 
@@ -718,7 +760,7 @@ export const valueContentEncodingMap = (
               method:
                 (method as SUPPORTED_VERIFICATION_METHOD_STRINGS) ||
                 SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
-              data: hashedJson,
+              data: hashedJson || '0x',
             },
             url,
           );
@@ -753,7 +795,7 @@ export const valueContentEncodingMap = (
         },
         decode: (value: string) => {
           if (typeof value !== 'string' || !isHex(value)) {
-            console.log(`Value: ${value} is not hex.`);
+            console.error(`Value: ${value} is not hex.`);
             return null;
           }
 
@@ -898,7 +940,8 @@ export function decodeValueContent(
     return valueContent === value ? value : null;
   }
 
-  if (!value || value === '0x') {
+  if (value == null || value === '0x') {
+    // !value allows 0 values to become null.
     return null;
   }
 
