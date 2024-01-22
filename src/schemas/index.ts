@@ -25,3 +25,18 @@ export const LSP9Schema: schemaType = LSP9JSONSchema as schemaType;
 export const LSP10Schema: schemaType = LSP10JSONSchema as schemaType;
 export const LSP12Schema: schemaType = LSP12JSONSchema as schemaType;
 export const LSP17Schema: schemaType = LSP17JSONSchema as schemaType;
+
+const AllSchemas = LSP1Schema.concat(
+  LSP3Schema,
+  LSP4Schema,
+  LSP4LegacySchema,
+  LSP5Schema,
+  LSP6Schema,
+  LSP8Schema,
+  LSP9Schema,
+  LSP10Schema,
+  LSP12Schema,
+  LSP17Schema,
+);
+
+export default AllSchemas;
