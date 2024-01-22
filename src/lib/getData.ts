@@ -106,24 +106,28 @@ const getDataMultiple = async (
   // Looks like it gets array even if not requested as it gets the arrays from the this.options.schemas?
   // eslint-disable-next-line no-restricted-syntax
   for (const keySchema of arraySchemas) {
-    const dataKeyValue = {
-      [keySchema.key]: {
-        key: keySchema.key,
-        value: keyValueMap[keySchema.key],
-      },
-    };
-    const arrayValues = await getArrayValues(
-      erc725Options,
-      keySchema,
-      dataKeyValue,
-    );
+    try {
+      const dataKeyValue = {
+        [keySchema.key]: {
+          key: keySchema.key,
+          value: keyValueMap[keySchema.key],
+        },
+      };
+      const arrayValues = await getArrayValues(
+        erc725Options,
+        keySchema,
+        dataKeyValue,
+      );
 
-    if (arrayValues && arrayValues.length > 0) {
-      arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
+      if (arrayValues && arrayValues.length > 0) {
+        arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
 
-      schemasWithValue[
-        schemasWithValue.findIndex((schema) => schema.key === keySchema.key)
-      ] = { ...keySchema, value: arrayValues };
+        schemasWithValue[
+          schemasWithValue.findIndex((schema) => schema.key === keySchema.key)
+        ] = { ...keySchema, value: arrayValues };
+      }
+    } catch (error) {
+      console.error(error);
     }
   }
   // ------- END ARRAY HANDLER -------

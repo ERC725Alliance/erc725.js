@@ -38,6 +38,7 @@ import {
   encodeTupleKeyValue,
   duplicateMultiTypeERC725SchemaEntry,
   splitMultiDynamicKeyNamePart,
+  countSignificantBits,
 } from './utils';
 import { isDynamicKeyName } from './encodeKeyName';
 import { decodeKey } from './decodeData';
@@ -249,6 +250,26 @@ describe('utils', () => {
       const encodedValue = '0x00000000000000000000000000000003';
 
       assert.equal(encodeKey(schema, decodedValue), encodedValue);
+    });
+  });
+
+  describe('count bits', () => {
+    const testCases = [
+      {
+        value: '0x00',
+        result: 0,
+      },
+      {
+        value: '0x01',
+        result: 1,
+      },
+      { value: '0x1000', result: 13 },
+      { value: '0x000f', result: 4 },
+    ];
+    testCases.forEach(({ value, result }) => {
+      it(`should count the number of bits in ${value}`, () => {
+        assert.equal(countSignificantBits(value), result);
+      });
     });
   });
 
