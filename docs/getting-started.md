@@ -27,6 +27,8 @@ If you install it on the backend side, you may need to also install [`isomorphic
 
 ## Instantiation
 
+You need to initialise the ERC725 object with a [schema](https://docs.lukso.tech/tools/erc725js/schemas), a contract address, and an RPC URL.
+
 ```js
 const address = '0x0Dc07C77985fE31996Ed612F568eb441afe5768D';
 const RPC_URL = 'https://rpc.testnet.lukso.network';
@@ -35,8 +37,6 @@ const config = {
   gas: 20_000_000, // optional, default is 1_000_000
 };
 ```
-
-> All used schemas should be exported from an `index.ts` file under the `schema/` folder.
 
 ### TypeScript
 
