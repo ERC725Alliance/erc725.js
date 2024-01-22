@@ -158,11 +158,13 @@ export const decodeTupleKeyValue = (
     0,
   );
 
-  if (value.length !== 2 + totalBytesLength * 2) {
+  // if value cannot be decoded, we return an array of as many `undefined`
+  // as the number of elements there is mentioned in the tuple definition.
+  if (!value || value.length !== 2 + totalBytesLength * 2) {
     console.error(
       `Trying to decode a value: ${value} which does not match the length of the valueType: ${valueType}. Expected ${totalBytesLength} bytes.`,
     );
-    return [];
+    return Array(valueTypeParts.length).fill(undefined);
   }
 
   let cursor = 2; // to skip the 0x

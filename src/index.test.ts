@@ -720,6 +720,56 @@ describe('Running @erc725/erc725.js tests...', () => {
           );
         });
       }
+
+      it('fetchData and return `[undefined...]` number of elements based on number of tuple elements', async () => {
+        const provider = new HttpProvider(
+          {
+            returnData: allRawData.filter(
+              (rawData) =>
+                rawData.key ===
+                '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+            ),
+          },
+          [contractVersion.interface],
+        );
+
+        const erc725js = new ERC725(
+          [
+            {
+              name: 'LSP4CreatorsMap:<address>',
+              key: '0x6de85eaf5d982b4e5da00000<address>',
+              keyType: 'Mapping',
+              valueType: '(bytes4,uint128)',
+              valueContent: '(Bytes4,Number)',
+            },
+            {
+              name: 'AnotherKeyWithTuple',
+              key: '0xe285b699bb64c38edb31f6be9fe25f8778b48b260430a16ea4d4cfd1d7ac6d38',
+              keyType: 'Singleton',
+              valueType: '(address,address,uint128,bytes4)',
+              valueContent: '(Address,Address,Number,Bytes)',
+            },
+          ],
+          address,
+          provider,
+        );
+
+        const result = await erc725js.fetchData([
+          'AnotherKeyWithTuple',
+          {
+            keyName: 'LSP4CreatorsMap:<address>',
+            dynamicKeyParts: '0x9139def55c73c12bcda9c44f12326686e3948634',
+          },
+        ]);
+
+        assert.deepStrictEqual(result[0].value, [
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+        ]);
+        // assert.deepStrictEqual(result[1].value, [undefined, undefined]);
+      });
     });
   });
 
