@@ -24,6 +24,9 @@ import Web3 from 'web3';
 import * as sinon from 'sinon';
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
 
+// examples of schemas to load (for testing)
+import { LSP1Schema, LSP12Schema, LSP3Schema, LSP6Schema } from './schemas';
+
 import ERC725 from '.';
 import {
   decodeKeyValue,
@@ -66,6 +69,18 @@ describe('Running @erc725/erc725.js tests...', () => {
       // eslint-disable-next-line no-new
       new ERC725(mockSchema, address, { test: false });
     }, /Incorrect or unsupported provider/);
+  });
+
+  it('should allow importing the schemas and instantiating with them', async () => {
+    const schemasToLoad = [
+      ...LSP1Schema,
+      ...LSP12Schema,
+      ...LSP3Schema,
+      ...LSP6Schema,
+    ];
+    const erc725 = new ERC725(schemasToLoad);
+
+    assert.deepStrictEqual(erc725.options.schemas, schemasToLoad);
   });
 
   it('should throw when calling getData without address & provider options set', async () => {

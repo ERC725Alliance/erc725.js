@@ -20,9 +20,29 @@ _A quick reference for keys used in schema definitions can be seen below_
 
 ## Standard LSP Schemas
 
-The most common schemas of [LUKSO Standard Proposals](https://github.com/lukso-network/LIPs/tree/main/LSPs) are available under the [`schemas/`](https://github.com/ERC725Alliance/erc725.js/tree/develop/schemas) folder.
+The most common schemas of [LUKSO Standard Proposals](https://github.com/lukso-network/LIPs/tree/main/LSPs) are available to import. These are typed automatically with the Typescript type `ERC725JSONSchema[]` for when instantiating `new ERC725(...)` from Typescript projects.
 
-Current provided LSPs are:
+```ts
+import {
+  LSP1Schema,
+  LSP3Schema,
+  LSP4Schema,
+  LSP4LegacySchema,
+  LSP5Schema,
+  LSP6Schema,
+  LSP8Schema,
+  LSP9Schema,
+  LSP10Schema,
+  LSP12Schema,
+  LSP17Schema,
+} from '@erc725/erc725.js/schemas';
+
+const erc725js = new ERC725(LSP12Schema);
+```
+
+The raw JSON schemas are also available for import from the [`schemas/`](https://github.com/ERC725Alliance/erc725.js/tree/develop/schemas) folder.
+
+Current provided LSPs JSON schemas are:
 
 ```
 LSP1UniversalReceiverDelegate.json
@@ -38,7 +58,7 @@ LSP12IssuedAssets.json
 LSP17ContractExtension.json
 ```
 
-You can import them from:
+You can import the raw JSON as follow:
 
 ```js
 import LSP3 from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
