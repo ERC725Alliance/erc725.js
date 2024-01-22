@@ -41,44 +41,85 @@ If you install it on the backend side, you may need to also install [`isomorphic
 
 ## Instantiation
 
-You need to initialise it with a [schema](https://docs.lukso.tech/tools/erc725js/schemas), a contract address and an RPC URL.
+You need to initialise the ERC725 object with a [schema](https://docs.lukso.tech/tools/erc725js/schemas), a contract address, and an RPC URL.
 
 ```js
-import { ERC725 } from '@erc725/erc725.js';
+const address = '0x0Dc07C77985fE31996Ed612F568eb441afe5768D';
+const RPC_URL = 'https://rpc.testnet.lukso.network';
+const config = {
+  ipfsGateway: 'https://YOUR-IPFS-GATEWAY/ipfs/',
+  gas: 20_000_000, // optional, default is 1_000_000
+};
+```
 
-// Part of LSP3-Profile Schema
-// https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-Profile-Metadata.md
-const schema = [
+### TypeScript
+
+> If you are using ES6 `import` statements in Node.js, make sure your file has a `.mjs` extension, or that your project is set up to support ES6 modules.
+
+```ts
+import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
+
+// Part of LSP3-UniversalProfile Schema
+// https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
+const schemas: ERC725JSONSchema[] = [
   {
     name: 'SupportedStandards:LSP3Profile',
     key: '0xeafec4d89fa9619884b600005ef83ad9559033e6e941db7d7c495acdce616347',
     keyType: 'Mapping',
-    valueContent: '0x5ef83ad9',
     valueType: 'bytes',
+    valueContent: '0x5ef83ad9',
   },
   {
     name: 'LSP3Profile',
     key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
     keyType: 'Singleton',
-    valueContent: 'VerifiableURI',
     valueType: 'bytes',
+    valueContent: 'VerifiableURI',
   },
   {
     name: 'LSP1UniversalReceiverDelegate',
     key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
     keyType: 'Singleton',
-    valueContent: 'Address',
     valueType: 'address',
+    valueContent: 'Address',
   },
 ];
 
-const address = '0x3000783905Cc7170cCCe49a4112Deda952DDBe24';
-const RPC_URL = 'https://rpc.testnet.lukso.network';
-const config = {
-  ipfsGateway: 'https://2eff.lukso.dev/ipfs/',
-};
+const erc725 = new ERC725(schemas, address, RPC_URL, config);
+```
 
-const myErc725 = new ERC725(schema, address, RPC_URL, config);
+### JavaScript
+
+```js
+import { ERC725 } require('@erc725/erc725.js');
+
+// Part of LSP3-UniversalProfile Schema
+// https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
+const schemas = [
+  {
+    name: 'SupportedStandards:LSP3Profile',
+    key: '0xeafec4d89fa9619884b600005ef83ad9559033e6e941db7d7c495acdce616347',
+    keyType: 'Mapping',
+    valueType: 'bytes',
+    valueContent: '0x5ef83ad9',
+  },
+  {
+    name: 'LSP3Profile',
+    key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+    keyType: 'Singleton',
+    valueType: 'bytes',
+    valueContent: 'VerifiableURI',
+  },
+  {
+    name: 'LSP1UniversalReceiverDelegate',
+    key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
+    keyType: 'Singleton',
+    valueType: 'address',
+    valueContent: 'Address',
+  },
+];
+
+const erc725 = new ERC725(schemas, address, RPC_URL, config);
 ```
 
 ## Usage
