@@ -19,7 +19,7 @@
  * @date 2021
  */
 
-import { arrToBufArr } from 'ethereumjs-util';
+import { Buffer } from 'buffer';
 
 import {
   DecodeDataOutput,
@@ -134,8 +134,8 @@ export const getDataFromExternalSources = (
             // Check if the beginning or end are
             // { and } => JSON.stringify({...}) => pretty much 100% of our JSON will be this.
             // [ and ] => JSON.stringify([...])
-            if (/^(\[.*\]|\{.*\})\s*$/s.test(key)) {
-              const json = arrToBufArr(receivedData).toString();
+            if (/^(\[.*\]|\{.*\})\s*$/.test(key)) {
+              const json = new TextDecoder().decode(receivedData);
               const value = JSON.parse(json);
               if (isDataAuthentic(value, urlDataWithHash.verification)) {
                 return { ...dataEntry, value };

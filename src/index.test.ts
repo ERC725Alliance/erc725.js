@@ -22,7 +22,7 @@ import { assert } from 'chai';
 
 import Web3 from 'web3';
 import * as sinon from 'sinon';
-import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
+import { leftPad, numberToHex, toNumber } from 'web3-utils';
 
 // examples of schemas to load (for testing)
 import { LSP1Schema, LSP12Schema, LSP3Schema, LSP6Schema } from './schemas';
@@ -42,8 +42,6 @@ import {
   generateAllRawData,
   generateAllResults,
 } from '../test/testHelpers';
-
-import 'isomorphic-fetch';
 
 import {
   ERC725Y_INTERFACE_IDS,
@@ -921,10 +919,11 @@ describe('Running @erc725/erc725.js tests...', () => {
           for (let i = 0; i < schemaElement.returnGraphData.length; i++) {
             const element = schemaElement.returnGraphData[i];
 
-            try {
-              // Fail silently with anything BUT the arrayLength key
-              hexToNumber(element.value);
-            } catch (error) {
+            if (i === 0) {
+              // toNumber will now work with bigint and will no longer
+              // throw an error for address values as before.
+              toNumber(element);
+            } else {
               const result = decodeKeyValue(
                 schemaElement.valueContent,
                 schemaElement.valueType,
@@ -933,15 +932,13 @@ describe('Running @erc725/erc725.js tests...', () => {
               );
 
               // Handle object types
-              if (
-                result &&
-                typeof result === 'object' &&
-                Object.keys(result).length > 0
-              ) {
+              const keys =
+                result && typeof result === 'object' && Object.keys(result);
+              if (keys && keys.length > 0) {
                 const objResult = {};
 
-                for (let j = 0; index < Object.keys(result).length; j++) {
-                  const key = Object.keys(result)[j];
+                for (let j = 0; j < keys.length; j++) {
+                  const key = keys[j];
                   const e = result[key];
                   objResult[key] = e;
                 }
@@ -950,9 +947,9 @@ describe('Running @erc725/erc725.js tests...', () => {
               } else {
                 results.push(result);
               }
-              assert.deepStrictEqual(results, schemaElement.expectedResult);
             }
           } // end for loop
+          assert.deepStrictEqual(results, schemaElement.expectedResult);
         });
 
         it(`encodes all data values for keyType "Array" in: ${schemaElement.name}`, async () => {

@@ -21,9 +21,16 @@
  */
 
 // Types
-import { ERC725 as ERC725Class } from './lib/ERC725';
+export type {
+  ERC725JSONSchemaKeyType,
+  ERC725JSONSchemaValueContent,
+  ERC725JSONSchemaValueType,
+} from './types/ERC725JSONSchema';
 
-export { ERC725 } from './lib/ERC725';
-export * from './utils';
-
-export default ERC725Class;
+export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
+export { encodeData, encodeArrayKey } from './lib/utils';
+export { decodeData } from './lib/decodeData';
+export { encodeKeyName } from './lib/encodeKeyName';
+export { decodeMappingKey } from './lib/decodeMappingKey';
+export { decodeValueType, decodeValueContent } from './lib/encoder';
+export { getDataFromExternalSources } from './lib/getDataFromExternalSources';

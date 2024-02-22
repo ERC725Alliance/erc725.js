@@ -19,15 +19,9 @@
  * @date 2020
  */
 
-import {
-  checkAddressChecksum,
-  hexToBytes,
-  isAddress,
-  leftPad,
-  numberToHex,
-  padLeft,
-  stripHexPrefix,
-} from 'web3-utils';
+import { hexToBytes, leftPad, numberToHex, padLeft } from 'web3-utils';
+import { checkAddressCheckSum, isAddress } from 'web3-validator';
+import { stripHexPrefix } from 'web3-eth-accounts';
 
 import {
   URLDataToEncode,
@@ -402,7 +396,7 @@ export function decodeKeyValue(
   }
 
   // As per exception above, if address and sameEncoding, then the address still needs to be handled
-  if (sameEncoding && isAddress(value) && !checkAddressChecksum(value)) {
+  if (sameEncoding && isAddress(value) && !checkAddressCheckSum(value)) {
     sameEncoding = !sameEncoding;
   }
 

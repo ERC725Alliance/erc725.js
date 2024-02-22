@@ -1,0 +1,16 @@
+{
+  "entry": ["src/index.ts", "src/utils.ts"],
+  "splitting": false,
+  "sourcemap": true,
+  "dts-resolve": true,
+  "clean": true,
+  "format": ["cjs", "esm"],
+  "treeshake": true,
+  "skipNodeModulesBundle": true,
+  "json.schemas": [
+    {
+      "url": "https://cdn.jsdelivr.net/npm/tsup/schema.json",
+      "fileMatch": ["package.json", "tsup.config.json"]
+    }
+  ]
+}

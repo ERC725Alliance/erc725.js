@@ -17,7 +17,7 @@
  * @date 2021
  */
 
-import { isHex, isHexStrict } from 'web3-utils';
+import { isHex, isHexStrict } from 'web3-validator';
 import { DynamicKeyParts } from '../types/dynamicKeys';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import {

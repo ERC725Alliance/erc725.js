@@ -15,15 +15,9 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect, assert } from 'chai';
+import { stripHexPrefix } from 'web3-eth-accounts';
 
-import {
-  keccak256,
-  utf8ToHex,
-  stripHexPrefix,
-  toBN,
-  toHex,
-  padLeft,
-} from 'web3-utils';
+import { keccak256, utf8ToHex, toHex, padLeft, toNumber } from 'web3-utils';
 import {
   valueContentEncodingMap,
   encodeValueType,
@@ -249,9 +243,8 @@ describe('encoder', () => {
           valueType: 'bytes32',
           // over the max uint256 allowed, does not fit in 32 bytes
           input: toHex(
-            toBN(
-              '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' +
-                1,
+            toNumber(
+              '0x1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
             ),
           ),
         },
