@@ -333,6 +333,16 @@ export class ProviderWrapper {
         if (e) {
           reject(e);
         } else {
+          if (r.error) {
+            let error: any;
+            ({ error } = r);
+            if (!(error instanceof Error)) {
+              error = new Error('Call failed');
+              Object.assign(error, r.error);
+            }
+            reject(error);
+            return;
+          }
           if (r.result) {
             resolve(r.result);
             return;
