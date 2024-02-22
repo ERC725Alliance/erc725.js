@@ -111,3 +111,21 @@ export function generateAllResults(schemas) {
       };
     });
 }
+
+export function hexToBitPositions(hexString) {
+  const binaryString = BigInt(hexString).toString(2);
+
+  const bitPositions: number[] = [];
+
+  for (let i = binaryString.length - 1; i >= 0; i--) {
+    // The current bit is set to 1
+    if (binaryString[i] === '1') {
+      // Calculate the bit position. We subtract from the string's length to start counting from 0
+      const bitPosition = binaryString.length - 1 - i;
+      bitPositions.push(bitPosition);
+    }
+  }
+
+  // Return the array of bit positions
+  return bitPositions;
+}

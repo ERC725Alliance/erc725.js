@@ -450,13 +450,53 @@ export class ERC725 {
    * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
    */
   static encodePermissions(permissions: Permissions): string {
-    const result = Object.keys(permissions).reduce((previous, key) => {
-      return permissions[key]
-        ? previous | Number(hexToNumber(LSP6_DEFAULT_PERMISSIONS[key]))
-        : previous;
-    }, 0);
+    let basePermissions = BigInt(0);
 
-    return leftPad(toHex(result), 64);
+    // If ALL_PERMISSIONS is requested, start with that as the base
+    if (permissions.ALL_PERMISSIONS) {
+      basePermissions = BigInt(
+        hexToNumber(LSP6_DEFAULT_PERMISSIONS.ALL_PERMISSIONS),
+      );
+    }
+
+    // Explicitly add REENTRANCY, DELEGATECALL, and SUPER_DELEGATECALL if requested (they are not included in ALL_PERMISSIONS)
+    const additionalPermissions = [
+      LSP6_DEFAULT_PERMISSIONS.REENTRANCY,
+      LSP6_DEFAULT_PERMISSIONS.DELEGATECALL,
+      LSP6_DEFAULT_PERMISSIONS.SUPER_DELEGATECALL,
+    ];
+    additionalPermissions.forEach((permission) => {
+      if (permissions[permission]) {
+        basePermissions |= BigInt(
+          hexToNumber(LSP6_DEFAULT_PERMISSIONS[permission]),
+        );
+      }
+    });
+
+    // Process each permission to potentially switch off permissions included in ALL_PERMISSIONS
+    Object.keys(permissions).forEach((key) => {
+      const permissionValue = BigInt(
+        hexToNumber(LSP6_DEFAULT_PERMISSIONS[key]),
+      );
+
+      if (permissions[key]) {
+        // If not dealing with ALL_PERMISSIONS or additional permissions, ensure they are added
+        if (
+          !additionalPermissions.includes(key) &&
+          key !== LSP6_DEFAULT_PERMISSIONS.ALL_PERMISSIONS
+        ) {
+          basePermissions |= permissionValue;
+        }
+      } else if (
+        LSP6_DEFAULT_PERMISSIONS[key] !==
+        LSP6_DEFAULT_PERMISSIONS.ALL_PERMISSIONS
+      ) {
+        // If permission is set to false, remove it from the basePermissions
+        basePermissions &= ~permissionValue;
+      }
+    });
+    // Convert the final BigInt permission value back to a hex string, properly padded
+    return leftPad(toHex(basePermissions.toString()), 64);
   }
 
   /**
@@ -503,6 +543,7 @@ export class ERC725 {
       SIGN: false,
       EXECUTE_RELAY_CALL: false,
       ERC4337_PERMISSION: false,
+      ALL_PERMISSIONS: false,
     };
 
     const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);

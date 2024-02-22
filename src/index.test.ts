@@ -47,6 +47,7 @@ import 'isomorphic-fetch';
 
 import {
   ERC725Y_INTERFACE_IDS,
+  LSP6_DEFAULT_PERMISSIONS,
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
 } from './constants/constants';
 import { decodeKey } from './lib/decodeData';
@@ -1192,6 +1193,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           SIGN: true,
           EXECUTE_RELAY_CALL: false,
           ERC4337_PERMISSION: false,
+          ALL_PERMISSIONS: false,
         },
         hex: '0x00000000000000000000000000000000000000000000000000000000003f3f7f',
       },
@@ -1221,6 +1223,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           SIGN: false,
           EXECUTE_RELAY_CALL: false,
           ERC4337_PERMISSION: false,
+          ALL_PERMISSIONS: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000000000',
       },
@@ -1250,6 +1253,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           SIGN: true,
           EXECUTE_RELAY_CALL: false,
           ERC4337_PERMISSION: false,
+          ALL_PERMISSIONS: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000200a00',
       },
@@ -1279,6 +1283,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           SIGN: false,
           EXECUTE_RELAY_CALL: false,
           ERC4337_PERMISSION: false,
+          ALL_PERMISSIONS: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000040800',
       },
@@ -1308,6 +1313,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           SIGN: false,
           EXECUTE_RELAY_CALL: false,
           ERC4337_PERMISSION: false,
+          ALL_PERMISSIONS: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000040004',
       },
@@ -1337,6 +1343,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           SIGN: false,
           EXECUTE_RELAY_CALL: false,
           ERC4337_PERMISSION: false,
+          ALL_PERMISSIONS: false,
         },
         hex: '0x0000000000000000000000000000000000000000000000000000000000000a00',
       },
@@ -1376,6 +1383,112 @@ describe('Running @erc725/erc725.js tests...', () => {
       });
     });
 
+    describe('Randomized Permissions Encoding', () => {
+      function convertToPermissionBits(permissions: { [key: string]: string }) {
+        const permissionBits = {};
+        Object.entries(permissions).forEach(([key, hexValue]) => {
+          // Convert hex to binary, then find the position of the '1' bit
+          const bitPosition = BigInt(hexValue).toString(2).length - 1;
+          permissionBits[key] = bitPosition;
+        });
+        return permissionBits;
+      }
+
+      // remove LSP6_DEFAULT_PERMISSIONS.ALL_PERMISSIONS from LSP6_DEFAULT_PERMISSIONS
+      const ALL_PERMISSIONS_WITHOUT_ALL_PERMISSIONS = Object.keys(
+        LSP6_DEFAULT_PERMISSIONS,
+      ).reduce((acc, key) => {
+        if (key !== 'ALL_PERMISSIONS') {
+          acc[key] = LSP6_DEFAULT_PERMISSIONS[key];
+        }
+        return acc;
+      }, {});
+
+      // Use the function to generate permissionBits
+      const permissionBits = convertToPermissionBits(
+        ALL_PERMISSIONS_WITHOUT_ALL_PERMISSIONS,
+      );
+
+      // Function to generate a random permissions object
+      const generateRandomPermissions = () => {
+        return Object.keys(permissionBits).reduce((acc, key) => {
+          // Randomly assign true or false
+          acc[key] = Math.random() < 0.5;
+          return acc;
+        }, {});
+      };
+
+      // Function to calculate expected hex based on permissions
+      const calculateExpectedHex = (permissions) => {
+        let basePermissions = BigInt(0);
+        Object.entries(permissions).forEach(([key, value]) => {
+          if (value) {
+            const bitPosition = permissionBits[key];
+            basePermissions |= BigInt(1) << BigInt(bitPosition);
+          }
+        });
+        // Convert to hex string, properly padded
+        return `0x${basePermissions.toString(16).padStart(64, '0')}`;
+      };
+
+      // Run the randomized test multiple times
+      const numberOfTests = 100; // Number of random tests
+      for (let i = 0; i < numberOfTests; i++) {
+        it(`Randomized test #${i + 1}`, () => {
+          const randomPermissions = generateRandomPermissions();
+          const encoded = ERC725.encodePermissions(randomPermissions);
+          const expectedHex = calculateExpectedHex(randomPermissions);
+          assert.strictEqual(
+            encoded,
+            expectedHex,
+            `Failed at randomized test #${i + 1}`,
+          );
+        });
+      }
+    });
+
+    describe('all permissions', () => {
+      it('should encode ALL_PERMISSIONS correctly', () => {
+        const permissions = { ALL_PERMISSIONS: true };
+        const encoded = ERC725.encodePermissions(permissions);
+
+        assert.strictEqual(
+          encoded,
+          LSP6_DEFAULT_PERMISSIONS.ALL_PERMISSIONS,
+          'Encoded permissions do not match expected value for ALL_PERMISSIONS',
+        );
+      });
+
+      it('should ignore individual permissions when ALL_PERMISSIONS is set', () => {
+        const permissions = {
+          ALL_PERMISSIONS: true,
+          CHANGEOWNER: true,
+        };
+        const encoded = ERC725.encodePermissions(permissions);
+        assert.strictEqual(
+          encoded,
+          LSP6_DEFAULT_PERMISSIONS.ALL_PERMISSIONS,
+          'ALL_PERMISSIONS did not correctly encode with additional permissions',
+        );
+      });
+      it('should be able to disable permissions that are part of ALL_PERMISSIONS', () => {
+        const permissions = {
+          ALL_PERMISSIONS: true,
+          CHANGEOWNER: false, // Explicitly disable CHANGEOWNER
+        };
+
+        const encoded = ERC725.encodePermissions(permissions);
+        const decodedPermissions = ERC725.decodePermissions(encoded);
+
+        // check that the permission is disabled
+        assert.strictEqual(
+          decodedPermissions.CHANGEOWNER,
+          false,
+          'CHANGEOWNER permission was not correctly disabled',
+        );
+      });
+    });
+
     describe('decodePermissions', () => {
       testCases.forEach((testCase) => {
         it(`Decodes ${testCase.hex} permission correctly`, () => {
@@ -1383,6 +1496,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             ERC725.decodePermissions(testCase.hex),
             testCase.permissions,
           );
+
           assert.deepStrictEqual(
             erc725Instance.decodePermissions(testCase.hex),
             testCase.permissions,
@@ -1419,6 +1533,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             SIGN: true,
             EXECUTE_RELAY_CALL: true,
             ERC4337_PERMISSION: true,
+            ALL_PERMISSIONS: true,
           },
         );
         assert.deepStrictEqual(
@@ -1450,6 +1565,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             SIGN: true,
             EXECUTE_RELAY_CALL: true,
             ERC4337_PERMISSION: true,
+            ALL_PERMISSIONS: true,
           },
         );
       });
