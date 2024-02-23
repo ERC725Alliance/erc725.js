@@ -25,6 +25,7 @@ export type {
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
+  ERC725JSONSchema,
 } from './types/ERC725JSONSchema';
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
