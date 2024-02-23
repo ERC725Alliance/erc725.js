@@ -73,6 +73,7 @@ export {
   ERC725JSONSchemaValueType,
 };
 
+export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
 export { encodeData, encodeArrayKey } from './lib/utils';
 export { decodeData } from './lib/decodeData';
 export { encodeKeyName } from './lib/encodeKeyName';
