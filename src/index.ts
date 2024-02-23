@@ -74,7 +74,12 @@ export {
 };
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
-export { encodeData } from './lib/utils';
+export { encodeData, encodeArrayKey } from './lib/utils';
+export { decodeData } from './lib/decodeData';
+export { encodeKeyName } from './lib/encodeKeyName';
+export { decodeMappingKey } from './lib/decodeMappingKey';
+export { decodeValueType, decodeValueContent } from './lib/encoder';
+export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 
 /**
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
