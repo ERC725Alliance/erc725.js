@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.23.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.23.0...v0.23.1) (2024-02-23)
+
+
+### Bug Fixes
+
+* Add check for pretty printed and non-pretty printed versions of JSON ([aa68bf1](https://github.com/ERC725Alliance/erc725.js/commit/aa68bf132d2e4793b4da784c30ae8f306560da8c))
+* Missing line ([d13be00](https://github.com/ERC725Alliance/erc725.js/commit/d13be00ba77be924f914cba1283e9c37250ec9bd))
+* Re-do PR with minimal changes ([17458d6](https://github.com/ERC725Alliance/erc725.js/commit/17458d623f214f026307184357bcf7ff75fad7ed))
+* Repair package-lock to be just as on main ([e793246](https://github.com/ERC725Alliance/erc725.js/commit/e793246e7e09bd80628f19499a5218ce70df8401))
+
 ## [0.23.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.22.0...v0.23.0) (2024-01-22)
 
 
