@@ -132,6 +132,9 @@ export const getDataFromExternalSources = (
               if (isDataAuthentic(value, urlDataWithHash.verification)) {
                 return { ...dataEntry, value };
               }
+              if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
+                return { ...dataEntry, value };
+              }
               throw new Error('result did not correctly validate');
             }
           } catch {
