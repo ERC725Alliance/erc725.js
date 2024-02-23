@@ -101,20 +101,32 @@ export const getDataFromExternalSources = (
             // - check whether those could represent valid JSON data.
             // - then validate the data as JSON
             // - then verfiy the data against the verification method
-            const key = String.fromCharCode(
-              receivedData[0],
-              receivedData[receivedData.length - 1],
-            );
+
+            // Improved JSON detection. We now check the first and up to the last 3 bytes.
+            // The 3 bytes can be `]` or '}' with either SPACE, LF or CRLF at the end.
+            // When editing JSON using a text editor, a lot of time it's pretty printed
+            // and an empty line added to the end. This is a common pattern.
+            const capture: number[] = [];
+            capture.push(receivedData[0]);
+            if (receivedData.length > 3) {
+              capture.push(receivedData[receivedData.length - 3]);
+            }
+            if (receivedData.length > 2) {
+              capture.push(receivedData[receivedData.length - 2]);
+            }
+            if (receivedData.length > 1) {
+              capture.push(receivedData[receivedData.length - 1]);
+            }
+            const key = String.fromCharCode.apply(null, capture);
             // Currently not supported even though they could be added and can represent valid JSON.
             // " " => JSON.stringify("") NOT SUPPORTED as valid JSON
             // t or f and e => JSON.stringify(true) or JSON.stringify(false) NOT SUPPORTED as valid JSON
             // 0-9 => JSON.stringify(0) integer or float (note .5 is not legitimate JSON) NOT SUPPORTED as valid JSON
             // if (/^(\[\]|\{\}|(tf)e|\d\d)$/.test(key)) {
-
             // Check if the beginning or end are
             // { and } => JSON.stringify({...}) => pretty much 100% of our JSON will be this.
             // [ and ] => JSON.stringify([...])
-            if (/^(\[\]|\{\})$/.test(key)) {
+            if (/^(\[.*\]|\{.*\})\s*$/.test(key)) {
               const json = arrToBufArr(receivedData).toString();
               const value = JSON.parse(json);
               if (isDataAuthentic(value, urlDataWithHash.verification)) {

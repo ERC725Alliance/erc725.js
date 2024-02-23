@@ -6,3 +6,4 @@ docs/html
 .nyc_output
 coverage
 *.tgz
+.DS_Store
