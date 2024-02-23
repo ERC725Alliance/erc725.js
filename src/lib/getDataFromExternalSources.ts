@@ -79,6 +79,7 @@ export const getDataFromExternalSources = (
         urlDataWithHash as URLDataWithHash,
         ipfsGateway,
       );
+
       try {
         let receivedData: Uint8Array;
         const [, encoding, data] = url.match(/^data:.*?;(.*?),(.*)$/) || [];
