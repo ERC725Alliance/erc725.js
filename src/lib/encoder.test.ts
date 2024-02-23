@@ -244,7 +244,7 @@ describe('encoder', () => {
           // over the max uint256 allowed, does not fit in 32 bytes
           input: toHex(
             toNumber(
-              '0x1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+              '0x01ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
             ),
           ),
         },
