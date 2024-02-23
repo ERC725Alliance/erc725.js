@@ -1,11 +1,7 @@
 // https://stackoverflow.com/questions/60059121/nodejs-es6-imports-cannot-find-module#comment106219502_60059121
 
-import { bootstrap } from 'global-agent';
 // eslint-disable-next-line import/extensions
 import { getInstance } from './instantiation.js';
-
-bootstrap();
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const myERC725 = getInstance();
 

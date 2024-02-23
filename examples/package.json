@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@erc725/erc725.js": "..",
-    "global-agent": "^3.0.0",
     "web3": "^4.4"
   },
   "devDependencies": {
