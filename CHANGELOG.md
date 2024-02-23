@@ -2,6 +2,52 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.23.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.22.0...v0.23.0) (2024-01-22)
+
+
+### Features
+
+* add permission related to 4337 ([e7fd19b](https://github.com/ERC725Alliance/erc725.js/commit/e7fd19bc27aa89fae410b9633ef5ccdf13f33f0e))
+* allow to load typed schemas from `schemas/` folder ([c54a370](https://github.com/ERC725Alliance/erc725.js/commit/c54a370c1e4f8d71ba6bb7e62122b89069f521e6))
+
+
+### Bug Fixes
+
+* Add workaround to read (bytes4,URI), repair none vs unknown signature. ([204409d](https://github.com/ERC725Alliance/erc725.js/commit/204409df544825041a586865cfb6bb124288e48f))
+* Additional PR repair ([2a18f2b](https://github.com/ERC725Alliance/erc725.js/commit/2a18f2bf1a24547e71cad6953f5144761aa2cc9a))
+* BodyInit should be just string or buffer and not already Uint8Array ([08e0177](https://github.com/ERC725Alliance/erc725.js/commit/08e017778fa42ade5386b8d9e85255225a7f3195))
+* Cleanup ([038d975](https://github.com/ERC725Alliance/erc725.js/commit/038d97584075c89f93f51227666074cf11973a29))
+* Cleanup a bit with comments. ([3d6a5a6](https://github.com/ERC725Alliance/erc725.js/commit/3d6a5a65db5049b678d0d54149e9b11ea2479999))
+* Cleanup and handle situation where one of many keys fails. Return null. ([cdf4583](https://github.com/ERC725Alliance/erc725.js/commit/cdf4583c159d8c8e52a832bfe5af6b650d8945fa))
+* Cleanup error handler inside of getDataFromExternalSources ([fde2e0f](https://github.com/ERC725Alliance/erc725.js/commit/fde2e0f41df3ecee90a4dfd8248dd9c2a7a72965))
+* Debug and repair test scripts. Implement detecting of JSON inside of Uint8Array ([74c0526](https://github.com/ERC725Alliance/erc725.js/commit/74c0526e3f544400ced78f02ff4fed64bd048bfa))
+* Missing commit ([a3dd604](https://github.com/ERC725Alliance/erc725.js/commit/a3dd604964c9c9221ff421fe668faa8fd363101a))
+* More fixes ([620b606](https://github.com/ERC725Alliance/erc725.js/commit/620b60632e50ca59abedae9935f8b75d188278e0))
+* Remove .only call for testing. ([d5ef3c9](https://github.com/ERC725Alliance/erc725.js/commit/d5ef3c9965e2c5ad343f88a9c30a6281e9fa169b))
+* Remove console debugging. ([e349d57](https://github.com/ERC725Alliance/erc725.js/commit/e349d5715c7779c1eeb8d6e08c3ae3bf17eedd9e))
+* Remove unnecessary special case for 0x00000000 ([cd6152a](https://github.com/ERC725Alliance/erc725.js/commit/cd6152a88ca7a1c98184799b6fdc6982ff8a1cd6))
+* Repair and enhance test scripts ([224eb9e](https://github.com/ERC725Alliance/erc725.js/commit/224eb9ecb1b16f373f2ad17ee9d3efab08dda53b))
+* Repair as per PR review ([0a52452](https://github.com/ERC725Alliance/erc725.js/commit/0a5245230455324e9911e4e14992c50e6f645ba2))
+* Repair console.log and expand types of URLs (ar://, ipfs://, https\?://, data:) ([5c8f228](https://github.com/ERC725Alliance/erc725.js/commit/5c8f2285d2d23c59ef9707a54e419b55d25e4136))
+* Repair problems with IPFS, fetch and VerifiableURI ([44834b8](https://github.com/ERC725Alliance/erc725.js/commit/44834b8ed517e869ad99920b2853e30213a8d7b5))
+* Repair to not throw errors when data is not authentica or not accessible withing getDataFromExternalSources. ([25756d0](https://github.com/ERC725Alliance/erc725.js/commit/25756d09cecfec5d13d6e4fb6ed842c4e3d77734))
+* Repair tuples containing numeric types uintX/intX, add Number to output data type. ([01cceea](https://github.com/ERC725Alliance/erc725.js/commit/01cceeac03f719df6eb8be8c238aca4483e7a3e8))
+* Simplify buffer to string conversion. ([0bd1349](https://github.com/ERC725Alliance/erc725.js/commit/0bd1349f863283cf16cc6808bef48990ec118361))
+* Simplify creation of key to detect JSON. ([df2580d](https://github.com/ERC725Alliance/erc725.js/commit/df2580d9434dc386480f7eec2cd6e94a5b4ca7c1))
+* Use a single keccak function since ethereumjs converts it to a Buffer no matter what. ([cdc6c0a](https://github.com/ERC725Alliance/erc725.js/commit/cdc6c0a0f749209352d620db6d60865a276e072c))
+
+## [0.22.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.21.3...v0.22.0) (2023-12-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* update new LSP7/8 interface IDs ([#367](https://github.com/ERC725Alliance/erc725.js/issues/367))
+* `JSONURL` and `AssetURL` are now deprecated and have been replaced by `VerifiableURI`. The decoding is backward compatible but if you try to encode `JSONURL` and `AssetURL` value, they will be encoded as [`VerifiableURI`](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#verifiableuri). ([9aa87e5](https://github.com/ERC725Alliance/erc725.js/commit/9aa87e5ccc0fb1caac1f3291387370b3a980324b))
+
+### Bug Fixes
+
+* Rename JSONURLDataToEncode ([808f1b3](https://github.com/ERC725Alliance/erc725.js/commit/808f1b362bd2275424cf93ac6333049cde90216e))
+
 ## [0.21.3](https://github.com/ERC725Alliance/erc725.js/compare/v0.21.2...v0.21.3) (2023-11-29)
 
 
