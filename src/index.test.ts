@@ -27,7 +27,7 @@ import { leftPad, numberToHex, toNumber } from 'web3-utils';
 // examples of schemas to load (for testing)
 import { LSP1Schema, LSP12Schema, LSP3Schema, LSP6Schema } from './schemas';
 
-import ERC725 from '.';
+import ERC725, { decodeMappingKey, encodeKeyName } from '.';
 import {
   decodeKeyValue,
   encodeKey,
@@ -1597,11 +1597,9 @@ describe('checkPermissions', () => {
 });
 
 describe('decodeMappingKey', () => {
-  const erc725Instance = new ERC725([]);
-
   it('is available on instance and class', () => {
     assert.deepStrictEqual(
-      ERC725.decodeMappingKey(
+      decodeMappingKey(
         '0x35e6950bc8d21a1699e50000cafecafecafecafecafecafecafecafecafecafe',
         'MyKeyName:<address>',
       ),
@@ -1613,7 +1611,19 @@ describe('decodeMappingKey', () => {
       ],
     );
     assert.deepStrictEqual(
-      erc725Instance.decodeMappingKey(
+      decodeMappingKey(
+        encodeKeyName('MyKeyName:<bytes16>', ['0x12345678']),
+        'MyKeyName:<bytes16>',
+      ),
+      [
+        {
+          type: 'bytes16',
+          value: '00000000000000000000000012345678',
+        },
+      ],
+    );
+    assert.deepStrictEqual(
+      decodeMappingKey(
         '0x35e6950bc8d21a1699e50000cafecafecafecafecafecafecafecafecafecafe',
         'MyKeyName:<address>',
       ),
@@ -1624,5 +1634,13 @@ describe('decodeMappingKey', () => {
         },
       ],
     );
+    assert.throws(() => {
+      decodeMappingKey(
+        encodeKeyName('LSP8MetadataTokenURI:<string>', ['hello there']),
+        // '0x1339e76a390b7b9ec9010000e753904c77f5a07e628eff190bbddad936aaffb2',
+        // '0x6c2a998f88b72c27017768656c6c6f20776f726c640000000000000000000000',
+        'LSP8MetadataTokenURI:<string>',
+      );
+    }, /String dynamic key parts cannot be decoded/);
   });
 });
