@@ -35,3 +35,4 @@ export { encodeKeyName } from './lib/encodeKeyName';
 export { decodeMappingKey } from './lib/decodeMappingKey';
 export { decodeValueType, decodeValueContent } from './lib/encoder';
 export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
+export { decodePermissions, encodePermissions } from './lib/permissions';
