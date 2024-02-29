@@ -81,6 +81,68 @@ export { decodeMappingKey } from './lib/decodeMappingKey';
 export { decodeValueType, decodeValueContent } from './lib/encoder';
 export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 
+export function decodePermissions(permissionHex: string): Permissions {
+  const result = {
+    CHANGEOWNER: false,
+    ADDCONTROLLER: false,
+    EDITPERMISSIONS: false,
+    ADDEXTENSIONS: false,
+    CHANGEEXTENSIONS: false,
+    ADDUNIVERSALRECEIVERDELEGATE: false,
+    CHANGEUNIVERSALRECEIVERDELEGATE: false,
+    REENTRANCY: false,
+    SUPER_TRANSFERVALUE: false,
+    TRANSFERVALUE: false,
+    SUPER_CALL: false,
+    CALL: false,
+    SUPER_STATICCALL: false,
+    STATICCALL: false,
+    SUPER_DELEGATECALL: false,
+    DELEGATECALL: false,
+    DEPLOY: false,
+    SUPER_SETDATA: false,
+    SETDATA: false,
+    ENCRYPT: false,
+    DECRYPT: false,
+    SIGN: false,
+    EXECUTE_RELAY_CALL: false,
+    ERC4337_PERMISSION: false,
+  };
+
+  const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);
+  if (permissionHex === LSP6_ALL_PERMISSIONS) {
+    permissionsToTest.forEach((testPermission) => {
+      result[testPermission] = true;
+    });
+    return result;
+  }
+
+  const passedPermissionDecimal = Number(hexToNumber(permissionHex));
+
+  permissionsToTest.forEach((testPermission) => {
+    const decimalTestPermission = Number(
+      hexToNumber(LSP6_DEFAULT_PERMISSIONS[testPermission]),
+    );
+    const isPermissionIncluded =
+      (passedPermissionDecimal & decimalTestPermission) ===
+      decimalTestPermission;
+
+    result[testPermission] = isPermissionIncluded;
+  });
+
+  return result;
+}
+
+export function encodePermissions(permissions: Permissions): string {
+  const result = Object.keys(permissions).reduce((previous, key) => {
+    return permissions[key]
+      ? previous | Number(hexToNumber(LSP6_DEFAULT_PERMISSIONS[key]))
+      : previous;
+  }, 0);
+
+  return leftPad(toHex(result), 64);
+}
+
 /**
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
  *
@@ -455,13 +517,7 @@ export class ERC725 {
    * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
    */
   static encodePermissions(permissions: Permissions): string {
-    const result = Object.keys(permissions).reduce((previous, key) => {
-      return permissions[key]
-        ? previous | Number(hexToNumber(LSP6_DEFAULT_PERMISSIONS[key]))
-        : previous;
-    }, 0);
-
-    return leftPad(toHex(result), 64);
+    return encodePermissions(permissions);
   }
 
   /**
@@ -472,7 +528,7 @@ export class ERC725 {
    * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
    */
   encodePermissions(permissions: Permissions): string {
-    return ERC725.encodePermissions(permissions);
+    return encodePermissions(permissions);
   }
 
   /**
@@ -483,55 +539,7 @@ export class ERC725 {
    * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
    */
   static decodePermissions(permissionHex: string) {
-    const result = {
-      CHANGEOWNER: false,
-      ADDCONTROLLER: false,
-      EDITPERMISSIONS: false,
-      ADDEXTENSIONS: false,
-      CHANGEEXTENSIONS: false,
-      ADDUNIVERSALRECEIVERDELEGATE: false,
-      CHANGEUNIVERSALRECEIVERDELEGATE: false,
-      REENTRANCY: false,
-      SUPER_TRANSFERVALUE: false,
-      TRANSFERVALUE: false,
-      SUPER_CALL: false,
-      CALL: false,
-      SUPER_STATICCALL: false,
-      STATICCALL: false,
-      SUPER_DELEGATECALL: false,
-      DELEGATECALL: false,
-      DEPLOY: false,
-      SUPER_SETDATA: false,
-      SETDATA: false,
-      ENCRYPT: false,
-      DECRYPT: false,
-      SIGN: false,
-      EXECUTE_RELAY_CALL: false,
-      ERC4337_PERMISSION: false,
-    };
-
-    const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);
-    if (permissionHex === LSP6_ALL_PERMISSIONS) {
-      permissionsToTest.forEach((testPermission) => {
-        result[testPermission] = true;
-      });
-      return result;
-    }
-
-    const passedPermissionDecimal = Number(hexToNumber(permissionHex));
-
-    permissionsToTest.forEach((testPermission) => {
-      const decimalTestPermission = Number(
-        hexToNumber(LSP6_DEFAULT_PERMISSIONS[testPermission]),
-      );
-      const isPermissionIncluded =
-        (passedPermissionDecimal & decimalTestPermission) ===
-        decimalTestPermission;
-
-      result[testPermission] = isPermissionIncluded;
-    });
-
-    return result;
+    return decodePermissions(permissionHex);
   }
 
   /**
@@ -542,7 +550,7 @@ export class ERC725 {
    * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
    */
   decodePermissions(permissionHex: string) {
-    return ERC725.decodePermissions(permissionHex);
+    return decodePermissions(permissionHex);
   }
 
   /**
