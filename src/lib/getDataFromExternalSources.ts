@@ -80,19 +80,27 @@ export const getDataFromExternalSources = (
         ipfsGateway,
       );
       try {
-        if (/[=?/]$/.test(url)) {
-          // this URL is not verifiable and the URL ends with a / or ? or = meaning it's not a file
-          // and more likely to be some kind of directory or query BaseURI
-          return dataEntry;
-        }
-        const receivedData = await fetch(url).then(async (response) => {
-          if (!response.ok) {
-            throw new Error(response.statusText);
+        let receivedData: Uint8Array;
+        const [, encoding, data] = url.match(/^data:.*?;(.*?),(.*)$/) || [];
+        if (data) {
+          receivedData = Uint8Array.from(
+            Buffer.from(data, encoding === 'base64' ? 'base64' : 'utf8'),
+          );
+        } else {
+          if (/[=?/]$/.test(url)) {
+            // this URL is not verifiable and the URL ends with a / or ? or = meaning it's not a file
+            // and more likely to be some kind of directory or query BaseURI
+            return dataEntry;
           }
-          return response
-            .arrayBuffer()
-            .then((buffer) => new Uint8Array(buffer));
-        });
+          receivedData = await fetch(url).then(async (response) => {
+            if (!response.ok) {
+              throw new Error(response.statusText);
+            }
+            return response
+              .arrayBuffer()
+              .then((buffer) => new Uint8Array(buffer));
+          });
+        }
         if (receivedData.length >= 2) {
           // JSON data cannot be less than 2 characters long.
           try {
