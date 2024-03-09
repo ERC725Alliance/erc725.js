@@ -19,8 +19,6 @@
  * @date 2021
  */
 
-import { Buffer } from 'buffer';
-
 import {
   DecodeDataOutput,
   GetDataExternalSourcesOutput,
