@@ -84,8 +84,8 @@ export const getDataFromExternalSources = (
         let receivedData: Uint8Array;
         const [, encoding, data] = url.match(/^data:.*?;(.*?),(.*)$/) || [];
         if (data) {
-          receivedData = Uint8Array.from(
-            Buffer.from(data, encoding === 'base64' ? 'base64' : 'utf8'),
+          receivedData = new TextEncoder().encode(
+            encoding === 'base64' ? atob(data) : data,
           );
         } else {
           if (/[=?/]$/.test(url)) {
