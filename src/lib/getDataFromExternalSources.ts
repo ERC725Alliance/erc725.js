@@ -138,12 +138,32 @@ export const getDataFromExternalSources = (
             if (/^(\[.*\]|\{.*\})\s*$/.test(key)) {
               const json = new TextDecoder().decode(receivedData);
               const value = JSON.parse(json);
-              if (isDataAuthentic(value, urlDataWithHash.verification)) {
+              const mismatchedHashes = [];
+              if (
+                isDataAuthentic(
+                  value,
+                  urlDataWithHash.verification,
+                  mismatchedHashes,
+                )
+              ) {
                 return { ...dataEntry, value };
               }
-              if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
+              if (
+                isDataAuthentic(
+                  receivedData,
+                  urlDataWithHash.verification,
+                  mismatchedHashes,
+                )
+              ) {
                 return { ...dataEntry, value };
               }
+              console.error(
+                `Hash mismatch, calculated hashes ("${mismatchedHashes.join(
+                  '", "',
+                )}") are both different from expected hash "${
+                  urlDataWithHash.verification.data
+                }"`,
+              );
               throw new Error('result did not correctly validate');
             }
           } catch {
