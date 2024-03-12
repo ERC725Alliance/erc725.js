@@ -71,6 +71,7 @@ export {
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
+  Permissions,
 };
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
