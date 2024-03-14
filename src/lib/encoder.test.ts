@@ -39,6 +39,47 @@ import {
 import { URLDataToEncode, URLDataWithHash } from '../types';
 
 describe('encoder', () => {
+  describe('when keyType is Array []', () => {
+    it('should be able to specify the array length + starting index', async () => {
+      const schemas = [
+        {
+          name: 'AddressPermissions[]',
+          key: '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3',
+          keyType: 'Array',
+          valueType: 'address',
+          valueContent: 'Address',
+        },
+      ];
+      const erc725js = new ERC725(schemas);
+
+      const result = erc725js.encodeData([
+        {
+          keyName: 'AddressPermissions[]',
+          value: [
+            '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
+            '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
+          ],
+          arrayLength: 23,
+          startingIndex: 21,
+        },
+      ]);
+
+      // result should be:
+      // {
+      //   keys: [
+      //     '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3',
+      //     '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000015',
+      //     '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000016'
+      //   ],
+      //   values: [
+      //     '0x00000000000000000000000000000017',
+      //     '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
+      //     '0x56ecbc104136d00eb37aa0dce60e075f10292d81'
+      //   ]
+      // }
+    });
+  });
+
   describe('valueType', () => {
     describe('`bool`/`boolean` type', () => {
       const validTestCases = [
