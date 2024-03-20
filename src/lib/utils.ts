@@ -262,13 +262,12 @@ export function encodeKey(
         return null;
       }
 
-      // Check if an starting index and array lenght are correct types
       if (
         typeof startingIndex !== 'number' ||
         typeof arrayLength !== 'number'
       ) {
         throw new Error(
-          'Invalid startingIndex or arrayLength parameters. Values must be of type number',
+          'Invalid startingIndex or arrayLength parameters. Values must be of type number.',
         );
       }
 

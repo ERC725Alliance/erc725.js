@@ -791,7 +791,7 @@ describe('utils', () => {
     });
 
     it('should throw if arrayLength is smaller than elements in provided value array', () => {
-      const encodeDataWithLowerArrayLenght = () => {
+      const encodeDataWithLowerArrayLength = () => {
         encodeData(
           [
             {
@@ -809,7 +809,7 @@ describe('utils', () => {
       };
 
       assert.throws(
-        encodeDataWithLowerArrayLenght,
+        encodeDataWithLowerArrayLength,
         /Invalid arrayLength/,
         'Should throw an error for arrayLength smaller than the number of provided elements',
       );
