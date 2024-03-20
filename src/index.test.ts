@@ -1004,6 +1004,45 @@ describe('Running @erc725/erc725.js tests...', () => {
           assert.deepStrictEqual(results, intendedResult);
         });
 
+        it('encodes dynamic data values for keyType "Array" in naked class instance', () => {
+          const schemas: ERC725JSONSchema[] = [
+            {
+              name: 'AddressPermissions[]',
+              key: '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3',
+              keyType: 'Array',
+              valueType: 'address',
+              valueContent: 'Address',
+            },
+          ];
+          const erc725 = new ERC725(schemas);
+          const encodedArraySection = erc725.encodeData([
+            {
+              keyName: 'AddressPermissions[]',
+              value: [
+                '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
+                '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
+              ],
+              arrayLength: 23,
+              startingIndex: 21,
+            },
+          ]);
+
+          // Expected result with custom startingIndex and arrayLength
+          const expectedResult = {
+            keys: [
+              '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3',
+              '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000015', // 21
+              '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000016', // 22
+            ],
+            values: [
+              '0x00000000000000000000000000000017', // 23
+              '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
+              '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
+            ],
+          };
+          assert.deepStrictEqual(encodedArraySection, expectedResult);
+        });
+
         it(`decode all data values for keyType "Array" in naked class instance: ${schemaElement.name}`, async () => {
           const values = allGraphData.filter(
             (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
