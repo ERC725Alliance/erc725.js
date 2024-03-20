@@ -720,6 +720,168 @@ describe('utils', () => {
     });
   });
 
+  describe('encodeData with custom array length and starting index', () => {
+    const schemas: ERC725JSONSchema[] = [
+      {
+        name: 'AddressPermissions[]',
+        key: '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3',
+        keyType: 'Array',
+        valueType: 'address',
+        valueContent: 'Address',
+      },
+    ];
+
+    it('should be able to specify the array length + starting index', () => {
+      const encodedArraySection = encodeData(
+        [
+          {
+            keyName: 'AddressPermissions[]',
+            value: [
+              '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
+              '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
+            ],
+            arrayLength: 23,
+            startingIndex: 21,
+          },
+        ],
+        schemas,
+      );
+
+      // Expected result with custom startingIndex and arrayLength
+      const expectedResult = {
+        keys: [
+          '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3',
+          '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000015', // 21
+          '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000016', // 22
+        ],
+        values: [
+          '0x00000000000000000000000000000017', // 23
+          '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
+          '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
+        ],
+      };
+
+      assert.deepStrictEqual(
+        encodedArraySection,
+        expectedResult,
+        'Encoding with custom starting index and array length should match the expected result.',
+      );
+    });
+
+    it('should throw if startingIndex is negative', () => {
+      const encodeDataWithNegativeStartingIndex = () => {
+        encodeData(
+          [
+            {
+              keyName: 'AddressPermissions[]',
+              value: ['0x983abc616f2442bab7a917e6bb8660df8b01f3bf'],
+              arrayLength: 1,
+              startingIndex: -1,
+            },
+          ],
+          schemas,
+        );
+      };
+
+      assert.throws(
+        encodeDataWithNegativeStartingIndex,
+        /Invalid startingIndex/,
+        'Should throw an error for negative startingIndex',
+      );
+    });
+
+    it('should throw if arrayLength is smaller than elements in provided value array', () => {
+      const encodeDataWithLowerArrayLenght = () => {
+        encodeData(
+          [
+            {
+              keyName: 'AddressPermissions[]',
+              value: [
+                '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
+                '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
+              ],
+              arrayLength: 1, // 2 elements
+              startingIndex: 0,
+            },
+          ],
+          schemas,
+        );
+      };
+
+      assert.throws(
+        encodeDataWithLowerArrayLenght,
+        /Invalid arrayLength/,
+        'Should throw an error for arrayLength smaller than the number of provided elements',
+      );
+    });
+
+    it('should start from 0 if startingIndex is not provided', () => {
+      const result = encodeData(
+        [
+          {
+            keyName: 'AddressPermissions[]',
+            value: ['0x983abc616f2442bab7a917e6bb8660df8b01f3bf'],
+            arrayLength: 1,
+          },
+        ],
+        schemas,
+      );
+
+      const expectedResult = {
+        keys: [
+          '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3',
+          '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000000',
+        ],
+        values: [
+          '0x00000000000000000000000000000001',
+          '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
+        ],
+      };
+
+      assert.deepStrictEqual(
+        result,
+        expectedResult,
+        'Should encode starting from index 0 if startingIndex is not provided',
+      );
+    });
+
+    it('should use the number of elements in value field if arrayLength is not provided', () => {
+      const result = encodeData(
+        [
+          {
+            keyName: 'AddressPermissions[]',
+            value: [
+              '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
+              '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
+            ],
+            // Not specifying arrayLength, it should default to the number of elements in the value array
+            startingIndex: 0,
+          },
+        ],
+        schemas,
+      );
+
+      const expectedResult = {
+        keys: [
+          '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3',
+          '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000000',
+          '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000001',
+        ],
+        values: [
+          '0x00000000000000000000000000000002',
+          '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
+          '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
+        ],
+      };
+
+      assert.deepStrictEqual(
+        result,
+        expectedResult,
+        'should use the number of elements in value field if arrayLength is not provided',
+      );
+    });
+  });
+
   describe('isDataAuthentic', () => {
     it('returns true if data is authentic', () => {
       const data = 'h3ll0HowAreYou?';
