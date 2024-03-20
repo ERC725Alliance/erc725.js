@@ -4,6 +4,8 @@ export interface DataInput {
   keyName: string; // can be the name or the hex/hash
   value;
   dynamicKeyParts?: string | string[];
+  arrayLength?: number;
+  startingIndex?: number;
 }
 
 export interface EncodeDataInput extends DataInput {

@@ -243,6 +243,8 @@ export function encodeKey(
     | URLDataToEncode
     | URLDataToEncode[]
     | boolean,
+  startingIndex = 0,
+  arrayLength = Array.isArray(value) ? value.length : 0,
 ) {
   // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
 
@@ -260,21 +262,46 @@ export function encodeKey(
         return null;
       }
 
+      // Check if an starting index and array lenght are correct types
+      if (
+        typeof startingIndex !== 'number' ||
+        typeof arrayLength !== 'number'
+      ) {
+        throw new Error(
+          'Invalid startingIndex or arrayLength parameters. Values must be of type number',
+        );
+      }
+
+      if (startingIndex < 0) {
+        throw new Error(
+          'Invalid startingIndex parameter. Value cannot be negative.',
+        );
+      }
+
+      if (arrayLength < value.length) {
+        throw new Error(
+          'Invalid arrayLength parameter. Array length must be at least as large as the number of elements of the value array.',
+        );
+      }
+
       const results: { key: string; value: string }[] = [];
 
       for (let index = 0; index < value.length; index++) {
-        const dataElement = value[index];
         if (index === 0) {
           // This is arrayLength as the first element in the raw array
           // encoded as uint128
           results.push({
             key: schema.key,
-            value: encodeValueType('uint128', value.length),
+            // Encode the explicitly provided or default array length
+            value: encodeValueType('uint128', arrayLength),
           });
         }
 
+        const elementIndex = startingIndex + index;
+        const dataElement = value[index];
+
         results.push({
-          key: encodeArrayKey(schema.key, index),
+          key: encodeArrayKey(schema.key, elementIndex),
           value: encodeKeyValue(
             schema.valueContent,
             schema.valueType,
@@ -439,7 +466,10 @@ export function encodeData(
   const dataAsArray = Array.isArray(data) ? data : [data];
 
   return dataAsArray.reduce(
-    (accumulator, { keyName, value, dynamicKeyParts }) => {
+    (
+      accumulator,
+      { keyName, value, dynamicKeyParts, startingIndex, arrayLength },
+    ) => {
       let schemaElement: ERC725JSONSchema | null = null;
       let encodedValue; // would be nice to type this
 
@@ -453,10 +483,20 @@ export function encodeData(
         }
 
         schemaElement = getSchemaElement(schema, keyName, dynamicKeyParts);
-        encodedValue = encodeKey(schemaElement, value);
+        encodedValue = encodeKey(
+          schemaElement,
+          value,
+          startingIndex,
+          arrayLength,
+        );
       } else {
         schemaElement = getSchemaElement(schema, keyName);
-        encodedValue = encodeKey(schemaElement, value as any);
+        encodedValue = encodeKey(
+          schemaElement,
+          value as any,
+          startingIndex,
+          arrayLength,
+        );
       }
 
       if (typeof encodedValue === 'string') {
