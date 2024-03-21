@@ -244,7 +244,7 @@ export function encodeKey(
     | URLDataToEncode[]
     | boolean,
   startingIndex = 0,
-  arrayLength = Array.isArray(value) ? value.length : 0,
+  totalArrayLength = Array.isArray(value) ? value.length : 0,
 ) {
   // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
 
@@ -264,10 +264,10 @@ export function encodeKey(
 
       if (
         typeof startingIndex !== 'number' ||
-        typeof arrayLength !== 'number'
+        typeof totalArrayLength !== 'number'
       ) {
         throw new Error(
-          'Invalid startingIndex or arrayLength parameters. Values must be of type number.',
+          'Invalid startingIndex or totalArrayLength parameters. Values must be of type number.',
         );
       }
 
@@ -277,9 +277,9 @@ export function encodeKey(
         );
       }
 
-      if (arrayLength < value.length) {
+      if (totalArrayLength < value.length) {
         throw new Error(
-          'Invalid arrayLength parameter. Array length must be at least as large as the number of elements of the value array.',
+          'Invalid totalArrayLength parameter. Array length must be at least as large as the number of elements of the value array.',
         );
       }
 
@@ -287,12 +287,12 @@ export function encodeKey(
 
       for (let index = 0; index < value.length; index++) {
         if (index === 0) {
-          // This is arrayLength as the first element in the raw array
+          // This is totalArrayLength as the first element in the raw array
           // encoded as uint128
           results.push({
             key: schema.key,
             // Encode the explicitly provided or default array length
-            value: encodeValueType('uint128', arrayLength),
+            value: encodeValueType('uint128', totalArrayLength),
           });
         }
 
@@ -467,7 +467,7 @@ export function encodeData(
   return dataAsArray.reduce(
     (
       accumulator,
-      { keyName, value, dynamicKeyParts, startingIndex, arrayLength },
+      { keyName, value, dynamicKeyParts, startingIndex, totalArrayLength },
     ) => {
       let schemaElement: ERC725JSONSchema | null = null;
       let encodedValue; // would be nice to type this
@@ -486,7 +486,7 @@ export function encodeData(
           schemaElement,
           value,
           startingIndex,
-          arrayLength,
+          totalArrayLength,
         );
       } else {
         schemaElement = getSchemaElement(schema, keyName);
@@ -494,7 +494,7 @@ export function encodeData(
           schemaElement,
           value as any,
           startingIndex,
-          arrayLength,
+          totalArrayLength,
         );
       }
 

@@ -740,14 +740,14 @@ describe('utils', () => {
               '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
               '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
             ],
-            arrayLength: 23,
+            totalArrayLength: 23,
             startingIndex: 21,
           },
         ],
         schemas,
       );
 
-      // Expected result with custom startingIndex and arrayLength
+      // Expected result with custom startingIndex and totalArrayLength
       const expectedResult = {
         keys: [
           '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3',
@@ -775,7 +775,7 @@ describe('utils', () => {
             {
               keyName: 'AddressPermissions[]',
               value: ['0x983abc616f2442bab7a917e6bb8660df8b01f3bf'],
-              arrayLength: 1,
+              totalArrayLength: 1,
               startingIndex: -1,
             },
           ],
@@ -790,8 +790,8 @@ describe('utils', () => {
       );
     });
 
-    it('should throw if arrayLength is smaller than elements in provided value array', () => {
-      const encodeDataWithLowerArrayLength = () => {
+    it('should throw if totalArrayLength is smaller than elements in provided value array', () => {
+      const encodeDataWithLowerTotalArrayLength = () => {
         encodeData(
           [
             {
@@ -800,7 +800,7 @@ describe('utils', () => {
                 '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
                 '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
               ],
-              arrayLength: 1, // 2 elements
+              totalArrayLength: 1, // 2 elements
               startingIndex: 0,
             },
           ],
@@ -809,9 +809,9 @@ describe('utils', () => {
       };
 
       assert.throws(
-        encodeDataWithLowerArrayLength,
-        /Invalid arrayLength/,
-        'Should throw an error for arrayLength smaller than the number of provided elements',
+        encodeDataWithLowerTotalArrayLength,
+        /Invalid totalArrayLength/,
+        'Should throw an error for totalArrayLength smaller than the number of provided elements',
       );
     });
 
@@ -821,7 +821,7 @@ describe('utils', () => {
           {
             keyName: 'AddressPermissions[]',
             value: ['0x983abc616f2442bab7a917e6bb8660df8b01f3bf'],
-            arrayLength: 1,
+            totalArrayLength: 1,
           },
         ],
         schemas,
@@ -845,7 +845,7 @@ describe('utils', () => {
       );
     });
 
-    it('should use the number of elements in value field if arrayLength is not provided', () => {
+    it('should use the number of elements in value field if totalArrayLength is not provided', () => {
       const result = encodeData(
         [
           {
@@ -854,7 +854,7 @@ describe('utils', () => {
               '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
               '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
             ],
-            // Not specifying arrayLength, it should default to the number of elements in the value array
+            // Not specifying totalArrayLength, it should default to the number of elements in the value array
             startingIndex: 0,
           },
         ],
@@ -877,7 +877,7 @@ describe('utils', () => {
       assert.deepStrictEqual(
         result,
         expectedResult,
-        'should use the number of elements in value field if arrayLength is not provided',
+        'should use the number of elements in value field if totalArrayLength is not provided',
       );
     });
   });

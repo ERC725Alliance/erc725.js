@@ -1022,12 +1022,12 @@ describe('Running @erc725/erc725.js tests...', () => {
                 '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
                 '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
               ],
-              arrayLength: 23,
+              totalArrayLength: 23,
               startingIndex: 21,
             },
           ]);
 
-          // Expected result with custom startingIndex and arrayLength
+          // Expected result with custom startingIndex and totalArrayLength
           const expectedResult = {
             keys: [
               '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3',
