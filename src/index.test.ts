@@ -1004,7 +1004,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           assert.deepStrictEqual(results, intendedResult);
         });
 
-        it('encodes dynamic data values for keyType "Array" in naked class instance', () => {
+        it('encodes subset of elements for keyType "Array" in naked class instance', () => {
           const schemas: ERC725JSONSchema[] = [
             {
               name: 'AddressPermissions[]',
