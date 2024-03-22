@@ -633,7 +633,7 @@ describe('encoder', () => {
       });
     });
 
-    describe('when encoding a value that exceeds the maximal lenght of bytes than its type', () => {
+    describe('when encoding a value that exceeds the maximal length of bytes than its type', () => {
       const validTestCases = [
         {
           valueType: 'bytes32',
@@ -796,13 +796,13 @@ describe('encoder', () => {
       });
 
       describe('when encoding uintN[CompactBytesArray]', () => {
-        it('should throw if trying to encode a value that exceeds the maximal lenght of bytes for this type', async () => {
+        it('should throw if trying to encode a value that exceeds the maximal length of bytes for this type', async () => {
           expect(() => {
             encodeValueType('uint8[CompactBytesArray]', [15, 178, 266]);
           }).to.throw('Hex uint8 value at index 2 does not fit in 1 bytes');
         });
 
-        it('should throw if trying to decode a value that exceeds the maximal lenght of bytes for this type', async () => {
+        it('should throw if trying to decode a value that exceeds the maximal length of bytes for this type', async () => {
           expect(() => {
             decodeValueType(
               'uint8[CompactBytesArray]',
@@ -813,7 +813,7 @@ describe('encoder', () => {
       });
 
       describe('when encoding bytesN[CompactBytesArray]', () => {
-        it('should throw if trying to encode a value that exceeds the maximal lenght of bytes for this type', async () => {
+        it('should throw if trying to encode a value that exceeds the maximal length of bytes for this type', async () => {
           expect(() => {
             encodeValueType('bytes4[CompactBytesArray]', [
               '0xe6520726',
@@ -824,7 +824,7 @@ describe('encoder', () => {
           }).to.throw('Hex bytes4 value at index 3 does not fit in 4 bytes');
         });
 
-        it('should throw if trying to decode a value that exceeds the maximal lenght of bytes for this type', async () => {
+        it('should throw if trying to decode a value that exceeds the maximal length of bytes for this type', async () => {
           expect(() => {
             decodeValueType(
               'bytes4[CompactBytesArray]',
