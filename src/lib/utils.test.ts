@@ -785,7 +785,7 @@ describe('utils', () => {
 
       assert.throws(
         encodeDataWithNegativeStartingIndex,
-        /Invalid startingIndex/,
+        /Invalid `startingIndex`/,
         'Should throw an error for negative startingIndex',
       );
     });
@@ -810,7 +810,7 @@ describe('utils', () => {
 
       assert.throws(
         encodeDataWithLowerTotalArrayLength,
-        /Invalid totalArrayLength/,
+        /Invalid `totalArrayLength`/,
         'Should throw an error for totalArrayLength smaller than the number of provided elements',
       );
     });

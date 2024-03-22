@@ -267,19 +267,19 @@ export function encodeKey(
         typeof totalArrayLength !== 'number'
       ) {
         throw new Error(
-          'Invalid startingIndex or totalArrayLength parameters. Values must be of type number.',
+          'Invalid `startingIndex` or `totalArrayLength` parameters. Values must be of type number.',
         );
       }
 
       if (startingIndex < 0) {
         throw new Error(
-          'Invalid startingIndex parameter. Value cannot be negative.',
+          'Invalid `startingIndex` parameter. Value cannot be negative.',
         );
       }
 
       if (totalArrayLength < value.length) {
         throw new Error(
-          'Invalid totalArrayLength parameter. Array length must be at least as large as the number of elements of the value array.',
+          'Invalid `totalArrayLength` parameter. Array length must be at least as large as the number of elements of the value array.',
         );
       }
 
