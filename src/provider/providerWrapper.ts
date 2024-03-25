@@ -24,7 +24,7 @@
 
 import { encodeParameter, encodeParameters } from 'web3-eth-abi';
 
-import { JsonRpc } from '../types/JsonRpc';
+import type { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
 import { ProviderTypes } from '../types/provider';

@@ -43,35 +43,43 @@ import {
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types
-import { ERC725Config, ERC725Options } from './types/Config';
-import { Permissions } from './types/Method';
-import {
+import type { ERC725Config, ERC725Options } from './types/Config';
+import type { Permissions } from './types/Method';
+import type {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
 } from './types/ERC725JSONSchema';
-import {
+import type {
   DecodeDataInput,
   DecodeDataOutput,
   EncodeDataInput,
   FetchDataOutput,
 } from './types/decodeData';
-import { GetDataDynamicKey, GetDataInput } from './types/GetData';
+import type { GetDataDynamicKey, GetDataInput } from './types/GetData';
 import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
-import { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
+import type { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
 import { decodeValueType, encodeValueType } from './lib/encoder';
 import { supportsInterface, checkPermissions } from './lib/detector';
 import { decodeMappingKey } from './lib/decodeMappingKey';
 
-export {
+export type {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
   Permissions,
+  GetDataDynamicKey,
+  GetDataInput,
+  DynamicKeyPart,
+  DynamicKeyParts,
+  DecodeDataInput,
+  DecodeDataOutput,
+  EncodeDataInput,
+  FetchDataOutput,
 };
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
@@ -81,6 +89,24 @@ export { encodeKeyName } from './lib/encodeKeyName';
 export { decodeMappingKey } from './lib/decodeMappingKey';
 export { decodeValueType, decodeValueContent } from './lib/encoder';
 export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
+
+export function initializeProvider(providerOrRpcUrl, gasInfo) {
+  // do not fail on no-provider
+  if (!providerOrRpcUrl) return undefined;
+
+  // if provider is a string, assume it's a rpcUrl
+  if (typeof providerOrRpcUrl === 'string') {
+    return new ProviderWrapper(new HttpProvider(providerOrRpcUrl), gasInfo);
+  }
+
+  if (
+    typeof providerOrRpcUrl.request === 'function' ||
+    typeof providerOrRpcUrl.send === 'function'
+  )
+    return new ProviderWrapper(providerOrRpcUrl, gasInfo);
+
+  throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
+}
 
 export function decodePermissions(permissionHex: string): Permissions {
   const result = {
@@ -112,15 +138,17 @@ export function decodePermissions(permissionHex: string): Permissions {
 
   const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);
   if (permissionHex === LSP6_ALL_PERMISSIONS) {
-    permissionsToTest.forEach((testPermission) => {
+    for (let i = 0; i < permissionsToTest.length; i += 1) {
+      const testPermission = permissionsToTest[i];
       result[testPermission] = true;
-    });
+    }
     return result;
   }
 
   const passedPermissionDecimal = Number(hexToNumber(permissionHex));
 
-  permissionsToTest.forEach((testPermission) => {
+  for (let i = 0; i < permissionsToTest.length; i += 1) {
+    const testPermission = permissionsToTest[i];
     const decimalTestPermission = Number(
       hexToNumber(LSP6_DEFAULT_PERMISSIONS[testPermission]),
     );
@@ -129,7 +157,7 @@ export function decodePermissions(permissionHex: string): Permissions {
       decimalTestPermission;
 
     result[testPermission] = isPermissionIncluded;
-  });
+  }
 
   return result;
 }
@@ -181,12 +209,12 @@ export class ERC725 {
 
     this.options = {
       schemas: this.validateSchemas(
-        schemas
-          .map((schema) => duplicateMultiTypeERC725SchemaEntry(schema))
-          .flat(),
+        schemas.flatMap((schema) =>
+          duplicateMultiTypeERC725SchemaEntry(schema),
+        ),
       ),
       address,
-      provider: ERC725.initializeProvider(
+      provider: initializeProvider(
         provider,
         config?.gas ? config?.gas : defaultConfig.gas,
       ),
@@ -241,21 +269,7 @@ export class ERC725 {
   }
 
   private static initializeProvider(providerOrRpcUrl, gasInfo) {
-    // do not fail on no-provider
-    if (!providerOrRpcUrl) return undefined;
-
-    // if provider is a string, assume it's a rpcUrl
-    if (typeof providerOrRpcUrl === 'string') {
-      return new ProviderWrapper(new HttpProvider(providerOrRpcUrl), gasInfo);
-    }
-
-    if (
-      typeof providerOrRpcUrl.request === 'function' ||
-      typeof providerOrRpcUrl.send === 'function'
-    )
-      return new ProviderWrapper(providerOrRpcUrl, gasInfo);
-
-    throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
+    return initializeProvider(providerOrRpcUrl, gasInfo);
   }
 
   private getAddressAndProvider() {
@@ -648,7 +662,7 @@ export class ERC725 {
 
     return supportsInterface(interfaceIdOrName, {
       address: options.address,
-      provider: this.initializeProvider(
+      provider: initializeProvider(
         options.rpcUrl,
         options?.gas ? options?.gas : DEFAULT_GAS_VALUE,
       ),
