@@ -126,7 +126,7 @@ export const getDataFromExternalSources = (
             // Check if the beginning or end are
             // { and } => JSON.stringify({...}) => pretty much 100% of our JSON will be this.
             // [ and ] => JSON.stringify([...])
-            if (/^(\[.*\]|\{.*\})\s*$/.test(key)) {
+            if (/^(\[.*\]|\{.*\})\s*$/s.test(key)) {
               const json = arrToBufArr(receivedData).toString();
               const value = JSON.parse(json);
               if (isDataAuthentic(value, urlDataWithHash.verification)) {
