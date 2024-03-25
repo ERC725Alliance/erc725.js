@@ -90,7 +90,7 @@ export { decodeMappingKey } from './lib/decodeMappingKey';
 export { decodeValueType, decodeValueContent } from './lib/encoder';
 export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 
-export function initializeProvider(providerOrRpcUrl, gasInfo) {
+function initializeProvider(providerOrRpcUrl, gasInfo) {
   // do not fail on no-provider
   if (!providerOrRpcUrl) return undefined;
 
@@ -266,10 +266,6 @@ export class ERC725 {
         return true;
       }
     });
-  }
-
-  private static initializeProvider(providerOrRpcUrl, gasInfo) {
-    return initializeProvider(providerOrRpcUrl, gasInfo);
   }
 
   private getAddressAndProvider() {
