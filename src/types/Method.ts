@@ -48,4 +48,5 @@ export interface Permissions {
   SIGN?: boolean;
   EXECUTE_RELAY_CALL?: boolean;
   ERC4337_PERMISSION?: boolean;
+  [key: string]: boolean | undefined;
 }

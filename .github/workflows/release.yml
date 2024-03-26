@@ -19,10 +19,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: ⚙️ Setup Node.js v16
+      - name: ⚙️ Setup Node.js 20.x
         uses: actions/setup-node@v2
         with:
-          node-version: '16.x'
+          node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
           scope: '@erc725'
           cache: 'npm'

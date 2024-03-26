@@ -1,6 +1,6 @@
 // This file contains the mock providers used for tests
 
-import AbiCoder from 'web3-eth-abi';
+import { decodeParameter, encodeParameter } from 'web3-eth-abi';
 
 import { METHODS } from '../src/constants/constants';
 import { Method } from '../src/types/Method';
@@ -17,8 +17,6 @@ interface HttpProviderPayload {
   }>;
   id: number;
 }
-
-const abiCoder = AbiCoder;
 
 const IS_VALID_SIGNATURE_RESPONSE = {
   valid: '0x1626ba7e00000000000000000000000000000000000000000000000000000000',
@@ -91,24 +89,26 @@ export class HttpProvider {
             // getData([A]), getData([A, B, C])...
             //
             {
-              const requestedKeys = abiCoder.decodeParameter(
+              const requestedKeys = decodeParameter(
                 'bytes32[]',
                 payload[index].params[0].data.slice(10),
-              );
+              ) as string[];
 
               const decodedResult = requestedKeys.map((requestedKey) => {
                 const foundElement = this.returnData.find((element) => {
                   return element.key === requestedKey;
                 });
                 return foundElement
-                  ? abiCoder.decodeParameter('bytes[]', foundElement.value)[0] // we need to decode the keys as the values provided to the mock are already bytes[] encoded (as it was made for "single item" request mode)
+                  ? (
+                      decodeParameter('bytes[]', foundElement.value) as string[]
+                    )[0] // we need to decode the keys as the values provided to the mock are already bytes[] encoded (as it was made for "single item" request mode)
                   : '0x';
               });
 
               results.push({
                 jsonrpc: '2.0',
                 id: payload[index].id,
-                result: abiCoder.encodeParameter('bytes[]', decodedResult),
+                result: encodeParameter('bytes[]', decodedResult),
               });
             }
             break;
@@ -237,21 +237,21 @@ export class EthereumProvider {
       case METHODS[Method.GET_DATA].sig:
         {
           // Duplicated logic with HttpProvider
-          const requestedKeys = abiCoder.decodeParameter(
+          const requestedKeys = decodeParameter(
             'bytes32[]',
             payload.params[0].data.slice(10),
-          );
+          ) as string[];
 
           const decodedResult = requestedKeys.map((requestedKey) => {
             const foundElement = this.returnData.find((element) => {
               return element.key === requestedKey;
             });
             return foundElement
-              ? abiCoder.decodeParameter('bytes[]', foundElement.value)[0] // we need to decode the keys as the values provided to the mock are already bytes[] encoded (as it was made for "single item" request mode)
+              ? (decodeParameter('bytes[]', foundElement.value) as string[])[0] // we need to decode the keys as the values provided to the mock are already bytes[] encoded (as it was made for "single item" request mode)
               : '0x';
           });
 
-          result = abiCoder.encodeParameter('bytes[]', decodedResult);
+          result = encodeParameter('bytes[]', decodedResult);
         }
         break;
       default:

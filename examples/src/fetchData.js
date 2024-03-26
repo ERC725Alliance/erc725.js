@@ -1,4 +1,5 @@
 // https://stackoverflow.com/questions/60059121/nodejs-es6-imports-cannot-find-module#comment106219502_60059121
+
 // eslint-disable-next-line import/extensions
 import { getInstance } from './instantiation.js';
 
