@@ -17,12 +17,14 @@
  * @date 2022
  */
 
+import { keccak256 } from 'web3-utils';
 import allSchemas from '../schemas';
 
 import {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
 } from '../types/ERC725JSONSchema';
+import { isDynamicKeyName } from './encodeKeyName';
 
 const getSchemasByKeyType = (
   schemas: ERC725JSONSchema[],
@@ -86,6 +88,9 @@ const findMappingSchemaForKey = (
   key: string,
   schemas: ERC725JSONSchema[],
 ): ERC725JSONSchema | null => {
+  const firstWordHex = key.substring(0, 26);
+  const secondWordHex = key.substring(26);
+
   // Should detect:
 
   // 1. Known/defined mapping
@@ -96,19 +101,35 @@ const findMappingSchemaForKey = (
   }
 
   // 2. "Semi defined mappings" i.e. "SupportedStandards:??????"
+  let dynamicPart = '??????'; // default for "unknown"
+
   keySchema =
     schemas.find(
-      (schema) => `${schema.key.substring(0, 22)}0000` === key.substring(0, 26),
+      (schema) => `${schema.key.substring(0, 22)}0000` === firstWordHex,
     ) || null;
 
   if (!keySchema) {
     return null;
   }
+
+  const keyNameParts = keySchema.name.split(':');
+
+  // replace dynamic placeholder in the map part (e.g: <address>, <bytes32>) with the hex value
+  if (isDynamicKeyName(keySchema.name)) {
+    dynamicPart = secondWordHex;
+  }
+
+  // if first 20 bytes of the hash of second word in schema match,
+  // display the map part as plain word
+  if (keccak256(keyNameParts[1]).substring(0, 26) === secondWordHex) {
+    [, dynamicPart] = keyNameParts;
+  }
+
   // TODO: Handle the SupportedStandard Keys; we can get the valueContent from the Keys
   return {
     ...keySchema,
     valueContent: '?',
-    name: `${keySchema.name.split(':')[0]}:??????`,
+    name: `${keyNameParts[0]}:${dynamicPart}`,
     key,
   };
 };

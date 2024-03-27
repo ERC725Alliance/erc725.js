@@ -109,6 +109,7 @@ describe('schemaParser getSchema', () => {
         valueType: 'bytes4',
       });
     });
+
     it('finds Known Mapping:<address> ', () => {
       const address = 'af3bf2ffb025098b79caddfbdd113b3681817744';
       const name = `MyCoolAddress:${address}`;
@@ -120,6 +121,43 @@ describe('schemaParser getSchema', () => {
         keyType: 'Mapping',
         valueContent: 'Address',
         valueType: 'address',
+      };
+
+      const schema = getSchema(key, [extraSchema]);
+
+      assert.deepStrictEqual(schema, extraSchema);
+    });
+
+    it('finds known SomeBytes32Mapping:<bytes32>', () => {
+      const bytes32Value =
+        '1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff';
+      const name = `SomeBytes32Mapping:${bytes32Value}`;
+      const key = `0x0cfc51aec37c55a4d0b10000${bytes32Value.slice(0, 42)}`;
+
+      const extraSchema: ERC725JSONSchema = {
+        name,
+        key,
+        keyType: 'Mapping',
+        valueContent: 'Address',
+        valueType: 'address',
+      };
+
+      const schema = getSchema(key, [extraSchema]);
+
+      assert.deepStrictEqual(schema, extraSchema);
+    });
+
+    it('finds known SomeSelectorMap:<bytes4>', () => {
+      const bytes4Value = 'beefbeef';
+      const name = `SomeSelectorMap:${bytes4Value}`;
+      const key = `0x0cfc51aec37c55a4d0b10000${bytes4Value}00000000000000000000000000000000`;
+
+      const extraSchema: ERC725JSONSchema = {
+        name,
+        key,
+        keyType: 'Mapping',
+        valueContent: '(Address,bool)',
+        valueType: '(address,bool)',
       };
 
       const schema = getSchema(key, [extraSchema]);
