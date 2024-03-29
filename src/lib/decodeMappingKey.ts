@@ -18,7 +18,8 @@
  * @date 2022
  */
 
-import { isHex, padLeft } from 'web3-utils';
+import { padLeft } from 'web3-utils';
+import { isHex } from 'web3-validator';
 import { decodeValueType } from './encoder';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { DynamicKeyPart } from '../types/dynamicKeys';
@@ -85,7 +86,7 @@ export function decodeMappingKey(
     throw new Error(
       `Invalid encodedKey length, key must be 32 bytes long hexadecimal value`,
     );
-  if (!isHex(hashedKey.slice(2)))
+  if (!isHex(hashedKey))
     throw new Error(`Invalid encodedKey, must be a hexadecimal value`);
 
   let keyParts: string[];
@@ -93,6 +94,12 @@ export function decodeMappingKey(
   if (typeof keyNameOrSchema === 'string')
     keyParts = keyNameOrSchema.split(':');
   else keyParts = keyNameOrSchema.name.split(':');
+
+  if (keyParts.some((p) => p.includes('string'))) {
+    throw new Error(
+      "String dynamic key parts cannot be decoded, because it's formatted as a keccak256 hash",
+    );
+  }
 
   const dynamicParts: (DynamicKeyPart | false)[] = [];
   switch (keyParts.length) {

@@ -22,15 +22,13 @@
   in accordance with implementation of smart contract interfaces of ERC725
 */
 
-import AbiCoder from 'web3-eth-abi';
+import { encodeParameter, encodeParameters } from 'web3-eth-abi';
 
-import { JsonRpc } from '../types/JsonRpc';
+import type { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
 import { ProviderTypes } from '../types/provider';
 import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../constants/constants';
-
-const abiCoder = AbiCoder;
 
 interface GetDataReturn {
   key: string;
@@ -55,11 +53,7 @@ export class ProviderWrapper {
     const result = await this.callContract(
       constructJSONRPC(address, Method.OWNER, this.gas),
     );
-    if (result.error) {
-      throw result.error;
-    }
-
-    return decodeResult(Method.OWNER, result.result);
+    return decodeResult(Method.OWNER, result);
   }
 
   async getErc725YVersion(address: string): Promise<ERC725_VERSION> {
@@ -98,9 +92,10 @@ export class ProviderWrapper {
       ERC725Y_INTERFACE_IDS.legacy,
     );
 
-    return isErc725YLegacy
-      ? ERC725_VERSION.ERC725_LEGACY
-      : ERC725_VERSION.NOT_ERC725;
+    if (isErc725YLegacy) {
+      return ERC725_VERSION.ERC725_LEGACY;
+    }
+    return ERC725_VERSION.NOT_ERC725;
   }
 
   /**
@@ -121,18 +116,9 @@ export class ProviderWrapper {
         `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
       ),
     );
-
-    // These will be boolean because passing Method.SUPPORTS_INTERFACE ensures they will be decoded to bool by web3-eth-abi lib
-    // The {[key: string]: any} return type causes problems for boolean values so we have to cast here
-    if (this.type === ProviderTypes.ETHEREUM) {
-      return decodeResult(
-        Method.SUPPORTS_INTERFACE,
-        result,
-      ) as unknown as boolean;
-    }
     return decodeResult(
       Method.SUPPORTS_INTERFACE,
-      result.result,
+      result,
     ) as unknown as boolean;
   }
 
@@ -149,7 +135,7 @@ export class ProviderWrapper {
     signature: string,
   ): Promise<string> {
     if (this.type === ProviderTypes.ETHEREUM) {
-      const encodedParams = abiCoder.encodeParameters(
+      const encodedParams = encodeParameters(
         ['bytes32', 'bytes'],
         [hash, signature],
       );
@@ -174,7 +160,7 @@ export class ProviderWrapper {
       ) as unknown as string;
     }
 
-    const encodedParams = abiCoder.encodeParameters(
+    const encodedParams = encodeParameters(
       ['bytes32', 'bytes'],
       [hash, signature],
     );
@@ -246,7 +232,7 @@ export class ProviderWrapper {
           address,
           method,
           undefined, // this.gas,
-          abiCoder.encodeParameter('bytes32[]', keyHashes),
+          encodeParameter('bytes32[]', keyHashes),
         ),
       );
 
@@ -263,7 +249,7 @@ export class ProviderWrapper {
         address,
         method,
         undefined, // this.gas,
-        abiCoder.encodeParameter('bytes32[]', keyHashes),
+        encodeParameter('bytes32[]', keyHashes),
       ),
     ];
 
@@ -323,11 +309,20 @@ export class ProviderWrapper {
   }
 
   private async callContract(payload: JsonRpc[] | JsonRpc): Promise<any> {
+    // Make this mock provider always return the result in terms of data.
+    // So if the result is wrapped in an object as result.result then unwrap it.
+    // Some code was assuming it's wrapped and other was it's not wrapped.
     if (this.type === ProviderTypes.ETHEREUM) {
-      return this.provider.request({
-        method: 'eth_call',
-        params: (payload as JsonRpc).params,
-      });
+      const result = await this.provider.request(payload);
+      if (result.error) {
+        const error = new Error('Call failed');
+        Object.assign(error, result.error);
+        throw error;
+      }
+      if (result.result) {
+        return result.result;
+      }
+      return result;
     }
 
     return new Promise((resolve, reject) => {
@@ -338,6 +333,20 @@ export class ProviderWrapper {
         if (e) {
           reject(e);
         } else {
+          if (r.error) {
+            let error: any;
+            ({ error } = r);
+            if (!(error instanceof Error)) {
+              error = new Error('Call failed');
+              Object.assign(error, r.error);
+            }
+            reject(error);
+            return;
+          }
+          if (r.result) {
+            resolve(r.result);
+            return;
+          }
           resolve(r);
         }
       });

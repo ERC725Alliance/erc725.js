@@ -1,176 +1,34 @@
-/*
-    This file is part of @erc725/erc725.js.
-    @erc725/erc725.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-    @erc725/erc725.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-    You should have received a copy of the GNU Lesser General Public License
-    along with @erc725/erc725.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/**
- * @file index.ts
- * @author Robert McLeod <@robertdavid010>
- * @author Fabian Vogelsteller <fabian@lukso.network>
- * @author Hugo Masclet <@Hugoo>
- * @date 2020
- */
-
-import { hexToNumber, isAddress, leftPad, toHex } from 'web3-utils';
 import HttpProvider from 'web3-providers-http';
-
-import { ProviderWrapper } from './provider/providerWrapper';
-
+import { isAddress } from 'web3-validator';
+import { ProviderWrapper } from '../provider/providerWrapper';
 import {
   encodeData,
   convertIPFSGatewayUrl,
   generateSchemasFromDynamicKeys,
   duplicateMultiTypeERC725SchemaEntry,
-} from './lib/utils';
-
-import { getSchema } from './lib/schemaParser';
-import { isValidSignature } from './lib/isValidSignature';
-
+} from './utils';
+import { getSchema } from './schemaParser';
+import { isValidSignature } from './isValidSignature';
+import { DEFAULT_GAS_VALUE } from '../constants/constants';
+import { encodeKeyName, isDynamicKeyName } from './encodeKeyName';
+import { ERC725Config, ERC725Options } from '../types/Config';
+import { Permissions } from '../types/Method';
+import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import {
-  LSP6_ALL_PERMISSIONS,
-  LSP6_DEFAULT_PERMISSIONS,
-  DEFAULT_GAS_VALUE,
-} from './constants/constants';
-import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
-
-// Types
-import type { ERC725Config, ERC725Options } from './types/Config';
-import type { Permissions } from './types/Method';
-import type {
-  ERC725JSONSchema,
-  ERC725JSONSchemaKeyType,
-  ERC725JSONSchemaValueContent,
-  ERC725JSONSchemaValueType,
-} from './types/ERC725JSONSchema';
-import type {
   DecodeDataInput,
   DecodeDataOutput,
   EncodeDataInput,
   FetchDataOutput,
-} from './types/decodeData';
-import type { GetDataDynamicKey, GetDataInput } from './types/GetData';
-import { decodeData } from './lib/decodeData';
-import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
-import type { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
-import { getData } from './lib/getData';
-import { decodeValueType, encodeValueType } from './lib/encoder';
-import { supportsInterface, checkPermissions } from './lib/detector';
-import { decodeMappingKey } from './lib/decodeMappingKey';
-
-export type {
-  ERC725JSONSchema,
-  ERC725JSONSchemaKeyType,
-  ERC725JSONSchemaValueContent,
-  ERC725JSONSchemaValueType,
-  Permissions,
-  GetDataDynamicKey,
-  GetDataInput,
-  DynamicKeyPart,
-  DynamicKeyParts,
-  DecodeDataInput,
-  DecodeDataOutput,
-  EncodeDataInput,
-  FetchDataOutput,
-};
-
-export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
-export { encodeData, encodeArrayKey } from './lib/utils';
-export { decodeData } from './lib/decodeData';
-export { encodeKeyName } from './lib/encodeKeyName';
-export { decodeMappingKey } from './lib/decodeMappingKey';
-export { decodeValueType, decodeValueContent } from './lib/encoder';
-export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
-
-function initializeProvider(providerOrRpcUrl, gasInfo) {
-  // do not fail on no-provider
-  if (!providerOrRpcUrl) return undefined;
-
-  // if provider is a string, assume it's a rpcUrl
-  if (typeof providerOrRpcUrl === 'string') {
-    return new ProviderWrapper(new HttpProvider(providerOrRpcUrl), gasInfo);
-  }
-
-  if (
-    typeof providerOrRpcUrl.request === 'function' ||
-    typeof providerOrRpcUrl.send === 'function'
-  )
-    return new ProviderWrapper(providerOrRpcUrl, gasInfo);
-
-  throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
-}
-
-export function decodePermissions(permissionHex: string): Permissions {
-  const result = {
-    CHANGEOWNER: false,
-    ADDCONTROLLER: false,
-    EDITPERMISSIONS: false,
-    ADDEXTENSIONS: false,
-    CHANGEEXTENSIONS: false,
-    ADDUNIVERSALRECEIVERDELEGATE: false,
-    CHANGEUNIVERSALRECEIVERDELEGATE: false,
-    REENTRANCY: false,
-    SUPER_TRANSFERVALUE: false,
-    TRANSFERVALUE: false,
-    SUPER_CALL: false,
-    CALL: false,
-    SUPER_STATICCALL: false,
-    STATICCALL: false,
-    SUPER_DELEGATECALL: false,
-    DELEGATECALL: false,
-    DEPLOY: false,
-    SUPER_SETDATA: false,
-    SETDATA: false,
-    ENCRYPT: false,
-    DECRYPT: false,
-    SIGN: false,
-    EXECUTE_RELAY_CALL: false,
-    ERC4337_PERMISSION: false,
-  };
-
-  const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);
-  if (permissionHex === LSP6_ALL_PERMISSIONS) {
-    for (let i = 0; i < permissionsToTest.length; i += 1) {
-      const testPermission = permissionsToTest[i];
-      result[testPermission] = true;
-    }
-    return result;
-  }
-
-  const passedPermissionDecimal = Number(hexToNumber(permissionHex));
-
-  for (let i = 0; i < permissionsToTest.length; i += 1) {
-    const testPermission = permissionsToTest[i];
-    const decimalTestPermission = Number(
-      hexToNumber(LSP6_DEFAULT_PERMISSIONS[testPermission]),
-    );
-    const isPermissionIncluded =
-      (passedPermissionDecimal & decimalTestPermission) ===
-      decimalTestPermission;
-
-    result[testPermission] = isPermissionIncluded;
-  }
-
-  return result;
-}
-
-export function encodePermissions(permissions: Permissions): string {
-  const result = Object.keys(permissions).reduce((previous, key) => {
-    return permissions[key]
-      ? previous | Number(hexToNumber(LSP6_DEFAULT_PERMISSIONS[key]))
-      : previous;
-  }, 0);
-
-  return leftPad(toHex(result), 64);
-}
+} from '../types/decodeData';
+import { GetDataDynamicKey, GetDataInput } from '../types/GetData';
+import { decodeData } from './decodeData';
+import { getDataFromExternalSources } from './getDataFromExternalSources';
+import { DynamicKeyPart, DynamicKeyParts } from '../types/dynamicKeys';
+import { getData } from './getData';
+import { decodeValueType, encodeValueType } from './encoder';
+import { supportsInterface, checkPermissions } from './detector';
+import { decodeMappingKey } from './decodeMappingKey';
+import { decodePermissions, encodePermissions } from './permissions';
 
 /**
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
@@ -178,6 +36,7 @@ export function encodePermissions(permissions: Permissions): string {
  * @typeParam Schema
  *
  */
+
 export class ERC725 {
   options: ERC725Options;
 
@@ -196,25 +55,24 @@ export class ERC725 {
     config?: ERC725Config,
   ) {
     // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
-
     // TODO: Add check for schema format?
     if (!schemas) {
       throw new Error('Missing schema.');
     }
 
     const defaultConfig = {
-      ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/',
+      ipfsGateway: 'https://api.universalprofile.cloud/ipfs/',
       gas: DEFAULT_GAS_VALUE,
     };
 
     this.options = {
       schemas: this.validateSchemas(
-        schemas.flatMap((schema) =>
-          duplicateMultiTypeERC725SchemaEntry(schema),
-        ),
+        schemas
+          .map((schema) => duplicateMultiTypeERC725SchemaEntry(schema))
+          .flat(),
       ),
       address,
-      provider: initializeProvider(
+      provider: ERC725.initializeProvider(
         provider,
         config?.gas ? config?.gas : defaultConfig.gas,
       ),
@@ -257,15 +115,31 @@ export class ERC725 {
         return isKeyValid;
       } catch (err: any) {
         // We could not encodeKeyName, probably because the key is dynamic (Mapping or MappingWithGrouping).
-
         // TODO: make sure the dynamic key name is valid:
         // - has max 2 variables
         // - variables are correct (<string>, <bool>, etc.)
-
         // Keeping dynamic keys may be an issue for getData / fetchData functions.
         return true;
       }
     });
+  }
+
+  private static initializeProvider(providerOrRpcUrl, gasInfo) {
+    // do not fail on no-provider
+    if (!providerOrRpcUrl) return undefined;
+
+    // if provider is a string, assume it's a rpcUrl
+    if (typeof providerOrRpcUrl === 'string') {
+      return new ProviderWrapper(new HttpProvider(providerOrRpcUrl), gasInfo);
+    }
+
+    if (
+      typeof providerOrRpcUrl.request === 'function' ||
+      typeof providerOrRpcUrl.send === 'function'
+    )
+      return new ProviderWrapper(providerOrRpcUrl, gasInfo);
+
+    throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
   }
 
   private getAddressAndProvider() {
@@ -319,7 +193,6 @@ export class ERC725 {
    *
    * @returns Returns the fetched and decoded value depending ‘valueContent’ for the schema element, otherwise works like getData.
    */
-
   async fetchData(
     keyOrKeys?: Array<string | GetDataDynamicKey>,
   ): Promise<FetchDataOutput[]>;
@@ -658,7 +531,7 @@ export class ERC725 {
 
     return supportsInterface(interfaceIdOrName, {
       address: options.address,
-      provider: initializeProvider(
+      provider: this.initializeProvider(
         options.rpcUrl,
         options?.gas ? options?.gas : DEFAULT_GAS_VALUE,
       ),
@@ -727,5 +600,3 @@ export class ERC725 {
     return ERC725.decodeValueType(type, data);
   }
 }
-
-export default ERC725;

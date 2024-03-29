@@ -17,14 +17,9 @@
  * @date 2022
  */
 
-import {
-  isAddress,
-  isHex,
-  keccak256,
-  leftPad,
-  numberToHex,
-  padLeft,
-} from 'web3-utils';
+import { isAddress, isHex } from 'web3-validator';
+import { keccak256, leftPad, numberToHex, padLeft } from 'web3-utils';
+import { stripHexPrefix } from 'web3-eth-accounts';
 
 import { guessKeyTypeFromKeyName } from './utils';
 import { DynamicKeyParts } from '../types/dynamicKeys';
@@ -112,16 +107,15 @@ export const encodeDynamicKeyPart = (
       // TODO:
       throw new Error('The encoding of <intM> has not been implemented yet.');
     case 'bytes': {
-      const valueWithoutPrefix = value.replace('0x', '');
-      if (valueWithoutPrefix.length !== size * 2) {
-        throw new Error(
-          `Wrong value: ${value} for dynamic key with type: ${type}. Value is not ${size} bytes long.`,
-        );
-      }
-
-      if (!isHex(valueWithoutPrefix)) {
+      if (!isHex(value)) {
         throw new Error(
           `Wrong value: ${value} for dynamic key with type: ${type}. Value is not in hex.`,
+        );
+      }
+      const valueWithoutPrefix = value.replace('0x', '');
+      if (valueWithoutPrefix.length > size * 2) {
+        throw new Error(
+          `Wrong value: ${value} for dynamic key with type: ${type}. Value longer than ${size} bytes.`,
         );
       }
 
@@ -129,7 +123,7 @@ export const encodeDynamicKeyPart = (
         return valueWithoutPrefix.slice(0, bytes * 2); // right cut
       }
 
-      return leftPad(valueWithoutPrefix, bytes * 2).toLowerCase();
+      return stripHexPrefix(leftPad(value, bytes * 2).toLowerCase());
     }
     default:
       throw new Error(`Dynamic key: ${type} is not supported`);
