@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.24.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.23.1...v0.24.0) (2024-04-02)
+
+
+### Features
+
+* add dynamic array encoding ([f0f495c](https://github.com/ERC725Alliance/erc725.js/commit/f0f495c69e8b4768468437cad24f1b77d53a379f))
+* replace dynamic part with hex value when parsing schemas for `Mapping` keys ([a9fdb4d](https://github.com/ERC725Alliance/erc725.js/commit/a9fdb4daa69e2aac38aca2393f94e8fe83113656))
+
+
+### Bug Fixes
+
+* Patch full pretty printed with LF and TAB. ([315fa54](https://github.com/ERC725Alliance/erc725.js/commit/315fa547ab8f2d25db4f771d818afeec0d324bdf))
+
 ## [0.23.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.23.0...v0.23.1) (2024-02-23)
 
 
