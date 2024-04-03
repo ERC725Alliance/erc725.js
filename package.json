@@ -1,6 +1,6 @@
 {
   "name": "@erc725/erc725.js",
-  "version": "0.23.0",
+  "version": "0.24.0",
   "description": "Library to interact with ERC725 smart contracts",
   "main": "build/main/src/index.js",
   "typings": "build/main/src/index.d.ts",
