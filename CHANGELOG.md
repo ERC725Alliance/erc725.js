@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.24.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.24.0...v0.24.1) (2024-04-03)
+
+
+### Bug Fixes
+
+* Add missing exports due to merge conflict. ([2e14cd5](https://github.com/ERC725Alliance/erc725.js/commit/2e14cd5b4a5a1f51222c1056bd4220be2a09a02d))
+
 ## [0.24.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.23.1...v0.24.0) (2024-04-02)
 
 ### Features
