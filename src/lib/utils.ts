@@ -106,7 +106,16 @@ export function encodeKeyValue(
     valueContentEncodingMethods &&
     valueContentEncodingMethods.type === valueType.split('[]')[0];
 
-  let result;
+  let result:
+    | (string | false | AssetURLEncode)[]
+    | string
+    | undefined
+    | string
+    | number
+    | boolean
+    | string[]
+    | number[]
+    | boolean[];
 
   // We only loop if the valueType done by abi.encodeParameter can not handle it directly
   if (Array.isArray(decodedValue)) {
@@ -128,12 +137,15 @@ export function encodeKeyValue(
     // Requires encoding because !sameEncoding means both encodings are required
     !isSameEncoding
   ) {
-    result = encodeValueType(valueType, result);
+    result = encodeValueType(
+      valueType,
+      result as string | number | boolean | string[] | number[] | boolean[],
+    );
   } else if (isValueTypeArray && isSameEncoding) {
     result = encodeValueType(valueType, decodedValue as any);
   }
 
-  return result;
+  return result as string | false;
 }
 
 /**
@@ -194,34 +206,32 @@ export const encodeTupleKeyValue = (
     );
   }
 
-  const returnValue =
-    `0x` +
-    valueContentParts
-      .map((valueContentPart, i) => {
-        const encodedKeyValue = encodeKeyValue(
-          valueContentPart,
-          valueTypeParts[i],
-          decodedValues[i],
+  const returnValue = `0x${valueContentParts
+    .map((valueContentPart, i) => {
+      const encodedKeyValue = encodeKeyValue(
+        valueContentPart,
+        valueTypeParts[i],
+        decodedValues[i],
+      );
+
+      if (!encodedKeyValue) {
+        return ''; // may cause issues?
+      }
+
+      const numberOfBytes = Number.parseInt(valueTypeParts[i].substring(5), 10); // bytes50 -> 50
+
+      // If the encoded value is too large for the expected valueType, we shrink it from the left
+      // i.e. number are encoded on 32bytes
+      // TODO: might be missing cases !
+      if (encodedKeyValue.length > 2 + numberOfBytes * 2) {
+        return encodedKeyValue.slice(
+          encodedKeyValue.length - numberOfBytes * 2,
         );
+      }
 
-        if (!encodedKeyValue) {
-          return ''; // may cause issues?
-        }
-
-        const numberOfBytes = parseInt(valueTypeParts[i].substring(5), 10); // bytes50 -> 50
-
-        // If the encoded value is too large for the expected valueType, we shrink it from the left
-        // i.e. number are encoded on 32bytes
-        // TODO: might be missing cases !
-        if (encodedKeyValue.length > 2 + numberOfBytes * 2) {
-          return encodedKeyValue.slice(
-            encodedKeyValue.length - numberOfBytes * 2,
-          );
-        }
-
-        return padLeft(encodedKeyValue, numberOfBytes * 2).replace('0x', '');
-      })
-      .join('');
+      return padLeft(encodedKeyValue, numberOfBytes * 2).replace('0x', '');
+    })
+    .join('')}`;
 
   return returnValue;
 };
@@ -373,9 +383,7 @@ export function encodeKey(
       );
     default:
       console.error(
-        'Incorrect data match or keyType in schema from encodeKey(): "' +
-          schema.keyType +
-          '"',
+        `Incorrect data match or keyType in schema from encodeKey(): "${schema.keyType}"`,
       );
       return null;
   }
@@ -393,19 +401,16 @@ export function encodeKey(
 export function decodeKeyValue(
   valueContent: string,
   valueType: ERC725JSONSchemaValueType | string, // string for tuples and CompactBytesArray
-  value,
+  _value,
   name?: string,
 ) {
   // Check for the missing map.
   const valueContentEncodingMethods = valueContentMap(valueContent);
+  let value = _value;
 
   if (!valueContentEncodingMethods && valueContent.slice(0, 2) !== '0x') {
     throw new Error(
-      'The valueContent "' +
-        valueContent +
-        '" for "' +
-        name +
-        '" is not supported.',
+      `The valueContent "${valueContent}" for "${name}" is not supported.`,
     );
   }
 
@@ -470,7 +475,14 @@ export function encodeData(
       { keyName, value, dynamicKeyParts, startingIndex, totalArrayLength },
     ) => {
       let schemaElement: ERC725JSONSchema | null = null;
-      let encodedValue; // would be nice to type this
+      let encodedValue:
+        | string
+        | false
+        | {
+            key: string;
+            value: string;
+          }[]
+        | null; // would be nice to type this
 
       // Switch between non dynamic and dynamic keys:
       if (isDynamicKeyName(keyName)) {
@@ -501,11 +513,12 @@ export function encodeData(
       if (typeof encodedValue === 'string') {
         accumulator.keys.push(schemaElement.key);
         accumulator.values.push(encodedValue);
-      } else if (encodedValue !== false && encodedValue !== null) {
-        encodedValue.forEach((keyValuePair) => {
-          accumulator.keys.push(keyValuePair.key);
-          accumulator.values.push(keyValuePair.value);
-        });
+      } else if (encodedValue !== false && encodedValue != null) {
+        for (let i = 0; i < encodedValue.length; i++) {
+          const { key, value: _value } = encodedValue[i];
+          accumulator.keys.push(key);
+          accumulator.values.push(_value);
+        }
       }
 
       return accumulator;
@@ -568,11 +581,11 @@ export function convertIPFSGatewayUrl(ipfsGateway: string) {
   let convertedIPFSGateway = ipfsGateway;
 
   if (ipfsGateway.endsWith('/') && !ipfsGateway.endsWith('/ipfs/')) {
-    convertedIPFSGateway = ipfsGateway + 'ipfs/';
+    convertedIPFSGateway = `${ipfsGateway}ipfs/`;
   } else if (ipfsGateway.endsWith('/ipfs')) {
-    convertedIPFSGateway = ipfsGateway + '/';
+    convertedIPFSGateway = `${ipfsGateway}/`;
   } else if (!ipfsGateway.endsWith('/ipfs/')) {
-    convertedIPFSGateway = ipfsGateway + '/ipfs/';
+    convertedIPFSGateway = `${ipfsGateway}/ipfs/`;
   }
 
   return convertedIPFSGateway;
@@ -602,11 +615,7 @@ export function patchIPFSUrlsIfApplicable(
   receivedData: URLDataWithHash,
   ipfsGateway: string,
 ): URLDataWithHash {
-  if (
-    receivedData &&
-    receivedData.url &&
-    receivedData.url.indexOf('ipfs://') !== -1
-  ) {
+  if (receivedData?.url?.indexOf('ipfs://') !== -1) {
     return {
       ...receivedData,
       url: receivedData.url.replace('ipfs://', ipfsGateway),
@@ -787,17 +796,15 @@ export const duplicateMultiTypeERC725SchemaEntry = (
   // Processing of the last part of the group - which is dynamic
   const lastDynamicTypes = splitMultiDynamicKeyNamePart(nameGroups[1]);
 
-  return finalSchemas
-    .map((finalSchema) => {
-      return lastDynamicTypes.map((lastDynamicType) => {
-        return {
-          ...finalSchema,
-          name: `${finalSchema.name}:<${lastDynamicType}>`,
-          key: `${finalSchema.key}<${lastDynamicType}>`,
-        };
-      });
-    })
-    .flat();
+  return finalSchemas.flatMap((finalSchema) => {
+    return lastDynamicTypes.map((lastDynamicType) => {
+      return {
+        ...finalSchema,
+        name: `${finalSchema.name}:<${lastDynamicType}>`,
+        key: `${finalSchema.key}<${lastDynamicType}>`,
+      };
+    });
+  });
 };
 
 /*
