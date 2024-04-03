@@ -20,7 +20,7 @@
  * @date 2020
  */
 
-import { hexToNumber, isAddress, leftPad, toHex } from 'web3-utils';
+import { isAddress } from 'web3-utils';
 import HttpProvider from 'web3-providers-http';
 
 import { ProviderWrapper } from './provider/providerWrapper';
@@ -35,11 +35,7 @@ import {
 import { getSchema } from './lib/schemaParser';
 import { isValidSignature } from './lib/isValidSignature';
 
-import {
-  LSP6_ALL_PERMISSIONS,
-  LSP6_DEFAULT_PERMISSIONS,
-  DEFAULT_GAS_VALUE,
-} from './constants/constants';
+import { DEFAULT_GAS_VALUE } from './constants/constants';
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types
@@ -65,6 +61,7 @@ import { getData } from './lib/getData';
 import { decodeValueType, encodeValueType } from './lib/encoder';
 import { supportsInterface, checkPermissions } from './lib/detector';
 import { decodeMappingKey } from './lib/decodeMappingKey';
+import { encodePermissions, decodePermissions } from './lib/permissions';
 
 export {
   ERC725JSONSchema,
@@ -76,10 +73,16 @@ export {
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
 export { encodeData, encodeArrayKey } from './lib/utils';
 export { decodeData } from './lib/decodeData';
-export { encodeKeyName } from './lib/encodeKeyName';
+export { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 export { decodeMappingKey } from './lib/decodeMappingKey';
-export { decodeValueType, decodeValueContent } from './lib/encoder';
+export {
+  decodeValueType,
+  decodeValueContent,
+  encodeValueType,
+} from './lib/encoder';
 export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
+export { encodePermissions, decodePermissions } from './lib/permissions';
+export { supportsInterface, checkPermissions } from './lib/detector';
 
 /**
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
@@ -118,9 +121,9 @@ export class ERC725 {
 
     this.options = {
       schemas: this.validateSchemas(
-        schemas
-          .map((schema) => duplicateMultiTypeERC725SchemaEntry(schema))
-          .flat(),
+        schemas.flatMap((schema) =>
+          duplicateMultiTypeERC725SchemaEntry(schema),
+        ),
       ),
       address,
       provider: ERC725.initializeProvider(
@@ -455,53 +458,7 @@ export class ERC725 {
    * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
    */
   static encodePermissions(permissions: Permissions): string {
-    let basePermissions = BigInt(0);
-
-    // If ALL_PERMISSIONS is requested, start with that as the base
-    if (permissions.ALL_PERMISSIONS) {
-      basePermissions = BigInt(
-        hexToNumber(LSP6_DEFAULT_PERMISSIONS.ALL_PERMISSIONS),
-      );
-    }
-
-    // Explicitly add REENTRANCY, DELEGATECALL, and SUPER_DELEGATECALL if requested (they are not included in ALL_PERMISSIONS)
-    const additionalPermissions = [
-      LSP6_DEFAULT_PERMISSIONS.REENTRANCY,
-      LSP6_DEFAULT_PERMISSIONS.DELEGATECALL,
-      LSP6_DEFAULT_PERMISSIONS.SUPER_DELEGATECALL,
-    ];
-    additionalPermissions.forEach((permission) => {
-      if (permissions[permission]) {
-        basePermissions |= BigInt(
-          hexToNumber(LSP6_DEFAULT_PERMISSIONS[permission]),
-        );
-      }
-    });
-
-    // Process each permission to potentially switch off permissions included in ALL_PERMISSIONS
-    Object.keys(permissions).forEach((key) => {
-      const permissionValue = BigInt(
-        hexToNumber(LSP6_DEFAULT_PERMISSIONS[key]),
-      );
-
-      if (permissions[key]) {
-        // If not dealing with ALL_PERMISSIONS or additional permissions, ensure they are added
-        if (
-          !additionalPermissions.includes(key) &&
-          key !== LSP6_DEFAULT_PERMISSIONS.ALL_PERMISSIONS
-        ) {
-          basePermissions |= permissionValue;
-        }
-      } else if (
-        LSP6_DEFAULT_PERMISSIONS[key] !==
-        LSP6_DEFAULT_PERMISSIONS.ALL_PERMISSIONS
-      ) {
-        // If permission is set to false, remove it from the basePermissions
-        basePermissions &= ~permissionValue;
-      }
-    });
-    // Convert the final BigInt permission value back to a hex string, properly padded
-    return leftPad(toHex(basePermissions.toString()), 64);
+    return encodePermissions(permissions);
   }
 
   /**
@@ -512,7 +469,7 @@ export class ERC725 {
    * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
    */
   encodePermissions(permissions: Permissions): string {
-    return ERC725.encodePermissions(permissions);
+    return encodePermissions(permissions);
   }
 
   /**
@@ -523,56 +480,7 @@ export class ERC725 {
    * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
    */
   static decodePermissions(permissionHex: string) {
-    const result = {
-      CHANGEOWNER: false,
-      ADDCONTROLLER: false,
-      EDITPERMISSIONS: false,
-      ADDEXTENSIONS: false,
-      CHANGEEXTENSIONS: false,
-      ADDUNIVERSALRECEIVERDELEGATE: false,
-      CHANGEUNIVERSALRECEIVERDELEGATE: false,
-      REENTRANCY: false,
-      SUPER_TRANSFERVALUE: false,
-      TRANSFERVALUE: false,
-      SUPER_CALL: false,
-      CALL: false,
-      SUPER_STATICCALL: false,
-      STATICCALL: false,
-      SUPER_DELEGATECALL: false,
-      DELEGATECALL: false,
-      DEPLOY: false,
-      SUPER_SETDATA: false,
-      SETDATA: false,
-      ENCRYPT: false,
-      DECRYPT: false,
-      SIGN: false,
-      EXECUTE_RELAY_CALL: false,
-      ERC4337_PERMISSION: false,
-      ALL_PERMISSIONS: false,
-    };
-
-    const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);
-    if (permissionHex === LSP6_ALL_PERMISSIONS) {
-      permissionsToTest.forEach((testPermission) => {
-        result[testPermission] = true;
-      });
-      return result;
-    }
-
-    const passedPermissionDecimal = Number(hexToNumber(permissionHex));
-
-    permissionsToTest.forEach((testPermission) => {
-      const decimalTestPermission = Number(
-        hexToNumber(LSP6_DEFAULT_PERMISSIONS[testPermission]),
-      );
-      const isPermissionIncluded =
-        (passedPermissionDecimal & decimalTestPermission) ===
-        decimalTestPermission;
-
-      result[testPermission] = isPermissionIncluded;
-    });
-
-    return result;
+    return decodePermissions(permissionHex);
   }
 
   /**
@@ -583,7 +491,7 @@ export class ERC725 {
    * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
    */
   decodePermissions(permissionHex: string) {
-    return ERC725.decodePermissions(permissionHex);
+    return decodePermissions(permissionHex);
   }
 
   /**
@@ -680,7 +588,7 @@ export class ERC725 {
 
     return supportsInterface(interfaceIdOrName, {
       address: options.address,
-      provider: this.initializeProvider(
+      provider: ERC725.initializeProvider(
         options.rpcUrl,
         options?.gas ? options?.gas : DEFAULT_GAS_VALUE,
       ),
@@ -714,7 +622,7 @@ export class ERC725 {
     requiredPermissions: string[] | string,
     grantedPermissions: string,
   ): boolean {
-    return ERC725.checkPermissions(requiredPermissions, grantedPermissions);
+    return checkPermissions(requiredPermissions, grantedPermissions);
   }
 
   /**
@@ -733,7 +641,7 @@ export class ERC725 {
     type: string,
     value: string | string[] | number | number[] | boolean | boolean[],
   ): string {
-    return ERC725.encodeValueType(type, value);
+    return encodeValueType(type, value);
   }
 
   /**
@@ -746,7 +654,7 @@ export class ERC725 {
   }
 
   decodeValueType(type: string, data: string) {
-    return ERC725.decodeValueType(type, data);
+    return decodeValueType(type, data);
   }
 }
 
