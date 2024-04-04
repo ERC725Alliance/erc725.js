@@ -1,4 +1,4 @@
-import { hexToNumber, leftPad, toHex } from 'web3-utils';
+import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
 import {
   LSP6_ALL_PERMISSIONS,
   LSP6_DEFAULT_PERMISSIONS,
@@ -54,7 +54,7 @@ export function encodePermissions(permissions: Permissions): string {
     }
   }
   // Convert the final BigInt permission value back to a hex string, properly padded
-  return leftPad(toHex(basePermissions.toString()), 64);
+  return leftPad(numberToHex(basePermissions.toString()), 64);
 }
 
 export function decodePermissions(permissionHex: string) {

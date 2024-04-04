@@ -40,8 +40,8 @@ import {
   stripHexPrefix,
   hexToBytes,
   bytesToHex,
-  toHex,
   toBN,
+  stringToHex,
 } from 'web3-utils';
 
 import { URLDataToEncode, URLDataWithHash, Verification } from '../types';
@@ -159,8 +159,8 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
     // ignore
   }
 
-  const dataHash = '0x' + encodedData.slice(0, 64); // Get jsonHash 32 bytes
-  const dataSource = hexToUtf8('0x' + encodedData.slice(64)); // Get remainder as URI
+  const dataHash = `0x${encodedData.slice(0, 64)}`; // Get jsonHash 32 bytes
+  const dataSource = hexToUtf8(`0x${encodedData.slice(64)}`); // Get remainder as URI
 
   return {
     verification: {
@@ -179,7 +179,7 @@ const encodeToBytesN = (
 
   if (typeof value === 'string' && !isHex(value)) {
     // if we receive a plain string (e.g: "hey!"), convert it to utf8-hex data
-    valueToEncode = toHex(value);
+    valueToEncode = stringToHex(value);
   } else if (typeof value === 'number') {
     // if we receive a number as input, convert it to hex
     valueToEncode = numberToHex(value);
@@ -187,7 +187,7 @@ const encodeToBytesN = (
     valueToEncode = value;
   }
 
-  const numberOfBytesInType = parseInt(bytesN.split('bytes')[1], 10);
+  const numberOfBytesInType = Number.parseInt(bytesN.split('bytes')[1], 10);
   const numberOfBytesInValue = countNumberOfBytes(valueToEncode);
 
   if (numberOfBytesInValue > numberOfBytesInType) {
@@ -256,7 +256,7 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
 
   while (pointer < strippedCompactBytesArray.length) {
     const length = Number(
-      hexToNumber('0x' + strippedCompactBytesArray.slice(pointer, pointer + 4)),
+      hexToNumber(`0x${strippedCompactBytesArray.slice(pointer, pointer + 4)}`),
     );
 
     if (length === 0) {
@@ -264,11 +264,10 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
       encodedValues.push('');
     } else {
       encodedValues.push(
-        '0x' +
-          strippedCompactBytesArray.slice(
-            pointer + 4,
-            pointer + 2 * (length + 2),
-          ),
+        `0x${strippedCompactBytesArray.slice(
+          pointer + 4,
+          pointer + 2 * (length + 2),
+        )}`,
       );
     }
 
@@ -444,7 +443,7 @@ const valueTypeEncodingMap = (
   const uintNRegexMatch = type.match(uintNValueTypeRegex);
 
   const uintLength = uintNRegexMatch
-    ? parseInt(uintNRegexMatch[0].slice(4), 10)
+    ? Number.parseInt(uintNRegexMatch[0].slice(4), 10)
     : '';
 
   if (type.includes('[CompactBytesArray]')) {
@@ -571,17 +570,17 @@ const valueTypeEncodingMap = (
       };
     case 'bytes':
       return {
-        encode: (value: string) => toHex(value),
+        encode: (value: string) => value,
         decode: (value: string) => value,
       };
     case 'bool[]':
       return {
-        encode: (value: boolean) => abiCoder.encodeParameter('bool[]', value),
+        encode: (value: boolean[]) => abiCoder.encodeParameter('bool[]', value),
         decode: (value: string) => abiCoder.decodeParameter('bool[]', value),
       };
     case 'boolean[]':
       return {
-        encode: (value: boolean) => abiCoder.encodeParameter('bool[]', value),
+        encode: (value: boolean[]) => abiCoder.encodeParameter('bool[]', value),
         decode: (value: string) => abiCoder.decodeParameter('bool[]', value),
       };
     case 'string[]':
@@ -604,7 +603,7 @@ const valueTypeEncodingMap = (
           // we want to return an array of numbers as [1, 2, 3], not an array of strings as [ '1', '2', '3']
           return abiCoder
             .decodeParameter('uint256[]', value)
-            .map((numberAsString) => parseInt(numberAsString, 10));
+            .map((numberAsString) => Number.parseInt(numberAsString, 10));
         },
       };
     case 'bytes32[]':
@@ -661,7 +660,9 @@ export const valueContentEncodingMap = (
   decode: (value: string) => any;
 } => {
   const bytesNRegexMatch = valueContent.match(BytesNValueContentRegex);
-  const bytesLength = bytesNRegexMatch ? parseInt(bytesNRegexMatch[1], 10) : '';
+  const bytesLength = bytesNRegexMatch
+    ? Number.parseInt(bytesNRegexMatch[1], 10)
+    : '';
 
   switch (valueContent) {
     case 'Keccak256': {
@@ -677,7 +678,7 @@ export const valueContentEncodingMap = (
         encode: (value: string) => {
           let parsedValue: number;
           try {
-            parsedValue = parseInt(value, 10);
+            parsedValue = Number.parseInt(value, 10);
           } catch (error: any) {
             throw new Error(error);
           }
@@ -696,7 +697,7 @@ export const valueContentEncodingMap = (
             return value.toLowerCase();
           }
 
-          throw new Error('Address: "' + value + '" is an invalid address.');
+          throw new Error(`Address: "${value}" is an invalid address.`);
         },
         decode: (value: string) => toChecksumAddress(value),
       };
