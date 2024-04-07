@@ -27,7 +27,14 @@ import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
 // examples of schemas to load (for testing)
 import { LSP1Schema, LSP12Schema, LSP3Schema, LSP6Schema } from './schemas';
 
-import ERC725 from '.';
+import ERC725, {
+  checkPermissions,
+  decodeMappingKey,
+  decodePermissions,
+  encodeKeyName,
+  encodePermissions,
+  supportsInterface,
+} from '.';
 import {
   decodeKeyValue,
   encodeKey,
@@ -988,9 +995,9 @@ describe('Running @erc725/erc725.js tests...', () => {
             values: [],
           };
 
-          keyValuePairs.forEach((keyValuePair) => {
-            intendedResult.keys.push(keyValuePair.key);
-            intendedResult.values.push(keyValuePair.value);
+          keyValuePairs.forEach(({ key, value }) => {
+            intendedResult.keys.push(key);
+            intendedResult.values.push(value);
           });
 
           const erc725 = new ERC725([schemaElement]);
@@ -1394,7 +1401,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       testCases.forEach((testCase) => {
         it(`Encodes ${testCase.hex} permission correctly`, () => {
           assert.deepStrictEqual(
-            ERC725.encodePermissions(testCase.permissions),
+            encodePermissions(testCase.permissions),
             testCase.hex,
           );
           assert.deepStrictEqual(
@@ -1406,7 +1413,7 @@ describe('Running @erc725/erc725.js tests...', () => {
 
       it('Defaults permissions to false if not passed', () => {
         assert.deepStrictEqual(
-          ERC725.encodePermissions({
+          encodePermissions({
             EDITPERMISSIONS: true,
             SETDATA: true,
           }),
@@ -1475,7 +1482,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       for (let i = 0; i < numberOfTests; i++) {
         it(`Randomized test #${i + 1}`, () => {
           const randomPermissions = generateRandomPermissions();
-          const encoded = ERC725.encodePermissions(randomPermissions);
+          const encoded = encodePermissions(randomPermissions);
           const expectedHex = calculateExpectedHex(randomPermissions);
           assert.strictEqual(
             encoded,
@@ -1489,7 +1496,7 @@ describe('Running @erc725/erc725.js tests...', () => {
     describe('all permissions', () => {
       it('should encode ALL_PERMISSIONS correctly', () => {
         const permissions = { ALL_PERMISSIONS: true };
-        const encoded = ERC725.encodePermissions(permissions);
+        const encoded = encodePermissions(permissions);
 
         assert.strictEqual(
           encoded,
@@ -1498,12 +1505,81 @@ describe('Running @erc725/erc725.js tests...', () => {
         );
       });
 
+      it('should decode ALL_PERMISSIONS', () => {
+        const permissions = { ALL_PERMISSIONS: true };
+        const encoded = encodePermissions(permissions);
+
+        const decodedPermissions = decodePermissions(encoded);
+
+        assert.strictEqual(
+          decodedPermissions.ALL_PERMISSIONS,
+          true,
+          'Decoded permissions includes ALL_PERMISSIONS',
+        );
+      });
+
+      it('should not decode CALL or ALL_PERMISSIONS if perms are missing', () => {
+        const permissions = { ALL_PERMISSIONS: true, CALL: false };
+        const encoded = encodePermissions(permissions);
+
+        const decodedPermissions = decodePermissions(encoded);
+
+        assert.strictEqual(
+          decodedPermissions.CALL,
+          false,
+          'Decoded permissions includes CALL',
+        );
+        assert.strictEqual(
+          decodedPermissions.ALL_PERMISSIONS,
+          false,
+          'Decoded permissions includes ALL_PERMISSIONS',
+        );
+      });
+
+      it('should allow editing of permissions remove from all', () => {
+        const permissions = { ALL_PERMISSIONS: true };
+        const encoded = encodePermissions(permissions);
+
+        const decodedPermissions = decodePermissions(encoded);
+        decodedPermissions.CALL = false;
+        const reencodePermissions = encodePermissions(decodedPermissions);
+        const redecodedPermissions = decodePermissions(reencodePermissions);
+
+        assert.strictEqual(
+          redecodedPermissions.CALL,
+          false,
+          'Re-reencoded permissions includes CALL',
+        );
+      });
+
+      it('should allow editing of permissions add extra', () => {
+        const permissions = { ALL_PERMISSIONS: true };
+        const encoded = encodePermissions(permissions);
+
+        const decodedPermissions = decodePermissions(encoded);
+        decodedPermissions.SUPER_DELEGATECALL = true;
+        decodedPermissions.DELEGATECALL = true;
+        const reencodePermissions = encodePermissions(decodedPermissions);
+        const redecodedPermissions = decodePermissions(reencodePermissions);
+
+        assert.strictEqual(
+          redecodedPermissions.SUPER_DELEGATECALL,
+          true,
+          'Re-reencoded permissions includes SUPER_DELEGATECALL',
+        );
+        assert.strictEqual(
+          redecodedPermissions.DELEGATECALL,
+          true,
+          'Re-reencoded permissions includes DELEGATECALL',
+        );
+      });
+
       it('should ignore individual permissions when ALL_PERMISSIONS is set', () => {
         const permissions = {
           ALL_PERMISSIONS: true,
           CHANGEOWNER: true,
         };
-        const encoded = ERC725.encodePermissions(permissions);
+        const encoded = encodePermissions(permissions);
         assert.strictEqual(
           encoded,
           LSP6_DEFAULT_PERMISSIONS.ALL_PERMISSIONS,
@@ -1516,8 +1592,8 @@ describe('Running @erc725/erc725.js tests...', () => {
           CHANGEOWNER: false, // Explicitly disable CHANGEOWNER
         };
 
-        const encoded = ERC725.encodePermissions(permissions);
-        const decodedPermissions = ERC725.decodePermissions(encoded);
+        const encoded = encodePermissions(permissions);
+        const decodedPermissions = decodePermissions(encoded);
 
         // check that the permission is disabled
         assert.strictEqual(
@@ -1532,7 +1608,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       testCases.forEach((testCase) => {
         it(`Decodes ${testCase.hex} permission correctly`, () => {
           assert.deepStrictEqual(
-            ERC725.decodePermissions(testCase.hex),
+            decodePermissions(testCase.hex),
             testCase.permissions,
           );
 
@@ -1542,9 +1618,81 @@ describe('Running @erc725/erc725.js tests...', () => {
           );
         });
       });
-      it(`Decodes 0xfff...fff admin permission correctly`, () => {
+      it('Decodes 0xfff...fff admin permission correctly but re-encodes only known', () => {
+        let decoded = erc725Instance.decodePermissions(
+          '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+        );
+        let reencoded = erc725Instance.encodePermissions(decoded);
         assert.deepStrictEqual(
-          ERC725.decodePermissions(
+          reencoded,
+          '0x0000000000000000000000000000000000000000000000000000000000ffffff',
+        );
+        assert.deepStrictEqual(erc725Instance.decodePermissions(reencoded), {
+          CHANGEOWNER: true,
+          ADDCONTROLLER: true,
+          EDITPERMISSIONS: true,
+          ADDEXTENSIONS: true,
+          CHANGEEXTENSIONS: true,
+          ADDUNIVERSALRECEIVERDELEGATE: true,
+          CHANGEUNIVERSALRECEIVERDELEGATE: true,
+          REENTRANCY: true,
+          SUPER_TRANSFERVALUE: true,
+          TRANSFERVALUE: true,
+          SUPER_CALL: true,
+          CALL: true,
+          SUPER_STATICCALL: true,
+          STATICCALL: true,
+          SUPER_DELEGATECALL: true,
+          DELEGATECALL: true,
+          DEPLOY: true,
+          SUPER_SETDATA: true,
+          SETDATA: true,
+          ENCRYPT: true,
+          DECRYPT: true,
+          SIGN: true,
+          EXECUTE_RELAY_CALL: true,
+          ERC4337_PERMISSION: true,
+          ALL_PERMISSIONS: true,
+        });
+        decoded = decodePermissions(
+          '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+        );
+        reencoded = encodePermissions(decoded);
+        assert.deepStrictEqual(
+          reencoded,
+          '0x0000000000000000000000000000000000000000000000000000000000ffffff',
+        );
+        assert.deepStrictEqual(decodePermissions(reencoded), {
+          CHANGEOWNER: true,
+          ADDCONTROLLER: true,
+          EDITPERMISSIONS: true,
+          ADDEXTENSIONS: true,
+          CHANGEEXTENSIONS: true,
+          ADDUNIVERSALRECEIVERDELEGATE: true,
+          CHANGEUNIVERSALRECEIVERDELEGATE: true,
+          REENTRANCY: true,
+          SUPER_TRANSFERVALUE: true,
+          TRANSFERVALUE: true,
+          SUPER_CALL: true,
+          CALL: true,
+          SUPER_STATICCALL: true,
+          STATICCALL: true,
+          SUPER_DELEGATECALL: true,
+          DELEGATECALL: true,
+          DEPLOY: true,
+          SUPER_SETDATA: true,
+          SETDATA: true,
+          ENCRYPT: true,
+          DECRYPT: true,
+          SIGN: true,
+          EXECUTE_RELAY_CALL: true,
+          ERC4337_PERMISSION: true,
+          ALL_PERMISSIONS: true,
+        });
+      });
+      it('Decodes 0xfff...fff admin permission correctly', () => {
+        assert.deepStrictEqual(
+          decodePermissions(
             '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
           ),
           {
@@ -1650,7 +1798,7 @@ describe('encodeKeyName', () => {
 
   it('is available on instance and class', () => {
     assert.deepStrictEqual(
-      ERC725.encodeKeyName('MyKeyName'),
+      encodeKeyName('MyKeyName'),
       '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2',
     );
     assert.deepStrictEqual(
@@ -1661,7 +1809,7 @@ describe('encodeKeyName', () => {
 
   it('works for dynamic keys', () => {
     assert.deepStrictEqual(
-      ERC725.encodeKeyName(
+      encodeKeyName(
         'FavouriteFood:<address>',
         '0xa4FBbFe353124E6fa6Bb7f8e088a9269dF552EA2',
       ),
@@ -1681,7 +1829,7 @@ describe('supportsInterface', () => {
   const erc725Instance = new ERC725([]);
 
   it('is available on instance and class', () => {
-    assert.typeOf(ERC725.supportsInterface, 'function');
+    assert.typeOf(supportsInterface, 'function');
     assert.typeOf(erc725Instance.supportsInterface, 'function');
   });
 
@@ -1691,7 +1839,7 @@ describe('supportsInterface', () => {
 
   it('should throw when provided address is not an address', async () => {
     try {
-      await ERC725.supportsInterface(interfaceId, {
+      await supportsInterface(interfaceId, {
         address: 'notAnAddress',
         rpcUrl,
       });
@@ -1702,7 +1850,7 @@ describe('supportsInterface', () => {
 
   it('should throw when rpcUrl is not provided on non instantiated class', async () => {
     try {
-      await ERC725.supportsInterface(interfaceId, {
+      await supportsInterface(interfaceId, {
         address: contractAddress,
         // @ts-ignore
         rpcUrl: undefined,
@@ -1736,7 +1884,7 @@ describe('checkPermissions', () => {
   });
 
   it('is available on class', () => {
-    assert.typeOf(ERC725.checkPermissions, 'function');
+    assert.typeOf(checkPermissions, 'function');
 
     const requiredPermissions = [
       '0x0000000000000000000000000000000000000000000000000000000000000004',
@@ -1745,10 +1893,7 @@ describe('checkPermissions', () => {
     const grantedPermissions =
       '0x000000000000000000000000000000000000000000000000000000000000ff51';
 
-    const result = ERC725.checkPermissions(
-      requiredPermissions,
-      grantedPermissions,
-    );
+    const result = checkPermissions(requiredPermissions, grantedPermissions);
 
     assert.equal(result, false);
   });
@@ -1759,7 +1904,7 @@ describe('decodeMappingKey', () => {
 
   it('is available on instance and class', () => {
     assert.deepStrictEqual(
-      ERC725.decodeMappingKey(
+      decodeMappingKey(
         '0x35e6950bc8d21a1699e50000cafecafecafecafecafecafecafecafecafecafe',
         'MyKeyName:<address>',
       ),
