@@ -417,7 +417,7 @@ describe('utils', () => {
     ]; // we may need to add more test cases! Address, etc.
 
     testCases.forEach((testCase) => {
-      it(`encodes tuple values`, () => {
+      it('encodes tuple values', () => {
         expect(
           encodeTupleKeyValue(
             testCase.valueContent,

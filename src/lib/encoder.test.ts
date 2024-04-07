@@ -786,7 +786,7 @@ describe('encoder', () => {
         it('should throw when trying to encode a `bytes[CompactBytesArray]` with a bytes length bigger than 65_535', async () => {
           expect(() => {
             encodeValueType('bytes[CompactBytesArray]', [
-              '0x' + 'ab'.repeat(66_0000),
+              `0x${'ab'.repeat(66_0000)}`,
             ]);
           }).to.throw(
             "Couldn't encode bytes[CompactBytesArray], value at index 0 exceeds 65_535 bytes",

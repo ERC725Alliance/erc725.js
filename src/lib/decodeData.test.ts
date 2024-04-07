@@ -309,7 +309,7 @@ describe('tuple', () => {
     ]; // TODO: add more cases? Address, etc.
 
     testCases.forEach((testCase) => {
-      it(`decodes tuple values`, () => {
+      it('decodes tuple values', () => {
         expect(
           decodeTupleKeyValue(
             testCase.valueContent,
@@ -348,19 +348,22 @@ describe('tuple', () => {
       {
         valueType: '(bytes4,bytes8)',
         valueContent: '(Bytes4,Number,Bytes5)',
-        isTuple: false, // valueContent length != valueType length
+        // valueContent length != valueType length
+        isTuple: false,
         shouldThrow: true,
       },
       {
         valueType: '(bytes4,bytes8)',
         valueContent: '(Bytes2,Number)',
-        isTuple: false, // first item in valueType does not fit inside first item in valueContent (bytes4 > bytes2)
+        // first item in valueType does not fit inside first item in valueContent (bytes4 > bytes2)
+        isTuple: false,
         shouldThrow: true,
       },
       {
         valueType: '(bytes4,bytes8)',
         valueContent: '(Bytes8,Number)',
-        isTuple: true, // first item in valueType fit in first item of valueContent (bytes4 < bytes8)
+        // first item in valueType fit in first item of valueContent (bytes4 < bytes8)
+        isTuple: true,
       },
       {
         valueType: '(bytes4,bytes8)',

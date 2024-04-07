@@ -845,7 +845,7 @@ describe('Running @erc725/erc725.js tests...', () => {
 
   describe('Getting data by schema element by provider', () => {
     mockSchema.forEach((schemaElement) => {
-      it(schemaElement.name + ' with web3.currentProvider', async () => {
+      it(`${schemaElement.name} with web3.currentProvider`, async () => {
         const returnRawData = generateAllRawData([schemaElement], false);
         const provider = new HttpProvider({ returnData: returnRawData }, [
           ERC725Y_INTERFACE_IDS.legacy,
@@ -866,7 +866,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         });
       });
 
-      it(schemaElement.name + ' with ethereumProvider EIP 1193', async () => {
+      it(`${schemaElement.name} with ethereumProvider EIP 1193`, async () => {
         const returnRawData = generateAllRawData([schemaElement], false);
         const provider = new HttpProvider({ returnData: returnRawData }, [
           ERC725Y_INTERFACE_IDS.legacy,
@@ -898,7 +898,7 @@ describe('Running @erc725/erc725.js tests...', () => {
 
       // ARRAY type:
       if (schemaElement.keyType.toLowerCase() === 'array') {
-        it('Encode data values in array: ' + schemaElement.name, async () => {
+        it(`Encode data values in array: ${schemaElement.name}`, async () => {
           const results: string[] = [];
 
           // Encode array loop
@@ -922,7 +922,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           assert.deepStrictEqual(results, schemaElement.returnGraphData);
         });
 
-        it('decodes data values in array: ' + schemaElement.name, async () => {
+        it(`decodes data values in array: ${schemaElement.name}`, async () => {
           const results: any[] = [];
 
           // decode array loop
@@ -1071,7 +1071,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         }
 
         // SINGLETON type: This is not an array, assumed 'Singleton'
-        it('encodes data value for: ' + schemaElement.name, async () => {
+        it(`encodes data value for: ${schemaElement.name}`, async () => {
           const result = encodeKeyValue(
             schemaElement.valueContent,
             schemaElement.valueType,
@@ -1081,7 +1081,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           assert.deepStrictEqual(result, schemaElement.returnGraphData);
         });
 
-        it('decodes data value for: ' + schemaElement.name, async () => {
+        it(`decodes data value for: ${schemaElement.name}`, async () => {
           const result = decodeKeyValue(
             schemaElement.valueContent,
             schemaElement.valueType,
@@ -1397,7 +1397,7 @@ describe('Running @erc725/erc725.js tests...', () => {
 
     const erc725Instance = new ERC725([]);
 
-    describe(`encodePermissions`, () => {
+    describe('encodePermissions', () => {
       testCases.forEach((testCase) => {
         it(`Encodes ${testCase.hex} permission correctly`, () => {
           assert.deepStrictEqual(
