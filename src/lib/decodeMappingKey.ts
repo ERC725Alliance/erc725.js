@@ -42,14 +42,15 @@ function decodeKeyPart(
 ): DynamicKeyPart | false {
   if (!isDynamicKeyPart(keyPartName)) return false;
 
-  let decodedKey;
+  let decodedKey: string | number | boolean | undefined;
   const type = keyPartName.slice(1, keyPartName.length - 1);
 
   if (type === 'bool')
     decodedKey = encodedKeyPart.slice(encodedKeyPart.length - 1) === '1';
-  else if (type.includes('uint')) decodedKey = parseInt(encodedKeyPart, 16);
+  else if (type.includes('uint'))
+    decodedKey = Number.parseInt(encodedKeyPart, 16);
   else if (type.includes('bytes')) {
-    const bytesLength = parseInt(type.replace('bytes', ''), 10) * 2;
+    const bytesLength = Number.parseInt(type.replace('bytes', ''), 10) * 2;
     const sliceFrom =
       encodedKeyPart.length - bytesLength < 0
         ? 0
@@ -57,14 +58,14 @@ function decodeKeyPart(
     decodedKey = encodedKeyPart.slice(sliceFrom);
   } else if (type === 'address') {
     // this is required if the 2nd word is an address in a MappingWithGrouping
-    const leftPaddedAddress = padLeft('0x' + encodedKeyPart, 40);
+    const leftPaddedAddress = padLeft(`0x${encodedKeyPart}`, 40);
 
     decodedKey = decodeValueType(type, leftPaddedAddress);
   } else {
     decodedKey = decodeValueType(type, encodedKeyPart);
   }
 
-  return { type, value: decodedKey };
+  return { type, value: decodedKey as string | number | boolean };
 }
 
 /**
@@ -79,14 +80,14 @@ export function decodeMappingKey(
 ): DynamicKeyPart[] {
   let hashedKey = keyHash;
   if (hashedKey.length === 64 && hashedKey.slice(0, 2) !== '0x')
-    hashedKey = '0x' + hashedKey;
+    hashedKey = `0x${hashedKey}`;
 
   if (hashedKey.length !== 66)
     throw new Error(
-      `Invalid encodedKey length, key must be 32 bytes long hexadecimal value`,
+      'Invalid encodedKey length, key must be 32 bytes long hexadecimal value',
     );
   if (!isHex(hashedKey.slice(2)))
-    throw new Error(`Invalid encodedKey, must be a hexadecimal value`);
+    throw new Error('Invalid encodedKey, must be a hexadecimal value');
 
   let keyParts: string[];
 

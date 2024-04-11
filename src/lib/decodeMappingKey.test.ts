@@ -193,7 +193,7 @@ describe('decodeDynamicKeyParts', () => {
         '0x3234535343fXXWGWXWDSWDAEDFAEDr5434534grdgrdggrdgdrgdgrd098594334',
         'MyKeyName:<bool>',
       ),
-    ).to.throw(`Invalid encodedKey, must be a hexadecimal value`);
+    ).to.throw('Invalid encodedKey, must be a hexadecimal value');
   });
 
   it('throws if incorrect length key', () => {
@@ -203,7 +203,7 @@ describe('decodeDynamicKeyParts', () => {
         'MyKeyName:<bool>',
       ),
     ).to.throw(
-      `Invalid encodedKey length, key must be 32 bytes long hexadecimal value`,
+      'Invalid encodedKey length, key must be 32 bytes long hexadecimal value',
     );
   });
 });

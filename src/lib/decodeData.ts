@@ -113,7 +113,7 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
       // is compatible with the valueType (e.g: bytes4)
       const hexLiteralLength = valueContentParts[i].length - 2;
 
-      if (parseInt(valueTypeBytesLength, 10) < hexLiteralLength) {
+      if (Number.parseInt(valueTypeBytesLength, 10) < hexLiteralLength) {
         throw new Error(
           `Invalid tuple (${valueType},${valueContent}: ${valueContent[i]} cannot fit in ${valueType[i]}`,
         );
@@ -148,11 +148,12 @@ export const decodeTupleKeyValue = (
     const regexMatch = valueTypePart.match(tupleValueTypesRegex);
 
     // if we are dealing with `bytesN`
-    if (regexMatch) bytesLengths.push(parseInt(regexMatch[1], 10));
+    if (regexMatch) bytesLengths.push(Number.parseInt(regexMatch[1], 10));
 
     const numericMatch = valueTypePart.match(/u?int(\d+)/);
 
-    if (numericMatch) bytesLengths.push(parseInt(numericMatch[1], 10) / 8);
+    if (numericMatch)
+      bytesLengths.push(Number.parseInt(numericMatch[1], 10) / 8);
 
     if (valueTypePart === 'address') bytesLengths.push(20);
   });
@@ -289,9 +290,7 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
     }
     default: {
       console.error(
-        'Incorrect data match or keyType in schema from decodeKey(): "' +
-          schema.keyType +
-          '"',
+        `Incorrect data match or keyType in schema from decodeKey(): "${schema.keyType}"`,
       );
       return null;
     }

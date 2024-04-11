@@ -160,8 +160,9 @@ const getDataMultiple = async (
 
 export const getData = async (
   erc725Options: ERC725Options,
-  keyOrKeys?: GetDataInput,
+  _keyOrKeys?: GetDataInput,
 ): Promise<DecodeDataOutput | DecodeDataOutput[]> => {
+  let keyOrKeys = _keyOrKeys;
   if (!keyOrKeys) {
     // eslint-disable-next-line no-param-reassign
     keyOrKeys = erc725Options.schemas

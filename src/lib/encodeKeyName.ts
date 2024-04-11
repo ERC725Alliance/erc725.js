@@ -61,7 +61,7 @@ export const encodeDynamicKeyPart = (
 
     // eslint-disable-next-line prefer-destructuring
     baseType = regexMatch[1];
-    size = parseInt(regexMatch[2], 10);
+    size = Number.parseInt(regexMatch[2], 10);
   }
 
   switch (baseType) {
