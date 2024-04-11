@@ -1,60 +1,32 @@
-import { hexToNumber, leftPad, toHex } from 'web3-utils';
-import {
-  LSP6_ALL_PERMISSIONS,
-  LSP6_DEFAULT_PERMISSIONS,
-} from '../constants/constants';
+import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
+import { LSP6_DEFAULT_PERMISSIONS } from '../constants/constants';
 import { Permissions } from '../types/Method';
 
 export function encodePermissions(permissions: Permissions): string {
   let basePermissions = BigInt(0);
 
-  // If ALL_PERMISSIONS is requested, start with that as the base
-  if (permissions.ALL_PERMISSIONS) {
-    basePermissions = BigInt(
-      hexToNumber(LSP6_DEFAULT_PERMISSIONS.ALL_PERMISSIONS),
-    );
-  }
-
-  // Explicitly add REENTRANCY, DELEGATECALL, and SUPER_DELEGATECALL if requested (they are not included in ALL_PERMISSIONS)
-  const additionalPermissions = [
-    LSP6_DEFAULT_PERMISSIONS.REENTRANCY,
-    LSP6_DEFAULT_PERMISSIONS.DELEGATECALL,
-    LSP6_DEFAULT_PERMISSIONS.SUPER_DELEGATECALL,
-  ];
-  // Do not use an for of loop here to not require the regenerator runtime
-  for (let i = 0; i < additionalPermissions.length; i += 1) {
-    const permission = additionalPermissions[i];
-    if (permissions[permission]) {
-      basePermissions |= BigInt(
-        hexToNumber(LSP6_DEFAULT_PERMISSIONS[permission]),
-      );
-    }
-  }
-
   // Process each permission to potentially switch off permissions included in ALL_PERMISSIONS
-  const keys = Object.keys(permissions);
+  // Deal with ALL_PERMISSIONS first IMPORTANT!
+  const keys = Object.keys(permissions).filter(
+    (key) => key !== 'ALL_PERMISSIONS',
+  );
+  keys.splice(0, 0, 'ALL_PERMISSIONS');
   // Do not use an for of loop here to not require the regenerator runtime
   for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i];
-    const permissionValue = BigInt(hexToNumber(LSP6_DEFAULT_PERMISSIONS[key]));
-
-    if (permissions[key]) {
-      // If not dealing with ALL_PERMISSIONS or additional permissions, ensure they are added
-      if (
-        !additionalPermissions.includes(key) &&
-        key !== LSP6_DEFAULT_PERMISSIONS.ALL_PERMISSIONS
-      ) {
+    const permissionValue = BigInt(
+      hexToNumber(LSP6_DEFAULT_PERMISSIONS[key], true),
+    );
+    if (key in permissions) {
+      if (permissions[key]) {
         basePermissions |= permissionValue;
+      } else {
+        basePermissions &= ~permissionValue;
       }
-    } else if (
-      LSP6_DEFAULT_PERMISSIONS[key] !== LSP6_DEFAULT_PERMISSIONS.ALL_PERMISSIONS
-    ) {
-      // If permission is set to false, remove it from the basePermissions
-      basePermissions &= ~permissionValue;
     }
   }
   // Convert the final BigInt permission value back to a hex string, properly padded
-  return leftPad(toHex(basePermissions.toString()), 64);
+  return leftPad(numberToHex(basePermissions.toString()), 64);
 }
 
 export function decodePermissions(permissionHex: string) {
@@ -87,22 +59,16 @@ export function decodePermissions(permissionHex: string) {
   };
 
   const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);
-  if (permissionHex === LSP6_ALL_PERMISSIONS) {
-    // Do not use an for of loop here to not require the regenerator runtime
-    for (let i = 0; i < permissionsToTest.length; i += 1) {
-      const testPermission = permissionsToTest[i];
-      result[testPermission] = true;
-    }
-    return result;
-  }
-
-  const passedPermissionDecimal = Number(hexToNumber(permissionHex));
+  const passedPermissionDecimal = BigInt(hexToNumber(permissionHex, true));
 
   // Do not use an for of loop here to not require the regenerator runtime
+  // Deal with ALL_PERMISSIONS the same way. So as long as all the bits in ALL_PERMISSIONS
+  // are set the same way as in ALL_PERMISSIONS then this flag will return as true.
+  // It does not mean some extra permissions are not included.
   for (let i = 0; i < permissionsToTest.length; i += 1) {
     const testPermission = permissionsToTest[i];
-    const decimalTestPermission = Number(
-      hexToNumber(LSP6_DEFAULT_PERMISSIONS[testPermission]),
+    const decimalTestPermission = BigInt(
+      hexToNumber(LSP6_DEFAULT_PERMISSIONS[testPermission], true),
     );
     const isPermissionIncluded =
       (passedPermissionDecimal & decimalTestPermission) ===

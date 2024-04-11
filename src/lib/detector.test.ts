@@ -24,7 +24,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { INTERFACE_IDS_0_12_0 } from '../constants/interfaces';
 
-import { supportsInterface, checkPermissions } from './detector';
+import { internalSupportsInterface, checkPermissions } from './detector';
 
 describe('supportsInterface', () => {
   it('it should return true if the contract supports the interface with name', async () => {
@@ -37,10 +37,13 @@ describe('supportsInterface', () => {
       .withArgs(contractAddress, INTERFACE_IDS_0_12_0[interfaceName])
       .returns(Promise.resolve(true));
 
-    const doesSupportInterface = await supportsInterface(interfaceName, {
-      address: contractAddress,
-      provider: providerStub,
-    });
+    const doesSupportInterface = await internalSupportsInterface(
+      interfaceName,
+      {
+        address: contractAddress,
+        provider: providerStub,
+      },
+    );
 
     expect(doesSupportInterface).to.be.true;
   });
@@ -55,7 +58,7 @@ describe('supportsInterface', () => {
       .withArgs(contractAddress, interfaceId)
       .returns(Promise.resolve(true));
 
-    const doesSupportInterface = await supportsInterface(interfaceId, {
+    const doesSupportInterface = await internalSupportsInterface(interfaceId, {
       address: contractAddress,
       provider: providerStub,
     });

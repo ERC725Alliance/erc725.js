@@ -16,6 +16,8 @@
     "build:module": "tsc -p tsconfig.module.json",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=text --reporter=lcov mocha",
     "lint": "eslint . --ext .ts",
+    "format:fix": "prettier --write .",
+    "format": "prettier .",
     "release": "standard-version"
   },
   "repository": {
@@ -51,6 +53,7 @@
   },
   "homepage": "https://github.com/ERC725Alliance/erc725.js#readme",
   "devDependencies": {
+    "@biomejs/biome": "^1.6.4",
     "@types/chai": "^4.3.4",
     "@types/isomorphic-fetch": "^0.0.36",
     "@types/jest": "^27.5.2",
