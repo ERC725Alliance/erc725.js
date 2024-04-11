@@ -63,6 +63,7 @@ export function decodePermissions(permissionHex: string) {
 
   // Do not use an for of loop here to not require the regenerator runtime
   // Deal with ALL_PERMISSIONS the same way. So as long as all the bits in ALL_PERMISSIONS
+
   // are set the same way as in ALL_PERMISSIONS then this flag will return as true.
   // It does not mean some extra permissions are not included.
   for (let i = 0; i < permissionsToTest.length; i += 1) {
