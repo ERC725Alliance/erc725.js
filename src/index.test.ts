@@ -1548,7 +1548,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         assert.strictEqual(
           redecodedPermissions.CALL,
           false,
-          'Re-reencoded permissions includes CALL',
+          'Re-reencoded permissions does not include CALL',
         );
       });
 
@@ -1567,6 +1567,13 @@ describe('Running @erc725/erc725.js tests...', () => {
           true,
           'Re-reencoded permissions includes SUPER_DELEGATECALL',
         );
+
+        assert.strictEqual(
+          redecodedPermissions.ALL_PERMISSIONS,
+          true,
+          'Re-reencoded permissions includes ALL_PERMISSIONS',
+        );
+
         assert.strictEqual(
           redecodedPermissions.DELEGATECALL,
           true,
