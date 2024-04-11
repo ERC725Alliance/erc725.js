@@ -250,9 +250,8 @@ describe('encoder', () => {
           // over the max uint256 allowed, does not fit in 32 bytes
           input: toHex(
             toBN(
-              '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' +
-                1,
-            ),
+              '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+            ).add(toBN(1)),
           ),
         },
       ];

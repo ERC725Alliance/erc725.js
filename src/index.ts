@@ -59,7 +59,7 @@ import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
 import { decodeValueType, encodeValueType } from './lib/encoder';
-import { supportsInterface, checkPermissions } from './lib/detector';
+import { internalSupportsInterface, checkPermissions } from './lib/detector';
 import { decodeMappingKey } from './lib/decodeMappingKey';
 import { encodePermissions, decodePermissions } from './lib/permissions';
 
@@ -68,6 +68,7 @@ export {
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
+  Permissions,
 };
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
@@ -82,7 +83,54 @@ export {
 } from './lib/encoder';
 export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 export { encodePermissions, decodePermissions } from './lib/permissions';
-export { supportsInterface, checkPermissions } from './lib/detector';
+export { checkPermissions } from './lib/detector';
+
+// PRIVATE FUNCTION
+function initializeProvider(providerOrRpcUrl, gasInfo) {
+  // do not fail on no-provider
+  if (!providerOrRpcUrl) return undefined;
+
+  // if provider is a string, assume it's a rpcUrl
+  if (typeof providerOrRpcUrl === 'string') {
+    return new ProviderWrapper(new HttpProvider(providerOrRpcUrl), gasInfo);
+  }
+
+  if (
+    typeof providerOrRpcUrl.request === 'function' ||
+    typeof providerOrRpcUrl.send === 'function'
+  )
+    return new ProviderWrapper(providerOrRpcUrl, gasInfo);
+
+  throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
+}
+
+// PUBLIC FUNCTION
+export async function supportsInterface(
+  interfaceIdOrName: string,
+  options: {
+    address: string;
+    rpcUrl: string;
+    gas?: number;
+    provider?: ProviderWrapper;
+  },
+): Promise<boolean> {
+  if (!isAddress(options.address)) {
+    throw new Error('Invalid address');
+  }
+  if (!options.rpcUrl) {
+    throw new Error('Missing RPC URL');
+  }
+
+  return internalSupportsInterface(interfaceIdOrName, {
+    address: options.address,
+    provider:
+      options.provider ||
+      initializeProvider(
+        options.rpcUrl,
+        options?.gas ? options?.gas : DEFAULT_GAS_VALUE,
+      ),
+  });
+}
 
 /**
  * This package is currently in early stages of development, <br/>use only for testing or experimentation purposes.<br/>
@@ -181,21 +229,7 @@ export class ERC725 {
   }
 
   private static initializeProvider(providerOrRpcUrl, gasInfo) {
-    // do not fail on no-provider
-    if (!providerOrRpcUrl) return undefined;
-
-    // if provider is a string, assume it's a rpcUrl
-    if (typeof providerOrRpcUrl === 'string') {
-      return new ProviderWrapper(new HttpProvider(providerOrRpcUrl), gasInfo);
-    }
-
-    if (
-      typeof providerOrRpcUrl.request === 'function' ||
-      typeof providerOrRpcUrl.send === 'function'
-    )
-      return new ProviderWrapper(providerOrRpcUrl, gasInfo);
-
-    throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
+    return initializeProvider(providerOrRpcUrl, gasInfo);
   }
 
   private getAddressAndProvider() {
@@ -561,7 +595,7 @@ export class ERC725 {
   async supportsInterface(interfaceIdOrName: string): Promise<boolean> {
     const { address, provider } = this.getAddressAndProvider();
 
-    return supportsInterface(interfaceIdOrName, {
+    return internalSupportsInterface(interfaceIdOrName, {
       address,
       provider,
     });
@@ -579,20 +613,7 @@ export class ERC725 {
     interfaceIdOrName: string,
     options: { address: string; rpcUrl: string; gas?: number },
   ): Promise<boolean> {
-    if (!isAddress(options.address)) {
-      throw new Error('Invalid address');
-    }
-    if (!options.rpcUrl) {
-      throw new Error('Missing RPC URL');
-    }
-
-    return supportsInterface(interfaceIdOrName, {
-      address: options.address,
-      provider: ERC725.initializeProvider(
-        options.rpcUrl,
-        options?.gas ? options?.gas : DEFAULT_GAS_VALUE,
-      ),
-    });
+    return supportsInterface(interfaceIdOrName, options);
   }
 
   /**

@@ -80,7 +80,7 @@ export const getDataFromExternalSources = (
         ipfsGateway,
       );
       try {
-        if (/[=?/]$/.test(url)) {
+        if (!url.startsWith('data:') && /[=?/]$/.test(url)) {
           // this URL is not verifiable and the URL ends with a / or ? or = meaning it's not a file
           // and more likely to be some kind of directory or query BaseURI
           return dataEntry;

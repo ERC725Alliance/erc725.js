@@ -36,7 +36,7 @@ import {
  * @param options Object with address and RPC URL.
  * @returns {Promise<boolean>} if interface is supported.
  */
-export const supportsInterface = async (
+export const internalSupportsInterface = async (
   interfaceIdOrName: string,
   options: AddressProviderOptions,
 ): Promise<boolean> => {
