@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.24.2](https://github.com/ERC725Alliance/erc725.js/compare/v0.24.1...v0.24.2) (2024-04-11)
+
+
+### Bug Fixes
+
+* Apply suggestions. ([e9c3d81](https://github.com/ERC725Alliance/erc725.js/commit/e9c3d81875ef2861791753c1285defc096ddbdac))
+* Minimize changes ([cc31b5f](https://github.com/ERC725Alliance/erc725.js/commit/cc31b5f8b185743a5e783a04a7a8b4b158268fda))
+* Repair data: urls from not triggering the baseURI test. ([c26ab3e](https://github.com/ERC725Alliance/erc725.js/commit/c26ab3e51b1f027044df467ab4e2f0c6a00dff5d))
+
 ## [0.24.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.24.0...v0.24.1) (2024-04-03)
 
 
