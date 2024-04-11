@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@erc725/erc725.js": "^0.17.2",
-    "web3": "^1.10.0"
+    "web3": "^4.7.0"
   },
   "devDependencies": {
     "isomorphic-fetch": "^3.0.0"
