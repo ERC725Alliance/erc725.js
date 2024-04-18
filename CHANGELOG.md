@@ -2,40 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [0.25.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.25.0...v0.25.0) (2024-04-18)
-
-
-### Bug Fixes
-
-* Ignore formatting in package.json inside of biome ([33a80dd](https://github.com/ERC725Alliance/erc725.js/commit/33a80dd5368028cb55ab68ea940c176790595806))
-
-
-### Miscellaneous Chores
-
-* release 0.25.0 ([a6af6b4](https://github.com/ERC725Alliance/erc725.js/commit/a6af6b46aa25fab8494c55e8b8dcd4c2cad65102))
-
 ## [0.25.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.24.2...v0.25.0) (2024-04-18)
-
 
 ### Features
 
-* export methods for encoding/decoding dataSourceWithHash and valueContent ([b1e0ed9](https://github.com/ERC725Alliance/erc725.js/commit/b1e0ed98718acce90f1db6917728394ab8aeb4fa))
+- export methods for encoding/decoding dataSourceWithHash and valueContent ([b1e0ed9](https://github.com/ERC725Alliance/erc725.js/commit/b1e0ed98718acce90f1db6917728394ab8aeb4fa))
 
 ## [0.24.2](https://github.com/ERC725Alliance/erc725.js/compare/v0.24.1...v0.24.2) (2024-04-11)
 
-
 ### Bug Fixes
 
-* Apply suggestions. ([e9c3d81](https://github.com/ERC725Alliance/erc725.js/commit/e9c3d81875ef2861791753c1285defc096ddbdac))
-* Minimize changes ([cc31b5f](https://github.com/ERC725Alliance/erc725.js/commit/cc31b5f8b185743a5e783a04a7a8b4b158268fda))
-* Repair data: urls from not triggering the baseURI test. ([c26ab3e](https://github.com/ERC725Alliance/erc725.js/commit/c26ab3e51b1f027044df467ab4e2f0c6a00dff5d))
+- Apply suggestions. ([e9c3d81](https://github.com/ERC725Alliance/erc725.js/commit/e9c3d81875ef2861791753c1285defc096ddbdac))
+- Minimize changes ([cc31b5f](https://github.com/ERC725Alliance/erc725.js/commit/cc31b5f8b185743a5e783a04a7a8b4b158268fda))
+- Repair data: urls from not triggering the baseURI test. ([c26ab3e](https://github.com/ERC725Alliance/erc725.js/commit/c26ab3e51b1f027044df467ab4e2f0c6a00dff5d))
 
 ## [0.24.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.24.0...v0.24.1) (2024-04-03)
 
-
 ### Bug Fixes
 
-* Add missing exports due to merge conflict. ([2e14cd5](https://github.com/ERC725Alliance/erc725.js/commit/2e14cd5b4a5a1f51222c1056bd4220be2a09a02d))
+- Add missing exports due to merge conflict. ([2e14cd5](https://github.com/ERC725Alliance/erc725.js/commit/2e14cd5b4a5a1f51222c1056bd4220be2a09a02d))
 
 ## [0.24.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.23.1...v0.24.0) (2024-04-02)
 
