@@ -74,7 +74,7 @@ const findArraySchemaForKey = (
     return null;
   }
 
-  const elementIndex = parseInt(key.substring(34), 10);
+  const elementIndex = Number.parseInt(key.substring(34), 10);
 
   return {
     ...arraySchema,

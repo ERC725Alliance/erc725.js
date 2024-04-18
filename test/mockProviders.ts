@@ -64,7 +64,7 @@ export class HttpProvider {
             {
               const foundResult = this.returnData.find((element) => {
                 // get call param (key)
-                const keyParam = '0x' + payload[index].params[0].data.slice(10);
+                const keyParam = `0x${payload[index].params[0].data.slice(10)}`;
                 return element.key === keyParam;
               });
 
@@ -143,7 +143,7 @@ export class HttpProvider {
           break;
         case METHODS[Method.GET_DATA_LEGACY].sig:
           {
-            const keyParam = '0x' + payload.params[0].data.slice(10);
+            const keyParam = `0x${payload.params[0].data.slice(10)}`;
             const foundResult = this.returnData.find((e) => e.key === keyParam);
             result = foundResult ? foundResult.value : '0x';
           }
@@ -151,7 +151,7 @@ export class HttpProvider {
         case METHODS[Method.GET_DATA_BATCH].sig:
         case METHODS[Method.GET_DATA].sig:
           {
-            const keyParam = '0x' + payload.params[0].data.slice(138);
+            const keyParam = `0x${payload.params[0].data.slice(138)}`;
             const foundResult = this.returnData.find((e) => e.key === keyParam);
             result = foundResult ? foundResult.value : '0x';
           }
@@ -224,7 +224,7 @@ export class EthereumProvider {
         break;
       case METHODS[Method.GET_DATA_LEGACY].sig:
         {
-          const keyParam = '0x' + payload.params[0].data.slice(10);
+          const keyParam = `0x${payload.params[0].data.slice(10)}`;
 
           result = this.returnData.find((e) => e.key === keyParam)?.value;
         }

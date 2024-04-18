@@ -68,7 +68,7 @@ const BytesNValueContentRegex = /Bytes(\d+)/;
 
 const ALLOWED_BYTES_SIZES = [2, 4, 8, 16, 32, 64, 128, 256];
 
-const encodeDataSourceWithHash = (
+export const encodeDataSourceWithHash = (
   verification: undefined | Verification,
   dataSource: string,
 ): string => {
@@ -94,7 +94,7 @@ const encodeDataSourceWithHash = (
   ].join('');
 };
 
-const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
+export const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   if (value.slice(0, 6) === '0x0000') {
     // DEAL with VerifiableURI
     // NOTE: A JSONURL with a 0x00000000 verification method is invalid.
@@ -119,7 +119,7 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
     const encodedLength = `0x${value.slice(14, 18)}`; // Rest of data string after function hash
     const dataLength = hexToNumber(encodedLength, false) as number;
     const dataHash = `0x${value.slice(18, 18 + dataLength * 2)}`; // Get jsonHash 32 bytes
-    const dataSource = hexToUtf8('0x' + value.slice(18 + dataLength * 2)); // Get remainder as URI
+    const dataSource = hexToUtf8(`0x${value.slice(18 + dataLength * 2)}`); // Get remainder as URI
 
     return {
       verification: {
@@ -144,7 +144,7 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
     // Special case where JSONURL is really (bytes4,URI) as specified
     // by the old version of LSP8TokenMetadataBaseURI
     // Catch error in case the buffor is not convertable to utf8.
-    const dataSource = hexToUtf8('0x' + encodedData); // Get as URI
+    const dataSource = hexToUtf8(`0x${encodedData}`); // Get as URI
     if (encodedData.length < 64 || /^[a-z]{2,}:[/\S]/.test(dataSource)) {
       // If the verification data starts with a utf8 sequence that looks like https:/ or data: or ar:/ for example.
       return {
@@ -159,8 +159,8 @@ const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
     // ignore
   }
 
-  const dataHash = '0x' + encodedData.slice(0, 64); // Get jsonHash 32 bytes
-  const dataSource = hexToUtf8('0x' + encodedData.slice(64)); // Get remainder as URI
+  const dataHash = `0x${encodedData.slice(0, 64)}`; // Get jsonHash 32 bytes
+  const dataSource = hexToUtf8(`0x${encodedData.slice(64)}`); // Get remainder as URI
 
   return {
     verification: {
@@ -187,7 +187,7 @@ const encodeToBytesN = (
     valueToEncode = value;
   }
 
-  const numberOfBytesInType = parseInt(bytesN.split('bytes')[1], 10);
+  const numberOfBytesInType = Number.parseInt(bytesN.split('bytes')[1], 10);
   const numberOfBytesInValue = countNumberOfBytes(valueToEncode);
 
   if (numberOfBytesInValue > numberOfBytesInType) {
@@ -256,7 +256,7 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
 
   while (pointer < strippedCompactBytesArray.length) {
     const length = Number(
-      hexToNumber('0x' + strippedCompactBytesArray.slice(pointer, pointer + 4)),
+      hexToNumber(`0x${strippedCompactBytesArray.slice(pointer, pointer + 4)}`),
     );
 
     if (length === 0) {
@@ -264,11 +264,10 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
       encodedValues.push('');
     } else {
       encodedValues.push(
-        '0x' +
-          strippedCompactBytesArray.slice(
-            pointer + 4,
-            pointer + 2 * (length + 2),
-          ),
+        `0x${strippedCompactBytesArray.slice(
+          pointer + 4,
+          pointer + 2 * (length + 2),
+        )}`,
       );
     }
 
@@ -444,7 +443,7 @@ const valueTypeEncodingMap = (
   const uintNRegexMatch = type.match(uintNValueTypeRegex);
 
   const uintLength = uintNRegexMatch
-    ? parseInt(uintNRegexMatch[0].slice(4), 10)
+    ? Number.parseInt(uintNRegexMatch[0].slice(4), 10)
     : '';
 
   if (type.includes('[CompactBytesArray]')) {
@@ -604,7 +603,7 @@ const valueTypeEncodingMap = (
           // we want to return an array of numbers as [1, 2, 3], not an array of strings as [ '1', '2', '3']
           return abiCoder
             .decodeParameter('uint256[]', value)
-            .map((numberAsString) => parseInt(numberAsString, 10));
+            .map((numberAsString) => Number.parseInt(numberAsString, 10));
         },
       };
     case 'bytes32[]':
@@ -661,7 +660,9 @@ export const valueContentEncodingMap = (
   decode: (value: string) => any;
 } => {
   const bytesNRegexMatch = valueContent.match(BytesNValueContentRegex);
-  const bytesLength = bytesNRegexMatch ? parseInt(bytesNRegexMatch[1], 10) : '';
+  const bytesLength = bytesNRegexMatch
+    ? Number.parseInt(bytesNRegexMatch[1], 10)
+    : '';
 
   switch (valueContent) {
     case 'Keccak256': {
@@ -677,7 +678,7 @@ export const valueContentEncodingMap = (
         encode: (value: string) => {
           let parsedValue: number;
           try {
-            parsedValue = parseInt(value, 10);
+            parsedValue = Number.parseInt(value, 10);
           } catch (error: any) {
             throw new Error(error);
           }
@@ -696,7 +697,7 @@ export const valueContentEncodingMap = (
             return value.toLowerCase();
           }
 
-          throw new Error('Address: "' + value + '" is an invalid address.');
+          throw new Error(`Address: "${value}" is an invalid address.`);
         },
         decode: (value: string) => toChecksumAddress(value),
       };

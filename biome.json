@@ -30,6 +30,6 @@
     "enabled": false
   },
   "files": {
-    "ignore": ["node_modules", "build", "coverage", ".vscode"]
+    "ignore": ["node_modules", ".nyc_output", "build", "coverage", ".vscode"]
   }
 }

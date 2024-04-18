@@ -5,17 +5,14 @@
   "main": "build/main/src/index.js",
   "typings": "build/main/src/index.d.ts",
   "module": "build/module/src/index.js",
-  "files": [
-    "build",
-    "schemas",
-    "docs"
-  ],
+  "files": ["build", "schemas", "docs"],
   "scripts": {
     "build": "run-p build:*",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=text --reporter=lcov mocha",
-    "lint": "eslint . --ext .ts",
+    "lint": "biome check .",
+    "lint:fix": "biome check --apply .",
     "format:fix": "prettier --write .",
     "format": "prettier .",
     "release": "standard-version"
@@ -24,11 +21,7 @@
     "type": "git",
     "url": "git+https://github.com/ERC725Alliance/erc725.js"
   },
-  "keywords": [
-    "ethereum",
-    "erc725",
-    "lsp"
-  ],
+  "keywords": ["ethereum", "erc725", "lsp"],
   "contributors": [
     {
       "name": "Robert McLeod",
