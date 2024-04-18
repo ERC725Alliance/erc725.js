@@ -1,11 +1,15 @@
 {
   "name": "@erc725/erc725.js",
-  "version": "0.24.2",
+  "version": "0.25.0",
   "description": "Library to interact with ERC725 smart contracts",
   "main": "build/main/src/index.js",
   "typings": "build/main/src/index.d.ts",
   "module": "build/module/src/index.js",
-  "files": ["build", "schemas", "docs"],
+  "files": [
+    "build",
+    "schemas",
+    "docs"
+  ],
   "scripts": {
     "build": "run-p build:*",
     "build:main": "tsc -p tsconfig.json",
@@ -21,7 +25,11 @@
     "type": "git",
     "url": "git+https://github.com/ERC725Alliance/erc725.js"
   },
-  "keywords": ["ethereum", "erc725", "lsp"],
+  "keywords": [
+    "ethereum",
+    "erc725",
+    "lsp"
+  ],
   "contributors": [
     {
       "name": "Robert McLeod",

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.25.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.24.2...v0.25.0) (2024-04-18)
+
+
+### Features
+
+* export methods for encoding/decoding dataSourceWithHash and valueContent ([b1e0ed9](https://github.com/ERC725Alliance/erc725.js/commit/b1e0ed98718acce90f1db6917728394ab8aeb4fa))
+
 ## [0.24.2](https://github.com/ERC725Alliance/erc725.js/compare/v0.24.1...v0.24.2) (2024-04-11)
 
 
