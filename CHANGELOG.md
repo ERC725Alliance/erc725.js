@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.25.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.25.0...v0.25.0) (2024-04-18)
+
+
+### Bug Fixes
+
+* Ignore formatting in package.json inside of biome ([33a80dd](https://github.com/ERC725Alliance/erc725.js/commit/33a80dd5368028cb55ab68ea940c176790595806))
+
+
+### Miscellaneous Chores
+
+* release 0.25.0 ([a6af6b4](https://github.com/ERC725Alliance/erc725.js/commit/a6af6b46aa25fab8494c55e8b8dcd4c2cad65102))
+
 ## [0.25.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.24.2...v0.25.0) (2024-04-18)
 
 
