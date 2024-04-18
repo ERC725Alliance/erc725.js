@@ -47,16 +47,8 @@ jobs:
           bump-minor-pre-major: true
           default-branch: main
 
-      - name: 🔍 Check if version changed
-        uses: EndBug/version-check@v1
-        if: github.event_name == 'push'
-        id: check
-
-      - name: 🔄 Check if should release
-        run: echo "SHOULD_RELEASE=${{ steps.check.outputs.changed == 'true' }}" >> $GITHUB_ENV
-
       - name: 📦 Publish to NPM
-        if: env.SHOULD_RELEASE == 'true'
+        if: steps.release.outputs.releases_created
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
