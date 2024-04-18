@@ -68,7 +68,7 @@ const BytesNValueContentRegex = /Bytes(\d+)/;
 
 const ALLOWED_BYTES_SIZES = [2, 4, 8, 16, 32, 64, 128, 256];
 
-const encodeDataSourceWithHash = (
+export const encodeDataSourceWithHash = (
   verification: undefined | Verification,
   dataSource: string,
 ): string => {
@@ -94,7 +94,7 @@ const encodeDataSourceWithHash = (
   ].join('');
 };
 
-const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
+export const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   if (value.slice(0, 6) === '0x0000') {
     // DEAL with VerifiableURI
     // NOTE: A JSONURL with a 0x00000000 verification method is invalid.

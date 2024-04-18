@@ -58,10 +58,19 @@ import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
-import { decodeValueType, encodeValueType } from './lib/encoder';
+import {
+  encodeDataSourceWithHash,
+  decodeDataSourceWithHash,
+  encodeValueType,
+  decodeValueType,
+  encodeValueContent,
+  decodeValueContent,
+} from './lib/encoder';
 import { internalSupportsInterface, checkPermissions } from './lib/detector';
 import { decodeMappingKey } from './lib/decodeMappingKey';
 import { encodePermissions, decodePermissions } from './lib/permissions';
+import { AssetURLEncode } from './types/encodeData';
+import { URLDataToEncode, URLDataWithHash, Verification } from './types';
 
 export {
   ERC725JSONSchema,
@@ -77,9 +86,12 @@ export { decodeData } from './lib/decodeData';
 export { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 export { decodeMappingKey } from './lib/decodeMappingKey';
 export {
-  decodeValueType,
-  decodeValueContent,
+  encodeDataSourceWithHash,
+  decodeDataSourceWithHash,
   encodeValueType,
+  decodeValueType,
+  encodeValueContent,
+  decodeValueContent,
 } from './lib/encoder';
 export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 export { encodePermissions, decodePermissions } from './lib/permissions';
@@ -646,6 +658,28 @@ export class ERC725 {
     return checkPermissions(requiredPermissions, grantedPermissions);
   }
 
+  encodeDataSourceWithHash(
+    verification: undefined | Verification,
+    dataSource: string,
+  ): string {
+    return encodeDataSourceWithHash(verification, dataSource);
+  }
+
+  static encodeDataSourceWithHash(
+    verification: undefined | Verification,
+    dataSource: string,
+  ): string {
+    return encodeDataSourceWithHash(verification, dataSource);
+  }
+
+  decodeDataSourceWithHash(value: string): URLDataWithHash {
+    return decodeDataSourceWithHash(value);
+  }
+
+  static decodeDataSourceWithHash(value: string): URLDataWithHash {
+    return decodeDataSourceWithHash(value);
+  }
+
   /**
    * @param type The valueType to encode the value as
    * @param value The value to encode
@@ -676,6 +710,34 @@ export class ERC725 {
 
   decodeValueType(type: string, data: string) {
     return decodeValueType(type, data);
+  }
+
+  static encodeValueContent(
+    valueContent: string,
+    value: string | number | AssetURLEncode | URLDataToEncode | boolean,
+  ): string | false {
+    return encodeValueContent(valueContent, value);
+  }
+
+  encodeValueContent(
+    valueContent: string,
+    value: string | number | AssetURLEncode | URLDataToEncode | boolean,
+  ): string | false {
+    return encodeValueContent(valueContent, value);
+  }
+
+  static decodeValueContent(
+    valueContent: string,
+    value: string,
+  ): string | URLDataWithHash | number | boolean | null {
+    return decodeValueContent(valueContent, value);
+  }
+
+  decodeValueContent(
+    valueContent: string,
+    value: string,
+  ): string | URLDataWithHash | number | boolean | null {
+    return decodeValueContent(valueContent, value);
   }
 }
 
