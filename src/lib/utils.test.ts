@@ -414,6 +414,12 @@ describe('utils', () => {
         encodedValue: '0xdeadbeaf0000000000000010',
         decodedValue: ['0xdeadbeaf', 16],
       },
+      {
+        valueContent: '(Bytes4,Number)',
+        valueType: '(bytes4,uint128)',
+        encodedValue: '0xdeadbeaf00000000000000000000000000000020',
+        decodedValue: ['0xdeadbeaf', 32],
+      },
     ]; // we may need to add more test cases! Address, etc.
 
     testCases.forEach((testCase) => {

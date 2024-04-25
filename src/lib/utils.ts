@@ -61,6 +61,10 @@ import { EncodeDataInput } from '../types/decodeData';
 import { GetDataDynamicKey } from '../types/GetData';
 import { isValidTuple } from './decodeData';
 
+function isValueContentLiteralHex(valueContent: string): boolean {
+  return valueContent.slice(0, 2) === '0x';
+}
+
 /**
  *
  * @param {string} valueContent as per ERC725Schema definition
@@ -84,16 +88,22 @@ export function encodeKeyValue(
   name?: string,
 ): string | false {
   const isSupportedValueContent =
-    !!valueContentMap(valueContent) || valueContent.slice(0, 2) === '0x';
+    !!valueContentMap(valueContent) || isValueContentLiteralHex(valueContent);
 
   if (!isSupportedValueContent) {
     throw new Error(
-      `The valueContent '${valueContent}' 
-            for ${name} is not supported.`,
+      `The valueContent '${valueContent}' for ${name} is not supported.`,
     );
   }
 
   const isValueTypeArray = valueType.slice(valueType.length - 2) === '[]';
+
+  if (
+    (valueType.startsWith('uint') || valueType.startsWith('bytes')) &&
+    typeof decodedValue !== 'object'
+  ) {
+    return encodeValueType(valueType, decodedValue);
+  }
 
   if (!isValueTypeArray && !Array.isArray(decodedValue)) {
     // Straight forward encode
@@ -187,8 +197,8 @@ export function guessKeyTypeFromKeyName(
 }
 
 export const encodeTupleKeyValue = (
-  valueContent: string, // i.e. (bytes4,Number,bytes16)
-  valueType: string, // i.e. (bytes4,bytes8,bytes16)
+  valueContent: string, // i.e. (Bytes4,Number,Bytes16,Address)
+  valueType: string, // i.e. (bytes4,uint128,bytes16,address)
   decodedValues: Array<string | number | URLDataToEncode | string[]>,
 ) => {
   // We assume data has already been validated at this stage
@@ -196,6 +206,7 @@ export const encodeTupleKeyValue = (
   const valueTypeParts = valueType
     .substring(1, valueType.length - 1)
     .split(',');
+
   const valueContentParts = valueContent
     .substring(1, valueContent.length - 1)
     .split(',');
@@ -218,18 +229,7 @@ export const encodeTupleKeyValue = (
         return ''; // may cause issues?
       }
 
-      const numberOfBytes = Number.parseInt(valueTypeParts[i].substring(5), 10); // bytes50 -> 50
-
-      // If the encoded value is too large for the expected valueType, we shrink it from the left
-      // i.e. number are encoded on 32bytes
-      // TODO: might be missing cases !
-      if (encodedKeyValue.length > 2 + numberOfBytes * 2) {
-        return encodedKeyValue.slice(
-          encodedKeyValue.length - numberOfBytes * 2,
-        );
-      }
-
-      return padLeft(encodedKeyValue, numberOfBytes * 2).replace('0x', '');
+      return stripHexPrefix(encodedKeyValue);
     })
     .join('')}`;
 
