@@ -65,9 +65,7 @@ import { ERC725JSONSchemaValueType } from '../types/ERC725JSONSchema';
 const abiCoder = AbiCoder;
 
 const uintNValueTypeRegex = /^uint(\d+)$/;
-``;
 const bytesNValueTypeRegex = /^bytes(\d+)$/;
-``;
 const BytesNValueContentRegex = /Bytes(\d+)/;
 
 export const encodeDataSourceWithHash = (
@@ -211,7 +209,7 @@ const encodeToBytesN = (
   bytesN: BytesNValueTypes,
   value: string | number,
 ): string => {
-  const numberOfBytesInType = parseInt(bytesN.split('bytes')[1], 10);
+  const numberOfBytesInType = Number.parseInt(bytesN.split('bytes')[1], 10);
 
   let valueToEncode: string;
 
@@ -985,7 +983,7 @@ export function decodeValueContent(
   value: string,
 ): string | URLDataWithHash | number | boolean | null {
   if (isValueContentLiteralHex(valueContent)) {
-    if (valueContent.toLowerCase() != value) {
+    if (valueContent.toLowerCase() !== value) {
       throw new Error(
         `Could not decode value content: the value ${value} does not match the Hex Literal ${valueContent} defined in the \`valueContent\` part of the schema`,
       );
