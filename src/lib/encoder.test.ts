@@ -145,16 +145,35 @@ describe('encoder', () => {
           encodedValue: '0x7765656b', // utf8-encoded characters
           decodedValue: '0x7765656b',
         },
-        {
-          valueType: 'bytes4',
-          input: 1122334455,
-          encodedValue: '0x42e576f7', // number converted to hex + right padded
-          decodedValue: '0x42e576f7',
-        },
       ];
 
       oneWayEncodingTestCases.forEach((testCase) => {
         it(`encodes one way \`input\` = ${testCase.input} as ${testCase.valueType}, but does not decode back as the same input`, async () => {
+          const encodedValue = encodeValueType(
+            testCase.valueType,
+            testCase.input,
+          );
+
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(
+            decodeValueType(testCase.valueType, encodedValue),
+            testCase.decodedValue,
+          );
+        });
+      });
+
+      const leftPaddedTestCases = [
+        {
+          valueType: 'bytes4',
+          input: 1122334455,
+          encodedValue: '0x42e576f7', // number converted to hex + left padded still
+          decodedValue: '0x42e576f7',
+        },
+      ];
+
+      // numbers encoded as `bytesN` are left padded to allow symmetric encoding / decoding
+      leftPaddedTestCases.forEach((testCase) => {
+        it(`encodes + left pad numbers \`input\` = ${testCase.input} as ${testCase.valueType} padded on the left with \`00\`s`, async () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
             testCase.input,
@@ -273,18 +292,36 @@ describe('encoder', () => {
           encodedValue:
             '0x546869732073656e74656e6365206973203332206279746573206c6f6e672021',
         },
-        {
-          valueType: 'bytes32',
-          input: 12345,
-          decodedValue:
-            '0x3039000000000000000000000000000000000000000000000000000000000000',
-          encodedValue:
-            '0x3039000000000000000000000000000000000000000000000000000000000000',
-        },
       ];
 
       oneWayEncodingTestCases.forEach((testCase) => {
         it(`encodes one way \`input\` = ${testCase.input} as ${testCase.valueType}, but does not decode back as the same input`, async () => {
+          const encodedValue = encodeValueType(
+            testCase.valueType,
+            testCase.input,
+          );
+
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(
+            decodeValueType(testCase.valueType, encodedValue),
+            testCase.decodedValue,
+          );
+        });
+      });
+
+      const leftPaddedTestCases = [
+        {
+          valueType: 'bytes32',
+          input: 12345,
+          decodedValue:
+            '0x0000000000000000000000000000000000000000000000000000000000003039',
+          encodedValue:
+            '0x0000000000000000000000000000000000000000000000000000000000003039',
+        },
+      ];
+
+      leftPaddedTestCases.forEach((testCase) => {
+        it(`encodes + left pad \`input\` = ${testCase.input} as ${testCase.valueType} padded on the right with \`00\`s`, async () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
             testCase.input,

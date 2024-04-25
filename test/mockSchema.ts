@@ -357,8 +357,7 @@ export const mockSchema: (ERC725JSONSchema & {
     returnRawDataArray: abiCoder.encodeParameter('bytes[]', [
       '0x0000000000000000000000000000000000000000000000000000000000000063',
     ]),
-    returnGraphData:
-      '0x0000000000000000000000000000000000000000000000000000000000000063',
+    returnGraphData: '0x63',
     expectedResult: 99,
   },
 

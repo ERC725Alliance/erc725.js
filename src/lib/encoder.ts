@@ -57,16 +57,17 @@ import {
   countNumberOfBytes,
   isValidUintSize,
   countSignificantBits,
+  isValidBytesSize,
 } from './utils';
 import { ERC725JSONSchemaValueType } from '../types/ERC725JSONSchema';
 
 const abiCoder = AbiCoder;
 
 const uintNValueTypeRegex = /^uint(\d+)$/;
-
+``;
+const bytesNValueTypeRegex = /^bytes(\d+)$/;
+``;
 const BytesNValueContentRegex = /Bytes(\d+)/;
-
-const ALLOWED_BYTES_SIZES = [2, 4, 8, 16, 32, 64, 128, 256];
 
 export const encodeDataSourceWithHash = (
   verification: undefined | Verification,
@@ -171,23 +172,58 @@ export const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
   };
 };
 
+type BytesNValueTypes =
+  | 'bytes1'
+  | 'bytes2'
+  | 'bytes3'
+  | 'bytes4'
+  | 'bytes5'
+  | 'bytes6'
+  | 'bytes7'
+  | 'bytes8'
+  | 'bytes9'
+  | 'bytes10'
+  | 'bytes11'
+  | 'bytes12'
+  | 'bytes13'
+  | 'bytes14'
+  | 'bytes15'
+  | 'bytes16'
+  | 'bytes17'
+  | 'bytes18'
+  | 'bytes19'
+  | 'bytes20'
+  | 'bytes21'
+  | 'bytes22'
+  | 'bytes23'
+  | 'bytes24'
+  | 'bytes25'
+  | 'bytes26'
+  | 'bytes27'
+  | 'bytes28'
+  | 'bytes29'
+  | 'bytes30'
+  | 'bytes31'
+  | 'bytes32';
+
 const encodeToBytesN = (
-  bytesN: 'bytes32' | 'bytes4',
+  bytesN: BytesNValueTypes,
   value: string | number,
 ): string => {
+  const numberOfBytesInType = parseInt(bytesN.split('bytes')[1], 10);
+
   let valueToEncode: string;
 
   if (typeof value === 'string' && !isHex(value)) {
     // if we receive a plain string (e.g: "hey!"), convert it to utf8-hex data
     valueToEncode = toHex(value);
   } else if (typeof value === 'number') {
-    // if we receive a number as input, convert it to hex
-    valueToEncode = numberToHex(value);
+    // if we receive a number as input, convert it to hex, left padded
+    valueToEncode = padLeft(numberToHex(value), numberOfBytesInType * 2);
   } else {
     valueToEncode = value;
   }
 
-  const numberOfBytesInType = Number.parseInt(bytesN.split('bytes')[1], 10);
   const numberOfBytesInValue = countNumberOfBytes(valueToEncode);
 
   if (numberOfBytesInValue > numberOfBytesInType) {
@@ -204,7 +240,7 @@ const encodeToBytesN = (
   }
 
   const bytesArray = hexToBytes(abiEncodedValue);
-  return bytesToHex(bytesArray.slice(0, 4));
+  return bytesToHex(bytesArray.slice(0, numberOfBytesInType));
 };
 
 /**
@@ -441,6 +477,10 @@ const valueTypeEncodingMap = (
   decode: (value: string) => any;
 } => {
   const uintNRegexMatch = type.match(uintNValueTypeRegex);
+  const bytesNRegexMatch = type.match(bytesNValueTypeRegex);
+  const bytesLength = bytesNRegexMatch
+    ? Number.parseInt(bytesNRegexMatch[1], 10)
+    : '';
 
   const uintLength = uintNRegexMatch
     ? Number.parseInt(uintNRegexMatch[0].slice(4), 10)
@@ -461,6 +501,13 @@ const valueTypeEncodingMap = (
     };
 
     return compactBytesArrayMap[type];
+  }
+
+  if (type === 'bytes') {
+    return {
+      encode: (value: string) => toHex(value),
+      decode: (value: string) => value,
+    };
   }
 
   switch (type) {
@@ -552,26 +599,23 @@ const valueTypeEncodingMap = (
           return toBN(value).toNumber();
         },
       };
-    case 'bytes32':
+    case `bytes${bytesLength}`:
       return {
-        encode: (value: string | number) => encodeToBytesN('bytes32', value),
-        decode: (value: string) => abiCoder.decodeParameter('bytes32', value),
-      };
-    case 'bytes4':
-      return {
-        encode: (value: string | number) => encodeToBytesN('bytes4', value),
+        encode: (value: string | number) => {
+          if (!isValidBytesSize(bytesLength as number)) {
+            throw new Error(
+              `Can't encode ${value} as ${type}. Invalid \`bytesN\` provided. Expected a \`N\` value for bytesN between 1 and 32.`,
+            );
+          }
+          return encodeToBytesN(type as BytesNValueTypes, value);
+        },
         decode: (value: string) => {
           // we need to abi-encode the value again to ensure that:
-          //  - that data to decode does not go over 4 bytes.
-          //  - if the data is less than 4 bytes, that it gets padded to 4 bytes long.
-          const reEncodedData = abiCoder.encodeParameter('bytes4', value);
-          return abiCoder.decodeParameter('bytes4', reEncodedData);
+          //  - that data to decode does not go over N bytes.
+          //  - if the data is less than N bytes, that it gets padded to N bytes long.
+          const reEncodedData = abiCoder.encodeParameter(type, value);
+          return abiCoder.decodeParameter(type, reEncodedData);
         },
-      };
-    case 'bytes':
-      return {
-        encode: (value: string) => toHex(value),
-        decode: (value: string) => value,
       };
     case 'bool[]':
       return {
@@ -778,7 +822,7 @@ export const valueContentEncodingMap = (
             throw new Error(`Value: ${value} is not hex.`);
           }
 
-          if (bytesLength && !ALLOWED_BYTES_SIZES.includes(bytesLength)) {
+          if (bytesLength && !isValidBytesSize(bytesLength)) {
             throw new Error(
               `Provided bytes length: ${bytesLength} for encoding valueContent: ${valueContent} is not valid.`,
             );
@@ -800,7 +844,7 @@ export const valueContentEncodingMap = (
             return null;
           }
 
-          if (bytesLength && !ALLOWED_BYTES_SIZES.includes(bytesLength)) {
+          if (bytesLength && !isValidBytesSize(bytesLength)) {
             console.error(
               `Provided bytes length: ${bytesLength} for encoding valueContent: ${valueContent} is not valid.`,
             );

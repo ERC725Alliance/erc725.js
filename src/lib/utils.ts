@@ -816,3 +816,13 @@ export const duplicateMultiTypeERC725SchemaEntry = (
 export function isValidUintSize(bitSize: number) {
   return bitSize >= 8 && bitSize <= 256 && bitSize % 8 === 0;
 }
+
+/*
+ * `bytesN` must be a valid number of bytes between 1 and 32
+ * e.g: bytes1, bytes2, bytes3, bytes4, ..., bytes32
+ *
+ * @param bytesSize the size of the fixed size bytes value
+ */
+export function isValidBytesSize(bytesSize: number) {
+  return bytesSize >= 1 && bytesSize <= 32;
+}
