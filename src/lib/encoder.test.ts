@@ -321,7 +321,7 @@ describe('encoder', () => {
       ];
 
       leftPaddedTestCases.forEach((testCase) => {
-        it(`encodes + left pad \`input\` = ${testCase.input} as ${testCase.valueType} padded on the right with \`00\`s`, async () => {
+        it(`encodes + left pad number \`input\` = ${testCase.input} as ${testCase.valueType} padded on the left with \`00\`s`, async () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
             testCase.input,

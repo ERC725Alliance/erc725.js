@@ -939,10 +939,6 @@ describe('Running @erc725/erc725.js tests...', () => {
     });
   });
 
-  describe('Testing `decodeData`', () => {
-    // ...
-  });
-
   describe('Testing utility encoding & decoding functions', () => {
     const allGraphData = generateAllData(mockSchema) as any;
     /* **************************************** */

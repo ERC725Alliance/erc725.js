@@ -219,7 +219,9 @@ const encodeToBytesN = (
     // if we receive a plain string (e.g: "hey!"), convert it to utf8-hex data
     valueToEncode = toHex(value);
   } else if (typeof value === 'number') {
-    // if we receive a number as input, convert it to hex, left padded
+    // if we receive a number as input, convert it to hex,
+    // despite `bytesN` pads on the right, we pad number on the left side here
+    // to symmetrically encode / decode
     valueToEncode = padLeft(numberToHex(value), numberOfBytesInType * 2);
   } else {
     valueToEncode = value;
