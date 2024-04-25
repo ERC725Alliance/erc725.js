@@ -23,6 +23,7 @@ import {
   checkAddressChecksum,
   hexToBytes,
   isAddress,
+  isHexStrict,
   leftPad,
   numberToHex,
   padLeft,
@@ -60,10 +61,6 @@ import { getSchemaElement } from './getSchemaElement';
 import { EncodeDataInput } from '../types/decodeData';
 import { GetDataDynamicKey } from '../types/GetData';
 import { isValidTuple } from './decodeData';
-
-function isValueContentLiteralHex(valueContent: string): boolean {
-  return valueContent.slice(0, 2) === '0x';
-}
 
 /**
  *
@@ -823,6 +820,15 @@ export function isValidUintSize(bitSize: number) {
  *
  * @param bytesSize the size of the fixed size bytes value
  */
-export function isValidBytesSize(bytesSize: number) {
+export function isValidByteSize(bytesSize: number) {
   return bytesSize >= 1 && bytesSize <= 32;
+}
+
+/**
+ * @dev Check if the `valueContent` in a schema is defined as an hex literal string
+ * @param valueContent The valueContent part of a schema
+ * @returns true or false
+ */
+export function isValueContentLiteralHex(valueContent: string): boolean {
+  return isHexStrict(valueContent);
 }

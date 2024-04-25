@@ -57,7 +57,8 @@ import {
   countNumberOfBytes,
   isValidUintSize,
   countSignificantBits,
-  isValidBytesSize,
+  isValidByteSize,
+  isValueContentLiteralHex,
 } from './utils';
 import { ERC725JSONSchemaValueType } from '../types/ERC725JSONSchema';
 
@@ -602,7 +603,7 @@ const valueTypeEncodingMap = (
     case `bytes${bytesLength}`:
       return {
         encode: (value: string | number) => {
-          if (!isValidBytesSize(bytesLength as number)) {
+          if (!isValidByteSize(bytesLength as number)) {
             throw new Error(
               `Can't encode ${value} as ${type}. Invalid \`bytesN\` provided. Expected a \`N\` value for bytesN between 1 and 32.`,
             );
@@ -822,7 +823,7 @@ export const valueContentEncodingMap = (
             throw new Error(`Value: ${value} is not hex.`);
           }
 
-          if (bytesLength && !isValidBytesSize(bytesLength)) {
+          if (bytesLength && !isValidByteSize(bytesLength)) {
             throw new Error(
               `Provided bytes length: ${bytesLength} for encoding valueContent: ${valueContent} is not valid.`,
             );
@@ -844,7 +845,7 @@ export const valueContentEncodingMap = (
             return null;
           }
 
-          if (bytesLength && !isValidBytesSize(bytesLength)) {
+          if (bytesLength && !isValidByteSize(bytesLength)) {
             console.error(
               `Provided bytes length: ${bytesLength} for encoding valueContent: ${valueContent} is not valid.`,
             );
@@ -981,8 +982,13 @@ export function decodeValueContent(
   valueContent: string,
   value: string,
 ): string | URLDataWithHash | number | boolean | null {
-  if (valueContent.slice(0, 2) === '0x') {
-    return valueContent === value ? value : null;
+  if (isValueContentLiteralHex(valueContent)) {
+    if (valueContent.toLowerCase() != value) {
+      throw new Error(
+        `Could not decode value content: the value ${value} does not match the Hex Literal ${valueContent} defined in the \`valueContent\` part of the schema`,
+      );
+    }
+    return valueContent;
   }
 
   if (value == null || value === '0x') {

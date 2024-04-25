@@ -378,7 +378,7 @@ describe('utils', () => {
         valueContent: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
         valueType: 'bytes',
         decodedValue: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
-        encodedValue: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
+        encodedValue: '0xc9aaae3201f40fd0ff04d9c885769d8256a456ab', // encoded hex is always lower case
       },
     ];
 
