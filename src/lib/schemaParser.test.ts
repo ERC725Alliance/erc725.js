@@ -13,7 +13,7 @@
 */
 
 import assert from 'assert';
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
+import { DynamicNameSchema } from '../types/ERC725JSONSchema';
 
 import { getSchema } from './schemaParser';
 
@@ -112,11 +112,13 @@ describe('schemaParser getSchema', () => {
 
     it('finds Known Mapping:<address> ', () => {
       const address = 'af3bf2ffb025098b79caddfbdd113b3681817744';
-      const name = `MyCoolAddress:${address}`;
+      const name = 'MyCoolAddress:<address>';
+      const dynamicName = `MyCoolAddress:${address}`;
       const key = `0x22496f48a493035f00000000${address}`;
 
-      const extraSchema: ERC725JSONSchema = {
+      const extraSchema: DynamicNameSchema = {
         name,
+        dynamicName,
         key,
         keyType: 'Mapping',
         valueContent: 'Address',
@@ -131,11 +133,13 @@ describe('schemaParser getSchema', () => {
     it('finds known SomeBytes32Mapping:<bytes32>', () => {
       const bytes32Value =
         '1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff';
-      const name = `SomeBytes32Mapping:${bytes32Value}`;
+      const name = `SomeBytes32Mapping:<bytes32>`;
+      const dynamicName = `SomeBytes32Mapping:${bytes32Value}`;
       const key = `0x0cfc51aec37c55a4d0b10000${bytes32Value.slice(0, 42)}`;
 
-      const extraSchema: ERC725JSONSchema = {
+      const extraSchema: DynamicNameSchema = {
         name,
+        dynamicName,
         key,
         keyType: 'Mapping',
         valueContent: 'Address',
@@ -149,11 +153,13 @@ describe('schemaParser getSchema', () => {
 
     it('finds known SomeSelectorMap:<bytes4>', () => {
       const bytes4Value = 'beefbeef';
-      const name = `SomeSelectorMap:${bytes4Value}`;
+      const name = `SomeSelectorMap:<bytes4>`;
+      const dynamicName = `SomeSelectorMap:${bytes4Value}`;
       const key = `0x0cfc51aec37c55a4d0b10000${bytes4Value}00000000000000000000000000000000`;
 
-      const extraSchema: ERC725JSONSchema = {
+      const extraSchema: DynamicNameSchema = {
         name,
+        dynamicName,
         key,
         keyType: 'Mapping',
         valueContent: '(Address,bool)',
@@ -169,12 +175,14 @@ describe('schemaParser getSchema', () => {
   describe('MappingWithGrouping', () => {
     it('finds MappingWithGrouping', () => {
       const address = 'af3bf2ffb025098b79caddfbdd113b3681817744';
-      const name = `AddressPermissions:Permissions:${address}`;
+      const name = `AddressPermissions:Permissions:<address>`;
+      const dynamicName = `AddressPermissions:Permissions:${address}`;
       const key = `0x4b80742de2bf82acb3630000${address}`;
       const schema = getSchema(key);
 
       assert.deepStrictEqual(schema, {
         name,
+        dynamicName,
         key,
         keyType: 'MappingWithGrouping',
         valueContent: 'BitArray',

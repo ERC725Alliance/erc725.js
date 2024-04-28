@@ -163,3 +163,9 @@ export interface ERC725JSONSchema {
   valueContent: ERC725JSONSchemaValueContent | string; // string holds '0x1345ABCD...' If the value content are specific bytes, than the returned value is expected to equal those bytes.
   valueType: ERC725JSONSchemaValueType | string; // The type of the value. This is used to determine how the value should be encoded / decode (`string` for tuples and CompactBytesArray).
 }
+
+// The dynamic part placeholder in the `name` of ERC725JSONSchema is preserved to allow re-encoding after the schema
+// of a hex data key got retrieved via `getSchema(...)`.
+export interface DynamicNameSchema extends ERC725JSONSchema {
+  dynamicName: string; // Describes the name of the key where the dynamic part (<address>, <bytes32) is replaced by the actual mapped value.
+}

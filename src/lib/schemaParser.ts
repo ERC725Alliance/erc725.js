@@ -21,6 +21,7 @@ import { keccak256 } from 'web3-utils';
 import allSchemas from '../schemas';
 
 import {
+  DynamicNameSchema,
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
 } from '../types/ERC725JSONSchema';
@@ -87,10 +88,9 @@ const findArraySchemaForKey = (
 const findMappingSchemaForKey = (
   key: string,
   schemas: ERC725JSONSchema[],
-): ERC725JSONSchema | null => {
+): ERC725JSONSchema | DynamicNameSchema | null => {
   const firstWordHex = key.substring(0, 26);
   const secondWordHex = key.substring(26);
-
   // Should detect:
 
   // 1. Known/defined mapping
@@ -101,7 +101,7 @@ const findMappingSchemaForKey = (
   }
 
   // 2. "Semi defined mappings" i.e. "SupportedStandards:??????"
-  let dynamicPart = '??????'; // default for "unknown"
+  let dynamicPartName = '??????'; // default for "unknown"
 
   keySchema =
     schemas.find(
@@ -114,30 +114,32 @@ const findMappingSchemaForKey = (
 
   const keyNameParts = keySchema.name.split(':');
 
+  const result = {
+    ...keySchema,
+    name: `${keyNameParts[0]}:${dynamicPartName}`,
+    valueContent: '?',
+    key,
+  };
+
   // replace dynamic placeholder in the map part (e.g: <address>, <bytes32>) with the hex value
   if (isDynamicKeyName(keySchema.name)) {
-    dynamicPart = secondWordHex;
+    dynamicPartName = secondWordHex;
+    result['dynamicName'] = `${keyNameParts[0]}:${dynamicPartName}`;
   }
 
   // if first 20 bytes of the hash of second word in schema match,
   // display the map part as plain word
   if (keccak256(keyNameParts[1]).substring(0, 26) === secondWordHex) {
-    [, dynamicPart] = keyNameParts;
+    [, dynamicPartName] = keyNameParts;
   }
 
-  // TODO: Handle the SupportedStandard Keys; we can get the valueContent from the Keys
-  return {
-    ...keySchema,
-    valueContent: '?',
-    name: `${keyNameParts[0]}:${dynamicPart}`,
-    key,
-  };
+  return result;
 };
 
 const findMappingWithGroupingSchemaForKey = (
   key: string,
   schemas: ERC725JSONSchema[],
-): ERC725JSONSchema | null => {
+): ERC725JSONSchema | DynamicNameSchema | null => {
   const keySchema =
     schemas.find(
       (schema) => schema.key.substring(0, 26) === key.substring(0, 26),
@@ -149,7 +151,7 @@ const findMappingWithGroupingSchemaForKey = (
     return {
       ...keySchema,
       key,
-      name: `${keySchema.name.substring(
+      dynamicName: `${keySchema.name.substring(
         0,
         keySchema.name.lastIndexOf(':'),
       )}:${address}`,
