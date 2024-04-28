@@ -889,6 +889,56 @@ describe('Running @erc725/erc725.js tests...', () => {
     });
   });
 
+  describe('Testing `encodeData`', () => {
+    describe('for `uintN` as `Number`', () => {
+      [
+        { valueType: 'uint8', valueToEncode: 10, expectedEncodedValue: '0x0a' },
+        {
+          valueType: 'uint16',
+          valueToEncode: 10,
+          expectedEncodedValue: '0x000a',
+        },
+        {
+          valueType: 'uint24',
+          valueToEncode: 10,
+          expectedEncodedValue: '0x00000a',
+        },
+        {
+          valueType: 'uint32',
+          valueToEncode: 10,
+          expectedEncodedValue: '0x0000000a',
+        },
+        {
+          valueType: 'uint128',
+          valueToEncode: 10,
+          expectedEncodedValue: '0x0000000000000000000000000000000a',
+        },
+        {
+          valueType: 'uint256',
+          valueToEncode: 10,
+          expectedEncodedValue:
+            '0x000000000000000000000000000000000000000000000000000000000000000a',
+        },
+      ].forEach((testCase) => {
+        it('should encode a valueType `uintN` as valueContent `Number` correctly with the right padding', () => {
+          const schema = {
+            name: 'ExampleUintN',
+            key: '0x512cddbe2654abd240fafbed308d91e82ff977301943f08ea825ba3e435bfa57',
+            keyType: 'Singleton',
+            valueType: testCase.valueType,
+            valueContent: 'Number',
+          };
+          const erc725js = new ERC725([schema]);
+          const result = erc725js.encodeData([
+            { keyName: schema.name, value: testCase.valueToEncode },
+          ]);
+
+          assert.equal(result.values[0], testCase.expectedEncodedValue);
+        });
+      });
+    });
+  });
+
   describe('Testing utility encoding & decoding functions', () => {
     const allGraphData = generateAllData(mockSchema) as any;
     /* **************************************** */

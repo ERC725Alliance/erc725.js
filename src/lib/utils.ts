@@ -23,6 +23,7 @@ import {
   checkAddressChecksum,
   hexToBytes,
   isAddress,
+  isHexStrict,
   leftPad,
   numberToHex,
   padLeft,
@@ -84,16 +85,22 @@ export function encodeKeyValue(
   name?: string,
 ): string | false {
   const isSupportedValueContent =
-    !!valueContentMap(valueContent) || valueContent.slice(0, 2) === '0x';
+    !!valueContentMap(valueContent) || isValueContentLiteralHex(valueContent);
 
   if (!isSupportedValueContent) {
     throw new Error(
-      `The valueContent '${valueContent}' 
-            for ${name} is not supported.`,
+      `The valueContent '${valueContent}' for ${name} is not supported.`,
     );
   }
 
   const isValueTypeArray = valueType.slice(valueType.length - 2) === '[]';
+
+  if (
+    (valueType.startsWith('uint') || valueType.startsWith('bytes')) &&
+    typeof decodedValue !== 'object'
+  ) {
+    return encodeValueType(valueType, decodedValue);
+  }
 
   if (!isValueTypeArray && !Array.isArray(decodedValue)) {
     // Straight forward encode
@@ -187,8 +194,8 @@ export function guessKeyTypeFromKeyName(
 }
 
 export const encodeTupleKeyValue = (
-  valueContent: string, // i.e. (bytes4,Number,bytes16)
-  valueType: string, // i.e. (bytes4,bytes8,bytes16)
+  valueContent: string, // i.e. (Bytes4,Number,Bytes16,Address)
+  valueType: string, // i.e. (bytes4,uint128,bytes16,address)
   decodedValues: Array<string | number | URLDataToEncode | string[]>,
 ) => {
   // We assume data has already been validated at this stage
@@ -196,6 +203,7 @@ export const encodeTupleKeyValue = (
   const valueTypeParts = valueType
     .substring(1, valueType.length - 1)
     .split(',');
+
   const valueContentParts = valueContent
     .substring(1, valueContent.length - 1)
     .split(',');
@@ -218,18 +226,7 @@ export const encodeTupleKeyValue = (
         return ''; // may cause issues?
       }
 
-      const numberOfBytes = Number.parseInt(valueTypeParts[i].substring(5), 10); // bytes50 -> 50
-
-      // If the encoded value is too large for the expected valueType, we shrink it from the left
-      // i.e. number are encoded on 32bytes
-      // TODO: might be missing cases !
-      if (encodedKeyValue.length > 2 + numberOfBytes * 2) {
-        return encodedKeyValue.slice(
-          encodedKeyValue.length - numberOfBytes * 2,
-        );
-      }
-
-      return padLeft(encodedKeyValue, numberOfBytes * 2).replace('0x', '');
+      return stripHexPrefix(encodedKeyValue);
     })
     .join('')}`;
 
@@ -815,4 +812,23 @@ export const duplicateMultiTypeERC725SchemaEntry = (
  */
 export function isValidUintSize(bitSize: number) {
   return bitSize >= 8 && bitSize <= 256 && bitSize % 8 === 0;
+}
+
+/*
+ * `bytesN` must be a valid number of bytes between 1 and 32
+ * e.g: bytes1, bytes2, bytes3, bytes4, ..., bytes32
+ *
+ * @param bytesSize the size of the fixed size bytes value
+ */
+export function isValidByteSize(bytesSize: number) {
+  return bytesSize >= 1 && bytesSize <= 32;
+}
+
+/**
+ * @dev Check if the `valueContent` in a schema is defined as an hex literal string
+ * @param valueContent The valueContent part of a schema
+ * @returns true or false
+ */
+export function isValueContentLiteralHex(valueContent: string): boolean {
+  return isHexStrict(valueContent);
 }
