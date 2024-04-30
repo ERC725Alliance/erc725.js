@@ -171,7 +171,7 @@ const findMappingWithGroupingSchemaForKey = (
 function schemaParser(
   key: string,
   schemas: ERC725JSONSchema[],
-): ERC725JSONSchema | null {
+): ERC725JSONSchema | DynamicNameSchema | null {
   const schemasByKeyType = getSchemasByKeyType(schemas);
 
   let foundSchema: ERC725JSONSchema | null = null;
@@ -205,20 +205,23 @@ function schemaParser(
 export function getSchema(
   keyOrKeys: string | string[],
   providedSchemas?: ERC725JSONSchema[],
-): ERC725JSONSchema | null | Record<string, ERC725JSONSchema | null> {
+):
+  | ERC725JSONSchema
+  | DynamicNameSchema
+  | null
+  | Record<string, ERC725JSONSchema | DynamicNameSchema | null> {
   let fullSchema: ERC725JSONSchema[] = allSchemas;
   if (providedSchemas) {
     fullSchema = fullSchema.concat(providedSchemas);
   }
 
   if (Array.isArray(keyOrKeys)) {
-    return keyOrKeys.reduce<Record<string, ERC725JSONSchema | null>>(
-      (acc, key) => {
-        acc[key] = schemaParser(key, fullSchema);
-        return acc;
-      },
-      {},
-    );
+    return keyOrKeys.reduce<
+      Record<string, ERC725JSONSchema | DynamicNameSchema | null>
+    >((acc, key) => {
+      acc[key] = schemaParser(key, fullSchema);
+      return acc;
+    }, {});
   }
 
   return schemaParser(keyOrKeys, fullSchema);
