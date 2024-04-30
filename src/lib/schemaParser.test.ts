@@ -136,7 +136,7 @@ describe('schemaParser getSchema', () => {
     it('finds known SomeBytes32Mapping:<bytes32>', () => {
       const bytes32Value =
         '1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff';
-      const name = `SomeBytes32Mapping:<bytes32>`;
+      const name = 'SomeBytes32Mapping:<bytes32>';
       const dynamicName = `SomeBytes32Mapping:0x${bytes32Value}`;
       const key = `0x0cfc51aec37c55a4d0b10000${bytes32Value.slice(0, 42)}`;
 
@@ -157,7 +157,7 @@ describe('schemaParser getSchema', () => {
 
     it('finds known SomeSelectorMap:<bytes4>', () => {
       const bytes4Value = 'beefbeef';
-      const name = `SomeSelectorMap:<bytes4>`;
+      const name = 'SomeSelectorMap:<bytes4>';
       const dynamicName = `SomeSelectorMap:0x${bytes4Value}`;
       const key = `0x0cfc51aec37c55a4d0b10000${bytes4Value}00000000000000000000000000000000`;
 
@@ -180,7 +180,7 @@ describe('schemaParser getSchema', () => {
   describe('MappingWithGrouping', () => {
     it('finds MappingWithGrouping', () => {
       const address = 'af3bf2ffb025098b79caddfbdd113b3681817744';
-      const name = `AddressPermissions:Permissions:<address>`;
+      const name = 'AddressPermissions:Permissions:<address>';
       const dynamicName = `AddressPermissions:Permissions:0x${address}`;
       const key = `0x4b80742de2bf82acb3630000${address}`;
       const schema = getSchema(key);

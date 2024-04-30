@@ -125,8 +125,9 @@ const findMappingSchemaForKey = (
   // replace dynamic placeholder in the map part (e.g: <address>, <bytes32>) with the hex value
   if (isDynamicKeyName(keySchema.name)) {
     dynamicPartName = secondWordHex;
-    result['dynamicName'] = `${keyNameParts[0]}:0x${dynamicPartName}`;
-    result['dynamicKeyPart'] = `0x${secondWordHex}`;
+    (result as DynamicNameSchema).dynamicName =
+      `${keyNameParts[0]}:0x${dynamicPartName}`;
+    (result as DynamicNameSchema).dynamicKeyPart = `0x${secondWordHex}`;
   }
 
   // if first 20 bytes of the hash of second word in schema match,
@@ -153,10 +154,9 @@ const findMappingWithGroupingSchemaForKey = (
     const dynamicKeyPart = key.substring(26);
 
     if (isDynamicKeyName(keySchema.name)) {
-      keySchema[
-        'dynamicName'
-      ] = `${keyNameParts[0]}:${keyNameParts[1]}:0x${dynamicKeyPart}`;
-      keySchema['dynamicKeyPart'] = `0x${dynamicKeyPart}`;
+      (keySchema as DynamicNameSchema).dynamicName =
+        `${keyNameParts[0]}:${keyNameParts[1]}:0x${dynamicKeyPart}`;
+      (keySchema as DynamicNameSchema).dynamicKeyPart = `0x${dynamicKeyPart}`;
     }
 
     return {
