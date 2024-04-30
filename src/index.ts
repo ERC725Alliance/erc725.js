@@ -96,6 +96,7 @@ export {
 export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 export { encodePermissions, decodePermissions } from './lib/permissions';
 export { checkPermissions } from './lib/detector';
+export { getSchema } from './lib/schemaParser';
 
 // PRIVATE FUNCTION
 function initializeProvider(providerOrRpcUrl, gasInfo) {
