@@ -168,4 +168,5 @@ export interface ERC725JSONSchema {
 // of a hex data key got retrieved via `getSchema(...)`.
 export interface DynamicNameSchema extends ERC725JSONSchema {
   dynamicName: string; // Describes the name of the key where the dynamic part (<address>, <bytes32) is replaced by the actual mapped value.
+  dynamicKeyPart: string;
 }

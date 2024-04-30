@@ -121,16 +121,18 @@ const findMappingSchemaForKey = (
     key,
   };
 
+  // 3. mappings with dynamic key part
   // replace dynamic placeholder in the map part (e.g: <address>, <bytes32>) with the hex value
   if (isDynamicKeyName(keySchema.name)) {
     dynamicPartName = secondWordHex;
-    result['dynamicName'] = `${keyNameParts[0]}:${dynamicPartName}`;
+    result['dynamicName'] = `${keyNameParts[0]}:0x${dynamicPartName}`;
+    result['dynamicKeyPart'] = `0x${secondWordHex}`;
   }
 
   // if first 20 bytes of the hash of second word in schema match,
   // display the map part as plain word
   if (keccak256(keyNameParts[1]).substring(0, 26) === secondWordHex) {
-    [, dynamicPartName] = keyNameParts;
+    [, dynamicPartName] = `0x${keyNameParts}`;
   }
 
   return result;
@@ -145,16 +147,21 @@ const findMappingWithGroupingSchemaForKey = (
       (schema) => schema.key.substring(0, 26) === key.substring(0, 26),
     ) || null;
 
-  const address = key.substring(26);
-
   if (keySchema) {
+    const keyNameParts = keySchema.name.split(':');
+
+    const dynamicKeyPart = key.substring(26);
+
+    if (isDynamicKeyName(keySchema.name)) {
+      keySchema[
+        'dynamicName'
+      ] = `${keyNameParts[0]}:${keyNameParts[1]}:0x${dynamicKeyPart}`;
+      keySchema['dynamicKeyPart'] = `0x${dynamicKeyPart}`;
+    }
+
     return {
       ...keySchema,
       key,
-      dynamicName: `${keySchema.name.substring(
-        0,
-        keySchema.name.lastIndexOf(':'),
-      )}:${address}`,
     };
   }
 
