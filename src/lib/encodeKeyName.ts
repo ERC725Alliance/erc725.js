@@ -34,7 +34,7 @@ import { DynamicKeyParts } from '../types/dynamicKeys';
 const dynamicTypes = ['<string>', '<address>', '<bool>'];
 
 // https://docs.soliditylang.org/en/v0.8.14/abi-spec.html#types
-const dynamicTypesRegex = /<(uint|int|bytes)(\d+)>/;
+export const dynamicTypesRegex = /<(uint|int|bytes)(\d+)>/;
 
 /**
  *

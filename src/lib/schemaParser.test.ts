@@ -13,7 +13,7 @@
 */
 
 import assert from 'assert';
-import { DynamicNameSchema } from '../types/ERC725JSONSchema';
+import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 
 import { getSchema } from './schemaParser';
 
@@ -101,13 +101,11 @@ describe('schemaParser getSchema', () => {
         '0xeafec4d89fa9619884b60000f4d7faed14a1ab658d46d385bc29fb1eeaa56d0b',
       );
 
-      console.log('schema ', schema);
-
       assert.deepStrictEqual(schema, {
         name: 'SupportedStandards:??????',
         key: '0xeafec4d89fa9619884b60000f4d7faed14a1ab658d46d385bc29fb1eeaa56d0b',
         keyType: 'Mapping',
-        valueContent: '?',
+        valueContent: '0x5ef83ad9',
         valueType: 'bytes4',
       });
     });
@@ -118,11 +116,9 @@ describe('schemaParser getSchema', () => {
       const dynamicName = `MyCoolAddress:0x${address}`;
       const key = `0x22496f48a493035f00000000${address}`;
 
-      const extraSchema: DynamicNameSchema = {
+      const extraSchema: ERC725JSONSchema = {
         name,
-        dynamicName,
         key,
-        dynamicKeyPart: `0x${address}`,
         keyType: 'Mapping',
         valueContent: 'Address',
         valueType: 'address',
@@ -130,21 +126,24 @@ describe('schemaParser getSchema', () => {
 
       const schema = getSchema(key, [extraSchema]);
 
-      assert.deepStrictEqual(schema, extraSchema);
+      assert.deepStrictEqual(schema, {
+        ...extraSchema,
+        dynamicKeyPart: `0x${address}`,
+        dynamicName,
+      });
     });
 
     it('finds known SomeBytes32Mapping:<bytes32>', () => {
       const bytes32Value =
         '1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff';
       const name = 'SomeBytes32Mapping:<bytes32>';
-      const dynamicName = `SomeBytes32Mapping:0x${bytes32Value}`;
-      const key = `0x0cfc51aec37c55a4d0b10000${bytes32Value.slice(0, 42)}`;
+      const dynamicPart = bytes32Value.slice(0, 40);
+      const dynamicName = `SomeBytes32Mapping:0x${dynamicPart}`;
+      const key = `0x0cfc51aec37c55a4d0b10000${dynamicPart}`;
 
-      const extraSchema: DynamicNameSchema = {
+      const extraSchema: ERC725JSONSchema = {
         name,
-        dynamicName,
         key,
-        dynamicKeyPart: `0x${bytes32Value}`,
         keyType: 'Mapping',
         valueContent: 'Address',
         valueType: 'address',
@@ -152,7 +151,11 @@ describe('schemaParser getSchema', () => {
 
       const schema = getSchema(key, [extraSchema]);
 
-      assert.deepStrictEqual(schema, extraSchema);
+      assert.deepStrictEqual(schema, {
+        ...extraSchema,
+        dynamicName,
+        dynamicKeyPart: `0x${dynamicPart}`,
+      });
     });
 
     it('finds known SomeSelectorMap:<bytes4>', () => {
@@ -161,11 +164,9 @@ describe('schemaParser getSchema', () => {
       const dynamicName = `SomeSelectorMap:0x${bytes4Value}`;
       const key = `0x0cfc51aec37c55a4d0b10000${bytes4Value}00000000000000000000000000000000`;
 
-      const extraSchema: DynamicNameSchema = {
+      const extraSchema: ERC725JSONSchema = {
         name,
-        dynamicName,
         key,
-        dynamicKeyPart: `0x${bytes4Value}`,
         keyType: 'Mapping',
         valueContent: '(Address,bool)',
         valueType: '(address,bool)',
@@ -173,7 +174,36 @@ describe('schemaParser getSchema', () => {
 
       const schema = getSchema(key, [extraSchema]);
 
-      assert.deepStrictEqual(schema, extraSchema);
+      assert.deepStrictEqual(schema, {
+        ...extraSchema,
+        dynamicName,
+        dynamicKeyPart: `0x${bytes4Value}`,
+      });
+    });
+
+    it('finds Known LSP1UniversalReceiverDelegate:<bytes32> ', () => {
+      const bytes32value =
+        'cafecafecafecafecafecafecafecafecafecafef00df00df00df00df00df00d';
+      const name = 'LSP1UniversalReceiverDelegate:<bytes32>';
+      const dynamicPart = bytes32value.slice(0, 40);
+      const dynamicName = `LSP1UniversalReceiverDelegate:0x${dynamicPart}`;
+      const key = `0x0cfc51aec37c55a4d0b10000${dynamicPart}`;
+
+      const extraSchema: ERC725JSONSchema = {
+        name,
+        key,
+        keyType: 'Mapping',
+        valueContent: 'Address',
+        valueType: 'address',
+      };
+
+      const schema = getSchema(key, [extraSchema]);
+
+      assert.deepStrictEqual(schema, {
+        ...extraSchema,
+        dynamicName,
+        dynamicKeyPart: `0x${dynamicPart}`,
+      });
     });
   });
 

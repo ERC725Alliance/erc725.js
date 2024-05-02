@@ -16,7 +16,6 @@
  * @author Hugo Masclet <@Hugoo>
  * @date 2022
  */
-
 import { keccak256 } from 'web3-utils';
 import allSchemas from '../schemas';
 
@@ -25,7 +24,7 @@ import {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
 } from '../types/ERC725JSONSchema';
-import { isDynamicKeyName } from './encodeKeyName';
+import { dynamicTypesRegex, isDynamicKeyName } from './encodeKeyName';
 
 const getSchemasByKeyType = (
   schemas: ERC725JSONSchema[],
@@ -38,6 +37,59 @@ const getSchemasByKeyType = (
       (schema) => schema.keyType === 'MappingWithGrouping',
     ),
   };
+};
+
+const fillDynamicKeyPart = (
+  key: string,
+  keySchema: ERC725JSONSchema,
+): ERC725JSONSchema | DynamicNameSchema => {
+  const result: ERC725JSONSchema | DynamicNameSchema = { ...keySchema, key };
+
+  const keyNameParts = keySchema.name.split(':');
+  const secondWordHex = key.substring(26);
+
+  // 2. "Semi defined mappings" i.e. "SupportedStandards:??????"
+  let dynamicPartName = '??????'; // default for "unknown"
+
+  // replace dynamic placeholder in the map part (e.g: <address>, <bytes32>) with the hex value
+  if (isDynamicKeyName(keySchema.name)) {
+    dynamicPartName = secondWordHex;
+
+    let dynamicName = `${keyNameParts[0]}:0x${dynamicPartName}`;
+    let dynamicKeyPart = `0x${secondWordHex}`;
+
+    const dynamicPartType = keyNameParts[1].match(dynamicTypesRegex);
+
+    if (dynamicPartType) {
+      const byteSize =
+        dynamicPartType[1] === 'uint' || dynamicPartType[1] === 'int'
+          ? Number.parseInt(dynamicPartType[2]) / 8 // e.g: uint128 -> 128 / 8 -> 16 bytes
+          : Number.parseInt(dynamicPartType[2]); // e.g: bytes8 -> 8 bytes
+
+      if (byteSize < 20) {
+        dynamicName = `${keyNameParts[0]}:0x${dynamicPartName.slice(
+          0,
+          byteSize * 2,
+        )}`;
+
+        dynamicKeyPart = `0x${secondWordHex.slice(0, byteSize * 2)}`;
+      }
+    }
+
+    (result as DynamicNameSchema).dynamicName = dynamicName;
+    (result as DynamicNameSchema).dynamicKeyPart = dynamicKeyPart;
+
+    return result;
+  }
+
+  // if first 20 bytes of the hash of second word in schema match,
+  // display the map part as plain word
+  if (keccak256(keyNameParts[1]).substring(0, 42) === `0x${secondWordHex}`) {
+    dynamicPartName = keyNameParts[1];
+  }
+  result.name = `${keyNameParts[0]}:${dynamicPartName}`;
+
+  return result;
 };
 
 const findSingletonSchemaForKey = (
@@ -90,18 +142,14 @@ const findMappingSchemaForKey = (
   schemas: ERC725JSONSchema[],
 ): ERC725JSONSchema | DynamicNameSchema | null => {
   const firstWordHex = key.substring(0, 26);
-  const secondWordHex = key.substring(26);
   // Should detect:
 
-  // 1. Known/defined mapping
+  // Known/defined mapping
   let keySchema = schemas.find((schema) => schema.key === key) || null;
 
   if (keySchema) {
-    return keySchema;
+    return fillDynamicKeyPart(key, keySchema);
   }
-
-  // 2. "Semi defined mappings" i.e. "SupportedStandards:??????"
-  let dynamicPartName = '??????'; // default for "unknown"
 
   keySchema =
     schemas.find(
@@ -112,31 +160,7 @@ const findMappingSchemaForKey = (
     return null;
   }
 
-  const keyNameParts = keySchema.name.split(':');
-
-  const result = {
-    ...keySchema,
-    name: `${keyNameParts[0]}:${dynamicPartName}`,
-    valueContent: '?',
-    key,
-  };
-
-  // 3. mappings with dynamic key part
-  // replace dynamic placeholder in the map part (e.g: <address>, <bytes32>) with the hex value
-  if (isDynamicKeyName(keySchema.name)) {
-    dynamicPartName = secondWordHex;
-    (result as DynamicNameSchema).dynamicName =
-      `${keyNameParts[0]}:0x${dynamicPartName}`;
-    (result as DynamicNameSchema).dynamicKeyPart = `0x${secondWordHex}`;
-  }
-
-  // if first 20 bytes of the hash of second word in schema match,
-  // display the map part as plain word
-  if (keccak256(keyNameParts[1]).substring(0, 26) === secondWordHex) {
-    [, dynamicPartName] = `0x${keyNameParts}`;
-  }
-
-  return result;
+  return fillDynamicKeyPart(key, keySchema);
 };
 
 const findMappingWithGroupingSchemaForKey = (
