@@ -31,7 +31,7 @@ import {
 import { isDynamicKeyName } from './encodeKeyName';
 import { valueContentEncodingMap, decodeValueType } from './encoder';
 import { getSchemaElement } from './getSchemaElement';
-import { decodeKeyValue, encodeArrayKey } from './utils';
+import { countNumberOfBytes, decodeKeyValue, encodeArrayKey } from './utils';
 
 const tupleValueTypesRegex = /bytes(\d+)/;
 const valueContentsBytesRegex = /Bytes(\d+)/;
@@ -195,22 +195,27 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
 
   switch (lowerCaseKeyType) {
     case 'array': {
-      const results: any[] = [];
-
       // If user has requested a key which does not exist in the contract, value will be: 0x and value.find() will fail.
-      if (!value || typeof value === 'string') {
-        return results;
+      if (!value) {
+        return [];
+      }
+
+      // Decode as a Number when when the encoded value is to set the Array length only
+      if (typeof value === 'string' && countNumberOfBytes(value) === 16) {
+        return decodeKeyValue('Number', 'uint128', value, schema.name) || 0;
       }
 
       const valueElement = value.find((e) => e.key === schema.key);
       // Handle empty/non-existent array
       if (!valueElement) {
-        return results;
+        return [];
       }
 
       const arrayLength =
         decodeKeyValue('Number', 'uint128', valueElement.value, schema.name) ||
         0;
+
+      const results: any[] = [];
 
       // This will not run if no match or arrayLength
       for (let index = 0; index < arrayLength; index++) {
