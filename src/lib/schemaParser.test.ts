@@ -105,14 +105,15 @@ describe('schemaParser getSchema', () => {
         name: 'SupportedStandards:??????',
         key: '0xeafec4d89fa9619884b60000f4d7faed14a1ab658d46d385bc29fb1eeaa56d0b',
         keyType: 'Mapping',
-        valueContent: '?',
+        valueContent: '0x5ef83ad9',
         valueType: 'bytes4',
       });
     });
 
     it('finds Known Mapping:<address> ', () => {
       const address = 'af3bf2ffb025098b79caddfbdd113b3681817744';
-      const name = `MyCoolAddress:${address}`;
+      const name = 'MyCoolAddress:<address>';
+      const dynamicName = `MyCoolAddress:0x${address}`;
       const key = `0x22496f48a493035f00000000${address}`;
 
       const extraSchema: ERC725JSONSchema = {
@@ -125,14 +126,20 @@ describe('schemaParser getSchema', () => {
 
       const schema = getSchema(key, [extraSchema]);
 
-      assert.deepStrictEqual(schema, extraSchema);
+      assert.deepStrictEqual(schema, {
+        ...extraSchema,
+        dynamicKeyPart: `0x${address}`,
+        dynamicName,
+      });
     });
 
     it('finds known SomeBytes32Mapping:<bytes32>', () => {
       const bytes32Value =
         '1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff';
-      const name = `SomeBytes32Mapping:${bytes32Value}`;
-      const key = `0x0cfc51aec37c55a4d0b10000${bytes32Value.slice(0, 42)}`;
+      const name = 'SomeBytes32Mapping:<bytes32>';
+      const dynamicPart = bytes32Value.slice(0, 40);
+      const dynamicName = `SomeBytes32Mapping:0x${dynamicPart}`;
+      const key = `0x0cfc51aec37c55a4d0b10000${dynamicPart}`;
 
       const extraSchema: ERC725JSONSchema = {
         name,
@@ -144,12 +151,17 @@ describe('schemaParser getSchema', () => {
 
       const schema = getSchema(key, [extraSchema]);
 
-      assert.deepStrictEqual(schema, extraSchema);
+      assert.deepStrictEqual(schema, {
+        ...extraSchema,
+        dynamicName,
+        dynamicKeyPart: `0x${dynamicPart}`,
+      });
     });
 
     it('finds known SomeSelectorMap:<bytes4>', () => {
       const bytes4Value = 'beefbeef';
-      const name = `SomeSelectorMap:${bytes4Value}`;
+      const name = 'SomeSelectorMap:<bytes4>';
+      const dynamicName = `SomeSelectorMap:0x${bytes4Value}`;
       const key = `0x0cfc51aec37c55a4d0b10000${bytes4Value}00000000000000000000000000000000`;
 
       const extraSchema: ERC725JSONSchema = {
@@ -162,20 +174,52 @@ describe('schemaParser getSchema', () => {
 
       const schema = getSchema(key, [extraSchema]);
 
-      assert.deepStrictEqual(schema, extraSchema);
+      assert.deepStrictEqual(schema, {
+        ...extraSchema,
+        dynamicName,
+        dynamicKeyPart: `0x${bytes4Value}`,
+      });
+    });
+
+    it('finds Known LSP1UniversalReceiverDelegate:<bytes32> ', () => {
+      const bytes32value =
+        'cafecafecafecafecafecafecafecafecafecafef00df00df00df00df00df00d';
+      const name = 'LSP1UniversalReceiverDelegate:<bytes32>';
+      const dynamicPart = bytes32value.slice(0, 40);
+      const dynamicName = `LSP1UniversalReceiverDelegate:0x${dynamicPart}`;
+      const key = `0x0cfc51aec37c55a4d0b10000${dynamicPart}`;
+
+      const extraSchema: ERC725JSONSchema = {
+        name,
+        key,
+        keyType: 'Mapping',
+        valueContent: 'Address',
+        valueType: 'address',
+      };
+
+      const schema = getSchema(key, [extraSchema]);
+
+      assert.deepStrictEqual(schema, {
+        ...extraSchema,
+        dynamicName,
+        dynamicKeyPart: `0x${dynamicPart}`,
+      });
     });
   });
 
   describe('MappingWithGrouping', () => {
     it('finds MappingWithGrouping', () => {
       const address = 'af3bf2ffb025098b79caddfbdd113b3681817744';
-      const name = `AddressPermissions:Permissions:${address}`;
+      const name = 'AddressPermissions:Permissions:<address>';
+      const dynamicName = `AddressPermissions:Permissions:0x${address}`;
       const key = `0x4b80742de2bf82acb3630000${address}`;
       const schema = getSchema(key);
 
       assert.deepStrictEqual(schema, {
         name,
+        dynamicName,
         key,
+        dynamicKeyPart: `0x${address}`,
         keyType: 'MappingWithGrouping',
         valueContent: 'BitArray',
         valueType: 'bytes32',
