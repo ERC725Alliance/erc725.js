@@ -263,6 +263,27 @@ describe('decodeData', () => {
     ]);
   });
 
+  it('parses type Array correctly but just the array length', () => {
+    const decodedData = decodeData(
+      {
+        keyName: 'LSP12IssuedAssets[]',
+        value: '0x00000000000000000000000000000003',
+      },
+      [
+        {
+          name: 'LSP12IssuedAssets[]',
+          key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
+          keyType: 'Array',
+          valueContent: 'Address',
+          valueType: 'address',
+        },
+      ],
+    );
+
+    expect(decodedData.name).to.eql('LSP12IssuedAssets[]');
+    expect(decodedData.value).to.eql(3);
+  });
+
   it('decodes dynamic keys', () => {
     const decodedData = decodeData(
       [
