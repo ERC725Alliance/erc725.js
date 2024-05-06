@@ -1,6 +1,6 @@
 <p align="center">
  <h1 align="center"><strong>@erc725/erc725.js</strong></h1>
- <p align="center">Allows for interacting with <a href="https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md">ERC725Y</a> compliant contracts on an EVM blockchain.</p>
+ <p align="center">Allows for to read, encode and decode data from <a href="https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md">ERC725Y</a> compliant contracts using ERC725Y JSON schemas.</p>
 </p>
 
 <p align="center">
@@ -27,6 +27,8 @@
 
 ## Installation
 
+> If you install it on the backend side, you may need to also install [`isomorphic-fetch`](https://www.npmjs.com/package/isomorphic-fetch).
+
 ```shell script
 npm install @erc725/erc725.js
 ```
@@ -37,11 +39,11 @@ import { ERC725 } from '@erc725/erc725.js';
 import ERC725 from '@erc725/erc725.js';
 ```
 
-If you install it on the backend side, you may need to also install [`isomorphic-fetch`](https://www.npmjs.com/package/isomorphic-fetch).
-
 ## Instantiation
 
-You need to initialise the ERC725 object with a [schema](https://docs.lukso.tech/tools/erc725js/schemas), a contract address, and an RPC URL.
+> If you are using ES6 `import` statements in Node.js, make sure your file has a `.mjs` extension, or that your project is set up to support ES6 modules.
+
+You can initialize the ERC725 object with a [schema](https://docs.lukso.tech/tools/erc725js/schemas), a contract address, and an RPC URL.
 
 ```js
 const address = '0x0Dc07C77985fE31996Ed612F568eb441afe5768D';
@@ -52,15 +54,14 @@ const config = {
 };
 ```
 
-### TypeScript
-
-> If you are using ES6 `import` statements in Node.js, make sure your file has a `.mjs` extension, or that your project is set up to support ES6 modules.
+<details>
+  <summary>TypeScript</summary>
 
 ```ts
 import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
 
-// Part of LSP3-UniversalProfile Schema
-// https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
+// Part of LSP3-Profile-Metadata Schema
+// https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-Profile-Metadata.md
 const schemas: ERC725JSONSchema[] = [
   {
     name: 'SupportedStandards:LSP3Profile',
@@ -88,13 +89,16 @@ const schemas: ERC725JSONSchema[] = [
 const erc725 = new ERC725(schemas, address, RPC_URL, config);
 ```
 
-### JavaScript
+</details>
+
+<details>
+  <summary>Javascript</summary>
 
 ```js
-import { ERC725 } require('@erc725/erc725.js');
+const { ERC725 } = require('@erc725/erc725.js');
 
-// Part of LSP3-UniversalProfile Schema
-// https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
+// Part of LSP3-Profile-Metadata Schema
+// https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-Profile-Metadata.md
 const schemas = [
   {
     name: 'SupportedStandards:LSP3Profile',
@@ -122,7 +126,11 @@ const schemas = [
 const erc725 = new ERC725(schemas, address, RPC_URL, config);
 ```
 
+</details>
+
 ## Usage
+
+> See the **Getting Started** pages for more examples on how to use )_erc725.js_
 
 ```js
 await myErc725.getOwner();
