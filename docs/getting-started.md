@@ -5,19 +5,17 @@ sidebar_position: 1
 # Getting Started
 
 :::caution
-This package is currently in the early stages of development. Please use it for testing or experimentation purposes only.
+This package is currently in the early stages of development. Feel free to [report issues or feature requests](https://github.com/ERC725Alliance/erc725.js/issues) through the Github repository.
 :::
 
-The `@erc725/erc725.js` package allows you to interact with the ERC-725 schemas easily.
+<a href="https://github.com/ERC725Alliance/erc725.js" target="_blank" rel="noopener noreferrer"><img style={{verticalAlign: 'middle'}} alt="github badge" src="https://img.shields.io/github/v/release/ERC725Alliance/erc725.js?logo=github&label=Github"/></a>
+<a href="https://www.npmjs.com/package/@erc725/erc725.js" target="_blank" rel="noopener noreferrer"><img style={{verticalAlign: 'middle'}} alt="npm badge" src="https://img.shields.io/npm/v/@erc725/erc725.js.svg?style=flat&label=NPM&logo=npm"/></a>
 
-- GitHub repo: https://github.com/ERC725Alliance/erc725.js
-- NPM: https://www.npmjs.com/package/@erc725/erc725.js
+<br/><br/>
+
+The `@erc725/erc725.js` package allows you to retrieve, encode and decode data easily from any ERC725Y smart contracts using ERC725Y JSON Schemas.
 
 ## Installation
-
-```bash
-npm install @erc725/erc725.js
-```
 
 :::info
 
@@ -25,28 +23,45 @@ If you install it on the backend side, you may need to also install [`isomorphic
 
 :::
 
-## Instantiation
-
-You need to initialise the ERC725 object with a [schema](https://docs.lukso.tech/tools/erc725js/schemas), a contract address, and an RPC URL.
-
-```js
-const address = '0x0Dc07C77985fE31996Ed612F568eb441afe5768D';
-const RPC_URL = 'https://rpc.testnet.lukso.network';
-const config = {
-  ipfsGateway: 'https://YOUR-IPFS-GATEWAY/ipfs/',
-  gas: 20_000_000, // optional, default is 1_000_000
-};
+```bash
+npm install @erc725/erc725.js
 ```
 
-### TypeScript
+## Usage
 
 > If you are using ES6 `import` statements in Node.js, make sure your file has a `.mjs` extension, or that your project is set up to support ES6 modules.
 
-```ts
-import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
+There are 3 main ways to use _erc725.js_.
 
-// Part of LSP3-UniversalProfile Schema
-// https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
+### Option 1: using with schema only
+
+Create an instance of `ERC725` with just a [schema](https://docs.lukso.tech/tools/erc725js/schemas): **useful for just encoding / decoding data.**
+
+```js
+import ERC725, { ERC725JSONSchema } from '@erc725/erc725.js';
+
+const schemas: ERC725JSONSchema[] = [
+  {
+    name: 'LSP3Profile',
+    key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+    keyType: 'Singleton',
+    valueType: 'bytes',
+    valueContent: 'VerifiableURI',
+  },
+];
+
+const erc725 = new ERC725(schemas);
+```
+
+### Option 2: connect a contract to fetch + decode data from
+
+Same as option 1 where you can pass an ERC725Y contract address, an RPC URL and some additional confits (IPFS gateway): **useful to fetch and decode data automatically from a contract deployed on a network**.
+
+```js
+import ERC725, { ERC725JSONSchema } from '@erc725/erc725.js';
+
+// Part of LSP3-Profile-Metadata Schema
+// https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-Profile-Metadata.md
 const schemas: ERC725JSONSchema[] = [
   {
     name: 'SupportedStandards:LSP3Profile',
@@ -70,45 +85,54 @@ const schemas: ERC725JSONSchema[] = [
     valueContent: 'Address',
   },
 ];
+const address = '0x0Dc07C77985fE31996Ed612F568eb441afe5768D';
+const RPC_URL = 'https://rpc.testnet.lukso.network';
+const config = {
+  ipfsGateway: 'https://YOUR-IPFS-GATEWAY/ipfs/',
+  gas: 20_000_000, // optional, default is 1_000_000
+};
 
 const erc725 = new ERC725(schemas, address, RPC_URL, config);
 ```
 
-### JavaScript
+### Option 3: use only specific functions
+
+You can import only specific functions (or using static methods of the `ERC725` class): **useful when needing only specific functionalities for your dApp (_e.g:_ decoding `VerifiableURI`, encoding dynamic keys).**
 
 ```js
-import { ERC725 } require('@erc725/erc725.js');
+import {
+  encodeValueType,
+  encodeDataSourceWithHash,
+  decodeDataSourceWithHash,
+} from '@erc725/erc725.js';
 
-// Part of LSP3-UniversalProfile Schema
-// https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-3-UniversalProfile.md
-const schemas = [
-  {
-    name: 'SupportedStandards:LSP3Profile',
-    key: '0xeafec4d89fa9619884b600005ef83ad9559033e6e941db7d7c495acdce616347',
-    keyType: 'Mapping',
-    valueType: 'bytes',
-    valueContent: '0x5ef83ad9',
-  },
-  {
-    name: 'LSP3Profile',
-    key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-    keyType: 'Singleton',
-    valueType: 'bytes',
-    valueContent: 'VerifiableURI',
-  },
-  {
-    name: 'LSP1UniversalReceiverDelegate',
-    key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
-    keyType: 'Singleton',
-    valueType: 'address',
-    valueContent: 'Address',
-  },
-];
+const someNumber = encodeValueType('uint128', 3);
+// 0x00000000000000000000000000000003
 
-const erc725 = new ERC725(schemas, address, RPC_URL, config);
+const reEncodedVerifiableURI = decodeDataSourceWithHash(
+  '0x00006f357c6a0020820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
+);
+// verification: {
+//     data: '820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+//     method: 'keccak256(utf8)',
+//     source: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx'
+//   },
+
+const verifiableURI = encodeDataSourceWithHash(
+  {
+    method: 'keccak256(utf8)',
+    data: '820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361',
+  },
+  'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
+);
+// 0x00006f357c6a0020820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361696670733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178
 ```
 
-## Usage
+## Functionalities
+
+:::tip Try it out
+Try running the code snippets below within your browser using [StackBlitz](https://stackblitz.com/edit/erc725js-instantiation?devtoolsheight=66&file=index.js).
+:::
 
 ```js
 await erc725.getOwner();
@@ -153,19 +177,7 @@ await erc725.fetchData('LSP3Profile'); // downloads and verifies the linked JSON
 */
 ```
 
-:::tip Try it out
-You can run the code snippet within your browser using the corresponding [StackBlitz example](https://stackblitz.com/edit/erc725js-instantiation?devtoolsheight=66&file=index.js).
-
-:::note
-Whenever you can you should import `ERC725` via the named export. However currently we are also providing a default export.
-
-```javascript
-import ERC725 from 'erc725.js';
-```
-
-:::
-
-After the instance has been created, it is still possible to change settings through the options property.
+After the `ERC725` instance has been created, it is still possible to change settings through the `options` property.
 
 ```javascript
 myERC725.options.schema = '<schema>' // change schema
