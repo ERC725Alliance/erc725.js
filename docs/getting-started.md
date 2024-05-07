@@ -33,9 +33,9 @@ npm install @erc725/erc725.js
 
 There are 3 main ways to use _erc725.js_.
 
-### Option 1: using with schema only
+### Option 1: use a schema for encoding / decoding data
 
-Create an instance of `ERC725` with just a [schema](https://docs.lukso.tech/tools/erc725js/schemas): **useful for just encoding / decoding data.**
+Create an instance of `ERC725` with just a [schema](https://docs.lukso.tech/tools/erc725js/schemas). **Useful for just encoding / decoding data.**
 
 ```js
 import ERC725, { ERC725JSONSchema } from '@erc725/erc725.js';
@@ -53,9 +53,9 @@ const schemas: ERC725JSONSchema[] = [
 const erc725 = new ERC725(schemas);
 ```
 
-### Option 2: connect a contract to fetch + decode data from
+### Option 2: connect to a smart contract to fetch/decode data
 
-Same as option 1 where you can pass an ERC725Y contract address, an RPC URL and some additional confits (IPFS gateway): **useful to fetch and decode data automatically from a contract deployed on a network**.
+Same as option 1 where you can pass an ERC725Y contract address, an RPC URL and some additional configurations (e.g: IPFS gateway). **Useful to fetch and decode data automatically from a contract deployed on a network**.
 
 ```js
 import ERC725, { ERC725JSONSchema } from '@erc725/erc725.js';
@@ -95,9 +95,9 @@ const config = {
 const erc725 = new ERC725(schemas, address, RPC_URL, config);
 ```
 
-### Option 3: use only specific functions
+### Option 3: use specific functions or static methods
 
-You can import only specific functions (or using static methods of the `ERC725` class): **useful when needing only specific functionalities for your dApp (_e.g:_ decoding `VerifiableURI`, encoding dynamic keys).**
+You can import specific functions or use static methods from the `ERC725` class. **Useful to add only specific functionalities to your dApp (_e.g:_ decoding `VerifiableURI`, encoding dynamic keys).**
 
 ```js
 import {

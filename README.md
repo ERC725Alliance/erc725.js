@@ -1,6 +1,6 @@
 <p align="center">
  <h1 align="center"><strong>@erc725/erc725.js</strong></h1>
- <p align="center">Allows for to read, encode and decode data from <a href="https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md">ERC725Y</a> compliant contracts using ERC725Y JSON schemas.</p>
+ <p align="center">Allows to read, encode and decode data from <a href="https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md">ERC725Y</a> compliant contracts using ERC725Y JSON schemas.</p>
 </p>
 
 <p align="center">
@@ -130,7 +130,7 @@ const erc725 = new ERC725(schemas, address, RPC_URL, config);
 
 ## Usage
 
-> See the **Getting Started** pages for more examples on how to use )_erc725.js_
+> See the **Getting Started** pages for more examples on how to use _erc725.js_
 
 ```js
 await myErc725.getOwner();
