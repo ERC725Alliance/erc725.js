@@ -21,9 +21,6 @@
  * @date 2022
  */
 
-import { isHexStrict } from 'web3-utils';
-import { LSP6_DEFAULT_PERMISSIONS } from '../constants/constants';
-
 import {
   AddressProviderOptions,
   INTERFACE_IDS_0_12_0,
@@ -56,61 +53,4 @@ export const internalSupportsInterface = async (
   } catch (error) {
     throw new Error(`Error checking the interface: ${error}`);
   }
-};
-
-/**
- * @notice Map a permission to its corresponding bytes32 representation.
- * @param permission The permission string to be mapped.
- * @return The bytes32 representation of the permission.
- * @dev Return null if the input is not a known permission name or a valid 32-byte hex string.
- */
-export function mapPermission(permission: string): string | null {
-  if (!LSP6_DEFAULT_PERMISSIONS[permission] && !isHexStrict(permission)) {
-    return null;
-  }
-  return LSP6_DEFAULT_PERMISSIONS[permission] || permission;
-}
-
-/**
- * @notice Check if the required permissions are included in the granted permissions.
- * @param requiredPermissions An array of required permissions or a single required permission.
- * @param grantedPermissions The granted permissions as a 32-byte hex string.
- * @return A boolean value indicating whether the required permissions are included in the granted permissions.
- * @dev Throws an error if the grantedPermissions input is not a valid 32-byte hex string.
- */
-export const checkPermissions = (
-  requiredPermissions: string[] | string,
-  grantedPermissions: string,
-): boolean => {
-  // Validate the grantedPermissions string
-  if (!isHexStrict(grantedPermissions)) {
-    throw new Error(
-      'Invalid grantedPermissions string. It must be a valid 32-byte hex string.',
-    );
-  }
-
-  // Convert requiredPermissions to an array if it's a single string
-  const requiredPermissionArray: string[] = Array.isArray(requiredPermissions)
-    ? requiredPermissions
-    : [requiredPermissions];
-
-  // Map the literal permissions to their bytes32 representation
-  const mappedPermissionArray: (string | null)[] =
-    requiredPermissionArray.map(mapPermission);
-
-  // Perform the AND operation check for each required permission
-  return mappedPermissionArray.every((requiredPermission: string | null) => {
-    if (!requiredPermission) {
-      throw new Error(
-        `Invalid permission string: ${requiredPermission}. It must be a valid 32-byte hex string or a known permission name.`,
-      );
-    }
-    const requiredPermissionBigInt = BigInt(requiredPermission);
-    const grantedPermissionsBigInt = BigInt(grantedPermissions);
-
-    return (
-      (requiredPermissionBigInt & grantedPermissionsBigInt) ===
-      requiredPermissionBigInt
-    );
-  });
 };

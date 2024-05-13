@@ -67,13 +67,14 @@ import {
   encodeValueContent,
   decodeValueContent,
 } from './lib/encoder';
+import { internalSupportsInterface } from './lib/detector';
+import { decodeMappingKey } from './lib/decodeMappingKey';
 import {
-  internalSupportsInterface,
+  encodePermissions,
+  decodePermissions,
   checkPermissions,
   mapPermission,
-} from './lib/detector';
-import { decodeMappingKey } from './lib/decodeMappingKey';
-import { encodePermissions, decodePermissions } from './lib/permissions';
+} from './lib/permissions';
 import { AssetURLEncode } from './types/encodeData';
 import { URLDataToEncode, URLDataWithHash, Verification } from './types';
 
@@ -99,8 +100,12 @@ export {
   decodeValueContent,
 } from './lib/encoder';
 export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
-export { encodePermissions, decodePermissions } from './lib/permissions';
-export { checkPermissions } from './lib/detector';
+export {
+  encodePermissions,
+  decodePermissions,
+  checkPermissions,
+  mapPermission,
+} from './lib/permissions';
 export { getSchema } from './lib/schemaParser';
 
 // PRIVATE FUNCTION
@@ -669,14 +674,6 @@ export class ERC725 {
     grantedPermissions: string,
   ): boolean {
     return checkPermissions(requiredPermissions, grantedPermissions);
-  }
-
-  static mapPermission(permission: string): string | null {
-    return mapPermission(permission);
-  }
-
-  mapPermission(permission: string): string | null {
-    return mapPermission(permission);
   }
 
   static mapPermission(permission: string): string | null {
