@@ -32,6 +32,7 @@ import {
   generateSchemasFromDynamicKeys,
   duplicateMultiTypeERC725SchemaEntry,
   getVerificationMethod,
+  isDataAuthentic,
 } from './lib/utils';
 
 import { getSchema } from './lib/schemaParser';
@@ -93,7 +94,12 @@ export {
 };
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
-export { encodeData, encodeArrayKey, getVerificationMethod } from './lib/utils';
+export {
+  encodeData,
+  encodeArrayKey,
+  getVerificationMethod,
+  isDataAuthentic,
+} from './lib/utils';
 export { decodeData } from './lib/decodeData';
 export { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 export { decodeMappingKey } from './lib/decodeMappingKey';
@@ -796,6 +802,20 @@ export class ERC725 {
       }
     | undefined {
     return getVerificationMethod(nameOrSig);
+  }
+
+  static isDataAuthentic(
+    data: string | Uint8Array,
+    verificationOptions: Verification,
+  ): boolean {
+    return isDataAuthentic(data, verificationOptions);
+  }
+
+  isDataAuthentic(
+    data: string | Uint8Array,
+    verificationOptions: Verification,
+  ): boolean {
+    return isDataAuthentic(data, verificationOptions);
   }
 }
 

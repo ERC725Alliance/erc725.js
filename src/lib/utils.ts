@@ -158,7 +158,7 @@ export function encodeKeyValue(
 
 /**
  *
- * @param key A data key either as a 32 bytes long value, or a data key name of keyType = 'Array'
+ * @param key The schema key of a schema with keyType = 'Array'
  * @param index An integer representing the intended array index
  * @return The raw bytes key for the array element
  */

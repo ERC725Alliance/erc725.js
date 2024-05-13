@@ -129,12 +129,14 @@ export const getDataFromExternalSources = (
             if (/^(\[.*\]|\{.*\})\s*$/s.test(key)) {
               const json = arrToBufArr(receivedData).toString();
               const value = JSON.parse(json);
+
               if (isDataAuthentic(value, urlDataWithHash.verification)) {
                 return { ...dataEntry, value };
               }
               if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
                 return { ...dataEntry, value };
               }
+
               throw new Error('result did not correctly validate');
             }
           } catch {
