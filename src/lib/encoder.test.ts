@@ -409,6 +409,11 @@ describe('encoder', () => {
           decodedValue: 11,
           encodedValue: '0x0000000000000000000000000000000b',
         },
+        {
+          valueType: 'uint128',
+          decodedValue: 0,
+          encodedValue: '0x00000000000000000000000000000000',
+        },
       ];
 
       validTestCases.forEach((testCase) => {
