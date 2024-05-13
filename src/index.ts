@@ -30,6 +30,7 @@ import {
   convertIPFSGatewayUrl,
   generateSchemasFromDynamicKeys,
   duplicateMultiTypeERC725SchemaEntry,
+  encodeArrayKey,
 } from './lib/utils';
 
 import { getSchema } from './lib/schemaParser';
@@ -684,6 +685,17 @@ export class ERC725 {
 
   static decodeDataSourceWithHash(value: string): URLDataWithHash {
     return decodeDataSourceWithHash(value);
+  }
+
+  // Encoding methods
+  // ----------------
+
+  static encodeArrayKey(key: string, index: number): string {
+    return encodeArrayKey(key, index);
+  }
+
+  encodeArrayKey(key: string, index: number): string {
+    return encodeArrayKey(key, index);
   }
 
   /**

@@ -370,8 +370,6 @@ myErc725.encodeData(
 
 ---
 
-## encodeKey (TBD - necessary?)
-
 ## encodeKeyName
 
 ```js
@@ -432,8 +430,6 @@ myErc725.encodeKeyName('LSP3Profile');
 ```
 
 ---
-
-## encodeKeyValue (TBD)
 
 ## encodeArrayKey (TBD)
 
@@ -541,5 +537,3 @@ ERC725.encodeValueType('string', 'Hello');
 ```
 
 ---
-
-## encodeValueContent (TBD)
