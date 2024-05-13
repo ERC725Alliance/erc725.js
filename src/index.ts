@@ -42,6 +42,7 @@ import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 import { ERC725Config, ERC725Options } from './types/Config';
 import { Permissions } from './types/Method';
 import {
+  DynamicNameSchema,
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueContent,
@@ -96,6 +97,7 @@ export {
 export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 export { encodePermissions, decodePermissions } from './lib/permissions';
 export { checkPermissions } from './lib/detector';
+export { getSchema } from './lib/schemaParser';
 
 // PRIVATE FUNCTION
 function initializeProvider(providerOrRpcUrl, gasInfo) {
@@ -358,15 +360,19 @@ export class ERC725 {
   getSchema(
     keyOrKeys: string[],
     providedSchemas?: ERC725JSONSchema[],
-  ): Record<string, ERC725JSONSchema | null>;
+  ): Record<string, ERC725JSONSchema | DynamicNameSchema | null>;
   getSchema(
     keyOrKeys: string,
     providedSchemas?: ERC725JSONSchema[],
-  ): ERC725JSONSchema | null;
+  ): ERC725JSONSchema | DynamicNameSchema | null;
   getSchema(
     keyOrKeys: string | string[],
     providedSchemas?: ERC725JSONSchema[],
-  ): ERC725JSONSchema | null | Record<string, ERC725JSONSchema | null> {
+  ):
+    | ERC725JSONSchema
+    | DynamicNameSchema
+    | null
+    | Record<string, ERC725JSONSchema | DynamicNameSchema | null> {
     return getSchema(
       keyOrKeys,
       this.options.schemas.concat(providedSchemas || []),

@@ -378,7 +378,7 @@ describe('utils', () => {
         valueContent: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
         valueType: 'bytes',
         decodedValue: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
-        encodedValue: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
+        encodedValue: '0xc9aaae3201f40fd0ff04d9c885769d8256a456ab', // encoded hex is always lower case
       },
     ];
 
@@ -413,6 +413,12 @@ describe('utils', () => {
         valueType: '(bytes4,bytes8)',
         encodedValue: '0xdeadbeaf0000000000000010',
         decodedValue: ['0xdeadbeaf', 16],
+      },
+      {
+        valueContent: '(Bytes4,Number)',
+        valueType: '(bytes4,uint128)',
+        encodedValue: '0xdeadbeaf00000000000000000000000000000020',
+        decodedValue: ['0xdeadbeaf', 32],
       },
     ]; // we may need to add more test cases! Address, etc.
 
