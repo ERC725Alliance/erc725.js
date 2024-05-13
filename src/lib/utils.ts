@@ -47,6 +47,7 @@ import {
   SUPPORTED_VERIFICATION_METHODS,
   SUPPORTED_VERIFICATION_METHODS_LIST,
   COMPACT_BYTES_ARRAY_STRING,
+  SUPPORTED_VERIFICATION_METHOD_STRINGS,
 } from '../constants/constants';
 import {
   decodeValueContent,
@@ -157,7 +158,7 @@ export function encodeKeyValue(
 
 /**
  *
- * @param key The schema key of a schema with keyType = 'Array'
+ * @param key A data key either as a 32 bytes long value, or a data key name of keyType = 'Array'
  * @param index An integer representing the intended array index
  * @return The raw bytes key for the array element
  */
@@ -524,7 +525,13 @@ export function encodeData(
   );
 }
 
-export function getVerificationMethod(nameOrSig: string) {
+export function getVerificationMethod(nameOrSig: string):
+  | {
+      method: (data: string | object | Uint8Array | null) => string;
+      name: SUPPORTED_VERIFICATION_METHOD_STRINGS;
+      sig: SUPPORTED_VERIFICATION_METHODS;
+    }
+  | undefined {
   const verificationMethod = Object.values(HASH_METHODS).find(
     ({ name, sig }) => name === nameOrSig || sig === nameOrSig,
   );

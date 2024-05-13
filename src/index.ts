@@ -17,6 +17,7 @@
  * @author Robert McLeod <@robertdavid010>
  * @author Fabian Vogelsteller <fabian@lukso.network>
  * @author Hugo Masclet <@Hugoo>
+ * @author Jean Cavallera <@CJ42>
  * @date 2020
  */
 
@@ -30,12 +31,17 @@ import {
   convertIPFSGatewayUrl,
   generateSchemasFromDynamicKeys,
   duplicateMultiTypeERC725SchemaEntry,
+  getVerificationMethod,
 } from './lib/utils';
 
 import { getSchema } from './lib/schemaParser';
 import { isValidSignature } from './lib/isValidSignature';
 
-import { DEFAULT_GAS_VALUE } from './constants/constants';
+import {
+  DEFAULT_GAS_VALUE,
+  SUPPORTED_VERIFICATION_METHODS,
+  SUPPORTED_VERIFICATION_METHOD_STRINGS,
+} from './constants/constants';
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types
@@ -87,7 +93,7 @@ export {
 };
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
-export { encodeData, encodeArrayKey } from './lib/utils';
+export { encodeData, encodeArrayKey, getVerificationMethod } from './lib/utils';
 export { decodeData } from './lib/decodeData';
 export { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 export { decodeMappingKey } from './lib/decodeMappingKey';
@@ -684,27 +690,8 @@ export class ERC725 {
     return mapPermission(permission);
   }
 
-  encodeDataSourceWithHash(
-    verification: undefined | Verification,
-    dataSource: string,
-  ): string {
-    return encodeDataSourceWithHash(verification, dataSource);
-  }
-
-  static encodeDataSourceWithHash(
-    verification: undefined | Verification,
-    dataSource: string,
-  ): string {
-    return encodeDataSourceWithHash(verification, dataSource);
-  }
-
-  decodeDataSourceWithHash(value: string): URLDataWithHash {
-    return decodeDataSourceWithHash(value);
-  }
-
-  static decodeDataSourceWithHash(value: string): URLDataWithHash {
-    return decodeDataSourceWithHash(value);
-  }
+  // Encoding methods
+  // ----------------
 
   /**
    * @param type The valueType to encode the value as
@@ -764,6 +751,51 @@ export class ERC725 {
     value: string,
   ): string | URLDataWithHash | number | boolean | null {
     return decodeValueContent(valueContent, value);
+  }
+
+  // External Data Source utilities (`VerifiableURI` and `JSONURI`)
+  // ----------------------------------------------------------------
+
+  encodeDataSourceWithHash(
+    verification: undefined | Verification,
+    dataSource: string,
+  ): string {
+    return encodeDataSourceWithHash(verification, dataSource);
+  }
+
+  static encodeDataSourceWithHash(
+    verification: undefined | Verification,
+    dataSource: string,
+  ): string {
+    return encodeDataSourceWithHash(verification, dataSource);
+  }
+
+  decodeDataSourceWithHash(value: string): URLDataWithHash {
+    return decodeDataSourceWithHash(value);
+  }
+
+  static decodeDataSourceWithHash(value: string): URLDataWithHash {
+    return decodeDataSourceWithHash(value);
+  }
+
+  static getVerificationMethod(nameOrSig: string):
+    | {
+        method: (data: string | object | Uint8Array | null) => string;
+        name: SUPPORTED_VERIFICATION_METHOD_STRINGS;
+        sig: SUPPORTED_VERIFICATION_METHODS;
+      }
+    | undefined {
+    return getVerificationMethod(nameOrSig);
+  }
+
+  getVerificationMethod(nameOrSig: string):
+    | {
+        method: (data: string | object | Uint8Array | null) => string;
+        name: SUPPORTED_VERIFICATION_METHOD_STRINGS;
+        sig: SUPPORTED_VERIFICATION_METHODS;
+      }
+    | undefined {
+    return getVerificationMethod(nameOrSig);
   }
 }
 
