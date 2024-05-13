@@ -507,50 +507,6 @@ export class ERC725 {
   }
 
   /**
-   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
-   *
-   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
-   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
-   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
-   */
-  static encodePermissions(permissions: Permissions): string {
-    return encodePermissions(permissions);
-  }
-
-  /**
-   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
-   *
-   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
-   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
-   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
-   */
-  encodePermissions(permissions: Permissions): string {
-    return encodePermissions(permissions);
-  }
-
-  /**
-   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
-   *
-   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
-   * @param permissionHex The permission hexadecimal value to be decoded.
-   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
-   */
-  static decodePermissions(permissionHex: string) {
-    return decodePermissions(permissionHex);
-  }
-
-  /**
-   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
-   *
-   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
-   * @param permissionHex The permission hexadecimal value to be decoded.
-   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
-   */
-  decodePermissions(permissionHex: string) {
-    return decodePermissions(permissionHex);
-  }
-
-  /**
    * Hashes a key name for use on an ERC725Y contract according to LSP2 ERC725Y JSONSchema standard.
    *
    * @param {string} keyName The key name you want to encode.
@@ -636,6 +592,53 @@ export class ERC725 {
     options: { address: string; rpcUrl: string; gas?: number },
   ): Promise<boolean> {
     return supportsInterface(interfaceIdOrName, options);
+  }
+
+  // Permissions related functions
+  // -----------------------------
+
+  /**
+   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
+   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
+   */
+  static encodePermissions(permissions: Permissions): string {
+    return encodePermissions(permissions);
+  }
+
+  /**
+   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
+   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
+   */
+  encodePermissions(permissions: Permissions): string {
+    return encodePermissions(permissions);
+  }
+
+  /**
+   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissionHex The permission hexadecimal value to be decoded.
+   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
+   */
+  static decodePermissions(permissionHex: string) {
+    return decodePermissions(permissionHex);
+  }
+
+  /**
+   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissionHex The permission hexadecimal value to be decoded.
+   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
+   */
+  decodePermissions(permissionHex: string) {
+    return decodePermissions(permissionHex);
   }
 
   /**
