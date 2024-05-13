@@ -21,6 +21,7 @@
  * @date 2022
  */
 
+import { isHexStrict } from 'web3-utils';
 import { LSP6_DEFAULT_PERMISSIONS } from '../constants/constants';
 
 import {
@@ -58,32 +59,13 @@ export const internalSupportsInterface = async (
 };
 
 /**
- * @notice Check if the given string is a valid 32-byte hex string.
- * @param str The string to be checked.
- * @return A boolean value indicating whether the string is a valid 32-byte hex string.
- */
-function isValid32ByteHexString(str: string): boolean {
-  return (
-    str.startsWith('0x') &&
-    str.length === 66 &&
-    str
-      .slice(2)
-      .split('')
-      .every((char) => '0123456789abcdefABCDEF'.includes(char))
-  );
-}
-
-/**
  * @notice Map a permission to its corresponding bytes32 representation.
  * @param permission The permission string to be mapped.
  * @return The bytes32 representation of the permission.
  * @dev Throws an error if the input is not a known permission name or a valid 32-byte hex string.
  */
 function mapPermission(permission: string): string {
-  if (
-    !LSP6_DEFAULT_PERMISSIONS[permission] &&
-    !isValid32ByteHexString(permission)
-  ) {
+  if (!LSP6_DEFAULT_PERMISSIONS[permission] && !isHexStrict(permission)) {
     throw new Error(
       'Invalid permission string. It must be a valid 32-byte hex string or a known permission name.',
     );
@@ -103,7 +85,7 @@ export const checkPermissions = (
   grantedPermissions: string,
 ): boolean => {
   // Validate the grantedPermissions string
-  if (!isValid32ByteHexString(grantedPermissions)) {
+  if (!isHexStrict(grantedPermissions)) {
     throw new Error(
       'Invalid grantedPermissions string. It must be a valid 32-byte hex string.',
     );
