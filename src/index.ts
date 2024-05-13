@@ -67,7 +67,11 @@ import {
   encodeValueContent,
   decodeValueContent,
 } from './lib/encoder';
-import { internalSupportsInterface, checkPermissions } from './lib/detector';
+import {
+  internalSupportsInterface,
+  checkPermissions,
+  mapPermission,
+} from './lib/detector';
 import { decodeMappingKey } from './lib/decodeMappingKey';
 import { encodePermissions, decodePermissions } from './lib/permissions';
 import { AssetURLEncode } from './types/encodeData';
@@ -662,6 +666,22 @@ export class ERC725 {
     grantedPermissions: string,
   ): boolean {
     return checkPermissions(requiredPermissions, grantedPermissions);
+  }
+
+  static mapPermission(permission: string): string | null {
+    return mapPermission(permission);
+  }
+
+  mapPermission(permission: string): string | null {
+    return mapPermission(permission);
+  }
+
+  static mapPermission(permission: string): string | null {
+    return mapPermission(permission);
+  }
+
+  mapPermission(permission: string): string | null {
+    return mapPermission(permission);
   }
 
   encodeDataSourceWithHash(

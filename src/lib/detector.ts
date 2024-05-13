@@ -62,13 +62,11 @@ export const internalSupportsInterface = async (
  * @notice Map a permission to its corresponding bytes32 representation.
  * @param permission The permission string to be mapped.
  * @return The bytes32 representation of the permission.
- * @dev Throws an error if the input is not a known permission name or a valid 32-byte hex string.
+ * @dev Return null if the input is not a known permission name or a valid 32-byte hex string.
  */
-function mapPermission(permission: string): string {
+export function mapPermission(permission: string): string | null {
   if (!LSP6_DEFAULT_PERMISSIONS[permission] && !isHexStrict(permission)) {
-    throw new Error(
-      'Invalid permission string. It must be a valid 32-byte hex string or a known permission name.',
-    );
+    return null;
   }
   return LSP6_DEFAULT_PERMISSIONS[permission] || permission;
 }
@@ -97,11 +95,16 @@ export const checkPermissions = (
     : [requiredPermissions];
 
   // Map the literal permissions to their bytes32 representation
-  const mappedPermissionArray: string[] =
+  const mappedPermissionArray: (string | null)[] =
     requiredPermissionArray.map(mapPermission);
 
   // Perform the AND operation check for each required permission
-  return mappedPermissionArray.every((requiredPermission: string) => {
+  return mappedPermissionArray.every((requiredPermission: string | null) => {
+    if (!requiredPermission) {
+      throw new Error(
+        `Invalid permission string: ${requiredPermission}. It must be a valid 32-byte hex string or a known permission name.`,
+      );
+    }
     const requiredPermissionBigInt = BigInt(requiredPermission);
     const grantedPermissionsBigInt = BigInt(grantedPermissions);
 
