@@ -256,6 +256,107 @@ ERC725.decodeValueType(
 
 ---
 
+## decodeValueContent
+
+```js
+const erc725js = new ERC725();
+
+erc725js.decodeValueContent(valueContent, value);
+```
+
+OR
+
+```js
+ERC725.decodeValueContent(valueContent, value);
+```
+
+OR
+
+```js
+import { decodeValueContent } from '@erc725/erc725.js';
+
+decodeValueContent(valueContent, value);
+```
+
+Decode a hex encoded value and return it as if it was interpreted as a `valueContent`.
+
+Available `valueContent` are:
+
+- `Address` (checksummed)
+- `AssetURL` (deprecated)
+- `Boolean`
+- `BytesN`
+- `JSONURL` (deprecated)
+- `Keccak256`
+- `Markdown` (similar to `String`)
+- `Number`
+- `String`
+- `URL`
+- `VerifiableURI`
+- Any Hex `Literal` (e.g.: 0x1345ABCD...)
+
+#### Parameters
+
+| Name           | Type     | Description                                                        |
+| :------------- | :------- | :----------------------------------------------------------------- |
+| `valueContent` | `string` | One of the value content options defined by the LSP2 standard.     |
+| `value`        | `string` | A hex encoded string starting with `0x` to decode as `valueContent |
+
+#### Returns
+
+| Name           | Type                                                                                     | Description                                  |
+| :------------- | :--------------------------------------------------------------------------------------- | :------------------------------------------- |
+| `decodedValue` | `string` or <br/> `URLDataWithHash` or <br/> `number` or <br/> `boolean` or <br/> `null` | A value decoded according to `valueContent`. |
+
+### Examples
+
+```javascript title="decodeValueContent example"
+erc725js.decodeValueContent(
+  'VerifiableURI',
+  '0x00006f357c6a0020027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168687474703a2f2f746573742e636f6d2f61737365742e676c62',
+);
+// {
+//      verification: {
+//          method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+//          data: '0x027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168',
+//      },
+//      url: 'http://test.com/asset.glb',
+// }
+
+erc725js.decodeValueContent('String', '0x232068656c6c6f');
+// # hello
+
+erc725js.decodeValueContent('String', '0x68656c6c6f');
+// hello
+
+// `Address` will be checksummed
+erc725js.decodeValueContent(
+  'Address',
+  '0xa29afb8f3cce086b3992621324e9d7c104f03d1b',
+);
+// 0xa29Afb8F3ccE086B3992621324E9d7c104F03D1B
+
+erc725js.decodeValueContent(
+  'Number',
+  '0x000000000000000000000000000000000000000000000000000000000000000a',
+);
+// 10
+
+erc725js.decodeValueContent(
+  'Number',
+  '0x000000000000000000000000000000000000000000000000000000000000036c',
+);
+// 876
+
+erc725js.decodeValueContent('Boolean', '0x01');
+// true
+
+erc725js.decodeValueContent('Boolean', '0x00');
+// false
+```
+
+---
+
 ## decodeMappingKey
 
 ```js
