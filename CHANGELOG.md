@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.26.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.25.0...v0.26.0) (2024-05-14)
+
+### Features
+
+- add `dynamicPart` in schema returned by `getSchema` ([12d34d2](https://github.com/ERC725Alliance/erc725.js/commit/12d34d2d8a80656ae9b4efeb1ec72bcf2426b6e5))
+- add support for `bytesN` valueType from 1 to 32 ([1db6f2f](https://github.com/ERC725Alliance/erc725.js/commit/1db6f2faebaccdcc39455b4a3dbae05c6416271a))
+- allow to use `decodeData` to decode Array length only ([5ddb12d](https://github.com/ERC725Alliance/erc725.js/commit/5ddb12d43ce399e166e159be9faf364f9647c705))
+- export `getSchema` as a standalone function outside of class instance ([8558c71](https://github.com/ERC725Alliance/erc725.js/commit/8558c71b0cc077636db64506fc8407a8bc179c13))
+- include also `dynamicKeyPart` in the schema return by `getSchema` ([30dda33](https://github.com/ERC725Alliance/erc725.js/commit/30dda3398d35a019b97790524834f12489607f2b))
+
+### Bug Fixes
+
+- encode `uintN` with correct padding and bytes length ([f8dc5ae](https://github.com/ERC725Alliance/erc725.js/commit/f8dc5ae9651ce953b2ff9808dfb3671126adace0))
+- Ignore formatting in package.json inside of biome ([33a80dd](https://github.com/ERC725Alliance/erc725.js/commit/33a80dd5368028cb55ab68ea940c176790595806))
+- valueContent from `bytes32` -&gt; `Bytes32` for `LSP8ReferenceContract` ([dffc421](https://github.com/ERC725Alliance/erc725.js/commit/dffc421bea06c659d30f47ecead0be1385072248))
+
 ## [0.25.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.24.2...v0.25.0) (2024-04-18)
 
 ### Features
