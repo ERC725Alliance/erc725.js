@@ -42,15 +42,15 @@ describe('getSchemaElement', () => {
       name: 'LSP12IssuedAssetsMap:<address>',
       key: '0x74ac2555c10b9349e78f0000<address>',
       keyType: 'Mapping',
-      valueType: 'bytes',
-      valueContent: 'Mixed',
+      valueType: '(bytes4,uint128)',
+      valueContent: '(Bytes4,Number)',
     },
     {
       name: 'ARandomKey',
       key: '0x7cf0c8053453d0353fdbad6a48e68966b35dd13cb3a62e7b75009dc5035b80c0',
       keyType: 'Singleton',
-      valueContent: 'JSONURL',
       valueType: 'bytes',
+      valueContent: 'JSONURL',
     },
   ];
 
@@ -71,8 +71,8 @@ describe('getSchemaElement', () => {
         name: 'LSP12IssuedAssetsMap:2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
         key: '0x74ac2555c10b9349e78f00002ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
         keyType: 'Mapping',
-        valueType: 'bytes',
-        valueContent: 'Mixed',
+        valueType: '(bytes4,uint128)',
+        valueContent: '(Bytes4,Number)',
       },
     );
   });
