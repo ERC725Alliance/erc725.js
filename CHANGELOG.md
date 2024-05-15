@@ -2,6 +2,168 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.25.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.26.0...v0.25.1) (2024-05-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* update new LSP7/8 interface IDs ([#367](https://github.com/ERC725Alliance/erc725.js/issues/367))
+* remove supportsInterface
+* update lsp3/lsp4 verificationData
+* change LSP3 to SupportedStandards:LSP3Profile ([#307](https://github.com/ERC725Alliance/erc725.js/issues/307))
+* new encoding for static value types (not arrays `[]`) ([#288](https://github.com/ERC725Alliance/erc725.js/issues/288))
+* change `ArrayLength` value from `uint256` to `uint128` ([#287](https://github.com/ERC725Alliance/erc725.js/issues/287))
+* update schemas ([#274](https://github.com/ERC725Alliance/erc725.js/issues/274))
+* add LSP6 `ENCRYPT` permission in for encrypt/decrypt permissions methods. ([#223](https://github.com/ERC725Alliance/erc725.js/issues/223))
+* fetchData as same output as decodeData
+* getData as same output as decodeData
+* add dynamic keys for getData
+* use array for decodeData
+* use array for encodeData
+* remove old LSP2 Key Types (Bytes20..)
+* change encodeData result structure
+* the output of getData is not an object anymore, but the value directly if the input is a string.
+
+### improvement
+
+* change encodeData result structure ([10da619](https://github.com/ERC725Alliance/erc725.js/commit/10da619bf3eee18f6a764e0c8af8c36d9caf8d59))
+
+
+### Features
+
+* add  encoding / decoding for `bytes[CompactBytesArray]` ([#261](https://github.com/ERC725Alliance/erc725.js/issues/261)) ([8d3e4e9](https://github.com/ERC725Alliance/erc725.js/commit/8d3e4e994957dbf1f54eef4572b072bc308c61bc))
+* add `BitArray` in valueContent encoding map ([3498502](https://github.com/ERC725Alliance/erc725.js/commit/3498502da0b531559e557fc4a9e6c2851b480807))
+* add `dynamicPart` in schema returned by `getSchema` ([12d34d2](https://github.com/ERC725Alliance/erc725.js/commit/12d34d2d8a80656ae9b4efeb1ec72bcf2426b6e5))
+* add `encode/decodeValueType` as public callable methods ([#325](https://github.com/ERC725Alliance/erc725.js/issues/325)) ([a6fe7c8](https://github.com/ERC725Alliance/erc725.js/commit/a6fe7c8470688f573426b59fc2023a08da0cbd36))
+* add ALL_PERMISSIONS flag to encoding ([8adad51](https://github.com/ERC725Alliance/erc725.js/commit/8adad51093239f4852d1bb2ed3ba0489bf8a978c))
+* add BytesN value content ([#184](https://github.com/ERC725Alliance/erc725.js/issues/184)) ([7e073e4](https://github.com/ERC725Alliance/erc725.js/commit/7e073e4dfc7094aac55935fffc18ef14d16a24c8))
+* add checkPermissions function ([17d2258](https://github.com/ERC725Alliance/erc725.js/commit/17d225843c236951ef1515a0ff91095b5ef27cd3))
+* add decoding/encoding support for tuples of CompactBytesArray ([#264](https://github.com/ERC725Alliance/erc725.js/issues/264)) ([d9ce0f0](https://github.com/ERC725Alliance/erc725.js/commit/d9ce0f08b61a4a04ebc98c6b996513fb432768f6))
+* add dynamic array encoding ([f0f495c](https://github.com/ERC725Alliance/erc725.js/commit/f0f495c69e8b4768468437cad24f1b77d53a379f))
+* add dynamic keys for encodeKeyName ([#168](https://github.com/ERC725Alliance/erc725.js/issues/168)) ([fc614b0](https://github.com/ERC725Alliance/erc725.js/commit/fc614b0b92d3b5c7b86586f4be7e3200ea9680cf))
+* add dynamic keys for getData ([7a46786](https://github.com/ERC725Alliance/erc725.js/commit/7a46786105d35ca0b33ce5158be98866f3fbfd71))
+* add dynamicKeys for decodeData ([f386e15](https://github.com/ERC725Alliance/erc725.js/commit/f386e15396cbf6c2b842302f1c85b41a0798b684))
+* add encoding/decoding for other types of compactBytesArray ([#262](https://github.com/ERC725Alliance/erc725.js/issues/262)) ([9268a32](https://github.com/ERC725Alliance/erc725.js/commit/9268a3205b54f81069e6217c827dff69d4166848))
+* add LSP12IssuedAssets ([1d6dbef](https://github.com/ERC725Alliance/erc725.js/commit/1d6dbef2014883e0d9755c13477f405bb0cdd14b))
+* add LSP12IssuedAssets ([77dd71e](https://github.com/ERC725Alliance/erc725.js/commit/77dd71e2889b7542ae326433da9a9e8256698f03))
+* add LSP6 `ENCRYPT` permission in for encrypt/decrypt permissions methods. ([#223](https://github.com/ERC725Alliance/erc725.js/issues/223)) ([279c0b4](https://github.com/ERC725Alliance/erc725.js/commit/279c0b4b3775e60a284a9cee2c8a140a872f72f3))
+* add more schemas available to parse via `getSchema` ([#351](https://github.com/ERC725Alliance/erc725.js/issues/351)) ([b882379](https://github.com/ERC725Alliance/erc725.js/commit/b8823796c5f99d89d56954c894dfb6964adc552a))
+* Add new feature "Decode Mapping Key" ([8c1f1fc](https://github.com/ERC725Alliance/erc725.js/commit/8c1f1fcfb15fa43d1d3934b0b15f09d47902bb41))
+* add non array input on decodeData ([0774a86](https://github.com/ERC725Alliance/erc725.js/commit/0774a86d652e205814863d07319adef2266f634c))
+* add permission `EXECUTE_RELAY_CALL` ([6db8835](https://github.com/ERC725Alliance/erc725.js/commit/6db8835ccd9d1082d9e8184bb2f14972760bea69))
+* add permission related to 4337 ([e7fd19b](https://github.com/ERC725Alliance/erc725.js/commit/e7fd19bc27aa89fae410b9633ef5ccdf13f33f0e))
+* add schemas for LSP8 + LSP17 ([#311](https://github.com/ERC725Alliance/erc725.js/issues/311)) ([1e8dbf7](https://github.com/ERC725Alliance/erc725.js/commit/1e8dbf765c6c5e250539b402e9bd5a395966a8c2))
+* Add support for `bool` (valueType) and `Boolean` (valueContent) ([#266](https://github.com/ERC725Alliance/erc725.js/issues/266)) ([86d606e](https://github.com/ERC725Alliance/erc725.js/commit/86d606e677a69eebaaaeb9467c37e5f6303efb4a))
+* add support for `bytesN` valueType from 1 to 32 ([1db6f2f](https://github.com/ERC725Alliance/erc725.js/commit/1db6f2faebaccdcc39455b4a3dbae05c6416271a))
+* add support for hashed key for encodeData ([23323a0](https://github.com/ERC725Alliance/erc725.js/commit/23323a02a6bfb81be1eba24207fe353942367837))
+* add support for multi types in mappings ([#357](https://github.com/ERC725Alliance/erc725.js/issues/357)) ([ba92903](https://github.com/ERC725Alliance/erc725.js/commit/ba9290326efad0aab3855ad3f0ed2722180980ed))
+* add support to encode / decode any `uint8` to `uint256` types ([#355](https://github.com/ERC725Alliance/erc725.js/issues/355)) ([417a4e8](https://github.com/ERC725Alliance/erc725.js/commit/417a4e8ff2c74f3f9e35d0018a4973c97c6ac997))
+* add supportsInterface ([#243](https://github.com/ERC725Alliance/erc725.js/issues/243)) ([a2b0828](https://github.com/ERC725Alliance/erc725.js/commit/a2b08288e9aaede8a1a3307c1371672eb7b50969))
+* add tuples support ([7f3d1a0](https://github.com/ERC725Alliance/erc725.js/commit/7f3d1a09c3e6058b76a5b3ceca8bc1f454e634ce))
+* allow to encode LSP2 Array length only ([#326](https://github.com/ERC725Alliance/erc725.js/issues/326)) ([3a6be55](https://github.com/ERC725Alliance/erc725.js/commit/3a6be551d889904b7d95e2630ab637f2a31feb50))
+* allow to load typed schemas from `schemas/` folder ([c54a370](https://github.com/ERC725Alliance/erc725.js/commit/c54a370c1e4f8d71ba6bb7e62122b89069f521e6))
+* allow to use `decodeData` to decode Array length only ([5ddb12d](https://github.com/ERC725Alliance/erc725.js/commit/5ddb12d43ce399e166e159be9faf364f9647c705))
+* change the output of getData for string input ([3592c1b](https://github.com/ERC725Alliance/erc725.js/commit/3592c1bb335e9a1bce824bc3ef8667e98ae9e87e))
+* export `getSchema` as a standalone function outside of class instance ([8558c71](https://github.com/ERC725Alliance/erc725.js/commit/8558c71b0cc077636db64506fc8407a8bc179c13))
+* export methods for encoding/decoding dataSourceWithHash and valueContent ([b1e0ed9](https://github.com/ERC725Alliance/erc725.js/commit/b1e0ed98718acce90f1db6917728394ab8aeb4fa))
+* expose dynamic parts to public encodeKeyName ([73f1265](https://github.com/ERC725Alliance/erc725.js/commit/73f126570eaf5f118c48859ee878608afc48a0aa))
+* include also `dynamicKeyPart` in the schema return by `getSchema` ([30dda33](https://github.com/ERC725Alliance/erc725.js/commit/30dda3398d35a019b97790524834f12489607f2b))
+* make library compatible with RPC urls ([263de19](https://github.com/ERC725Alliance/erc725.js/commit/263de1983f08c9f31f0cc931e581fe8af52bd541))
+* new gas parameter ([82e3833](https://github.com/ERC725Alliance/erc725.js/commit/82e383345a712619b5c6a1030b124d2625115fc1))
+* replace dynamic part with hex value when parsing schemas for `Mapping` keys ([a9fdb4d](https://github.com/ERC725Alliance/erc725.js/commit/a9fdb4daa69e2aac38aca2393f94e8fe83113656))
+* supports dynamic keys for encodeData ([b506973](https://github.com/ERC725Alliance/erc725.js/commit/b5069735e7d03ffa97d695606fd9ae6a0f556836))
+
+
+### Bug Fixes
+
+* Add check for pretty printed and non-pretty printed versions of JSON ([aa68bf1](https://github.com/ERC725Alliance/erc725.js/commit/aa68bf132d2e4793b4da784c30ae8f306560da8c))
+* Add for unknown verification method to allow for null verification data in LSP2 ([f205818](https://github.com/ERC725Alliance/erc725.js/commit/f205818af348471bde8f88af2008497b8c13e258))
+* Add missing exports due to merge conflict. ([2e14cd5](https://github.com/ERC725Alliance/erc725.js/commit/2e14cd5b4a5a1f51222c1056bd4220be2a09a02d))
+* Add more fixes per PR comments ([e7302e4](https://github.com/ERC725Alliance/erc725.js/commit/e7302e4504408e2f4f6304badd2024bfe05fcf47))
+* Add workaround to read (bytes4,URI), repair none vs unknown signature. ([204409d](https://github.com/ERC725Alliance/erc725.js/commit/204409df544825041a586865cfb6bb124288e48f))
+* Additional PR repair ([2a18f2b](https://github.com/ERC725Alliance/erc725.js/commit/2a18f2bf1a24547e71cad6953f5144761aa2cc9a))
+* Apply suggestions. ([e9c3d81](https://github.com/ERC725Alliance/erc725.js/commit/e9c3d81875ef2861791753c1285defc096ddbdac))
+* BodyInit should be just string or buffer and not already Uint8Array ([08e0177](https://github.com/ERC725Alliance/erc725.js/commit/08e017778fa42ade5386b8d9e85255225a7f3195))
+* change lsp7 interface id from `0xe33f65c3` to `0x5fcaac27` ([6aa6eb3](https://github.com/ERC725Alliance/erc725.js/commit/6aa6eb30d427609c89ebc1920fc9ecf03c0dd68b))
+* Change to verification object ([ddd2ab2](https://github.com/ERC725Alliance/erc725.js/commit/ddd2ab23d1c5181745827f338d9abaea48c772f7))
+* Cleanup ([038d975](https://github.com/ERC725Alliance/erc725.js/commit/038d97584075c89f93f51227666074cf11973a29))
+* Cleanup a bit with comments. ([3d6a5a6](https://github.com/ERC725Alliance/erc725.js/commit/3d6a5a65db5049b678d0d54149e9b11ea2479999))
+* Cleanup and handle situation where one of many keys fails. Return null. ([cdf4583](https://github.com/ERC725Alliance/erc725.js/commit/cdf4583c159d8c8e52a832bfe5af6b650d8945fa))
+* Cleanup error handler inside of getDataFromExternalSources ([fde2e0f](https://github.com/ERC725Alliance/erc725.js/commit/fde2e0f41df3ecee90a4dfd8248dd9c2a7a72965))
+* Debug and repair test scripts. Implement detecting of JSON inside of Uint8Array ([74c0526](https://github.com/ERC725Alliance/erc725.js/commit/74c0526e3f544400ced78f02ff4fed64bd048bfa))
+* decode any uint256 as number not string ([#289](https://github.com/ERC725Alliance/erc725.js/issues/289)) ([37203f1](https://github.com/ERC725Alliance/erc725.js/commit/37203f14d313a0caff75724dc74175c741c1b540))
+* dependencies & example ([#302](https://github.com/ERC725Alliance/erc725.js/issues/302)) ([9979e89](https://github.com/ERC725Alliance/erc725.js/commit/9979e89e438cd9f7cc586d7dc271de969f13b125))
+* do not load wrong schemas ([66dc3e6](https://github.com/ERC725Alliance/erc725.js/commit/66dc3e648ad1a9aeabe66e5ae2aeb15cf3f74775))
+* don't throw on null jsonurl/asseturl ([#178](https://github.com/ERC725Alliance/erc725.js/issues/178)) ([d5060eb](https://github.com/ERC725Alliance/erc725.js/commit/d5060eb5d47b2d5bfaf78ec366e9506294054d38)), closes [#91](https://github.com/ERC725Alliance/erc725.js/issues/91)
+* encode `uintN` with correct padding and bytes length ([f8dc5ae](https://github.com/ERC725Alliance/erc725.js/commit/f8dc5ae9651ce953b2ff9808dfb3671126adace0))
+* Encode key name should parse any number (hex or decimal) for uint type ([eb7385e](https://github.com/ERC725Alliance/erc725.js/commit/eb7385e6e97f6f069c4be5331f0c4547b79faab5))
+* encodeKeyName returns lowercase keys ([80566eb](https://github.com/ERC725Alliance/erc725.js/commit/80566eb2358db0ff90e42028ee5b1b5bca206b46))
+* Found some small lint problems ([6ad681a](https://github.com/ERC725Alliance/erc725.js/commit/6ad681a15d48d4f4364f45a19517f9b1bc5d5621))
+* Ignore formatting in package.json inside of biome ([33a80dd](https://github.com/ERC725Alliance/erc725.js/commit/33a80dd5368028cb55ab68ea940c176790595806))
+* incorrect hex for `LSP8MetadataTokenURI` ([0500a75](https://github.com/ERC725Alliance/erc725.js/commit/0500a752e3117c5c7e9df8cfed22cb5d6fee20c5))
+* incorrect permission value for `EXECUTE_RELAY_CALL` ([55b8f5e](https://github.com/ERC725Alliance/erc725.js/commit/55b8f5e64c29c5a85d872f605667c88c1546f6b3))
+* incorrect value in schema for array length in `...Map` ([#310](https://github.com/ERC725Alliance/erc725.js/issues/310)) ([0d28b13](https://github.com/ERC725Alliance/erc725.js/commit/0d28b1317dc085078090a8babacf4db517d91a87))
+* LSP4Creators[] valueType ([6ddbf47](https://github.com/ERC725Alliance/erc725.js/commit/6ddbf473039b17af562d56f1f12be5194a060477))
+* Make sure unknown verification methods or 0x00000000 doesn't cause an error within decoder. ([0585066](https://github.com/ERC725Alliance/erc725.js/commit/0585066c39cb8088e323ed30cca4c06dee6f075f))
+* Minimize changes ([cc31b5f](https://github.com/ERC725Alliance/erc725.js/commit/cc31b5f8b185743a5e783a04a7a8b4b158268fda))
+* Missing commit ([a3dd604](https://github.com/ERC725Alliance/erc725.js/commit/a3dd604964c9c9221ff421fe668faa8fd363101a))
+* Missing line ([d13be00](https://github.com/ERC725Alliance/erc725.js/commit/d13be00ba77be924f914cba1283e9c37250ec9bd))
+* More fixes ([620b606](https://github.com/ERC725Alliance/erc725.js/commit/620b60632e50ca59abedae9935f8b75d188278e0))
+* More renames _FUNCTIONS to _METHODS ([1a96be1](https://github.com/ERC725Alliance/erc725.js/commit/1a96be1dd15942d2a844bc26b9ab73e053e3b766))
+* Move @types/jest and jest ([852918c](https://github.com/ERC725Alliance/erc725.js/commit/852918c72228b3839ba60730dadef66837008f5a))
+* Patch full pretty printed with LF and TAB. ([315fa54](https://github.com/ERC725Alliance/erc725.js/commit/315fa547ab8f2d25db4f771d818afeec0d324bdf))
+* Push a change ([3fd66e3](https://github.com/ERC725Alliance/erc725.js/commit/3fd66e374716e452799b00c045ec35eefd0299e3))
+* Re-do PR with minimal changes ([17458d6](https://github.com/ERC725Alliance/erc725.js/commit/17458d623f214f026307184357bcf7ff75fad7ed))
+* Rebase and merge support for VerifiableURL ([44bfcc1](https://github.com/ERC725Alliance/erc725.js/commit/44bfcc15356cdde7124c615cd51bf91c84190882))
+* Remove .only call for testing. ([d5ef3c9](https://github.com/ERC725Alliance/erc725.js/commit/d5ef3c9965e2c5ad343f88a9c30a6281e9fa169b))
+* Remove console debugging. ([e349d57](https://github.com/ERC725Alliance/erc725.js/commit/e349d5715c7779c1eeb8d6e08c3ae3bf17eedd9e))
+* Remove eslint script ([82f6cfe](https://github.com/ERC725Alliance/erc725.js/commit/82f6cfe297ea38b9e3bfe9d6f08cd0096cc19fbc))
+* Remove hardcoded require ([5279278](https://github.com/ERC725Alliance/erc725.js/commit/527927812b1a05b13f8dc6b14aecaa6d24e98d61))
+* Remove unnecessary special case for 0x00000000 ([cd6152a](https://github.com/ERC725Alliance/erc725.js/commit/cd6152a88ca7a1c98184799b6fdc6982ff8a1cd6))
+* removed ERC725JSONSchemaKeyType duplicate value ([060ee6c](https://github.com/ERC725Alliance/erc725.js/commit/060ee6ce23bda328f727140419de7590f48fc394))
+* Rename JSONURLDataToEncode ([808f1b3](https://github.com/ERC725Alliance/erc725.js/commit/808f1b362bd2275424cf93ac6333049cde90216e))
+* Repair and enhance test scripts ([224eb9e](https://github.com/ERC725Alliance/erc725.js/commit/224eb9ecb1b16f373f2ad17ee9d3efab08dda53b))
+* Repair as per PR review ([0a52452](https://github.com/ERC725Alliance/erc725.js/commit/0a5245230455324e9911e4e14992c50e6f645ba2))
+* Repair console.log and expand types of URLs (ar://, ipfs://, https\?://, data:) ([5c8f228](https://github.com/ERC725Alliance/erc725.js/commit/5c8f2285d2d23c59ef9707a54e419b55d25e4136))
+* Repair data: urls from not triggering the baseURI test. ([c26ab3e](https://github.com/ERC725Alliance/erc725.js/commit/c26ab3e51b1f027044df467ab4e2f0c6a00dff5d))
+* Repair package-lock to be just as on main ([e793246](https://github.com/ERC725Alliance/erc725.js/commit/e793246e7e09bd80628f19499a5218ce70df8401))
+* Repair problems with IPFS, fetch and VerifiableURI ([44834b8](https://github.com/ERC725Alliance/erc725.js/commit/44834b8ed517e869ad99920b2853e30213a8d7b5))
+* Repair to not throw errors when data is not authentica or not accessible withing getDataFromExternalSources. ([25756d0](https://github.com/ERC725Alliance/erc725.js/commit/25756d09cecfec5d13d6e4fb6ed842c4e3d77734))
+* Repair tuples containing numeric types uintX/intX, add Number to output data type. ([01cceea](https://github.com/ERC725Alliance/erc725.js/commit/01cceeac03f719df6eb8be8c238aca4483e7a3e8))
+* Simplify buffer to string conversion. ([0bd1349](https://github.com/ERC725Alliance/erc725.js/commit/0bd1349f863283cf16cc6808bef48990ec118361))
+* Simplify creation of key to detect JSON. ([df2580d](https://github.com/ERC725Alliance/erc725.js/commit/df2580d9434dc386480f7eec2cd6e94a5b4ca7c1))
+* Switch to biome ([a362c54](https://github.com/ERC725Alliance/erc725.js/commit/a362c548bf0bc1b1503d7d6fc3b6013e6ed12277))
+* update lsp6 schema ([75c4044](https://github.com/ERC725Alliance/erc725.js/commit/75c40444e407d93076cc1e49ad706cc0055f383b))
+* update return type for `fetchData` ([#247](https://github.com/ERC725Alliance/erc725.js/issues/247)) ([7ffcd64](https://github.com/ERC725Alliance/erc725.js/commit/7ffcd64b2c0ee841b71472d0d6d869e4149db37d))
+* Use a single keccak function since ethereumjs converts it to a Buffer no matter what. ([cdc6c0a](https://github.com/ERC725Alliance/erc725.js/commit/cdc6c0a0f749209352d620db6d60865a276e072c))
+* valueContent from `bytes32` -&gt; `Bytes32` for `LSP8ReferenceContract` ([dffc421](https://github.com/ERC725Alliance/erc725.js/commit/dffc421bea06c659d30f47ecead0be1385072248))
+* variable naming ([44b4785](https://github.com/ERC725Alliance/erc725.js/commit/44b47851ed63b817edc21c63655d67bac13a7e7f))
+* wrong web3 import ([337269e](https://github.com/ERC725Alliance/erc725.js/commit/337269eb22f82e6f44f9b8c9be4840fa6cd676ed))
+
+
+### Miscellaneous Chores
+
+* release 0.21.3 ([#361](https://github.com/ERC725Alliance/erc725.js/issues/361)) ([8a02062](https://github.com/ERC725Alliance/erc725.js/commit/8a0206220d02b91d13bcd1c8249b8037e957b614))
+* release 0.25.0 ([5c7f6c4](https://github.com/ERC725Alliance/erc725.js/commit/5c7f6c4b6aa006b15a33072f615dfd0b8bed3460))
+* release 0.25.0 ([a6af6b4](https://github.com/ERC725Alliance/erc725.js/commit/a6af6b46aa25fab8494c55e8b8dcd4c2cad65102))
+* release 0.25.1 ([f99cf13](https://github.com/ERC725Alliance/erc725.js/commit/f99cf1373e8be361ed6702d4054251b173183580))
+
+
+### Code Refactoring
+
+* change `ArrayLength` value from `uint256` to `uint128` ([#287](https://github.com/ERC725Alliance/erc725.js/issues/287)) ([c95ee8a](https://github.com/ERC725Alliance/erc725.js/commit/c95ee8a53bf25bcf47777054af27cae1fbad8b2f))
+* change LSP3 to SupportedStandards:LSP3Profile ([#307](https://github.com/ERC725Alliance/erc725.js/issues/307)) ([73f3481](https://github.com/ERC725Alliance/erc725.js/commit/73f34818fe152c3ab5299177adc0eddfed6886c5))
+* fetchData as same output as decodeData ([59c3a87](https://github.com/ERC725Alliance/erc725.js/commit/59c3a879fefb2b9bfe46b9bea91ff6bd2a528df1))
+* getData as same output as decodeData ([0f3b149](https://github.com/ERC725Alliance/erc725.js/commit/0f3b149f2280e6025a05e8e9ed306facfa63601a))
+* new encoding for static value types (not arrays `[]`) ([#288](https://github.com/ERC725Alliance/erc725.js/issues/288)) ([f0b04da](https://github.com/ERC725Alliance/erc725.js/commit/f0b04daa57a281c537a8f28594439573188f0dce))
+* remove old LSP2 Key Types (Bytes20..) ([1e1cd43](https://github.com/ERC725Alliance/erc725.js/commit/1e1cd43e7693db5f12200aef6e282fa14e655ec3))
+* remove supportsInterface ([ab83f08](https://github.com/ERC725Alliance/erc725.js/commit/ab83f0839457addfb3a03f0925b2f24a67743f79))
+* update lsp3/lsp4 verificationData ([9640d9f](https://github.com/ERC725Alliance/erc725.js/commit/9640d9fbf88c7cf694b9e82cc3a711350334b097))
+* update new LSP7/8 interface IDs ([#367](https://github.com/ERC725Alliance/erc725.js/issues/367)) ([6a48862](https://github.com/ERC725Alliance/erc725.js/commit/6a488627c787d5d0a12abef047b8702e117bba90))
+* update schemas ([#274](https://github.com/ERC725Alliance/erc725.js/issues/274)) ([feb575f](https://github.com/ERC725Alliance/erc725.js/commit/feb575f3395773e547f6ea45e4904c4abc9a8101))
+* use array for decodeData ([261d100](https://github.com/ERC725Alliance/erc725.js/commit/261d1007f4ff63abd9d794f4e64e5b408ce7c1a3))
+* use array for encodeData ([a2e6cdd](https://github.com/ERC725Alliance/erc725.js/commit/a2e6cdd5cca778f9015c71a624cc3953e2e0fd29))
+
 ## [0.26.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.25.0...v0.26.0) (2024-05-14)
 
 ### Features
