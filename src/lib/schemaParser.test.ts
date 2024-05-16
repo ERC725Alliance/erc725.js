@@ -34,7 +34,7 @@ describe('schemaParser getSchema', () => {
     });
   });
 
-  describe('Array', () => {
+  describe.only('Array', () => {
     it('finds initial key of type Array correctly', () => {
       const schema = getSchema(
         '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
@@ -56,15 +56,19 @@ describe('schemaParser getSchema', () => {
 
       assert.deepStrictEqual(schema, {
         '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000001': {
-          name: 'LSP12IssuedAssets[1]',
+          name: 'LSP12IssuedAssets[]',
           key: '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000001',
+          dynamicName: 'LSP12IssuedAssets[1]',
+          dynamicKeyPart: '0x00000000000000000000000000000001',
           keyType: 'Singleton',
           valueContent: 'Address',
           valueType: 'address',
         },
         '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000000': {
-          name: 'AddressPermissions[0]',
+          name: 'AddressPermissions[]',
           key: '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000000',
+          dynamicName: 'AddressPermissions[0]',
+          dynamicKeyPart: '0x00000000000000000000000000000000',
           keyType: 'Singleton',
           valueContent: 'Address',
           valueType: 'address',

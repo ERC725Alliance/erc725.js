@@ -102,7 +102,7 @@ const findSingletonSchemaForKey = (
 const findArraySchemaForKey = (
   key: string,
   schemas: ERC725JSONSchema[],
-): ERC725JSONSchema | null => {
+): ERC725JSONSchema | DynamicNameSchema | null => {
   // Should detect:
 
   // 1. Initial key
@@ -132,7 +132,9 @@ const findArraySchemaForKey = (
   return {
     ...arraySchema,
     key,
-    name: arraySchema.name.replace('[]', `[${elementIndex}]`),
+    dynamicName: arraySchema.name.replace('[]', `[${elementIndex}]`),
+    dynamicKeyPart: `0x${key.substring(34)}`,
+    name: arraySchema.name,
     keyType: 'Singleton',
   };
 };
@@ -178,8 +180,9 @@ const findMappingWithGroupingSchemaForKey = (
     const dynamicKeyPart = key.substring(26);
 
     if (isDynamicKeyName(keySchema.name)) {
-      (keySchema as DynamicNameSchema).dynamicName =
-        `${keyNameParts[0]}:${keyNameParts[1]}:0x${dynamicKeyPart}`;
+      (
+        keySchema as DynamicNameSchema
+      ).dynamicName = `${keyNameParts[0]}:${keyNameParts[1]}:0x${dynamicKeyPart}`;
       (keySchema as DynamicNameSchema).dynamicKeyPart = `0x${dynamicKeyPart}`;
     }
 
