@@ -619,7 +619,7 @@ ERC725.decodeData(data, schemas);
 If you are reading the key-value store from an ERC725 smart contract you can use the `decodeData` function to do the decoding for you.
 
 :::tip
-If you want total convenience, it is recommended to use the [`fetchData`](ERC725.md#fetchdata) function, which automatically `decodes` and `fetches` external references.
+If you want total convenience, it is recommended to use the [`fetchData`](#fetchdata) function, which automatically `decodes` and `fetches` external references.
 :::
 
 #### Parameters
@@ -1086,9 +1086,9 @@ The name(s) (or the encoded name(s) as schema key) of the element(s) in the smar
 
 #### Returns
 
-| Name | Type                                        | Description                                                                                                                                                                                                                    |
-| :--- | :------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| data | `Promise<Array>` or <br/> `Promise<Object>` | An array with same objects as for [`decodeData()`](./ERC725#decodedata) function but with the value being replaced by the actual file for `VerifiableURI` valueContent. If there is a hash mismatch, the value will be `null`. |
+| Name | Type                                        | Description                                                                                                                                                                                                            |
+| :--- | :------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| data | `Promise<Array>` or <br/> `Promise<Object>` | An array with same objects as for [`decodeData()`](#decodedata) function but with the value being replaced by the actual file for `VerifiableURI` valueContent. If there is a hash mismatch, the value will be `null`. |
 
 :::info
 
@@ -1234,7 +1234,7 @@ When omitting the `keys` parameter, it will give back every key (as per `ERC725J
 :::caution
 
 - Data returned by this function does not contain external data of [`VerifiableURI`](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#verifiableuri) schema elements.
-- If you would like to receive everything in one go, you can use [`fetchData`](ERC725.md#fetchdata).
+- If you would like to receive everything in one go, you can use [`fetchData`](#fetchdata).
 
 :::
 
@@ -1251,9 +1251,9 @@ The name(s) (or the encoded name(s) as schema key) of the element(s) in the smar
 
 #### Returns
 
-| Name | Type                                        | Description                                                                           |
-| :--- | :------------------------------------------ | :------------------------------------------------------------------------------------ |
-| data | `Promise<Array>` or <br/> `Promise<Object>` | An array with the same objects as for [`decodeData()`](./ERC725#decodedata) function. |
+| Name | Type                                        | Description                                                                   |
+| :--- | :------------------------------------------ | :---------------------------------------------------------------------------- |
+| data | `Promise<Array>` or <br/> `Promise<Object>` | An array with the same objects as for [`decodeData()`](#decodedata) function. |
 
 :::info
 
