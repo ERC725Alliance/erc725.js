@@ -49,8 +49,8 @@ describe('utils', () => {
       // test encoding an array of address
       {
         schema: {
-          name: 'LSP3IssuedAssets[]',
-          key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+          name: 'LSP12IssuedAssets[]',
+          key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
           keyType: 'Array',
           valueContent: 'Address',
           valueType: 'address',
@@ -61,7 +61,7 @@ describe('utils', () => {
         ],
         encodedValue: [
           {
-            key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+            key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
             value: '0x00000000000000000000000000000002',
           },
           {
@@ -239,8 +239,8 @@ describe('utils', () => {
 
     it('should encode the array length only if passing a number', async () => {
       const schema: ERC725JSONSchema = {
-        name: 'LSP3IssuedAssets[]',
-        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+        name: 'LSP12IssuedAssets[]',
+        key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
         keyType: 'Array',
         valueContent: 'Address',
         valueType: 'address',
@@ -438,8 +438,8 @@ describe('utils', () => {
   describe('encodeArrayKey', () => {
     it('should encode the array length only if passing a number', async () => {
       const schema: ERC725JSONSchema = {
-        name: 'LSP3IssuedAssets[]',
-        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+        name: 'LSP12IssuedAssets[]',
+        key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
         keyType: 'Array',
         valueContent: 'Address',
         valueType: 'address',
@@ -455,8 +455,8 @@ describe('utils', () => {
   describe('encodeData', () => {
     const schemas: ERC725JSONSchema[] = [
       {
-        name: 'LSP3IssuedAssets[]',
-        key: '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+        name: 'LSP12IssuedAssets[]',
+        key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
         keyType: 'Array',
         valueContent: 'Address',
         valueType: 'address',
@@ -550,7 +550,7 @@ describe('utils', () => {
       const encodedDataWithMultipleKeys = encodeData(
         [
           {
-            keyName: 'LSP3IssuedAssets[]',
+            keyName: 'LSP12IssuedAssets[]',
             value: ['0xa3e6F38477D45727F6e6f853Cdb479b0D60c0aC9'],
           },
         ],
@@ -559,7 +559,7 @@ describe('utils', () => {
 
       assert.deepStrictEqual(encodedDataWithMultipleKeys, {
         keys: [
-          '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+          '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
           '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
         ],
         values: [
@@ -586,7 +586,7 @@ describe('utils', () => {
       const encodedDataWithMultipleKeys = encodeData(
         [
           {
-            keyName: 'LSP3IssuedAssets[]',
+            keyName: 'LSP12IssuedAssets[]',
             value: addressArray,
           },
         ],
@@ -595,7 +595,7 @@ describe('utils', () => {
 
       assert.deepStrictEqual(encodedDataWithMultipleKeys, {
         keys: [
-          '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+          '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
           '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
           '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
           '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000002',
@@ -618,7 +618,7 @@ describe('utils', () => {
       const encodedArrayLengthKey = encodeData(
         [
           {
-            keyName: 'LSP3IssuedAssets[]',
+            keyName: 'LSP12IssuedAssets[]',
             value: length,
           },
         ],
@@ -627,7 +627,7 @@ describe('utils', () => {
 
       assert.deepStrictEqual(encodedArrayLengthKey, {
         keys: [
-          '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+          '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
         ],
         values: ['0x00000000000000000000000000000005'],
       });
@@ -647,7 +647,7 @@ describe('utils', () => {
             },
           },
           {
-            keyName: 'LSP3IssuedAssets[]',
+            keyName: 'LSP12IssuedAssets[]',
             value: [
               '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
               '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826',
@@ -664,7 +664,7 @@ describe('utils', () => {
       assert.deepStrictEqual(encodedMultipleKeys, {
         keys: [
           '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-          '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+          '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
           '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000000',
           '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
           '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
@@ -921,7 +921,7 @@ describe('utils', () => {
       },
       {
         keyType: 'Array',
-        keyName: 'LSP3IssuedAssets[]',
+        keyName: 'LSP12IssuedAssets[]',
       },
       {
         keyType: 'Mapping',
