@@ -34,7 +34,7 @@ describe('schemaParser getSchema', () => {
     });
   });
 
-  describe.only('Array', () => {
+  describe('Array', () => {
     it('finds initial key of type Array correctly', () => {
       const schema = getSchema(
         '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
