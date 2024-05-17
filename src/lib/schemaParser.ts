@@ -180,9 +180,8 @@ const findMappingWithGroupingSchemaForKey = (
     const dynamicKeyPart = key.substring(26);
 
     if (isDynamicKeyName(keySchema.name)) {
-      (
-        keySchema as DynamicNameSchema
-      ).dynamicName = `${keyNameParts[0]}:${keyNameParts[1]}:0x${dynamicKeyPart}`;
+      (keySchema as DynamicNameSchema).dynamicName =
+        `${keyNameParts[0]}:${keyNameParts[1]}:0x${dynamicKeyPart}`;
       (keySchema as DynamicNameSchema).dynamicKeyPart = `0x${dynamicKeyPart}`;
     }
 

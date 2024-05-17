@@ -299,7 +299,7 @@ export function encodeKeyName(name: string, dynamicKeyParts?: DynamicKeyParts) {
     }
     case 'Array': // Warning: this can not correctly encode subsequent keys of array, only the initial Array key will work
       // encode for array index
-      if (dynamicKeyParts && typeof dynamicKeyParts == 'number') {
+      if (dynamicKeyParts && typeof dynamicKeyParts === 'number') {
         return encodeArrayKey(keccak256(name), dynamicKeyParts);
       }
 
