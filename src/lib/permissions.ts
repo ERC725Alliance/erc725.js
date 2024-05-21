@@ -122,18 +122,20 @@ export const checkPermissions = (
     requiredPermissionArray.map(mapPermission);
 
   // Perform the AND operation check for each required permission
-  return mappedPermissionArray.every((requiredPermission: string | null) => {
-    if (!requiredPermission) {
-      throw new Error(
-        `Invalid permission string: ${requiredPermission}. It must be a valid 32-byte hex string or a known permission name.`,
-      );
-    }
-    const requiredPermissionBigInt = BigInt(requiredPermission);
-    const grantedPermissionsBigInt = BigInt(grantedPermissions);
+  return mappedPermissionArray.every(
+    (requiredPermission: string | null, index: number) => {
+      if (!requiredPermission) {
+        throw new Error(
+          `Invalid permission string: ${requiredPermissionArray[index]}. It must be a valid 32-byte hex string or a known permission name.`,
+        );
+      }
+      const requiredPermissionBigInt = BigInt(requiredPermission);
+      const grantedPermissionsBigInt = BigInt(grantedPermissions);
 
-    return (
-      (requiredPermissionBigInt & grantedPermissionsBigInt) ===
-      requiredPermissionBigInt
-    );
-  });
+      return (
+        (requiredPermissionBigInt & grantedPermissionsBigInt) ===
+        requiredPermissionBigInt
+      );
+    },
+  );
 };

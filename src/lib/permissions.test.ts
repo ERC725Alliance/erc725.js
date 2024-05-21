@@ -10,7 +10,7 @@ describe('checkPermissions', () => {
       expect(() =>
         checkPermissions(requiredPermissions, grantedPermissions),
       ).to.throw(
-        'Invalid permission string. It must be a valid 32-byte hex string or a known permission name.',
+        `Invalid permission string: ${requiredPermissions}. It must be a valid 32-byte hex string or a known permission name.`,
       );
     });
 
@@ -21,7 +21,7 @@ describe('checkPermissions', () => {
       expect(() =>
         checkPermissions(requiredPermissions, grantedPermissions),
       ).to.throw(
-        'Invalid permission string. It must be a valid 32-byte hex string or a known permission name.',
+        `Invalid permission string: ${requiredPermissions}. It must be a valid 32-byte hex string or a known permission name.`,
       );
     });
 
@@ -78,7 +78,7 @@ describe('checkPermissions', () => {
       expect(() =>
         checkPermissions(requiredPermissions, grantedPermissions),
       ).to.throw(
-        'Invalid permission string. It must be a valid 32-byte hex string or a known permission name.',
+        `Invalid permission string: ${requiredPermissions[1]}. It must be a valid 32-byte hex string or a known permission name.`,
       );
     });
 
@@ -89,7 +89,7 @@ describe('checkPermissions', () => {
       expect(() =>
         checkPermissions(requiredPermissions, grantedPermissions),
       ).to.throw(
-        'Invalid permission string. It must be a valid 32-byte hex string or a known permission name.',
+        `Invalid permission string: ${requiredPermissions[1]}. It must be a valid 32-byte hex string or a known permission name.`,
       );
     });
 
