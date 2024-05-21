@@ -38,9 +38,9 @@ describe('encodeKeyName', () => {
       expectedKey: keccak256('MyKeyName'),
     },
     {
-      keyName: 'LSP3IssuedAssets[]',
+      keyName: 'LSP12IssuedAssets[]',
       expectedKey:
-        '0x3a47ab5bd3a594c3a8995f8fa58d0876c96819ca4516bd76100c92462f2f9dc0',
+        '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
     },
     {
       keyName: 'SupportedStandards:LSP3Profile',

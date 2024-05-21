@@ -1908,6 +1908,17 @@ describe('encodeKeyName', () => {
       '0x31145577efe228036af40000a4fbbfe353124e6fa6bb7f8e088a9269df552ea2',
     );
   });
+
+  it('works for Array keys with index as `dynamicKeyParts', () => {
+    assert.deepStrictEqual(
+      encodeKeyName('MusicPlaylist[]', 2),
+      '0x03573598507fc76d82171baa336b7fd700000000000000000000000000000002',
+    );
+    assert.deepStrictEqual(
+      erc725Instance.encodeKeyName('MusicPlaylist[]', 2),
+      '0x03573598507fc76d82171baa336b7fd700000000000000000000000000000002',
+    );
+  });
 });
 
 describe('supportsInterface', () => {
