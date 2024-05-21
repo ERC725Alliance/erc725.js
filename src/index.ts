@@ -67,9 +67,14 @@ import {
   encodeValueContent,
   decodeValueContent,
 } from './lib/encoder';
-import { internalSupportsInterface, checkPermissions } from './lib/detector';
+import { internalSupportsInterface } from './lib/detector';
 import { decodeMappingKey } from './lib/decodeMappingKey';
-import { encodePermissions, decodePermissions } from './lib/permissions';
+import {
+  encodePermissions,
+  decodePermissions,
+  checkPermissions,
+  mapPermission,
+} from './lib/permissions';
 import { AssetURLEncode } from './types/encodeData';
 import { URLDataToEncode, URLDataWithHash, Verification } from './types';
 
@@ -95,8 +100,12 @@ export {
   decodeValueContent,
 } from './lib/encoder';
 export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
-export { encodePermissions, decodePermissions } from './lib/permissions';
-export { checkPermissions } from './lib/detector';
+export {
+  encodePermissions,
+  decodePermissions,
+  checkPermissions,
+  mapPermission,
+} from './lib/permissions';
 export { getSchema } from './lib/schemaParser';
 
 // PRIVATE FUNCTION
@@ -503,50 +512,6 @@ export class ERC725 {
   }
 
   /**
-   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
-   *
-   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
-   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
-   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
-   */
-  static encodePermissions(permissions: Permissions): string {
-    return encodePermissions(permissions);
-  }
-
-  /**
-   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
-   *
-   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
-   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
-   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
-   */
-  encodePermissions(permissions: Permissions): string {
-    return encodePermissions(permissions);
-  }
-
-  /**
-   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
-   *
-   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
-   * @param permissionHex The permission hexadecimal value to be decoded.
-   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
-   */
-  static decodePermissions(permissionHex: string) {
-    return decodePermissions(permissionHex);
-  }
-
-  /**
-   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
-   *
-   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
-   * @param permissionHex The permission hexadecimal value to be decoded.
-   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
-   */
-  decodePermissions(permissionHex: string) {
-    return decodePermissions(permissionHex);
-  }
-
-  /**
    * Hashes a key name for use on an ERC725Y contract according to LSP2 ERC725Y JSONSchema standard.
    *
    * @param {string} keyName The key name you want to encode.
@@ -634,6 +599,53 @@ export class ERC725 {
     return supportsInterface(interfaceIdOrName, options);
   }
 
+  // Permissions related functions
+  // -----------------------------
+
+  /**
+   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
+   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
+   */
+  static encodePermissions(permissions: Permissions): string {
+    return encodePermissions(permissions);
+  }
+
+  /**
+   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
+   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
+   */
+  encodePermissions(permissions: Permissions): string {
+    return encodePermissions(permissions);
+  }
+
+  /**
+   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissionHex The permission hexadecimal value to be decoded.
+   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
+   */
+  static decodePermissions(permissionHex: string) {
+    return decodePermissions(permissionHex);
+  }
+
+  /**
+   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissionHex The permission hexadecimal value to be decoded.
+   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
+   */
+  decodePermissions(permissionHex: string) {
+    return decodePermissions(permissionHex);
+  }
+
   /**
    * Check if the required permissions are included in the granted permissions as defined by the LSP6 KeyManager Standard.
    *
@@ -662,6 +674,14 @@ export class ERC725 {
     grantedPermissions: string,
   ): boolean {
     return checkPermissions(requiredPermissions, grantedPermissions);
+  }
+
+  static mapPermission(permission: string): string | null {
+    return mapPermission(permission);
+  }
+
+  mapPermission(permission: string): string | null {
+    return mapPermission(permission);
   }
 
   encodeDataSourceWithHash(
