@@ -939,6 +939,13 @@ describe('encoder', () => {
         encodedValue: '0x232068656c6c6f',
       },
       {
+        valueContent: 'Markdown',
+        decodedValue: `# Lorem Ipsum
+        dolor sit amet ebriscus lanfogern`,
+        encodedValue:
+          '0x23204c6f72656d20497073756d0a2020202020202020646f6c6f722073697420616d6574206562726973637573206c616e666f6765726e',
+      },
+      {
         valueContent: 'URL',
         decodedValue: 'http://test.com',
         encodedValue: '0x687474703a2f2f746573742e636f6d',

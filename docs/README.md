@@ -2,7 +2,7 @@
 
 The markdown files in this folder are published on the LUKSO docs portal: <https://docs.lukso.tech/tools/erc725js/getting-started>
 
-# Method docs template
+## Method docs template
 
 You can use the following example below as a template to document any new methods added the library.
 

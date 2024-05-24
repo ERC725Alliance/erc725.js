@@ -524,8 +524,6 @@ myErc725.encodeKeyName('LSP3Profile');
 
 ---
 
-### encodeArrayKey (TBD)
-
 ### encodeValueType
 
 ```js
@@ -600,7 +598,94 @@ ERC725.encodeValueType('string', 'Hello');
 
 ---
 
-### encodeValueContent (TBD)
+### encodeValueContent
+
+```js
+myErc725.encodeValueContent(valueContent, value);
+```
+
+or
+
+```js
+ERC725.encodeValueContent(valueContent, value);
+```
+
+or
+
+```js
+import { encodeValueContent } from '@erc725/erc725.js';
+encodeValueContent(valueContent, value);
+```
+
+Encode `value` into a hex bytestring that can be then fetched, decoded and interpreted as the specified `valueContent`.
+
+#### Parameters
+
+| Name           | Type                                                                                              | Description                                                                                                                                                                                                                                                                                                                                   |
+| :------------- | :------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `valueContent` | `string`                                                                                          | Available options are: <ul><li>`AssetURL`</li> <li>`JSONURL`</li> <li>`Boolean` </li> <li>`Keccak256`</li> <li>`Number`</li> <li>`Address`</li> <li>`String`</li> <li>`Markdown`</li> <li>`URL`</li> <li>`VerifiableURI`</li> <li>`BytesN`</li> <li>`BitArray`</li> <li>`Boolean`</li> <li>Any Hex `Literal` (e.g.: 0x1345ABCD...)</li> </ul> |
+| `value`        | `string` or <br/> `number` or <br/> `boolean` or <br/> `AssetURLEncode` or <br/> `AssetURLEncode` | The value to encode.                                                                                                                                                                                                                                                                                                                          |
+
+#### Returns
+
+| Name | Type     | Description                              |
+| :--- | :------- | :--------------------------------------- |
+|      | `string` | The `value` encoded as a `valueContent`. |
+
+#### Examples
+
+```javascript
+import { encodeValueContent } from '@erc725/erc725.js';
+
+encodeValueContent('String', 'hello');
+// 0x68656c6c6f
+
+// BytesN will right pad
+encodeValueContent('Bytes8', '0xaabbccdd');
+// 0xaabbccdd00000000
+
+// Encoding some markdown
+encodeValueContent(
+  'Markdown',
+  `# Lorem Ipsum
+        dolor sit amet ebriscus lanfogern`,
+);
+// 0x23204c6f72656d20497073756d0a2020202020202020646f6c6f722073697420616d6574206562726973637573206c616e666f6765726
+
+encodeValueContent('URL', 'http://test.com');
+// 0x687474703a2f2f746573742e636f6d
+
+encodeValueContent('VerifiableURI', {
+  verification: {
+    method: 'keccak256(utf8)',
+    data: '0x027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168',
+  },
+  url: 'http://test.com/asset.glb',
+});
+// 0x00006f357c6a0020027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168687474703a2f2f746573742e636f6d2f61737365742e676c62
+
+encodeValueContent('VerifiableURI', {
+  verification: {
+    method: '0x00000000',
+    data: '0x',
+  },
+  url: 'https://name.universal.page/',
+});
+// 0x000000000000000068747470733a2f2f6e616d652e756e6976657273616c2e706167652f
+```
+
+This method is also available as a static method or as a method from the `ERC725` instance.
+
+```javascript
+import ERC725 from '@erc725/erc725.js';
+
+ERC725.encodeValueContent('String', 'hello');
+// 0x68656c6c6f
+
+const erc725 = new ERC725();
+erc725.encodeValueContent('String', 'hello');
+// 0x68656c6c6f
+```
 
 ---
 
