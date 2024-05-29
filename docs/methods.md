@@ -524,8 +524,6 @@ myErc725.encodeKeyName('LSP3Profile');
 
 ---
 
-### encodeArrayKey (TBD)
-
 ### encodeValueType
 
 ```js
@@ -600,7 +598,94 @@ ERC725.encodeValueType('string', 'Hello');
 
 ---
 
-### encodeValueContent (TBD)
+### encodeValueContent
+
+```js
+myErc725.encodeValueContent(valueContent, value);
+```
+
+or
+
+```js
+ERC725.encodeValueContent(valueContent, value);
+```
+
+or
+
+```js
+import { encodeValueContent } from '@erc725/erc725.js';
+encodeValueContent(valueContent, value);
+```
+
+Encode `value` into a hex bytestring that can be then fetched, decoded and interpreted as the specified `valueContent`.
+
+#### Parameters
+
+| Name           | Type                                                                                              | Description                                                                                                                                                                                                                                                                                                                                   |
+| :------------- | :------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `valueContent` | `string`                                                                                          | Available options are: <ul><li>`AssetURL`</li> <li>`JSONURL`</li> <li>`Boolean` </li> <li>`Keccak256`</li> <li>`Number`</li> <li>`Address`</li> <li>`String`</li> <li>`Markdown`</li> <li>`URL`</li> <li>`VerifiableURI`</li> <li>`BytesN`</li> <li>`BitArray`</li> <li>`Boolean`</li> <li>Any Hex `Literal` (e.g.: 0x1345ABCD...)</li> </ul> |
+| `value`        | `string` or <br/> `number` or <br/> `boolean` or <br/> `AssetURLEncode` or <br/> `AssetURLEncode` | The value to encode.                                                                                                                                                                                                                                                                                                                          |
+
+#### Returns
+
+| Name | Type     | Description                              |
+| :--- | :------- | :--------------------------------------- |
+|      | `string` | The `value` encoded as a `valueContent`. |
+
+#### Examples
+
+```javascript
+import { encodeValueContent } from '@erc725/erc725.js';
+
+encodeValueContent('String', 'hello');
+// 0x68656c6c6f
+
+// BytesN will right pad
+encodeValueContent('Bytes8', '0xaabbccdd');
+// 0xaabbccdd00000000
+
+// Encoding some markdown
+encodeValueContent(
+  'Markdown',
+  `# Lorem Ipsum
+        dolor sit amet ebriscus lanfogern`,
+);
+// 0x23204c6f72656d20497073756d0a2020202020202020646f6c6f722073697420616d6574206562726973637573206c616e666f6765726
+
+encodeValueContent('URL', 'http://test.com');
+// 0x687474703a2f2f746573742e636f6d
+
+encodeValueContent('VerifiableURI', {
+  verification: {
+    method: 'keccak256(utf8)',
+    data: '0x027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168',
+  },
+  url: 'http://test.com/asset.glb',
+});
+// 0x00006f357c6a0020027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168687474703a2f2f746573742e636f6d2f61737365742e676c62
+
+encodeValueContent('VerifiableURI', {
+  verification: {
+    method: '0x00000000',
+    data: '0x',
+  },
+  url: 'https://name.universal.page/',
+});
+// 0x000000000000000068747470733a2f2f6e616d652e756e6976657273616c2e706167652f
+```
+
+This method is also available as a static method or as a method from the `ERC725` instance.
+
+```javascript
+import ERC725 from '@erc725/erc725.js';
+
+ERC725.encodeValueContent('String', 'hello');
+// 0x68656c6c6f
+
+const erc725 = new ERC725();
+erc725.encodeValueContent('String', 'hello');
+// 0x68656c6c6f
+```
 
 ---
 
@@ -914,7 +999,7 @@ Available `valueContent` are:
 | :------------- | :--------------------------------------------------------------------------------------- | :------------------------------------------- |
 | `decodedValue` | `string` or <br/> `URLDataWithHash` or <br/> `number` or <br/> `boolean` or <br/> `null` | A value decoded according to `valueContent`. |
 
-### Examples
+#### Examples
 
 ```javascript title="decodeValueContent example"
 erc725js.decodeValueContent(
@@ -1051,6 +1136,103 @@ myErc725.decodeMappingKey(
 
 ---
 
+### getSchema
+
+```js
+myErc725.getSchema(keys [, providedSchemas]);
+```
+
+Parses a hashed key or a list of hashed keys and will attempt to return its corresponding [LSP2 ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md) object. Additionally, it will look for a corresponding key within the schemas:
+
+- in the [`schemas`](https://github.com/ERC725Alliance/myErc725.js/tree/main/schemas) folder (which includes all [LSPs](https://github.com/lukso-network/LIPs/tree/main/LSPs)),
+- that were provided at ERC725 initialization, and
+- that were provided in the function call (`providedSchemas`).
+
+#### Parameters
+
+##### 1. `keys` - String or array of Strings
+
+The key(s) you are trying to get the schema for.
+
+##### 2. `providedSchemas` - Object (optional)
+
+An array of extra [LSP-2 ERC725YJSONSchema] objects that can be used to find the schema.
+
+#### Returns
+
+| Name     | Type               | Description                                                           |
+| :------- | :----------------- | :-------------------------------------------------------------------- |
+| `result` | `ERC725JSONSchema` | If the parameter `keys` is a string and the schema was found.         |
+| `result` | `string[]`         | If the parameter `keys` is a string[&nbsp;] and the schema was found. |
+| `result` | `null`             | If the schema was not found.                                          |
+
+#### Example using a predefined LSP3 schema
+
+```javascript title="Parsing the hashed key from the LSP3 schema"
+myErc725.getSchema(
+  '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+);
+/**
+{
+  name: 'LSP3Profile',
+  key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+  keyType: 'Singleton',
+  valueContent: 'VerifiableURI',
+  valueType: 'bytes'
+}
+*/
+myErc725.getSchema([
+  '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+  '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001',
+]);
+/**
+{
+  '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5': {
+    name: 'LSP3Profile',
+    key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+    keyType: 'Singleton',
+    valueContent: 'VerifiableURI',
+    valueType: 'bytes'
+  },
+  '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000000000000000000000001': {
+    name: 'LSP12IssuedAssets[1]',
+    key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
+    keyType: 'Singleton',
+    valueContent: 'Address',
+    valueType: 'address'
+  }
+}
+*/
+```
+
+#### Example using a custom schema
+
+```javascript title="Parsing the hashed key from a custom schema"
+myErc725.getSchema(
+  '0x777f55baf2e0c9f73d3bb456dfb8dbf6e609bf557969e3184c17ff925b3c402c',
+  [
+    {
+      name: 'ParameterSchema',
+      key: '0x777f55baf2e0c9f73d3bb456dfb8dbf6e609bf557969e3184c17ff925b3c402c',
+      keyType: 'Singleton',
+      valueContent: 'VerifiableURI',
+      valueType: 'bytes',
+    },
+  ],
+);
+/**
+{
+  name: 'ParameterSchema',
+  key: '0x777f55baf2e0c9f73d3bb456dfb8dbf6e609bf557969e3184c17ff925b3c402c',
+  keyType: 'Singleton',
+  valueContent: 'VerifiableURI',
+  valueType: 'bytes',
+}
+*/
+```
+
+---
+
 ## Fetching Data
 
 ### fetchData
@@ -1097,7 +1279,7 @@ The name(s) (or the encoded name(s) as schema key) of the element(s) in the smar
 
 :::
 
-### All-Keys Example
+#### All-Keys Example
 
 ```javascript title="Receiving all keys from the schema"
 import ERC725 from '@erc725/erc725.js';
@@ -1808,6 +1990,142 @@ url: 'ifps://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx'
 
 </details>
 
+### getDataFromExternalSources
+
+```js
+getDataFromExternalSources(schema, dataFromChain, ipfsGateway, [
+  (throwException = true),
+]);
+```
+
+Retrieve the data stored on IPFS using one (or multiple) IPFS CID(s) and link(s) under the `dataFromChain` parameter.
+
+#### Parameters
+
+| Name                        | Type                 | Description                                                                                                                                    |
+| :-------------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| `schema`                    | `ERC725JSONSchema[]` | A list of JSON schemas for some given data keys.                                                                                               |
+| `dataFromChain`             | `DecodeDataOutput[]` | A list of data output previously fetched from the ERC725Y contract via [`getData(...)](#getdata) or [`fetchData`](#fetchdata)                  |
+| `ipfsGateway`               | `string`             | The URL to use to fetch data from the IPFS network.                                                                                            |
+| `throwException` (optional) | `boolean`            | Define if the function should throw an error when fetching data. Set to `true` by default. This is useful for handling exceptions differently. |
+
+<details>
+    <summary>Types details</summary>
+
+```js
+interface ERC725JSONSchema {
+  name: string; // Describes the name of the key, SHOULD be composed of the Standards name + sub type. e.g: LSP2Name
+  key: string; // The keccak256 hash of the name. This is the actual key that MUST be retrievable via ERC725Y.getData(bytes32 key)
+  keyType: ERC725JSONSchemaKeyType | string; // Types that determine how the values should be interpreted.
+  valueContent: ERC725JSONSchemaValueContent | string; // string holds '0x1345ABCD...' If the value content are specific bytes, than the returned value is expected to equal those bytes.
+  valueType: ERC725JSONSchemaValueType | string; // The type of the value. This is used to determine how the value should be encoded / decode (`string` for tuples and CompactBytesArray).
+}
+
+interface DecodeDataOutput {
+  value: Data | Data[] | URLDataWithHash | null;
+  name: string;
+  key: string;
+}
+
+type Data = string | number | boolean | null;
+
+interface URLDataWithHash extends URLData {
+  verification: Verification; // | string is to allow use of string directly without importing the enum
+  json?: never;
+}
+
+interface URLData {
+  url: string;
+}
+
+interface GetDataExternalSourcesOutput extends DecodeDataOutput {
+  value: any;
+}
+```
+
+</details>
+
+#### Returns
+
+| Name | Type                                         | Description                                                                                                                                   |
+| :--- | :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+|      | `GetDataExternalSourcesOutput[]` (see above) | An array of objects that contain the result of the data fetch inside the `.value` property. Can be anything from a `string` to a JSON object. |
+
+#### Examples
+
+```javascript
+import { getDataFromExternalSources } from '@erc725/erc725.js';
+
+const schema = [
+  {
+    name: 'LSP3Profile',
+    key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+    keyType: 'Singleton',
+    valueType: 'bytes',
+    valueContent: 'VerifiableURI',
+  },
+];
+
+const dataFromChain = [
+  {
+    name: 'LSP3Profile',
+    key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+    value: {
+      verification: {
+        data: '0xdb864ed42104cee179785036cb4ff1183ebc57e5532ae766ad8533fa48acfbb3',
+        method: 'keccak256(utf8)',
+      },
+      url: 'ipfs://QmdMGUxuQsm1U9Qs8oJSn5PfY4B1apGG75YBRxQPybtRVm',
+    },
+  },
+];
+const ipfsGateway = 'https://my-ipfs-gateway.com/ipfs/';
+
+await getDataFromExternalSources(schema, dataFromChain, ipfsGateway);
+/**
+{
+        name: 'LSP3Profile',
+        key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+        value: {
+          LSP3Profile: {
+            name: 'test',
+            description: '',
+            tags: ['profile'],
+            links: [],
+            profileImage: [
+              {
+                width: 1024,
+                height: 709,
+                verification: {
+                  method: 'keccak256(bytes)',
+                  data: '0x6a0a28680d65b69f5696859be7e0fcebbbcf0df47f1f767926de35402c7d525c',
+                },
+                url: 'ipfs://QmVUYyft3j2JVrG4RzDe1Qx7K5gNtJGFhrExHQFeiRXz1C',
+              },
+              // more images...
+            ],
+            backgroundImage: [
+              {
+                width: 1800,
+                height: 1012,
+                verification: {
+                  method: 'keccak256(bytes)',
+                  data: '0x3f6be73b35d348fb8f0b87a47d8c8b6b9db8858ee044cb13734cdfe5d28031d8',
+                },
+                url: 'ipfs://QmfLCPmL31f31RRB4R7yoTg3Hsk5PjrWyS3ZaaYyhRPT4n',
+              },
+              // more images...
+            ],
+          },
+        },
+      },
+    ]);
+  });
+ */
+```
+
+---
+
 ### getVerificationMethod
 
 ```js
@@ -1825,10 +2143,6 @@ getVerificationMethod(nameOrSig);
 ```
 
 Get the verification method definition, including the name, signature and related method.
-
-method: (data: string | object | Uint8Array | null) => string;
-name: SUPPORTED_VERIFICATION_METHOD_STRINGS;
-sig: SUPPORTED_VERIFICATION_METHODS;
 
 #### Parameters
 
