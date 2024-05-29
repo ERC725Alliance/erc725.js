@@ -1160,11 +1160,11 @@ An array of extra [LSP-2 ERC725YJSONSchema] objects that can be used to find the
 
 #### Returns
 
-| Name     | Type             | Description                                                           |
-| :------- | :--------------- | :-------------------------------------------------------------------- |
-| `result` | ERC725JSONSchema | If the parameter `keys` is a string and the schema was found.         |
-| `result` | Record string    | If the parameter `keys` is a string[&nbsp;] and the schema was found. |
-| `result` | null             | If the schema was not found.                                          |
+| Name     | Type               | Description                                                           |
+| :------- | :----------------- | :-------------------------------------------------------------------- |
+| `result` | `ERC725JSONSchema` | If the parameter `keys` is a string and the schema was found.         |
+| `result` | `string[]`         | If the parameter `keys` is a string[&nbsp;] and the schema was found. |
+| `result` | `null`             | If the schema was not found.                                          |
 
 #### Example using a predefined LSP3 schema
 
@@ -1998,14 +1998,14 @@ getDataFromExternalSources(schema, dataFromChain, ipfsGateway, [
 ]);
 ```
 
-Retrieve the data(s) stored on IPFS using one (or multiple) IPFS CID(s) and link(s) under the `dataFromChain` parameter.
+Retrieve the data stored on IPFS using one (or multiple) IPFS CID(s) and link(s) under the `dataFromChain` parameter.
 
 #### Parameters
 
 | Name                        | Type                 | Description                                                                                                                                    |
 | :-------------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
 | `schema`                    | `ERC725JSONSchema[]` | A list of JSON schemas for some given data keys.                                                                                               |
-| `dataFromChain`             | `DecodeDataOutput[]` | ...                                                                                                                                            |
+| `dataFromChain`             | `DecodeDataOutput[]` | A list of data output previously fetched from the ERC725Y contract via [`getData(...)](#getdata) or [`fetchData`](#fetchdata)                  |
 | `ipfsGateway`               | `string`             | The URL to use to fetch data from the IPFS network.                                                                                            |
 | `throwException` (optional) | `boolean`            | Define if the function should throw an error when fetching data. Set to `true` by default. This is useful for handling exceptions differently. |
 
@@ -2037,15 +2037,19 @@ interface URLDataWithHash extends URLData {
 interface URLData {
   url: string;
 }
+
+interface GetDataExternalSourcesOutput extends DecodeDataOutput {
+  value: any;
+}
 ```
 
 </details>
 
 #### Returns
 
-| Name | Type     | Description |
-| :--- | :------- | :---------- |
-|      | `object` | ...         |
+| Name | Type                                         | Description                                                                                                                                   |
+| :--- | :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+|      | `GetDataExternalSourcesOutput[]` (see above) | An array of objects that contain the result of the data fetch inside the `.value` property. Can be anything from a `string` to a JSON object. |
 
 #### Examples
 
@@ -2139,10 +2143,6 @@ getVerificationMethod(nameOrSig);
 ```
 
 Get the verification method definition, including the name, signature and related method.
-
-method: (data: string | object | Uint8Array | null) => string;
-name: SUPPORTED_VERIFICATION_METHOD_STRINGS;
-sig: SUPPORTED_VERIFICATION_METHODS;
 
 #### Parameters
 
