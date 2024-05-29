@@ -284,6 +284,27 @@ describe('decodeData', () => {
     expect(decodedData.value).to.eql(3);
   });
 
+  it('parses type Array correctly, return empty array when value is 0x', () => {
+    const decodedData = decodeData(
+      {
+        keyName: 'LSP12IssuedAssets[]',
+        value: '0x',
+      },
+      [
+        {
+          name: 'LSP12IssuedAssets[]',
+          key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
+          keyType: 'Array',
+          valueContent: 'Address',
+          valueType: 'address',
+        },
+      ],
+    );
+
+    expect(decodedData.name).to.eql('LSP12IssuedAssets[]');
+    expect(decodedData.value).to.eql([]);
+  });
+
   it('decodes dynamic keys', () => {
     const decodedData = decodeData(
       [
