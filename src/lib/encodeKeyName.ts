@@ -26,7 +26,7 @@ import {
   padLeft,
 } from 'web3-utils';
 
-import { guessKeyTypeFromKeyName } from './utils';
+import { encodeArrayKey, guessKeyTypeFromKeyName } from './utils';
 import { DynamicKeyParts } from '../types/dynamicKeys';
 
 // https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#mapping
@@ -248,9 +248,12 @@ function encodeDynamicKeyName(
 
   switch (keyType) {
     case 'Mapping':
-      return encodeDynamicMapping(name, dynamicKeyPartsArray);
+      return encodeDynamicMapping(name, dynamicKeyPartsArray as string[]);
     case 'MappingWithGrouping':
-      return encodeDynamicMappingWithGrouping(name, dynamicKeyPartsArray);
+      return encodeDynamicMappingWithGrouping(
+        name,
+        dynamicKeyPartsArray as string[],
+      );
     default:
       throw new Error(
         `Could not encode dynamic key: ${name} of type: ${keyType}`,
@@ -295,6 +298,13 @@ export function encodeKeyName(name: string, dynamicKeyParts?: DynamicKeyParts) {
       ]);
     }
     case 'Array': // Warning: this can not correctly encode subsequent keys of array, only the initial Array key will work
+      // encode for array index
+      if (dynamicKeyParts && typeof dynamicKeyParts === 'number') {
+        return encodeArrayKey(keccak256(name), dynamicKeyParts);
+      }
+
+      // encode for array length
+      return keccak256(name);
     case 'Singleton':
       return keccak256(name);
     default:

@@ -937,6 +937,34 @@ describe('Running @erc725/erc725.js tests...', () => {
         });
       });
     });
+
+    describe('for tuples', () => {
+      it('encode `(bytes4,uint128)`', () => {
+        const schema = {
+          name: 'LSP4CreatorsMap:<address>',
+          key: '0x6de85eaf5d982b4e5da00000<address>',
+          keyType: 'Mapping',
+          valueType: '(bytes4,uint128)',
+          valueContent: '(Bytes4,Number)',
+        };
+
+        const expectedEncodedValue =
+          '0xb3c4928f00000000000000000000000000000005';
+
+        const result = ERC725.encodeData(
+          [
+            {
+              keyName: 'LSP4CreatorsMap:<address>',
+              dynamicKeyParts: address,
+              value: ['0xb3c4928f', 5],
+            },
+          ],
+          [schema],
+        );
+
+        assert.equal(result.values[0], expectedEncodedValue);
+      });
+    });
   });
 
   describe('Testing utility encoding & decoding functions', () => {
@@ -1878,6 +1906,17 @@ describe('encodeKeyName', () => {
         '0xa4FBbFe353124E6fa6Bb7f8e088a9269dF552EA2',
       ),
       '0x31145577efe228036af40000a4fbbfe353124e6fa6bb7f8e088a9269df552ea2',
+    );
+  });
+
+  it('works for Array keys with index as `dynamicKeyParts', () => {
+    assert.deepStrictEqual(
+      encodeKeyName('MusicPlaylist[]', 2),
+      '0x03573598507fc76d82171baa336b7fd700000000000000000000000000000002',
+    );
+    assert.deepStrictEqual(
+      erc725Instance.encodeKeyName('MusicPlaylist[]', 2),
+      '0x03573598507fc76d82171baa336b7fd700000000000000000000000000000002',
     );
   });
 });

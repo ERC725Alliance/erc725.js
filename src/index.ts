@@ -17,6 +17,7 @@
  * @author Robert McLeod <@robertdavid010>
  * @author Fabian Vogelsteller <fabian@lukso.network>
  * @author Hugo Masclet <@Hugoo>
+ * @author Jean Cavallera <@CJ42>
  * @date 2020
  */
 
@@ -30,12 +31,18 @@ import {
   convertIPFSGatewayUrl,
   generateSchemasFromDynamicKeys,
   duplicateMultiTypeERC725SchemaEntry,
+  getVerificationMethod,
+  isDataAuthentic,
 } from './lib/utils';
 
 import { getSchema } from './lib/schemaParser';
 import { isValidSignature } from './lib/isValidSignature';
 
-import { DEFAULT_GAS_VALUE } from './constants/constants';
+import {
+  DEFAULT_GAS_VALUE,
+  SUPPORTED_VERIFICATION_METHODS,
+  SUPPORTED_VERIFICATION_METHOD_STRINGS,
+} from './constants/constants';
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types
@@ -67,9 +74,14 @@ import {
   encodeValueContent,
   decodeValueContent,
 } from './lib/encoder';
-import { internalSupportsInterface, checkPermissions } from './lib/detector';
+import { internalSupportsInterface } from './lib/detector';
 import { decodeMappingKey } from './lib/decodeMappingKey';
-import { encodePermissions, decodePermissions } from './lib/permissions';
+import {
+  encodePermissions,
+  decodePermissions,
+  checkPermissions,
+  mapPermission,
+} from './lib/permissions';
 import { AssetURLEncode } from './types/encodeData';
 import { URLDataToEncode, URLDataWithHash, Verification } from './types';
 
@@ -82,7 +94,12 @@ export {
 };
 
 export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
-export { encodeData, encodeArrayKey } from './lib/utils';
+export {
+  encodeData,
+  encodeArrayKey,
+  getVerificationMethod,
+  isDataAuthentic,
+} from './lib/utils';
 export { decodeData } from './lib/decodeData';
 export { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 export { decodeMappingKey } from './lib/decodeMappingKey';
@@ -95,8 +112,12 @@ export {
   decodeValueContent,
 } from './lib/encoder';
 export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
-export { encodePermissions, decodePermissions } from './lib/permissions';
-export { checkPermissions } from './lib/detector';
+export {
+  encodePermissions,
+  decodePermissions,
+  checkPermissions,
+  mapPermission,
+} from './lib/permissions';
 export { getSchema } from './lib/schemaParser';
 
 // PRIVATE FUNCTION
@@ -503,50 +524,6 @@ export class ERC725 {
   }
 
   /**
-   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
-   *
-   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
-   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
-   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
-   */
-  static encodePermissions(permissions: Permissions): string {
-    return encodePermissions(permissions);
-  }
-
-  /**
-   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
-   *
-   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
-   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
-   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
-   */
-  encodePermissions(permissions: Permissions): string {
-    return encodePermissions(permissions);
-  }
-
-  /**
-   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
-   *
-   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
-   * @param permissionHex The permission hexadecimal value to be decoded.
-   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
-   */
-  static decodePermissions(permissionHex: string) {
-    return decodePermissions(permissionHex);
-  }
-
-  /**
-   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
-   *
-   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
-   * @param permissionHex The permission hexadecimal value to be decoded.
-   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
-   */
-  decodePermissions(permissionHex: string) {
-    return decodePermissions(permissionHex);
-  }
-
-  /**
    * Hashes a key name for use on an ERC725Y contract according to LSP2 ERC725Y JSONSchema standard.
    *
    * @param {string} keyName The key name you want to encode.
@@ -634,6 +611,53 @@ export class ERC725 {
     return supportsInterface(interfaceIdOrName, options);
   }
 
+  // Permissions related functions
+  // -----------------------------
+
+  /**
+   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
+   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
+   */
+  static encodePermissions(permissions: Permissions): string {
+    return encodePermissions(permissions);
+  }
+
+  /**
+   * Encode permissions into a hexadecimal string as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
+   * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
+   */
+  encodePermissions(permissions: Permissions): string {
+    return encodePermissions(permissions);
+  }
+
+  /**
+   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissionHex The permission hexadecimal value to be decoded.
+   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
+   */
+  static decodePermissions(permissionHex: string) {
+    return decodePermissions(permissionHex);
+  }
+
+  /**
+   * Decodes permissions from hexadecimal as defined by the LSP6 KeyManager Standard.
+   *
+   * @link https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-6-KeyManager.md LSP6 KeyManager Standard.
+   * @param permissionHex The permission hexadecimal value to be decoded.
+   * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
+   */
+  decodePermissions(permissionHex: string) {
+    return decodePermissions(permissionHex);
+  }
+
   /**
    * Check if the required permissions are included in the granted permissions as defined by the LSP6 KeyManager Standard.
    *
@@ -664,27 +688,16 @@ export class ERC725 {
     return checkPermissions(requiredPermissions, grantedPermissions);
   }
 
-  encodeDataSourceWithHash(
-    verification: undefined | Verification,
-    dataSource: string,
-  ): string {
-    return encodeDataSourceWithHash(verification, dataSource);
+  static mapPermission(permission: string): string | null {
+    return mapPermission(permission);
   }
 
-  static encodeDataSourceWithHash(
-    verification: undefined | Verification,
-    dataSource: string,
-  ): string {
-    return encodeDataSourceWithHash(verification, dataSource);
+  mapPermission(permission: string): string | null {
+    return mapPermission(permission);
   }
 
-  decodeDataSourceWithHash(value: string): URLDataWithHash {
-    return decodeDataSourceWithHash(value);
-  }
-
-  static decodeDataSourceWithHash(value: string): URLDataWithHash {
-    return decodeDataSourceWithHash(value);
-  }
+  // Encoding methods
+  // ----------------
 
   /**
    * @param type The valueType to encode the value as
@@ -744,6 +757,65 @@ export class ERC725 {
     value: string,
   ): string | URLDataWithHash | number | boolean | null {
     return decodeValueContent(valueContent, value);
+  }
+
+  // External Data Source utilities (`VerifiableURI` and `JSONURI`)
+  // ----------------------------------------------------------------
+
+  encodeDataSourceWithHash(
+    verification: undefined | Verification,
+    dataSource: string,
+  ): string {
+    return encodeDataSourceWithHash(verification, dataSource);
+  }
+
+  static encodeDataSourceWithHash(
+    verification: undefined | Verification,
+    dataSource: string,
+  ): string {
+    return encodeDataSourceWithHash(verification, dataSource);
+  }
+
+  decodeDataSourceWithHash(value: string): URLDataWithHash {
+    return decodeDataSourceWithHash(value);
+  }
+
+  static decodeDataSourceWithHash(value: string): URLDataWithHash {
+    return decodeDataSourceWithHash(value);
+  }
+
+  static getVerificationMethod(nameOrSig: string):
+    | {
+        method: (data: string | object | Uint8Array | null) => string;
+        name: SUPPORTED_VERIFICATION_METHOD_STRINGS;
+        sig: SUPPORTED_VERIFICATION_METHODS;
+      }
+    | undefined {
+    return getVerificationMethod(nameOrSig);
+  }
+
+  getVerificationMethod(nameOrSig: string):
+    | {
+        method: (data: string | object | Uint8Array | null) => string;
+        name: SUPPORTED_VERIFICATION_METHOD_STRINGS;
+        sig: SUPPORTED_VERIFICATION_METHODS;
+      }
+    | undefined {
+    return getVerificationMethod(nameOrSig);
+  }
+
+  static isDataAuthentic(
+    data: string | Uint8Array,
+    verificationOptions: Verification,
+  ): boolean {
+    return isDataAuthentic(data, verificationOptions);
+  }
+
+  isDataAuthentic(
+    data: string | Uint8Array,
+    verificationOptions: Verification,
+  ): boolean {
+    return isDataAuthentic(data, verificationOptions);
   }
 }
 

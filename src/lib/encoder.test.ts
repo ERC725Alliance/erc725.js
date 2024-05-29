@@ -409,6 +409,11 @@ describe('encoder', () => {
           decodedValue: 11,
           encodedValue: '0x0000000000000000000000000000000b',
         },
+        {
+          valueType: 'uint128',
+          decodedValue: 0,
+          encodedValue: '0x00000000000000000000000000000000',
+        },
       ];
 
       validTestCases.forEach((testCase) => {
@@ -932,6 +937,13 @@ describe('encoder', () => {
         valueContent: 'Markdown',
         decodedValue: '# hello',
         encodedValue: '0x232068656c6c6f',
+      },
+      {
+        valueContent: 'Markdown',
+        decodedValue: `# Lorem Ipsum
+        dolor sit amet ebriscus lanfogern`,
+        encodedValue:
+          '0x23204c6f72656d20497073756d0a2020202020202020646f6c6f722073697420616d6574206562726973637573206c616e666f6765726e',
       },
       {
         valueContent: 'URL',
