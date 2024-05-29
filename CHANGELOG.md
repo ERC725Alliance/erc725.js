@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.27.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.26.0...v0.27.0) (2024-05-29)
+
+
+### Features
+
+* allow to pass `number` directly in array when encoding tuples ([f6b4a9d](https://github.com/ERC725Alliance/erc725.js/commit/f6b4a9df803f1c63d53067ca3b67604219502cda))
+* export `mapPermission` function and don't make it throw an error ([08e72d6](https://github.com/ERC725Alliance/erc725.js/commit/08e72d61f37d8e3d8b70b5b0bf7cb355687f3546))
+* export function to get verification method ([f426a31](https://github.com/ERC725Alliance/erc725.js/commit/f426a31239f708775e5ab2829ccd0e206da43988))
+* export method `isDataAuthentic` as static, single method or member of class ([0c7ba98](https://github.com/ERC725Alliance/erc725.js/commit/0c7ba987540e0684e803ca8d722aa4b0b5d04fde))
+* return `dynamicKeyName` and `dynamicKeyPart` for `getSchema` with Array ([8b86092](https://github.com/ERC725Alliance/erc725.js/commit/8b860926f6a8e5a733c3d01321bf888a19b79f12))
+
+
+### Bug Fixes
+
+* allow to decode `0x` as `0` for keyType `Array` ([fde9f5d](https://github.com/ERC725Alliance/erc725.js/commit/fde9f5da07dfe87f1459266515b58bca58eacbcd))
+
 ## [0.26.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.25.0...v0.26.0) (2024-05-14)
 
 ### Features
