@@ -47,6 +47,7 @@ import {
   SUPPORTED_VERIFICATION_METHODS,
   SUPPORTED_VERIFICATION_METHODS_LIST,
   COMPACT_BYTES_ARRAY_STRING,
+  SUPPORTED_VERIFICATION_METHOD_STRINGS,
 } from '../constants/constants';
 import {
   decodeValueContent,
@@ -524,7 +525,13 @@ export function encodeData(
   );
 }
 
-export function getVerificationMethod(nameOrSig: string) {
+export function getVerificationMethod(nameOrSig: string):
+  | {
+      method: (data: string | object | Uint8Array | null) => string;
+      name: SUPPORTED_VERIFICATION_METHOD_STRINGS;
+      sig: SUPPORTED_VERIFICATION_METHODS;
+    }
+  | undefined {
   const verificationMethod = Object.values(HASH_METHODS).find(
     ({ name, sig }) => name === nameOrSig || sig === nameOrSig,
   );
