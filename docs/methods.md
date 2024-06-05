@@ -3,6 +3,10 @@ sidebar_position: 1
 title: 'Methods'
 ---
 
+import CodeSandbox from "../../../src/components/CodeSandbox";
+
+<CodeSandbox />
+
 ## Encoding
 
 ### encodeData
