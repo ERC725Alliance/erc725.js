@@ -948,8 +948,10 @@ export function encodeValueContent(
   valueContent: string,
   value: string | number | AssetURLEncode | URLDataToEncode | boolean,
 ): string | false {
-  if (valueContent.slice(0, 2) === '0x') {
-    return valueContent === value ? value : false;
+  if (isValueContentLiteralHex(valueContent)) {
+    // hex characters are always lower case, even if the schema define some hex words uppercase
+    // e.g: 0xAabbcCddeE -> encoded as 0xaabbccddee
+    return valueContent === value ? value.toLowerCase() : false;
   }
 
   const valueContentEncodingMethods = valueContentEncodingMap(valueContent);
@@ -983,12 +985,7 @@ export function decodeValueContent(
   value: string,
 ): string | URLDataWithHash | number | boolean | null {
   if (isValueContentLiteralHex(valueContent)) {
-    if (valueContent.toLowerCase() !== value) {
-      throw new Error(
-        `Could not decode value content: the value ${value} does not match the Hex Literal ${valueContent} defined in the \`valueContent\` part of the schema`,
-      );
-    }
-    return valueContent;
+    return valueContent.toLowerCase() === value ? valueContent : null;
   }
 
   if (value == null || value === '0x') {
