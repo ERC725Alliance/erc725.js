@@ -21,7 +21,6 @@ import { keccak256, utf8ToHex } from 'web3-utils';
 import {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
-  ERC725JSONSchemaValueType,
 } from '../types/ERC725JSONSchema';
 import { GetDataDynamicKey } from '../types/GetData';
 
@@ -226,12 +225,12 @@ describe('utils', () => {
     testCases.forEach((testCase) => {
       it(`encodes/decodes keyType Array / tuples (valueContent: ${testCase.schema.valueContent}, valueType: ${testCase.schema.valueType}`, () => {
         assert.deepStrictEqual(
-          encodeKey(testCase.schema as ERC725JSONSchema, testCase.decodedValue),
+          encodeKey(testCase.schema, testCase.decodedValue),
           testCase.encodedValue,
         );
 
         assert.deepStrictEqual(
-          decodeKey(testCase.schema as ERC725JSONSchema, testCase.encodedValue),
+          decodeKey(testCase.schema, testCase.encodedValue),
           testCase.decodedValue,
         );
       });
@@ -378,7 +377,7 @@ describe('utils', () => {
         valueContent: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
         valueType: 'bytes',
         decodedValue: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
-        encodedValue: '0xc9aaae3201f40fd0ff04d9c885769d8256a456ab', // encoded hex is always lower case
+        encodedValue: '0xc9aaae3201f40fd0ff04d9c885769d8256a456ab',
       },
     ];
 
@@ -387,7 +386,7 @@ describe('utils', () => {
         assert.strictEqual(
           encodeKeyValue(
             testCase.valueContent,
-            testCase.valueType as ERC725JSONSchemaValueType,
+            testCase.valueType,
             testCase.decodedValue,
           ),
           testCase.encodedValue,
@@ -397,7 +396,7 @@ describe('utils', () => {
         assert.deepStrictEqual(
           decodeKeyValue(
             testCase.valueContent,
-            testCase.valueType as ERC725JSONSchemaValueType,
+            testCase.valueType,
             testCase.encodedValue,
           ),
           testCase.decodedValue,
