@@ -700,7 +700,6 @@ describe('Running @erc725/erc725.js tests...', () => {
         const jsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
 
         const result = await erc725.fetchData('TestJSONURL');
-        console.log(result, JSON.parse(jsonString));
         assert.deepStrictEqual(result, {
           key: testJSONURLSchema.key,
           name: testJSONURLSchema.name,

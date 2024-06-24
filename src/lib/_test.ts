@@ -11,7 +11,7 @@ const decode = (receivedData: Uint8Array) => {
     capture.push(receivedData[receivedData.length - 1]);
   }
   const key = String.fromCharCode.apply(null, capture);
-  console.log(capture, key, /^(\[.*\]|\{.*\})\s*$/.test(key));
+  // console.log(capture, key, /^(\[.*\]|\{.*\})\s*$/.test(key));
   return key;
 };
 
