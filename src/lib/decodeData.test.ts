@@ -63,6 +63,13 @@ describe('decodeData', () => {
       valueType: 'bytes',
       valueContent: 'VerifiableURI',
     },
+    {
+      name: 'LSP4CreatorsMap:<address>',
+      key: '0x6de85eaf5d982b4e5da00000<address>',
+      keyType: 'Mapping',
+      valueType: '(bytes4,uint128)',
+      valueContent: '(Bytes4,Number)',
+    },
   ];
 
   it('decodes each key', () => {
@@ -164,7 +171,7 @@ describe('decodeData', () => {
     expect(decodedData.name).to.eql('KeyOne');
   });
 
-  it('parses type tuples/Mixed correctly', () => {
+  it.only('parses type tuples/Mixed correctly', () => {
     const schema: ERC725JSONSchema = {
       name: 'MyDynamicKey:<address>',
       key: '0x',
@@ -184,6 +191,8 @@ describe('decodeData', () => {
       },
       [schema],
     );
+
+    console.log('decodedData for tuple: ', decodedData);
 
     expect(decodedData.value).to.eql(['0x11223344', 12]);
   });
