@@ -171,7 +171,7 @@ describe('decodeData', () => {
     expect(decodedData.name).to.eql('KeyOne');
   });
 
-  it.only('parses type tuples/Mixed correctly', () => {
+  it('parses type tuples/Mixed correctly', () => {
     const schema: ERC725JSONSchema = {
       name: 'MyDynamicKey:<address>',
       key: '0x',
@@ -191,8 +191,6 @@ describe('decodeData', () => {
       },
       [schema],
     );
-
-    console.log('decodedData for tuple: ', decodedData);
 
     expect(decodedData.value).to.eql(['0x11223344', 12]);
   });
