@@ -112,7 +112,7 @@ export const encodeDynamicKeyPart = (
           `Wrong value: ${value} for dynamic key with type: ${type}. Value is not in hex.`,
         );
       }
-      const valueWithoutPrefix = value.replace('0x', '');
+      const valueWithoutPrefix = stripHexPrefix(value);
       if (valueWithoutPrefix.length > size * 2) {
         throw new Error(
           `Wrong value: ${value} for dynamic key with type: ${type}. Value longer than ${size} bytes.`,
