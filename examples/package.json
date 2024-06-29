@@ -9,10 +9,10 @@
     "decodeData": "node src/decodeData.js"
   },
   "dependencies": {
-    "@erc725/erc725.js": "^0.17.2",
+    "@erc725/erc725.js": "..",
     "web3": "^4.7.0"
   },
   "devDependencies": {
-    "isomorphic-fetch": "^3.0.0"
+    "cross-fetch": "^3.0.0"
   }
 }

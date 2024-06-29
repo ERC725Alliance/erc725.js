@@ -20,14 +20,12 @@
  */
 
 import {
-  checkAddressChecksum,
   hexToBytes,
   isAddress,
   isHexStrict,
   leftPad,
   numberToHex,
   padLeft,
-  stripHexPrefix,
 } from 'web3-utils';
 
 import {
@@ -62,6 +60,8 @@ import { getSchemaElement } from './getSchemaElement';
 import { EncodeDataInput } from '../types/decodeData';
 import { GetDataDynamicKey } from '../types/GetData';
 import { isValidTuple } from './decodeData';
+import { stripHexPrefix } from 'web3-eth-accounts';
+import { checkAddressCheckSum } from 'web3-validator';
 
 /**
  *
@@ -431,7 +431,7 @@ export function decodeKeyValue(
   }
 
   // As per exception above, if address and sameEncoding, then the address still needs to be handled
-  if (sameEncoding && isAddress(value) && !checkAddressChecksum(value)) {
+  if (sameEncoding && isAddress(value) && !checkAddressCheckSum(value)) {
     sameEncoding = !sameEncoding;
   }
 
@@ -559,6 +559,7 @@ export function hashData(
 export function isDataAuthentic(
   data: string | Uint8Array,
   options: Verification,
+  capture?: string[],
 ): boolean {
   if (!options || !options.method) {
     return true;
@@ -566,9 +567,13 @@ export function isDataAuthentic(
 
   const dataHash = hashData(data, options.method);
   if (dataHash !== options.data) {
-    console.error(
-      `Hash mismatch, returned JSON hash ("${dataHash}") is different from expected hash: "${options.method}"`,
-    );
+    if (capture) {
+      capture.push(dataHash);
+    } else {
+      console.error(
+        `Hash mismatch, calculated hash ("${dataHash}") is different from expected hash "${options.data}"`,
+      );
+    }
     return false;
   }
 

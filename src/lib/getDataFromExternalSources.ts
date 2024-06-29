@@ -19,8 +19,6 @@
  * @date 2021
  */
 
-import { arrToBufArr } from 'ethereumjs-util';
-
 import {
   DecodeDataOutput,
   GetDataExternalSourcesOutput,
@@ -79,20 +77,29 @@ export const getDataFromExternalSources = (
         urlDataWithHash as URLDataWithHash,
         ipfsGateway,
       );
+
       try {
-        if (!url.startsWith('data:') && /[=?/]$/.test(url)) {
-          // this URL is not verifiable and the URL ends with a / or ? or = meaning it's not a file
-          // and more likely to be some kind of directory or query BaseURI
-          return dataEntry;
-        }
-        const receivedData = await fetch(url).then(async (response) => {
-          if (!response.ok) {
-            throw new Error(response.statusText);
+        let receivedData: Uint8Array;
+        const [, encoding, data] = url.match(/^data:.*?;(.*?),(.*)$/) || [];
+        if (data) {
+          receivedData = new TextEncoder().encode(
+            encoding === 'base64' ? atob(data) : data,
+          );
+        } else {
+          if (/[=?/]$/.test(url)) {
+            // this URL is not verifiable and the URL ends with a / or ? or = meaning it's not a file
+            // and more likely to be some kind of directory or query BaseURI
+            return dataEntry;
           }
-          return response
-            .arrayBuffer()
-            .then((buffer) => new Uint8Array(buffer));
-        });
+          receivedData = await fetch(url).then(async (response) => {
+            if (!response.ok) {
+              throw new Error(response.statusText);
+            }
+            return response
+              .arrayBuffer()
+              .then((buffer) => new Uint8Array(buffer));
+          });
+        }
         if (receivedData.length >= 2) {
           // JSON data cannot be less than 2 characters long.
           try {
@@ -126,17 +133,35 @@ export const getDataFromExternalSources = (
             // Check if the beginning or end are
             // { and } => JSON.stringify({...}) => pretty much 100% of our JSON will be this.
             // [ and ] => JSON.stringify([...])
-            if (/^(\[.*\]|\{.*\})\s*$/s.test(key)) {
-              const json = arrToBufArr(receivedData).toString();
+            if (/^(\[.*\]|\{.*\})\s*$/.test(key)) {
+              const json = new TextDecoder().decode(receivedData);
               const value = JSON.parse(json);
-
-              if (isDataAuthentic(value, urlDataWithHash.verification)) {
+              const mismatchedHashes = [];
+              if (
+                isDataAuthentic(
+                  value,
+                  urlDataWithHash.verification,
+                  mismatchedHashes,
+                )
+              ) {
                 return { ...dataEntry, value };
               }
-              if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
+              if (
+                isDataAuthentic(
+                  receivedData,
+                  urlDataWithHash.verification,
+                  mismatchedHashes,
+                )
+              ) {
                 return { ...dataEntry, value };
               }
-
+              console.error(
+                `Hash mismatch, calculated hashes ("${mismatchedHashes.join(
+                  '", "',
+                )}") are both different from expected hash "${
+                  urlDataWithHash.verification.data
+                }"`,
+              );
               throw new Error('result did not correctly validate');
             }
           } catch {

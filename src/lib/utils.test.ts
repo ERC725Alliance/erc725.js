@@ -16,6 +16,7 @@
 
 import { expect } from 'chai';
 import assert from 'assert';
+import { IPFS_GATEWAY } from '../../test/server';
 
 import { keccak256, utf8ToHex } from 'web3-utils';
 import {
@@ -957,29 +958,29 @@ describe('utils', () => {
   });
 
   describe('convertIPFSGatewayUrl', () => {
-    const expectedIPFSGateway = 'https://cloudflare-ipfs.com/ipfs/';
+    const expectedIPFSGateway = IPFS_GATEWAY;
 
     it('converts when missing /ipfs/', () => {
       assert.deepStrictEqual(
-        convertIPFSGatewayUrl('https://cloudflare-ipfs.com'),
+        convertIPFSGatewayUrl(IPFS_GATEWAY.slice(0, -5)),
         expectedIPFSGateway,
       );
     });
     it('converts when missing /', () => {
       assert.deepStrictEqual(
-        convertIPFSGatewayUrl('https://cloudflare-ipfs.com/ipfs'),
+        convertIPFSGatewayUrl(IPFS_GATEWAY.slice(0, -1)),
         expectedIPFSGateway,
       );
     });
     it('converts when missing ipfs/', () => {
       assert.deepStrictEqual(
-        convertIPFSGatewayUrl('https://cloudflare-ipfs.com/'),
+        convertIPFSGatewayUrl(IPFS_GATEWAY.slice(0, -5)),
         expectedIPFSGateway,
       );
     });
     it('does not convert when passed correctly', () => {
       assert.deepStrictEqual(
-        convertIPFSGatewayUrl('https://cloudflare-ipfs.com/ipfs/'),
+        convertIPFSGatewayUrl(IPFS_GATEWAY),
         expectedIPFSGateway,
       );
     });

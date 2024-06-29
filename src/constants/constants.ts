@@ -12,9 +12,7 @@
     along with @erc725/erc725.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* eslint-disable @typescript-eslint/ban-types */
-import { numberToHex, keccak256 } from 'web3-utils';
-import { arrToBufArr, bufferToHex } from 'ethereumjs-util';
+import { numberToHex, keccak256, toHex } from 'web3-utils';
 
 import { MethodData, Encoding, Method } from '../types/Method';
 
@@ -118,7 +116,7 @@ function keccak256Method(data: object | string | Uint8Array | null) {
     return keccak256('');
   }
   if (data instanceof Uint8Array) {
-    const buffer = bufferToHex(arrToBufArr(data));
+    const buffer = toHex(data);
     return keccak256(buffer);
   }
   if (typeof data === 'object') {
