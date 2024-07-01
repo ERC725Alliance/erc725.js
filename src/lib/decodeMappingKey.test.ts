@@ -44,9 +44,9 @@ describe('decodeDynamicKeyParts', () => {
       key: {
         name: 'MyKeyName:<bytes4>',
         encoded:
-          '0x35e6950bc8d21a1699e5000000000000000000000000000000000000abcd1234',
+          '0x35e6950bc8d21a1699e50000abcd123400000000000000000000000000000000',
       },
-      dynamicKeyParts: [{ type: 'bytes4', value: 'abcd1234' }],
+      dynamicKeyParts: [{ type: 'bytes4', value: '0xabcd1234' }],
     },
     {
       key: {
@@ -57,7 +57,8 @@ describe('decodeDynamicKeyParts', () => {
       dynamicKeyParts: [
         {
           type: 'bytes32',
-          value: 'aaaabbbbccccddddeeeeffff1111222233334444',
+          value:
+            '0xaaaabbbbccccddddeeeeffff1111222233334444000000000000000000000000',
         },
       ],
     },
@@ -94,10 +95,10 @@ describe('decodeDynamicKeyParts', () => {
       key: {
         name: 'MyKeyName:<bytes2>:<uint32>',
         encoded:
-          '0x35e6950bc8d20000ffff000000000000000000000000000000000000f342d33d',
+          '0x35e6950bc8d2ffff0000000000000000000000000000000000000000f342d33d',
       },
       dynamicKeyParts: [
-        { type: 'bytes2', value: 'ffff' },
+        { type: 'bytes2', value: '0xffff' },
         { type: 'uint32', value: 4081242941 },
       ],
     },
@@ -127,7 +128,8 @@ describe('decodeDynamicKeyParts', () => {
       dynamicKeyParts: [
         {
           type: 'bytes32',
-          value: 'aaaabbbbccccddddeeeeffff1111222233334444',
+          value:
+            '0xaaaabbbbccccddddeeeeffff1111222233334444000000000000000000000000',
         },
       ],
     },
@@ -138,7 +140,11 @@ describe('decodeDynamicKeyParts', () => {
           '0x35e6950bc8d2aaaabbbb00000000000000000000000000000000000000000001',
       },
       dynamicKeyParts: [
-        { type: 'bytes32', value: 'aaaabbbb' },
+        {
+          type: 'bytes32',
+          value:
+            '0xaaaabbbb00000000000000000000000000000000000000000000000000000000',
+        },
         { type: 'bool', value: true },
       ],
     },

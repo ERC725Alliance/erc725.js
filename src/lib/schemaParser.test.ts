@@ -106,7 +106,7 @@ describe('schemaParser getSchema', () => {
       );
 
       assert.deepStrictEqual(schema, {
-        name: 'SupportedStandards:??????',
+        name: 'SupportedStandards:LSP3Profile',
         key: '0xeafec4d89fa9619884b60000f4d7faed14a1ab658d46d385bc29fb1eeaa56d0b',
         keyType: 'Mapping',
         valueContent: '0x5ef83ad9',
