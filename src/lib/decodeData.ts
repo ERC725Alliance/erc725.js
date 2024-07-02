@@ -338,9 +338,12 @@ export function decodeData(
       }
       console.error(error);
     }
+    const { key, name, nonDynamicName } = schemaElement;
     return {
-      key: schemaElement.key,
-      name: schemaElement.name,
+      key,
+      name,
+      ...(nonDynamicName ? { nonDynamicName } : { nonDynamicName: name }),
+      ...(dynamicKeyParts ? { dynamicKeyParts } : {}),
       value: decodedValue,
     };
   };

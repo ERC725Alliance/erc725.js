@@ -18,7 +18,7 @@
  * @date 2022
  */
 
-import { padLeft } from 'web3-utils';
+import { padLeft, padRight } from 'web3-utils';
 import { isHex } from 'web3-validator';
 import { decodeValueType } from './encoder';
 import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
@@ -45,18 +45,16 @@ function decodeKeyPart(
 
   let decodedKey: string | number | boolean | undefined;
   const type = keyPartName.slice(1, keyPartName.length - 1);
-
-  if (type === 'bool')
+  if (type === 'bool') {
     decodedKey = encodedKeyPart.slice(encodedKeyPart.length - 1) === '1';
-  else if (type.includes('uint'))
+  } else if (type.includes('uint'))
     decodedKey = Number.parseInt(encodedKeyPart, 16);
   else if (type.includes('bytes')) {
-    const bytesLength = Number.parseInt(type.replace('bytes', ''), 10) * 2;
-    const sliceFrom =
-      encodedKeyPart.length - bytesLength < 0
-        ? 0
-        : encodedKeyPart.length - bytesLength;
-    decodedKey = encodedKeyPart.slice(sliceFrom);
+    const charLength = Number.parseInt(type.replace('bytes', ''), 10) * 2;
+    decodedKey = padRight(
+      `0x${encodedKeyPart.slice(0, charLength)}`,
+      charLength,
+    );
   } else if (type === 'address') {
     // this is required if the 2nd word is an address in a MappingWithGrouping
     const leftPaddedAddress = padLeft(`0x${encodedKeyPart}`, 40);

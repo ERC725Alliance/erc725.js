@@ -375,8 +375,8 @@ describe('utils', () => {
         encodedValue: '0x74657374',
       },
       {
-        valueContent: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
-        valueType: 'bytes',
+        valueContent: 'Address',
+        valueType: 'address',
         decodedValue: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
         encodedValue: '0xc9aaae3201f40fd0ff04d9c885769d8256a456ab',
       },
@@ -929,7 +929,7 @@ describe('utils', () => {
       },
       {
         keyType: 'Mapping',
-        keyName: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
+        keyName: 'MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe',
       },
       {
         keyType: 'Mapping',
@@ -943,7 +943,7 @@ describe('utils', () => {
       {
         keyType: 'MappingWithGrouping',
         keyName:
-          'AddressPermissions:Permissions:0xcafecafecafecafecafecafecafecafecafecafe',
+          'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
       },
     ];
 
@@ -1026,7 +1026,7 @@ describe('utils', () => {
 
       generatedSchemas.forEach((schema) => {
         expect(
-          isDynamicKeyName(schema.name),
+          isDynamicKeyName(schema.key),
           'generated schema key should not be dynamic',
         ).to.be.false;
       });

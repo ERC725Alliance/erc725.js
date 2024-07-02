@@ -17,6 +17,7 @@
  * @date 2020
  */
 
+import { encodeKeyName, isDynamicKeyName } from '../src';
 import { encodeArrayKey } from '../src/lib/utils';
 
 /**
@@ -49,7 +50,9 @@ export function generateAllRawData(schema, isArrayMode: boolean) {
       });
     } else {
       results.push({
-        key: element.key,
+        key: isDynamicKeyName(element.key)
+          ? encodeKeyName(element.name, element.dynamicKeyParts)
+          : element.key,
         value: isArrayMode ? element.returnRawDataArray : element.returnRawData,
       });
     }
@@ -108,6 +111,7 @@ export function generateAllResults(schemas) {
         name: schema.name,
         key: schema.key,
         value: schema.expectedResult,
+        nonDynamicName: schema.nonDynamicName,
       };
     });
 }

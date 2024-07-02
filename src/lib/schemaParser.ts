@@ -87,7 +87,10 @@ const fillDynamicKeyPart = (
   if (keccak256(keyNameParts[1]).substring(0, 42) === `0x${secondWordHex}`) {
     dynamicPartName = keyNameParts[1];
   }
-  result.name = `${keyNameParts[0]}:${dynamicPartName}`;
+
+  // DO NOT MODIFY THE NAME OF THE SCHEMA ITEM
+  // OTHERWISE WE CAN NO LONGER FIND THE CORRESPONDING SCHEMA BY NAME.
+  // result.name = `${keyNameParts[0]}:${dynamicPartName}`;
 
   return result;
 };

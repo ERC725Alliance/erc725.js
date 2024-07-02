@@ -19,15 +19,8 @@
  * @date 2020
  */
 
-import {
-  hexToBytes,
-  isAddress,
-  isHexStrict,
-  leftPad,
-  numberToHex,
-  padLeft,
-} from 'web3-utils';
-
+import { hexToBytes, leftPad, numberToHex, padLeft } from 'web3-utils';
+import { isAddress, isHexStrict } from 'web3-validator';
 import {
   URLDataToEncode,
   EncodeDataReturn,
@@ -177,7 +170,7 @@ export function guessKeyTypeFromKeyName(
   // This function could not work with subsequents keys of an Array
   // It will always assume the given key, if array, is the initial array key.
 
-  const splittedKeyName = keyName.split(':');
+  const splittedKeyName = keyName.replace(/[^:]</g, ':').split(':');
 
   if (splittedKeyName.length === 3) {
     return 'MappingWithGrouping';
@@ -421,11 +414,7 @@ export function decodeKeyValue(
   const valueTypeIsBytesNonArray =
     valueType.slice(0, 5) === 'bytes' && valueType.slice(-2) !== '[]';
 
-  if (
-    !valueTypeIsBytesNonArray &&
-    valueType !== 'string' &&
-    !isAddress(value) // checks for addresses, since technically an address is bytes?
-  ) {
+  if (!valueTypeIsBytesNonArray && valueType !== 'string') {
     // eslint-disable-next-line no-param-reassign
     value = decodeValueType(valueType, value);
   }
