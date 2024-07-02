@@ -583,7 +583,7 @@ export const mockSchema: (ERC725JSONSchema & {
 
   {
     name: 'MyCoolAddress:<address>',
-    nonDynamicName: 'MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe',
+    nonDynamicName: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
     key: '0x22496f48a493035f0ab40000cafecafecafecafecafecafecafecafecafecafe',
     dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
     keyType: 'Mapping',
@@ -598,7 +598,7 @@ export const mockSchema: (ERC725JSONSchema & {
   {
     name: 'AddressPermissions:Permissions:<address>',
     nonDynamicName:
-      'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
+      'AddressPermissions:Permissions:0xcafecafecafecafecafecafecafecafecafecafe',
     key: '0x4b80742de2bf82acb3630000cafecafecafecafecafecafecafecafecafecafe',
     dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
     keyType: 'MappingWithGrouping',
@@ -612,7 +612,7 @@ export const mockSchema: (ERC725JSONSchema & {
   },
   {
     name: 'Hello:<address>',
-    nonDynamicName: 'Hello:cafecafecafecafecafecafecafecafecafecafe',
+    nonDynamicName: 'Hello:0xcafecafecafecafecafecafecafecafecafecafe',
     key: '0x06b3dfaec148fb1bb2b00000cafecafecafecafecafecafecafecafecafecafe', // encoded for cafecafe... address - parameters are bellow
     dynamicKeyParts: ['0xcafecafecafecafecafecafecafecafecafecafe'],
     keyType: 'Singleton',

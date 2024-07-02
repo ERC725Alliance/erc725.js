@@ -19,15 +19,8 @@
  * @date 2020
  */
 
-import {
-  hexToBytes,
-  isAddress,
-  isHexStrict,
-  leftPad,
-  numberToHex,
-  padLeft,
-} from 'web3-utils';
-
+import { hexToBytes, leftPad, numberToHex, padLeft } from 'web3-utils';
+import { isAddress, isHexStrict } from 'web3-validator';
 import {
   URLDataToEncode,
   EncodeDataReturn,

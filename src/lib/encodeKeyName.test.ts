@@ -248,7 +248,7 @@ describe('encodeKeyName', () => {
     );
     assert.throws(() =>
       encodeKeyName(
-        'MyDynamicKey:<string>:cafecafecafecafecafecafecafecafecafecafe',
+        'MyDynamicKey:<string>:0xcafecafecafecafecafecafecafecafecafecafe',
         ['variable1', 'variable2'],
       ),
     );
@@ -426,14 +426,14 @@ describe('generateDynamicKeyName', () => {
         '0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
       ],
       expectedKeyName:
-        'MyKey:11223344:2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
+        'MyKey:0x11223344:0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
     },
     {
       keyName: 'Addresses:<address>',
       dynamicKeyParts: [
-        '2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac', // without 0x in the address
+        '0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac', // without 0x in the address
       ],
-      expectedKeyName: 'Addresses:2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
+      expectedKeyName: 'Addresses:0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
     },
   ];
 

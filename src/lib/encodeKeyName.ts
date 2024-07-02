@@ -342,7 +342,7 @@ export const generateDynamicKeyName = (
 
       dynamicKeyPartsIndex += 1;
 
-      return dynamicKeyPart.replace('0x', '');
+      return dynamicKeyPart;
     })
     .join(':');
 };

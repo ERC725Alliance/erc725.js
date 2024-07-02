@@ -409,7 +409,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           key: '0x4b80742de2bf82acb36300009139def55c73c12bcda9c44f12326686e3948634',
           name: 'AddressPermissions:Permissions:<address>',
           nonDynamicName:
-            'AddressPermissions:Permissions:9139def55c73c12bcda9c44f12326686e3948634',
+            'AddressPermissions:Permissions:0x9139def55c73c12bcda9c44f12326686e3948634',
           value:
             '0x0000000000000000000000000000000000000000000000000000000000000002',
         });
@@ -455,7 +455,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           key: '0x6de85eaf5d982b4e5da000009139def55c73c12bcda9c44f12326686e3948634',
           name: 'LSP4CreatorsMap:<address>',
           nonDynamicName:
-            'LSP4CreatorsMap:9139def55c73c12bcda9c44f12326686e3948634',
+            'LSP4CreatorsMap:0x9139def55c73c12bcda9c44f12326686e3948634',
           value: ['0x24871b3d', 0],
         });
       });
@@ -560,7 +560,7 @@ describe('Running @erc725/erc725.js tests...', () => {
                 '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000035697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a62640000000000000000000000',
             },
             {
-              key: '0x74ac2555c10b9349e78f0000b74a88c43bcf691bd7a851f6603cb1868f6fc147', // LSP12IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147
+              key: '0x74ac2555c10b9349e78f0000b74a88c43bcf691bd7a851f6603cb1868f6fc147', // LSP12IssuedAssetsMap:0x0cb74a88C43BCf691bd7A851f6603cb1868f6fc147
               value:
                 '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000141098603b193d276f5fa176cc02007b609f9dae6b000000000000000000000000',
             },
@@ -620,7 +620,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           key: '0x74ac2555c10b9349e78f0000b74a88c43bcf691bd7a851f6603cb1868f6fc147',
           name: 'LSP12IssuedAssetsMap:<address>',
           nonDynamicName:
-            'LSP12IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+            'LSP12IssuedAssetsMap:0xb74a88C43BCf691bd7A851f6603cb1868f6fc147',
           value: '0x1098603B193d276f5fA176CC02007B609F9DAE6b',
         },
         {
@@ -764,7 +764,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           assert.deepStrictEqual(result, {
             name: 'JSONForAddress:<address>',
             nonDynamicName:
-              'JSONForAddress:cafecafecafecafecafecafecafecafecafecafe',
+              'JSONForAddress:0xcafecafecafecafecafecafecafecafecafecafe',
             key: '0x84b02f6e50a0a0819a4f0000cafecafecafecafecafecafecafecafecafecafe',
             value: JSON.parse(jsonString),
           });
