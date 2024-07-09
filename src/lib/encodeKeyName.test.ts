@@ -399,11 +399,23 @@ describe('encodeDynamicKeyPart', () => {
 
   // Since we're allowing things to be truncated and right and left padded
   // This doesn't seem an ideal test case.
-  // it('throws if <bytesM> is called with wrong number of bytes', () => {
-  //   assert.throws(() =>
-  //     encodeDynamicKeyPart('<bytes8>', '0xd1b2917d26eeeaad1234', 20),
-  //   );
-  // });
+  it('throws if <bytesM> is called with wrong number of bytes', () => {
+    assert.throws(() =>
+      encodeDynamicKeyPart('<bytes8>', '0xd1b2917d26eeeaad1234', 20),
+    );
+  });
+
+  it('throws if <uintN> is called with too large of a number', () => {
+    assert.throws(() => encodeDynamicKeyPart('<uint8>', '0x100', 20));
+  });
+
+  it('throws if <intN> is is used because intN is not supported (positive number)', () => {
+    assert.throws(() => encodeDynamicKeyPart('<int8>', '0x100', 20));
+  });
+
+  it('throws if <intN> is is used because intN is not supported (negative number)', () => {
+    assert.throws(() => encodeDynamicKeyPart('<int8>', '0xFFFFFFFF100', 20));
+  });
 });
 
 describe('generateDynamicKeyName', () => {

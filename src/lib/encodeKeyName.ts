@@ -98,6 +98,9 @@ export const encodeDynamicKeyPart = (
       // e.g.: uint8 max value is 255, uint16 is 65535...
 
       let hex = numberToHex(value).slice(2);
+      if (hex.length > size / 4) {
+        throw new Error(`Value: ${value} is too big for uint${size}.`);
+      }
       if (hex.length > bytes * 2) {
         hex = `0x${hex.slice(-bytes * 2)}`;
       } else {
@@ -115,6 +118,11 @@ export const encodeDynamicKeyPart = (
       if (!isHex(value)) {
         throw new Error(
           `Wrong value: ${value} for dynamic key with type: $type. Value is not in hex.`,
+        );
+      }
+      if (value.length > 2 + size * 2) {
+        throw new Error(
+          `Wrong value: ${value} for dynamic key with type: $type. Value is too big.`,
         );
       }
       return padRight(value.slice(0, 2 + bytes * 2), bytes * 2).slice(2);
