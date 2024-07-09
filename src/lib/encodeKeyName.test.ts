@@ -53,18 +53,19 @@ describe('encodeKeyName', () => {
         '0x22496f48a493035f0ab40000cafecafecafecafecafecafecafecafecafecafe',
     },
     {
-      keyName: 'MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe',
+      keyName: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
       expectedKey:
         '0x22496f48a493035f0ab40000cafecafecafecafecafecafecafecafecafecafe',
     },
     {
-      keyName: 'LSP12IssuedAssetsMap:b74a88C43BCf691bd7A851f6603cb1868f6fc147',
+      keyName:
+        'LSP12IssuedAssetsMap:0xb74a88C43BCf691bd7A851f6603cb1868f6fc147',
       expectedKey:
         '0x74ac2555c10b9349e78f0000b74a88c43bcf691bd7a851f6603cb1868f6fc147',
     },
     {
       keyName:
-        'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
+        'AddressPermissions:Permissions:0xcafecafecafecafecafecafecafecafecafecafe',
       expectedKey:
         '0x4b80742de2bf82acb3630000cafecafecafecafecafecafecafecafecafecafe',
     },
@@ -119,7 +120,7 @@ describe('encodeKeyName', () => {
     {
       keyName: 'MyKeyName:<bytes4>',
       expectedKey:
-        '0x35e6950bc8d21a1699e5000000000000000000000000000000000000abcd1234',
+        '0x35e6950bc8d21a1699e50000abcd123400000000000000000000000000000000',
       // |--keccak256 bytes12-||--||---bytes20: keccak256()---------------|
       dynamicKeyParts: '0xabcd1234',
     },
@@ -163,14 +164,14 @@ describe('encodeKeyName', () => {
     {
       keyName: 'MyKeyName:<bytes2>:<uint32>',
       expectedKey:
-        '0x35e6950bc8d20000ffff000000000000000000000000000000000000f342d33d',
+        '0x35e6950bc8d2ffff0000000000000000000000000000000000000000f342d33d',
       // |-- bytes6 --||------||--||------------ bytes20 -----------------|
       dynamicKeyParts: ['ffff', '4081242941'],
     },
     {
       keyName: 'MyKeyName:<bytes2>:<uint32>',
       expectedKey:
-        '0x35e6950bc8d20000ffff000000000000000000000000000000000000f342d33d',
+        '0x35e6950bc8d2ffff0000000000000000000000000000000000000000f342d33d',
       // |-- bytes6 --||------||--||------------ bytes20 -----------------|
       dynamicKeyParts: ['ffff', '0xf342d33d'],
     },
@@ -189,9 +190,7 @@ describe('encodeKeyName', () => {
       expectedKey:
         '0x35e6950bc8d275060e3c0000aaaabbbbccccddddeeeeffff1111222233334444',
       // |-- bytes6 --||------||--||------------ bytes20 -----------------|
-      dynamicKeyParts: [
-        '0xaaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa',
-      ],
+      dynamicKeyParts: ['0xaaaabbbbccccddddeeeeffff1111222233334444'],
     },
     {
       keyName: 'MyKeyName:<bytes32>:<bool>',
@@ -249,7 +248,7 @@ describe('encodeKeyName', () => {
     );
     assert.throws(() =>
       encodeKeyName(
-        'MyDynamicKey:<string>:cafecafecafecafecafecafecafecafecafecafe',
+        'MyDynamicKey:<string>:0xcafecafecafecafecafecafecafecafecafecafe',
         ['variable1', 'variable2'],
       ),
     );
@@ -367,19 +366,19 @@ describe('encodeDynamicKeyPart', () => {
       type: '<bytes8>',
       value: '0xd1b2917d26eeeaad',
       bytes: 12,
-      expectedEncoding: '00000000d1b2917d26eeeaad', // left padded
+      expectedEncoding: 'd1b2917d26eeeaad00000000', // right padded/cut
     },
     {
       type: '<bytes8>',
       value: 'd1b2917d26eeeaad', // test without 0x prefix
       bytes: 12,
-      expectedEncoding: '00000000d1b2917d26eeeaad', // left padded
+      expectedEncoding: 'd1b2917d26eeeaad00000000', // right padded/cut
     },
     {
       type: '<bytes8>',
-      value: 'd1b2917d26eeeaad',
+      value: '0xd1b2917d26eeeaad',
       bytes: 4,
-      expectedEncoding: 'd1b2917d', // right cut
+      expectedEncoding: 'd1b2917d', // right padded/cut
     },
   ];
 
@@ -397,10 +396,25 @@ describe('encodeDynamicKeyPart', () => {
       encodeDynamicKeyPart('<bytes8>', 'thisisnotanhexstr', 20),
     );
   });
+
+  // Since we're allowing things to be truncated and right and left padded
+  // This doesn't seem an ideal test case.
   it('throws if <bytesM> is called with wrong number of bytes', () => {
     assert.throws(() =>
       encodeDynamicKeyPart('<bytes8>', '0xd1b2917d26eeeaad1234', 20),
     );
+  });
+
+  it('throws if <uintN> is called with too large of a number', () => {
+    assert.throws(() => encodeDynamicKeyPart('<uint8>', '0x100', 20));
+  });
+
+  it('throws if <intN> is is used because intN is not supported (positive number)', () => {
+    assert.throws(() => encodeDynamicKeyPart('<int8>', '0x100', 20));
+  });
+
+  it('throws if <intN> is is used because intN is not supported (negative number)', () => {
+    assert.throws(() => encodeDynamicKeyPart('<int8>', '0xFFFFFFFF100', 20));
   });
 });
 
@@ -424,14 +438,14 @@ describe('generateDynamicKeyName', () => {
         '0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
       ],
       expectedKeyName:
-        'MyKey:11223344:2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
+        'MyKey:0x11223344:0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
     },
     {
       keyName: 'Addresses:<address>',
       dynamicKeyParts: [
-        '2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac', // without 0x in the address
+        '0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac', // without 0x in the address
       ],
-      expectedKeyName: 'Addresses:2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
+      expectedKeyName: 'Addresses:0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
     },
   ];
 

@@ -1,3 +1,4 @@
+import { DynamicKeyParts } from './dynamicKeys';
 import { EncodeDataType, URLDataWithHash } from './encodeData/JSONURL';
 
 export interface DataInput {
@@ -22,6 +23,7 @@ export interface DecodeDataOutput {
   value: Data | Data[] | URLDataWithHash | null;
   name: string;
   key: string;
+  dynamicName?: string;
 }
 
 export interface FetchDataOutput {
@@ -31,6 +33,8 @@ export interface FetchDataOutput {
     | string[]
     | { LSP3Profile: Record<string, any> }
     | Record<string, any>;
+  dynamicKeyParts?: DynamicKeyParts;
+  dynamicName?: string;
   name: string;
   key: string;
 }

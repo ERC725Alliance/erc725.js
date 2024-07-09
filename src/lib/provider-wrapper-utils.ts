@@ -12,7 +12,7 @@
     along with @erc725/erc725.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import * as abi from 'web3-eth-abi';
+import { decodeParameter } from 'web3-eth-abi';
 import { numberToHex } from 'web3-utils';
 
 import {
@@ -24,17 +24,19 @@ import { Method } from '../types/Method';
 import { METHODS } from '../constants/constants';
 
 let idCount = 0;
-const web3abiDecoder = abi.default;
 
-export function decodeResult(method: Method, hexString: string) {
-  if (hexString === '0x') {
+export function decodeResult(
+  method: Method,
+  hexString: string,
+): Record<string, any> | null {
+  if (!hexString || hexString === '0x' || hexString === '') {
     return null;
   }
 
-  const decodedData = web3abiDecoder.decodeParameter(
+  const decodedData = decodeParameter(
     METHODS[method].returnEncoding,
     hexString,
-  );
+  ) as Record<string, any> | null;
 
   if (
     Array.isArray(decodedData) &&
