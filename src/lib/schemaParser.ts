@@ -20,7 +20,6 @@ import { keccak256 } from 'web3-utils';
 import allSchemas from '../schemas';
 
 import {
-  DynamicNameSchema,
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
 } from '../types/ERC725JSONSchema';
@@ -41,55 +40,72 @@ const getSchemasByKeyType = (
 
 const fillDynamicKeyPart = (
   key: string,
-  keySchema: ERC725JSONSchema,
-): ERC725JSONSchema | DynamicNameSchema => {
-  const result: ERC725JSONSchema | DynamicNameSchema = { ...keySchema, key };
+  keySchema: ERC725JSONSchema | ERC725JSONSchema[],
+): ERC725JSONSchema => {
+  const fillOneDynamicKeyPart = (
+    key: string,
+    keySchema: ERC725JSONSchema,
+    insertQuestionMarks = false,
+  ) => {
+    const result: ERC725JSONSchema = {
+      ...keySchema,
+      key,
+    };
 
-  const keyNameParts = keySchema.name.split(':');
-  const secondWordHex = key.substring(26);
+    const keyNameParts = keySchema.name.split(':');
+    const secondWordHex = key.substring(26);
 
-  // 2. "Semi defined mappings" i.e. "SupportedStandards:??????"
-  let dynamicPartName = '??????'; // default for "unknown"
+    // 2. "Semi defined mappings" i.e. "SupportedStandards:??????"
+    let dynamicPartName = '??????'; // default for "unknown"
 
-  // replace dynamic placeholder in the map part (e.g: <address>, <bytes32>) with the hex value
-  if (isDynamicKeyName(keySchema.name)) {
-    dynamicPartName = secondWordHex;
+    // replace dynamic placeholder in the map part (e.g: <address>, <bytes32>) with the hex value
+    if (isDynamicKeyName(keySchema.name) && !insertQuestionMarks) {
+      dynamicPartName = secondWordHex;
 
-    let dynamicName = `${keyNameParts[0]}:0x${dynamicPartName}`;
-    let dynamicKeyPart = `0x${secondWordHex}`;
+      let dynamicName = `${keyNameParts[0]}:0x${dynamicPartName}`;
+      let dynamicKeyPart = `0x${secondWordHex}`;
 
-    const dynamicPartType = keyNameParts[1].match(dynamicTypesRegex);
+      const dynamicPartType = keyNameParts[1].match(dynamicTypesRegex);
 
-    if (dynamicPartType) {
-      const byteSize =
-        dynamicPartType[1] === 'uint' || dynamicPartType[1] === 'int'
-          ? Number.parseInt(dynamicPartType[2]) / 8 // e.g: uint128 -> 128 / 8 -> 16 bytes
-          : Number.parseInt(dynamicPartType[2]); // e.g: bytes8 -> 8 bytes
+      if (dynamicPartType) {
+        const byteSize =
+          dynamicPartType[1] === 'uint' || dynamicPartType[1] === 'int'
+            ? Number.parseInt(dynamicPartType[2]) / 8 // e.g: uint128 -> 128 / 8 -> 16 bytes
+            : Number.parseInt(dynamicPartType[2]); // e.g: bytes8 -> 8 bytes
 
-      if (byteSize < 20) {
-        dynamicName = `${keyNameParts[0]}:0x${dynamicPartName.slice(
-          0,
-          byteSize * 2,
-        )}`;
+        if (byteSize < 20) {
+          dynamicName = `${keyNameParts[0]}:0x${dynamicPartName.slice(0, byteSize * 2)}`;
 
-        dynamicKeyPart = `0x${secondWordHex.slice(0, byteSize * 2)}`;
+          dynamicKeyPart = `0x${secondWordHex.slice(0, byteSize * 2)}`;
+        }
       }
+
+      result.dynamicName = dynamicName;
+      result.dynamicKeyParts = dynamicKeyPart;
+
+      return result;
     }
 
-    (result as DynamicNameSchema).dynamicName = dynamicName;
-    (result as DynamicNameSchema).dynamicKeyPart = dynamicKeyPart;
+    // if first 20 bytes of the hash of second word in schema match,
+    // display the map part as plain word
+    if (keccak256(keyNameParts[1]).substring(0, 42) === `0x${secondWordHex}`) {
+      dynamicPartName = keyNameParts[1];
+    }
+
+    // DO NOT MODIFY THE NAME OF THE SCHEMA ITEM
+    // OTHERWISE WE CAN NO LONGER FIND THE CORRESPONDING SCHEMA BY NAME.
+    // result.name = `$keyNameParts[0]:$dynamicPartName`;
 
     return result;
+  };
+  if (Array.isArray(keySchema)) {
+    const singleSchema = keySchema.find((schema) => schema.key === key);
+    if (singleSchema) {
+      return fillOneDynamicKeyPart(key, singleSchema);
+    }
+    return fillOneDynamicKeyPart(key, keySchema[0], true);
   }
-
-  // if first 20 bytes of the hash of second word in schema match,
-  // display the map part as plain word
-  if (keccak256(keyNameParts[1]).substring(0, 42) === `0x${secondWordHex}`) {
-    dynamicPartName = keyNameParts[1];
-  }
-  result.name = `${keyNameParts[0]}:${dynamicPartName}`;
-
-  return result;
+  return fillOneDynamicKeyPart(key, keySchema);
 };
 
 const findSingletonSchemaForKey = (
@@ -102,7 +118,7 @@ const findSingletonSchemaForKey = (
 const findArraySchemaForKey = (
   key: string,
   schemas: ERC725JSONSchema[],
-): ERC725JSONSchema | DynamicNameSchema | null => {
+): ERC725JSONSchema | null => {
   // Should detect:
 
   // 1. Initial key
@@ -133,7 +149,7 @@ const findArraySchemaForKey = (
     ...arraySchema,
     key,
     dynamicName: arraySchema.name.replace('[]', `[${elementIndex}]`),
-    dynamicKeyPart: `0x${key.substring(34)}`,
+    dynamicKeyParts: `0x${key.substring(34)}`,
     name: arraySchema.name,
     keyType: 'Singleton',
   };
@@ -142,33 +158,32 @@ const findArraySchemaForKey = (
 const findMappingSchemaForKey = (
   key: string,
   schemas: ERC725JSONSchema[],
-): ERC725JSONSchema | DynamicNameSchema | null => {
+): ERC725JSONSchema | null => {
   const firstWordHex = key.substring(0, 26);
   // Should detect:
 
   // Known/defined mapping
-  let keySchema = schemas.find((schema) => schema.key === key) || null;
+  const keySchema = schemas.find((schema) => schema.key === key) || null;
 
   if (keySchema) {
     return fillDynamicKeyPart(key, keySchema);
   }
 
-  keySchema =
-    schemas.find(
-      (schema) => `${schema.key.substring(0, 22)}0000` === firstWordHex,
-    ) || null;
+  const keySchemas = schemas.filter(
+    (schema) => `${schema.key.substring(0, 22)}0000` === firstWordHex,
+  );
 
-  if (!keySchema) {
+  if (keySchemas.length === 0) {
     return null;
   }
 
-  return fillDynamicKeyPart(key, keySchema);
+  return fillDynamicKeyPart(key, keySchemas);
 };
 
 const findMappingWithGroupingSchemaForKey = (
   key: string,
   schemas: ERC725JSONSchema[],
-): ERC725JSONSchema | DynamicNameSchema | null => {
+): ERC725JSONSchema | null => {
   const keySchema =
     schemas.find(
       (schema) => schema.key.substring(0, 26) === key.substring(0, 26),
@@ -180,9 +195,8 @@ const findMappingWithGroupingSchemaForKey = (
     const dynamicKeyPart = key.substring(26);
 
     if (isDynamicKeyName(keySchema.name)) {
-      (keySchema as DynamicNameSchema).dynamicName =
-        `${keyNameParts[0]}:${keyNameParts[1]}:0x${dynamicKeyPart}`;
-      (keySchema as DynamicNameSchema).dynamicKeyPart = `0x${dynamicKeyPart}`;
+      keySchema.dynamicName = `${keyNameParts[0]}:${keyNameParts[1]}:0x${dynamicKeyPart}`;
+      keySchema.dynamicKeyParts = `0x${dynamicKeyPart}`;
     }
 
     return {
@@ -197,7 +211,7 @@ const findMappingWithGroupingSchemaForKey = (
 function schemaParser(
   key: string,
   schemas: ERC725JSONSchema[],
-): ERC725JSONSchema | DynamicNameSchema | null {
+): ERC725JSONSchema | null {
   const schemasByKeyType = getSchemasByKeyType(schemas);
 
   let foundSchema: ERC725JSONSchema | null = null;
@@ -231,23 +245,20 @@ function schemaParser(
 export function getSchema(
   keyOrKeys: string | string[],
   providedSchemas?: ERC725JSONSchema[],
-):
-  | ERC725JSONSchema
-  | DynamicNameSchema
-  | null
-  | Record<string, ERC725JSONSchema | DynamicNameSchema | null> {
+): ERC725JSONSchema | null | Record<string, ERC725JSONSchema | null> {
   let fullSchema: ERC725JSONSchema[] = allSchemas;
   if (providedSchemas) {
     fullSchema = fullSchema.concat(providedSchemas);
   }
 
   if (Array.isArray(keyOrKeys)) {
-    return keyOrKeys.reduce<
-      Record<string, ERC725JSONSchema | DynamicNameSchema | null>
-    >((acc, key) => {
-      acc[key] = schemaParser(key, fullSchema);
-      return acc;
-    }, {});
+    return keyOrKeys.reduce<Record<string, ERC725JSONSchema | null>>(
+      (acc, key) => {
+        acc[key] = schemaParser(key, fullSchema);
+        return acc;
+      },
+      {},
+    );
   }
 
   return schemaParser(keyOrKeys, fullSchema);
