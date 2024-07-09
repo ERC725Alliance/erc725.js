@@ -59,7 +59,7 @@ describe('schemaParser getSchema', () => {
           name: 'LSP12IssuedAssets[]',
           key: '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000001',
           dynamicName: 'LSP12IssuedAssets[1]',
-          dynamicKeyPart: '0x00000000000000000000000000000001',
+          dynamicKeyParts: '0x00000000000000000000000000000001',
           keyType: 'Singleton',
           valueContent: 'Address',
           valueType: 'address',
@@ -68,7 +68,7 @@ describe('schemaParser getSchema', () => {
           name: 'AddressPermissions[]',
           key: '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000000',
           dynamicName: 'AddressPermissions[0]',
-          dynamicKeyPart: '0x00000000000000000000000000000000',
+          dynamicKeyParts: '0x00000000000000000000000000000000',
           keyType: 'Singleton',
           valueContent: 'Address',
           valueType: 'address',
@@ -132,7 +132,7 @@ describe('schemaParser getSchema', () => {
 
       assert.deepStrictEqual(schema, {
         ...extraSchema,
-        dynamicKeyPart: `0x${address}`,
+        dynamicKeyParts: `0x${address}`,
         dynamicName,
       });
     });
@@ -158,7 +158,7 @@ describe('schemaParser getSchema', () => {
       assert.deepStrictEqual(schema, {
         ...extraSchema,
         dynamicName,
-        dynamicKeyPart: `0x${dynamicPart}`,
+        dynamicKeyParts: `0x${dynamicPart}`,
       });
     });
 
@@ -181,7 +181,7 @@ describe('schemaParser getSchema', () => {
       assert.deepStrictEqual(schema, {
         ...extraSchema,
         dynamicName,
-        dynamicKeyPart: `0x${bytes4Value}`,
+        dynamicKeyParts: `0x${bytes4Value}`,
       });
     });
 
@@ -206,7 +206,7 @@ describe('schemaParser getSchema', () => {
       assert.deepStrictEqual(schema, {
         ...extraSchema,
         dynamicName,
-        dynamicKeyPart: `0x${dynamicPart}`,
+        dynamicKeyParts: `0x${dynamicPart}`,
       });
     });
   });
@@ -223,7 +223,7 @@ describe('schemaParser getSchema', () => {
         name,
         dynamicName,
         key,
-        dynamicKeyPart: `0x${address}`,
+        dynamicKeyParts: `0x${address}`,
         keyType: 'MappingWithGrouping',
         valueContent: 'BitArray',
         valueType: 'bytes32',

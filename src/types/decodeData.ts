@@ -23,7 +23,7 @@ export interface DecodeDataOutput {
   value: Data | Data[] | URLDataWithHash | null;
   name: string;
   key: string;
-  nonDynamicName?: string;
+  dynamicName?: string;
 }
 
 export interface FetchDataOutput {
@@ -34,7 +34,7 @@ export interface FetchDataOutput {
     | { LSP3Profile: Record<string, any> }
     | Record<string, any>;
   dynamicKeyParts?: DynamicKeyParts;
-  nonDynamicName?: string;
+  dynamicName?: string;
   name: string;
   key: string;
 }

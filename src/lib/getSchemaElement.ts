@@ -52,14 +52,11 @@ const getSchemaElementForDynamicKeyName = (
   // once we have the schemaElement with dynamic parts, we need to replace the name and the key:
 
   const key = encodeKeyName(namedDynamicKey, dynamicKeyParts);
-  const nonDynamicName = generateDynamicKeyName(
-    namedDynamicKey,
-    dynamicKeyParts,
-  );
+  const dynamicName = generateDynamicKeyName(namedDynamicKey, dynamicKeyParts);
 
   return {
     ...schemaElement,
-    nonDynamicName,
+    dynamicName,
     key,
     dynamicKeyParts,
   };

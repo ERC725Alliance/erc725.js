@@ -223,7 +223,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         name: 'ThisKeyDoesNotExist',
         key: '0xb12a0af5f83066646eb63c96bf29dcb827024d9a33189f5a61652a03951d1fbe',
         value: null,
-        nonDynamicName: 'ThisKeyDoesNotExist',
+        dynamicName: 'ThisKeyDoesNotExist',
       };
 
       assert.deepStrictEqual(data, expectedResult);
@@ -241,7 +241,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             keyType: 'Array',
             valueContent: 'Address',
             valueType: 'address',
-            nonDynamicName: 'NonExistingArray[]',
+            dynamicName: 'NonExistingArray[]',
           },
         ],
         ERC725_CONTRACT_ADDRESS,
@@ -253,7 +253,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         name: 'NonExistingArray[]',
         key: '0xd6cbdbfc8d25c9ce4720b5fe6fa8fc536803944271617bf5425b4bd579195840',
         value: [],
-        nonDynamicName: 'NonExistingArray[]',
+        dynamicName: 'NonExistingArray[]',
       });
 
       const dataArray = await erc725.getData(['NonExistingArray[]']);
@@ -262,7 +262,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           name: 'NonExistingArray[]',
           key: '0xd6cbdbfc8d25c9ce4720b5fe6fa8fc536803944271617bf5425b4bd579195840',
           value: [],
-          nonDynamicName: 'NonExistingArray[]',
+          dynamicName: 'NonExistingArray[]',
         },
       ]);
     });
@@ -288,7 +288,7 @@ describe('Running @erc725/erc725.js tests...', () => {
       {
         name: 'LSP3Profile',
         key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-        nonDynamicName: 'LSP3Profile',
+        dynamicName: 'LSP3Profile',
         value: {
           verification: {
             method: 'keccak256(utf8)',
@@ -301,7 +301,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         name: 'LSP1UniversalReceiverDelegate',
         key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
         value: '0x36e4Eb6Ee168EF54B1E8e850ACBE51045214B313',
-        nonDynamicName: 'LSP1UniversalReceiverDelegate',
+        dynamicName: 'LSP1UniversalReceiverDelegate',
       },
     ];
 
@@ -365,7 +365,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           name: 'LSP1UniversalReceiverDelegate',
           key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
           value: '0x36e4Eb6Ee168EF54B1E8e850ACBE51045214B313',
-          nonDynamicName: 'LSP1UniversalReceiverDelegate',
+          dynamicName: 'LSP1UniversalReceiverDelegate',
         });
       });
     });
@@ -408,7 +408,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         assert.deepStrictEqual(data[0], {
           key: '0x4b80742de2bf82acb36300009139def55c73c12bcda9c44f12326686e3948634',
           name: 'AddressPermissions:Permissions:<address>',
-          nonDynamicName:
+          dynamicName:
             'AddressPermissions:Permissions:0x9139def55c73c12bcda9c44f12326686e3948634',
           value:
             '0x0000000000000000000000000000000000000000000000000000000000000002',
@@ -454,7 +454,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         assert.deepStrictEqual(data[0], {
           key: '0x6de85eaf5d982b4e5da000009139def55c73c12bcda9c44f12326686e3948634',
           name: 'LSP4CreatorsMap:<address>',
-          nonDynamicName:
+          dynamicName:
             'LSP4CreatorsMap:0x9139def55c73c12bcda9c44f12326686e3948634',
           value: ['0x24871b3d', 0],
         });
@@ -483,7 +483,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         {
           name: 'LSP3Profile',
           key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
-          nonDynamicName: 'LSP3Profile',
+          dynamicName: 'LSP3Profile',
           value: {
             verification: {
               method: 'keccak256(utf8)',
@@ -496,7 +496,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           name: 'LSP1UniversalReceiverDelegate',
           key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
           value: '0x36e4Eb6Ee168EF54B1E8e850ACBE51045214B313',
-          nonDynamicName: 'LSP1UniversalReceiverDelegate',
+          dynamicName: 'LSP1UniversalReceiverDelegate',
         },
       ];
 
@@ -545,7 +545,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         name: 'LSP3Profile',
         key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
         value: null,
-        nonDynamicName: 'LSP3Profile',
+        dynamicName: 'LSP3Profile',
       });
     });
 
@@ -560,7 +560,7 @@ describe('Running @erc725/erc725.js tests...', () => {
                 '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000035697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a62640000000000000000000000',
             },
             {
-              key: '0x74ac2555c10b9349e78f0000b74a88c43bcf691bd7a851f6603cb1868f6fc147', // LSP12IssuedAssetsMap:0x0cb74a88C43BCf691bd7A851f6603cb1868f6fc147
+              key: '0x74ac2555c10b9349e78f0000b74a88c43bcf691bd7a851f6603cb1868f6fc147', // LSP12IssuedAssetsMap:0xb74a88C43BCf691bd7A851f6603cb1868f6fc147
               value:
                 '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000141098603b193d276f5fa176cc02007b609f9dae6b000000000000000000000000',
             },
@@ -613,20 +613,20 @@ describe('Running @erc725/erc725.js tests...', () => {
         {
           key: '0x48643a15ac5407a175674ab0f8c92df5ae90694dac72ebf0a058fb2599e3b06a',
           name: 'MyURL',
-          nonDynamicName: 'MyURL',
+          dynamicName: 'MyURL',
           value: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
         },
         {
           key: '0x74ac2555c10b9349e78f0000b74a88c43bcf691bd7a851f6603cb1868f6fc147',
           name: 'LSP12IssuedAssetsMap:<address>',
-          nonDynamicName:
+          dynamicName:
             'LSP12IssuedAssetsMap:0xb74a88C43BCf691bd7A851f6603cb1868f6fc147',
           value: '0x1098603B193d276f5fA176CC02007B609F9DAE6b',
         },
         {
           key: '0xeafec4d89fa9619884b600005ef83ad9559033e6e941db7d7c495acdce616347',
           name: 'SupportedStandards:LSP3Profile',
-          nonDynamicName: 'SupportedStandards:LSP3Profile',
+          dynamicName: 'SupportedStandards:LSP3Profile',
           value: '0x5ef83ad9',
         },
       ]);
@@ -722,7 +722,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           key: testJSONURLSchema.key,
           name: testJSONURLSchema.name,
           value: JSON.parse(jsonString),
-          nonDynamicName: testJSONURLSchema.name,
+          dynamicName: testJSONURLSchema.name,
         });
       });
 
@@ -763,7 +763,7 @@ describe('Running @erc725/erc725.js tests...', () => {
 
           assert.deepStrictEqual(result, {
             name: 'JSONForAddress:<address>',
-            nonDynamicName:
+            dynamicName:
               'JSONForAddress:0xcafecafecafecafecafecafecafecafecafecafe',
             key: '0x84b02f6e50a0a0819a4f0000cafecafecafecafecafecafecafecafecafecafe',
             value: JSON.parse(jsonString),
@@ -847,7 +847,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           name: schemaElement.name,
           key: schemaElement.key,
           value: schemaElement.expectedResult,
-          nonDynamicName: schemaElement.nonDynamicName,
+          dynamicName: schemaElement.dynamicName,
         });
       });
 
@@ -869,7 +869,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           name: schemaElement.name,
           key: schemaElement.key,
           value: schemaElement.expectedResult,
-          nonDynamicName: schemaElement.nonDynamicName,
+          dynamicName: schemaElement.dynamicName,
         });
       });
     });

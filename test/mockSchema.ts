@@ -16,7 +16,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 1
   {
     name: 'SupportedStandards:LSP3Profile',
-    nonDynamicName: 'SupportedStandards:LSP3Profile',
+    dynamicName: 'SupportedStandards:LSP3Profile',
     key: '0xeafec4d89fa9619884b600005ef83ad9559033e6e941db7d7c495acdce616347',
     keyType: 'Mapping',
     valueContent: '0x5ef83ad9',
@@ -31,7 +31,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 2
   {
     name: 'TestJSONURL',
-    nonDynamicName: 'TestJSONURL',
+    dynamicName: 'TestJSONURL',
     key: '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
     keyType: 'Singleton',
     valueContent: 'JSONURL',
@@ -58,7 +58,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 3
   {
     name: 'TestAssetURL',
-    nonDynamicName: 'TestAssetURL',
+    dynamicName: 'TestAssetURL',
     key: '0xf18290c9b373d751e12c5ec807278267a807c35c3806255168bc48a85757ceee',
     keyType: 'Singleton',
     valueContent: 'AssetURL',
@@ -85,7 +85,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 4
   {
     name: 'TestKeccak256',
-    nonDynamicName: 'TestKeccak256',
+    dynamicName: 'TestKeccak256',
     key: '0xd6c7198ea09a1d3357688e1dbdf0e07f6cfaf94359e0a4fc11e4f5f1d59d54f4',
     keyType: 'Singleton',
     valueContent: 'Keccak256',
@@ -107,7 +107,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 5
   {
     name: 'TestAddress',
-    nonDynamicName: 'TestAddress',
+    dynamicName: 'TestAddress',
     key: '0x7bf6ecfbf659a88c662d7f099c14e468610f786f6e29f0d346e44f772ef0d187',
     keyType: 'Singleton',
     valueContent: 'Address',
@@ -127,7 +127,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 6
   {
     name: 'TestMarkdown',
-    nonDynamicName: 'TestMarkdown',
+    dynamicName: 'TestMarkdown',
     key: '0x328f991bde3a9d8c548b7b2dbc303a362202dddbcd33219650d85bedcd75ac9b',
     keyType: 'Singleton',
     valueContent: 'Markdown',
@@ -149,7 +149,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 7
   {
     name: 'LSP3Name',
-    nonDynamicName: 'LSP3Name',
+    dynamicName: 'LSP3Name',
     key: '0xa5f15b1fa920bbdbc28f5d785e5224e3a66eb5f7d4092dc9ba82d5e5ae3abc87',
     keyType: 'Singleton',
     valueContent: 'String',
@@ -164,7 +164,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 8
   {
     name: 'LSP3Profile',
-    nonDynamicName: 'LSP3Profile',
+    dynamicName: 'LSP3Profile',
     key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
     keyType: 'Singleton',
     valueContent: 'URL',
@@ -186,7 +186,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 9
   {
     name: 'LSP12IssuedAssets[]',
-    nonDynamicName: 'LSP12IssuedAssets[]',
+    dynamicName: 'LSP12IssuedAssets[]',
     key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
     keyType: 'Array',
     valueContent: 'Address',
@@ -220,7 +220,7 @@ export const mockSchema: (ERC725JSONSchema & {
 
   {
     name: 'LSP3IssuedAssetsWithEmptyValue[]',
-    nonDynamicName: 'LSP3IssuedAssetsWithEmptyValue[]',
+    dynamicName: 'LSP3IssuedAssetsWithEmptyValue[]',
     key: '0xbcdf8aea8f803343f50b03205ac25188e17fc1f5e4e42245b0782f68786d9f92',
     keyType: 'Array',
     valueContent: 'Address',
@@ -250,7 +250,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // // Case 10
   {
     name: 'TestObjArray[]',
-    nonDynamicName: 'TestObjArray[]',
+    dynamicName: 'TestObjArray[]',
     key: '0x9985edaf12cbacf5ac7d6ed54f0445cc0ea56075aee9b9942e4ab3bf4239f950',
     keyType: 'Array',
     valueContent: 'JSONURL',
@@ -307,7 +307,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 11
   {
     name: 'TestStringValueType',
-    nonDynamicName: 'TestStringValueType',
+    dynamicName: 'TestStringValueType',
     key: '0xc0929170bbaeb216f869c80a5c937f7a1c887a5a92262dac50313aef131f0c03',
     keyType: 'Singleton',
     valueContent: 'String',
@@ -322,7 +322,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // // Case 12
   {
     name: 'TestUintValueType',
-    nonDynamicName: 'TestUintValueType',
+    dynamicName: 'TestUintValueType',
     key: '0x61529294800f5739edc21a6cf8ba1bad3fd3e11d03d2ab5219ce9c0131b93f93',
     keyType: 'Singleton',
     valueContent: 'Number',
@@ -343,7 +343,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 13
   {
     name: 'TestNumberWithBytesValueType',
-    nonDynamicName: 'TestNumberWithBytesValueType',
+    dynamicName: 'TestNumberWithBytesValueType',
     key: '0x64a44e72c25d95851b1d449428d8d27093b2ef3e0b36a2b3497ae17edf979e61',
     keyType: 'Singleton',
     valueContent: 'Number',
@@ -363,7 +363,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 14
   {
     name: 'TestStringWithBytesValueType',
-    nonDynamicName: 'TestStringWithBytesValueType',
+    dynamicName: 'TestStringWithBytesValueType',
     key: '0x3ef4d417afa66557c9e1463723b391a518eee0c61d29be4e10882999c7848041',
     keyType: 'Singleton',
     valueContent: 'String',
@@ -384,7 +384,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 15
   {
     name: 'TestStringValueTypeArray',
-    nonDynamicName: 'TestStringValueTypeArray',
+    dynamicName: 'TestStringValueTypeArray',
     key: '0xd7a8f1af4a0d9de8d17c177ff06f1689c0c3f1310edbbe53733da0b084ccff18',
     keyType: 'Singleton',
     valueContent: 'String',
@@ -413,7 +413,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 16
   {
     name: 'TestBytesValueTypeArray',
-    nonDynamicName: 'TestBytesValueTypeArray',
+    dynamicName: 'TestBytesValueTypeArray',
     key: '0xd6b3622ec62ae4459c0276bd5e2e26011201fada1cbc2b33283e9c20495c05fe',
     keyType: 'Singleton',
     valueContent: 'String',
@@ -442,7 +442,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 17
   {
     name: 'TestAddressValueTypeArray',
-    nonDynamicName: 'TestAddressValueTypeArray',
+    dynamicName: 'TestAddressValueTypeArray',
     key: '0xe45f3de809830d5ac3aeab862200fc670391fcb99018dcd2522fee7cf07f93ee',
     keyType: 'Singleton',
     valueContent: 'Address',
@@ -474,7 +474,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // // Case 18
   {
     name: 'TestUintValueTypeArray',
-    nonDynamicName: 'TestUintValueTypeArray',
+    dynamicName: 'TestUintValueTypeArray',
     key: '0xdaa41a5e1acc41087359e61588e80bf0b7f1d96063b98bdff73b4ce3a645b40b',
     keyType: 'Singleton',
     valueContent: 'Number',
@@ -497,7 +497,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 19
   {
     name: 'TestBytes32ValueTypeArray',
-    nonDynamicName: 'TestBytes32ValueTypeArray',
+    dynamicName: 'TestBytes32ValueTypeArray',
     key: '0x7e2458b2b22ff4357510c3491b7c041df2ee4f11ba4d6f4f4e34101fc2645a97',
     keyType: 'Singleton',
     valueContent: 'Keccak256',
@@ -529,7 +529,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // // Case 20
   {
     name: 'TestURLStringValueTypeArray',
-    nonDynamicName: 'TestURLStringValueTypeArray',
+    dynamicName: 'TestURLStringValueTypeArray',
     key: '0x1a9818703b62d00000bd3e8c7499296d42966619cd735a92eac7488de8881bb8',
     keyType: 'Singleton',
     valueContent: 'URL',
@@ -561,7 +561,7 @@ export const mockSchema: (ERC725JSONSchema & {
   // Case 21
   {
     name: 'TestHashKey',
-    nonDynamicName: 'TestHashKey',
+    dynamicName: 'TestHashKey',
     key: '0xed579debad05d91a79b46589987171dfce1c8ffa8b1d8c1ddc851cc104ea6029',
     keyType: 'Singleton',
     valueContent:
@@ -583,7 +583,7 @@ export const mockSchema: (ERC725JSONSchema & {
 
   {
     name: 'MyCoolAddress:<address>',
-    nonDynamicName: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
+    dynamicName: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
     key: '0x22496f48a493035f0ab40000cafecafecafecafecafecafecafecafecafecafe',
     dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
     keyType: 'Mapping',
@@ -597,7 +597,7 @@ export const mockSchema: (ERC725JSONSchema & {
   },
   {
     name: 'AddressPermissions:Permissions:<address>',
-    nonDynamicName:
+    dynamicName:
       'AddressPermissions:Permissions:0xcafecafecafecafecafecafecafecafecafecafe',
     key: '0x4b80742de2bf82acb3630000cafecafecafecafecafecafecafecafecafecafe',
     dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
@@ -612,7 +612,7 @@ export const mockSchema: (ERC725JSONSchema & {
   },
   {
     name: 'Hello:<address>',
-    nonDynamicName: 'Hello:0xcafecafecafecafecafecafecafecafecafecafe',
+    dynamicName: 'Hello:0xcafecafecafecafecafecafecafecafecafecafe',
     key: '0x06b3dfaec148fb1bb2b00000cafecafecafecafecafecafecafecafecafecafe', // encoded for cafecafe... address - parameters are bellow
     dynamicKeyParts: ['0xcafecafecafecafecafecafecafecafecafecafe'],
     keyType: 'Singleton',
@@ -637,7 +637,7 @@ export const mockSchema: (ERC725JSONSchema & {
   },
   {
     name: 'TestStringWithBytes4ValueContent',
-    nonDynamicName: 'TestStringWithBytes4ValueContent',
+    dynamicName: 'TestStringWithBytes4ValueContent',
     key: '0xb61b0a1d86687ef022781d2698d5e0221997458e3a720cded0b8f165a029d3c5',
     keyType: 'Singleton',
     valueContent: 'Bytes4',
@@ -650,7 +650,7 @@ export const mockSchema: (ERC725JSONSchema & {
   },
   {
     name: 'TestStringWithBytes32ValueType',
-    nonDynamicName: 'TestStringWithBytes32ValueType',
+    dynamicName: 'TestStringWithBytes32ValueType',
     key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',
     keyType: 'Singleton',
     valueContent: 'Bytes32',
@@ -670,7 +670,7 @@ export const mockSchema: (ERC725JSONSchema & {
   },
   {
     name: 'TestStringWithBytes4ValueType',
-    nonDynamicName: 'TestStringWithBytes4ValueType',
+    dynamicName: 'TestStringWithBytes4ValueType',
     key: '0x1b92e269c7ce7fc16e625562aa588403fe603edb4e2740b0558ed44faa3c1728',
     keyType: 'Singleton',
     valueContent: 'Bytes4',

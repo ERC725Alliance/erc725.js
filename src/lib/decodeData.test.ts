@@ -338,7 +338,7 @@ describe('decodeData', () => {
       schemas,
     );
 
-    expect(decodedData.map(({ nonDynamicName }) => nonDynamicName)).to.eql([
+    expect(decodedData.map(({ dynamicName }) => dynamicName)).to.eql([
       'MyKeyName2:0xaaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa:true',
       'MyDynamicKey2:0xcafecafecafecafecafecafecafecafecafecafe',
       'KeyTwo',

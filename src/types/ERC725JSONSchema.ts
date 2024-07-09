@@ -160,17 +160,11 @@ export function isValidValueType(
  */
 export interface ERC725JSONSchema {
   name: string; // Describes the name of the key, SHOULD be composed of the Standards name + sub type. e.g: LSP2Name
-  nonDynamicName?: string; // Describes the name of the key, SHOULD be composed of the Standards name + sub type. e.g: LSP2Name without dynamic part
   key: string; // The keccak256 hash of the name. This is the actual key that MUST be retrievable via ERC725Y.getData(bytes32 key)
   keyType: ERC725JSONSchemaKeyType | string; // Types that determine how the values should be interpreted.
   valueContent: ERC725JSONSchemaValueContent | string; // string holds '0x1345ABCD...' If the value content are specific bytes, than the returned value is expected to equal those bytes.
   valueType: ERC725JSONSchemaValueType | string; // The type of the value. This is used to determine how the value should be encoded / decode (`string` for tuples and CompactBytesArray).
-  dynamicKeyParts?: DynamicKeyParts;
-}
 
-// The dynamic part placeholder in the `name` of ERC725JSONSchema is preserved to allow re-encoding after the schema
-// of a hex data key got retrieved via `getSchema(...)`.
-export interface DynamicNameSchema extends ERC725JSONSchema {
-  dynamicName: string; // Describes the name of the key where the dynamic part (<address>, <bytes32) is replaced by the actual mapped value.
-  dynamicKeyPart: string;
+  dynamicName?: string; // Describes the name of the key where the dynamic part (<address>, <bytes32) is replaced by the actual mapped value.
+  dynamicKeyParts?: DynamicKeyParts;
 }

@@ -68,7 +68,7 @@ describe('getSchemaElement', () => {
         ['0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac'],
       ),
       {
-        nonDynamicName:
+        dynamicName:
           'LSP12IssuedAssetsMap:0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
         name: 'LSP12IssuedAssetsMap:<address>',
         key: '0x74ac2555c10b9349e78f00002ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',

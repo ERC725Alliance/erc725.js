@@ -111,7 +111,7 @@ export function generateAllResults(schemas) {
         name: schema.name,
         key: schema.key,
         value: schema.expectedResult,
-        nonDynamicName: schema.nonDynamicName,
+        dynamicName: schema.dynamicName,
       };
     });
 }
