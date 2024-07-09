@@ -19,17 +19,8 @@
  * @date 2020
  */
 
-import {
-  checkAddressChecksum,
-  hexToBytes,
-  isAddress,
-  isHexStrict,
-  leftPad,
-  numberToHex,
-  padLeft,
-  stripHexPrefix,
-} from 'web3-utils';
-
+import { hexToBytes, leftPad, numberToHex, padLeft } from 'web3-utils';
+import { isAddress, isHexStrict } from 'web3-validator';
 import {
   URLDataToEncode,
   EncodeDataReturn,
@@ -62,6 +53,8 @@ import { getSchemaElement } from './getSchemaElement';
 import { EncodeDataInput } from '../types/decodeData';
 import { GetDataDynamicKey } from '../types/GetData';
 import { isValidTuple } from './decodeData';
+import { stripHexPrefix } from 'web3-eth-accounts';
+import { checkAddressCheckSum } from 'web3-validator';
 
 /**
  *
@@ -177,7 +170,7 @@ export function guessKeyTypeFromKeyName(
   // This function could not work with subsequents keys of an Array
   // It will always assume the given key, if array, is the initial array key.
 
-  const splittedKeyName = keyName.split(':');
+  const splittedKeyName = keyName.replace(/[^:]</g, ':').split(':');
 
   if (splittedKeyName.length === 3) {
     return 'MappingWithGrouping';
@@ -421,17 +414,13 @@ export function decodeKeyValue(
   const valueTypeIsBytesNonArray =
     valueType.slice(0, 5) === 'bytes' && valueType.slice(-2) !== '[]';
 
-  if (
-    !valueTypeIsBytesNonArray &&
-    valueType !== 'string' &&
-    !isAddress(value) // checks for addresses, since technically an address is bytes?
-  ) {
+  if (!valueTypeIsBytesNonArray && valueType !== 'string') {
     // eslint-disable-next-line no-param-reassign
     value = decodeValueType(valueType, value);
   }
 
   // As per exception above, if address and sameEncoding, then the address still needs to be handled
-  if (sameEncoding && isAddress(value) && !checkAddressChecksum(value)) {
+  if (sameEncoding && isAddress(value) && !checkAddressCheckSum(value)) {
     sameEncoding = !sameEncoding;
   }
 
@@ -559,6 +548,7 @@ export function hashData(
 export function isDataAuthentic(
   data: string | Uint8Array,
   options: Verification,
+  capture?: string[],
 ): boolean {
   if (!options || !options.method) {
     return true;
@@ -566,9 +556,13 @@ export function isDataAuthentic(
 
   const dataHash = hashData(data, options.method);
   if (dataHash !== options.data) {
-    console.error(
-      `Hash mismatch, returned JSON hash ("${dataHash}") is different from expected hash: "${options.method}"`,
-    );
+    if (capture) {
+      capture.push(dataHash);
+    } else {
+      console.error(
+        `Hash mismatch, calculated hash ("${dataHash}") is different from expected hash "${options.data}"`,
+      );
+    }
     return false;
   }
 

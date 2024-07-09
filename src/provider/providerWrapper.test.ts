@@ -53,6 +53,7 @@ describe('ProviderWrapper', () => {
       try {
         await ethSource.getOwner(erc725AccountAddress);
       } catch (error: any) {
+        // console.log(error);
         assert.deepStrictEqual(error.message, 'some error');
       }
     });

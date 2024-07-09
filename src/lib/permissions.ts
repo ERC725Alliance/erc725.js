@@ -1,6 +1,7 @@
-import { hexToNumber, isHexStrict, leftPad, numberToHex } from 'web3-utils';
+import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
 import { LSP6_DEFAULT_PERMISSIONS } from '../constants/constants';
 import { Permissions } from '../types/Method';
+import { isHexStrict } from 'web3-validator';
 
 export function encodePermissions(permissions: Permissions): string {
   let basePermissions = BigInt(0);
@@ -14,9 +15,7 @@ export function encodePermissions(permissions: Permissions): string {
   // Do not use an for of loop here to not require the regenerator runtime
   for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i];
-    const permissionValue = BigInt(
-      hexToNumber(LSP6_DEFAULT_PERMISSIONS[key], true),
-    );
+    const permissionValue = BigInt(hexToNumber(LSP6_DEFAULT_PERMISSIONS[key]));
     if (key in permissions) {
       if (permissions[key]) {
         basePermissions |= permissionValue;
@@ -59,7 +58,7 @@ export function decodePermissions(permissionHex: string) {
   };
 
   const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);
-  const passedPermissionDecimal = BigInt(hexToNumber(permissionHex, true));
+  const passedPermissionDecimal = BigInt(hexToNumber(permissionHex));
 
   // Do not use an for of loop here to not require the regenerator runtime
   // Deal with ALL_PERMISSIONS the same way. So as long as all the bits in ALL_PERMISSIONS
@@ -69,7 +68,7 @@ export function decodePermissions(permissionHex: string) {
   for (let i = 0; i < permissionsToTest.length; i += 1) {
     const testPermission = permissionsToTest[i];
     const decimalTestPermission = BigInt(
-      hexToNumber(LSP6_DEFAULT_PERMISSIONS[testPermission], true),
+      hexToNumber(LSP6_DEFAULT_PERMISSIONS[testPermission]),
     );
     const isPermissionIncluded =
       (passedPermissionDecimal & decimalTestPermission) ===

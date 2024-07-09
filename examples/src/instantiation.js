@@ -2,11 +2,11 @@ import Web3 from 'web3';
 import { ERC725 } from '@erc725/erc725.js';
 
 // this is needed because node does not support `fetch` out of the box
-// isomorphic-fetch is not needed in a browser environment
-import 'isomorphic-fetch';
+// cross-fetch is not needed in a browser environment
+import 'cross-fetch';
 
 const RPC_ENDPOINT = 'https://rpc.testnet.lukso.network';
-const IPFS_GATEWAY = 'https://2eff.lukso.dev/ipfs/';
+const IPFS_GATEWAY = 'https://api.universalprofile.cloud/ipfs/';
 
 export function getInstance() {
   const schema = [

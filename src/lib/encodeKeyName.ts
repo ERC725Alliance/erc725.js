@@ -17,14 +17,8 @@
  * @date 2022
  */
 
-import {
-  isAddress,
-  isHex,
-  keccak256,
-  leftPad,
-  numberToHex,
-  padLeft,
-} from 'web3-utils';
+import { isAddress, isHex } from 'web3-validator';
+import { keccak256, leftPad, numberToHex, padLeft, padRight } from 'web3-utils';
 
 import { encodeArrayKey, guessKeyTypeFromKeyName } from './utils';
 import { DynamicKeyParts } from '../types/dynamicKeys';
@@ -44,11 +38,12 @@ export const dynamicTypesRegex = /<(uint|int|bytes)(\d+)>/;
  */
 export const encodeDynamicKeyPart = (
   type: string,
-  value: string,
+  value_: string,
   bytes: number,
 ) => {
   let baseType = '';
   let size = 0;
+  let value = value_;
 
   if (dynamicTypes.includes(type)) {
     baseType = type.slice(1, -1);
@@ -73,23 +68,24 @@ export const encodeDynamicKeyPart = (
           `Wrong value: ${value} for dynamic key with type: <bool>. Expected "true" or "false".`,
         );
       }
-      return leftPad(+(value === 'true'), bytes * 2).slice(2);
+      return leftPad(
+        // In theory passing in 0x1 should also work
+        value === 'true' || Number(value) === 1 ? 1 : 0,
+        bytes * 2,
+      ).slice(2);
     }
     case 'address': {
+      if (!value.startsWith('0x')) {
+        value = `0x${value}`;
+      }
       if (!isAddress(value)) {
         throw new Error(
           `Wrong value: ${value} for dynamic key with type: <address>. Value is not an address.`,
         );
       }
-
-      if (bytes > 20) {
-        return leftPad(value.replace('0x', ''), bytes * 2).toLowerCase();
-      }
-
-      return value
-        .replace('0x', '')
-        .slice(0, bytes * 2)
-        .toLowerCase();
+      return padLeft(value.slice(0, 2 + bytes * 2), bytes * 2)
+        .slice(2)
+        .toLowerCase(); // keys should not contain upper case chars (i.e. original checksummed stuff)
     }
     case 'uint': {
       if (size > 256 || size % 8 !== 0) {
@@ -101,35 +97,35 @@ export const encodeDynamicKeyPart = (
       // NOTE: we could verify if the number given is not too big for the given size.
       // e.g.: uint8 max value is 255, uint16 is 65535...
 
-      const hexNumber = numberToHex(value).slice(2);
-      if (hexNumber.length <= bytes * 2) {
-        return padLeft(hexNumber, bytes * 2);
+      let hex = numberToHex(value).slice(2);
+      if (hex.length > size / 4) {
+        throw new Error(`Value: ${value} is too big for uint${size}.`);
       }
-
-      return hexNumber.slice(-bytes * 2);
+      if (hex.length > bytes * 2) {
+        hex = `0x${hex.slice(-bytes * 2)}`;
+      } else {
+        hex = `0x${hex}`;
+      }
+      return padLeft(hex, bytes * 2).slice(2);
     }
     case 'int':
       // TODO:
       throw new Error('The encoding of <intM> has not been implemented yet.');
     case 'bytes': {
-      const valueWithoutPrefix = value.replace('0x', '');
-      if (valueWithoutPrefix.length !== size * 2) {
+      if (!value.startsWith('0x')) {
+        value = `0x${value}`;
+      }
+      if (!isHex(value)) {
         throw new Error(
-          `Wrong value: ${value} for dynamic key with type: ${type}. Value is not ${size} bytes long.`,
+          `Wrong value: ${value} for dynamic key with type: $type. Value is not in hex.`,
         );
       }
-
-      if (!isHex(valueWithoutPrefix)) {
+      if (value.length > 2 + size * 2) {
         throw new Error(
-          `Wrong value: ${value} for dynamic key with type: ${type}. Value is not in hex.`,
+          `Wrong value: ${value} for dynamic key with type: $type. Value is too big.`,
         );
       }
-
-      if (valueWithoutPrefix.length > bytes * 2) {
-        return valueWithoutPrefix.slice(0, bytes * 2); // right cut
-      }
-
-      return leftPad(valueWithoutPrefix, bytes * 2).toLowerCase();
+      return padRight(value.slice(0, 2 + bytes * 2), bytes * 2).slice(2);
     }
     default:
       throw new Error(`Dynamic key: ${type} is not supported`);
@@ -138,6 +134,9 @@ export const encodeDynamicKeyPart = (
 
 // This function does not support multi dynamic types such as MyName:<string|address>
 export function isDynamicKeyName(name: string) {
+  if (name.startsWith('0x') && name.includes('<')) {
+    return true;
+  }
   const keyNameParts = name.split(':');
 
   for (let i = 0; i < keyNameParts.length; i++) {
@@ -211,14 +210,18 @@ const encodeDynamicMappingWithGrouping = (
   const firstPart = keccak256(keyNameSplit[0]).slice(0, 14);
 
   let secondPart = '';
-  if (isDynamicKeyName(keyNameSplit[1])) {
+  if (keyNameSplit[1].startsWith('0x')) {
+    secondPart = padRight(keyNameSplit[1].slice(0, 2 + 4 * 2), 4 * 2).slice(2);
+  } else if (isDynamicKeyName(keyNameSplit[1])) {
     secondPart = encodeDynamicKeyPart(keyNameSplit[1], dynamicKeyParts[0], 4);
   } else {
     secondPart = keccak256(keyNameSplit[1]).slice(2, 2 + 4 * 2);
   }
 
   let lastPart = '';
-  if (isDynamicKeyName(keyNameSplit[2])) {
+  if (keyNameSplit[2].startsWith('0x')) {
+    lastPart = padRight(keyNameSplit[2].slice(0, 2 + 20 * 2), 20 * 2).slice(2);
+  } else if (isDynamicKeyName(keyNameSplit[2])) {
     lastPart = encodeDynamicKeyPart(
       keyNameSplit[2],
       dynamicKeyParts[dynamicKeyParts.length - 1],
@@ -347,7 +350,7 @@ export const generateDynamicKeyName = (
 
       dynamicKeyPartsIndex += 1;
 
-      return dynamicKeyPart.replace('0x', '');
+      return dynamicKeyPart;
     })
     .join(':');
 };
