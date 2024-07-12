@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.27.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.27.0...v0.27.1) (2024-07-12)
+
+
+### Bug Fixes
+
+* Normalize tests and add name as a constant in the schema. Add nonDynamicName to capture resolved schema names. ([95dabb2](https://github.com/ERC725Alliance/erc725.js/commit/95dabb22c3958b94014eed2b460a5e2dcce4684d))
+* Repair and use dynamicName and dynamicKeyParts. ([2874516](https://github.com/ERC725Alliance/erc725.js/commit/2874516343fee7259367f84f19f071081be5f61f))
+* Repair limitation ([b0ffa5b](https://github.com/ERC725Alliance/erc725.js/commit/b0ffa5b1051015268c552b53b4334e0795295e1d))
+* Repair tests and 0x prefix for dynamic fields in some places. ([cef4e15](https://github.com/ERC725Alliance/erc725.js/commit/cef4e15587cb9dbc993606098851698fc77cd6b8))
+* Some cleanup, remove global-agent, some new minor upgrades ([239c98c](https://github.com/ERC725Alliance/erc725.js/commit/239c98c35233ad1188b74e971d9b5f993273b092))
+
 ## [0.27.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.26.0...v0.27.0) (2024-05-29)
 
 
