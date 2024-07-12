@@ -3,7 +3,7 @@ sidebar_position: 1
 title: 'Methods'
 ---
 
-import CodeSandbox from "../../../src/components/CodeSandbox";
+import CodeSandbox from "@site/src/components/CodeSandbox";
 
 <CodeSandbox />
 
