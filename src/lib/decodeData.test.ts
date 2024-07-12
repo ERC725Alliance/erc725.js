@@ -63,6 +63,13 @@ describe('decodeData', () => {
       valueType: 'bytes',
       valueContent: 'VerifiableURI',
     },
+    {
+      name: 'LSP4CreatorsMap:<address>',
+      key: '0x6de85eaf5d982b4e5da00000<address>',
+      keyType: 'Mapping',
+      valueType: '(bytes4,uint128)',
+      valueContent: '(Bytes4,Number)',
+    },
   ];
 
   it('decodes each key', () => {
@@ -331,9 +338,9 @@ describe('decodeData', () => {
       schemas,
     );
 
-    expect(decodedData.map(({ name }) => name)).to.eql([
-      'MyKeyName2:aaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa:true',
-      'MyDynamicKey2:cafecafecafecafecafecafecafecafecafecafe',
+    expect(decodedData.map(({ dynamicName }) => dynamicName)).to.eql([
+      'MyKeyName2:0xaaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa:true',
+      'MyDynamicKey2:0xcafecafecafecafecafecafecafecafecafecafe',
       'KeyTwo',
     ]);
   });

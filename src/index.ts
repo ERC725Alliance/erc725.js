@@ -21,7 +21,6 @@
  * @date 2020
  */
 
-import { isAddress } from 'web3-utils';
 import HttpProvider from 'web3-providers-http';
 
 import { ProviderWrapper } from './provider/providerWrapper';
@@ -49,22 +48,21 @@ import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 import { ERC725Config, ERC725Options } from './types/Config';
 import { Permissions } from './types/Method';
 import {
-  DynamicNameSchema,
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
 } from './types/ERC725JSONSchema';
-import {
+import type {
   DecodeDataInput,
   DecodeDataOutput,
   EncodeDataInput,
   FetchDataOutput,
 } from './types/decodeData';
-import { GetDataDynamicKey, GetDataInput } from './types/GetData';
+import type { GetDataDynamicKey, GetDataInput } from './types/GetData';
 import { decodeData } from './lib/decodeData';
 import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
-import { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
+import type { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
 import { getData } from './lib/getData';
 import {
   encodeDataSourceWithHash,
@@ -84,8 +82,9 @@ import {
 } from './lib/permissions';
 import { AssetURLEncode } from './types/encodeData';
 import { URLDataToEncode, URLDataWithHash, Verification } from './types';
+import { isAddress } from 'web3-validator';
 
-export {
+export type {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueContent,
@@ -198,7 +197,7 @@ export class ERC725 {
     }
 
     const defaultConfig = {
-      ipfsGateway: 'https://cloudflare-ipfs.com/ipfs/',
+      ipfsGateway: 'https://api.universalprofile.cloud/ipfs/',
       gas: DEFAULT_GAS_VALUE,
     };
 
@@ -209,7 +208,7 @@ export class ERC725 {
         ),
       ),
       address,
-      provider: ERC725.initializeProvider(
+      provider: initializeProvider(
         provider,
         config?.gas ? config?.gas : defaultConfig.gas,
       ),
@@ -263,7 +262,7 @@ export class ERC725 {
     });
   }
 
-  private static initializeProvider(providerOrRpcUrl, gasInfo) {
+  protected static initializeProvider(providerOrRpcUrl, gasInfo) {
     return initializeProvider(providerOrRpcUrl, gasInfo);
   }
 
@@ -381,19 +380,15 @@ export class ERC725 {
   getSchema(
     keyOrKeys: string[],
     providedSchemas?: ERC725JSONSchema[],
-  ): Record<string, ERC725JSONSchema | DynamicNameSchema | null>;
+  ): Record<string, ERC725JSONSchema | null>;
   getSchema(
     keyOrKeys: string,
     providedSchemas?: ERC725JSONSchema[],
-  ): ERC725JSONSchema | DynamicNameSchema | null;
+  ): ERC725JSONSchema | null;
   getSchema(
     keyOrKeys: string | string[],
     providedSchemas?: ERC725JSONSchema[],
-  ):
-    | ERC725JSONSchema
-    | DynamicNameSchema
-    | null
-    | Record<string, ERC725JSONSchema | DynamicNameSchema | null> {
+  ): ERC725JSONSchema | null | Record<string, ERC725JSONSchema | null> {
     return getSchema(
       keyOrKeys,
       this.options.schemas.concat(providedSchemas || []),

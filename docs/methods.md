@@ -3,6 +3,10 @@ sidebar_position: 1
 title: 'Methods'
 ---
 
+import CodeSandbox from "../../../src/components/CodeSandbox";
+
+<CodeSandbox />
+
 ## Encoding
 
 ### encodeData
@@ -93,6 +97,40 @@ After the `data` is encoded, the object is ready to be stored in smart contracts
 #### Examples
 
 <details>
+  <summary>**Encode** a <code>Singleton</code> data key</summary>
+
+```javascript title="encode a Singleton data key of valueContent Address"
+import ERC725 from '@erc725/erc725.js';
+
+const schemas = [
+  {
+    name: 'LSP1UniversalReceiverDelegate',
+    key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
+    keyType: 'Singleton',
+    valueType: 'address',
+    valueContent: 'Address',
+  },
+];
+
+const myErc725 = new ERC725(schemas);
+
+myErc725.encodeData([
+  {
+    keyName: 'LSP1UniversalReceiverDelegate',
+    value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
+  },
+]);
+/**
+{
+  keys: ['0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47'],
+  values: ['0x1183790f29be3cdfd0a102862fea1a4a30b3adab'],
+}
+*/
+```
+
+</details>
+
+<details>
     <summary>Encode a <code>VerifiableURI</code> with JSON and uploaded URL</summary>
 
 ```javascript title="Encode a VerifiableURI with JSON and uploaded URL"
@@ -162,39 +200,10 @@ myErc725.encodeData([
 */
 ```
 
-```javascript title="encode a Singleton data key of valueContent Address"
-import ERC725 from '@erc725/erc725.js';
-
-const schemas = [
-  {
-    name: 'LSP1UniversalReceiverDelegate',
-    key: '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
-    keyType: 'Singleton',
-    valueType: 'address',
-    valueContent: 'Address',
-  },
-];
-
-const myErc725 = new ERC725(schemas);
-
-myErc725.encodeData([
-  {
-    keyName: 'LSP1UniversalReceiverDelegate',
-    value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
-  },
-]);
-/**
-{
-  keys: ['0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47'],
-  values: ['0x1183790f29be3cdfd0a102862fea1a4a30b3adab'],
-}
-*/
-```
-
 </details>
 
 <details>
-    <summary>Encode a <code>VerifiableURI</code> with hash function, hash and uploaded URL</summary>
+    <summary>**Encode** a <code>VerifiableURI</code> with hash function, hash and uploaded URL</summary>
 
 ```javascript title="Encode a VerifiableURI with hash function, hash and uploaded URL"
 import ERC725 from '@erc725/erc725.js';
@@ -452,6 +461,46 @@ myErc725.encodeData(
     '0x00000000000000000000000000000017', // LSP12IssuedAssets[].length = 23
     '0x983abc616f2442bab7a917e6bb8660df8b01f3bf', // LSP12IssuedAssets[21] -> Address stored at index 21
     '0x56ecbc104136d00eb37aa0dce60e075f10292d81', // LSP12IssuedAssets[22] -> Address stored at index 22
+  ],
+}
+*/
+```
+
+</details>
+
+<details>
+    <summary>Encode a tuple for <code>valueType</code> / <code>valueContent</code></summary>
+
+```javascript title="Encode a tuple for valueType / valueContent"
+import ERC725 from '@erc725/erc725.js';
+
+const schemas = [
+  {
+    name: 'LSP4CreatorsMap:<address>',
+    key: '0x6de85eaf5d982b4e5da00000<address>',
+    keyType: 'Mapping',
+    valueType: '(bytes4,uint128)',
+    valueContent: '(Bytes4,Number)',
+  },
+];
+
+ERC725.encodeData(
+  [
+    {
+      keyName: 'LSP4CreatorsMap:<address>',
+      dynamicKeyParts: "0xcafecafecafecafecafecafecafecafecafecafe"
+      value: ['0x24871b3d', '11'],
+    },
+  ],
+  schemas,
+);
+/**
+{
+  keys: [
+    '0xdf30dba06db6a30e65354d9a64c609861f089545ca58c6b4dbe31a5f338cb0e3', // -> data key for `LSP4CreatorsMap:0xcafecafecafecafecafecafecafecafecafecafe`
+  ],
+  values: [
+    '0x24871b3d0000000000000000000000000000000b', // (bytes4,uint128)
   ],
 }
 */
@@ -883,6 +932,38 @@ myErc725.decodeData(
 ```
 
 ---
+
+#### Tuple Example
+
+```javascript title="Decode a key with tuple as valueType / valueContent"
+import ERC725 from '@erc725/erc725.js';
+
+const schemas = [
+  {
+    name: 'LSP4CreatorsMap:<address>',
+    key: '0x6de85eaf5d982b4e5da00000<address>',
+    keyType: 'Mapping',
+    valueType: '(bytes4,uint128)',
+    valueContent: '(Bytes4,Number)',
+  },
+];
+
+ERC725.decodeData(
+    {
+      keyName: 'LSP4CreatorsMap:<address>',
+      dynamicKeyParts: "0xcafecafecafecafecafecafecafecafecafecafe"
+      value: "0x24871b3d0000000000000000000000000000000b",
+    },
+  schemas,
+);
+/**
+{
+    key: '0x6de85eaf5d982b4e5da00000cafecafecafecafecafecafecafecafecafecafe',
+    name: 'LSP4CreatorsMap:cafecafecafecafecafecafecafecafecafecafe',
+    value: ['0x24871b3d', 11]
+}
+*/
+```
 
 ### decodeValueType
 

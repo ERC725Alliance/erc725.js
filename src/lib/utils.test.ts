@@ -16,12 +16,12 @@
 
 import { expect } from 'chai';
 import assert from 'assert';
+import { IPFS_GATEWAY } from '../../test/server';
 
 import { keccak256, utf8ToHex } from 'web3-utils';
 import {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
-  ERC725JSONSchemaValueType,
 } from '../types/ERC725JSONSchema';
 import { GetDataDynamicKey } from '../types/GetData';
 
@@ -226,12 +226,12 @@ describe('utils', () => {
     testCases.forEach((testCase) => {
       it(`encodes/decodes keyType Array / tuples (valueContent: ${testCase.schema.valueContent}, valueType: ${testCase.schema.valueType}`, () => {
         assert.deepStrictEqual(
-          encodeKey(testCase.schema as ERC725JSONSchema, testCase.decodedValue),
+          encodeKey(testCase.schema, testCase.decodedValue),
           testCase.encodedValue,
         );
 
         assert.deepStrictEqual(
-          decodeKey(testCase.schema as ERC725JSONSchema, testCase.encodedValue),
+          decodeKey(testCase.schema, testCase.encodedValue),
           testCase.decodedValue,
         );
       });
@@ -375,10 +375,10 @@ describe('utils', () => {
         encodedValue: '0x74657374',
       },
       {
-        valueContent: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
-        valueType: 'bytes',
+        valueContent: 'Address',
+        valueType: 'address',
         decodedValue: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
-        encodedValue: '0xc9aaae3201f40fd0ff04d9c885769d8256a456ab', // encoded hex is always lower case
+        encodedValue: '0xc9aaae3201f40fd0ff04d9c885769d8256a456ab',
       },
     ];
 
@@ -387,7 +387,7 @@ describe('utils', () => {
         assert.strictEqual(
           encodeKeyValue(
             testCase.valueContent,
-            testCase.valueType as ERC725JSONSchemaValueType,
+            testCase.valueType,
             testCase.decodedValue,
           ),
           testCase.encodedValue,
@@ -397,7 +397,7 @@ describe('utils', () => {
         assert.deepStrictEqual(
           decodeKeyValue(
             testCase.valueContent,
-            testCase.valueType as ERC725JSONSchemaValueType,
+            testCase.valueType,
             testCase.encodedValue,
           ),
           testCase.decodedValue,
@@ -929,7 +929,7 @@ describe('utils', () => {
       },
       {
         keyType: 'Mapping',
-        keyName: 'MyCoolAddress:0xcafecafecafecafecafecafecafecafecafecafe',
+        keyName: 'MyCoolAddress:cafecafecafecafecafecafecafecafecafecafe',
       },
       {
         keyType: 'Mapping',
@@ -943,7 +943,7 @@ describe('utils', () => {
       {
         keyType: 'MappingWithGrouping',
         keyName:
-          'AddressPermissions:Permissions:0xcafecafecafecafecafecafecafecafecafecafe',
+          'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
       },
     ];
 
@@ -958,29 +958,29 @@ describe('utils', () => {
   });
 
   describe('convertIPFSGatewayUrl', () => {
-    const expectedIPFSGateway = 'https://cloudflare-ipfs.com/ipfs/';
+    const expectedIPFSGateway = IPFS_GATEWAY;
 
     it('converts when missing /ipfs/', () => {
       assert.deepStrictEqual(
-        convertIPFSGatewayUrl('https://cloudflare-ipfs.com'),
+        convertIPFSGatewayUrl(IPFS_GATEWAY.slice(0, -5)),
         expectedIPFSGateway,
       );
     });
     it('converts when missing /', () => {
       assert.deepStrictEqual(
-        convertIPFSGatewayUrl('https://cloudflare-ipfs.com/ipfs'),
+        convertIPFSGatewayUrl(IPFS_GATEWAY.slice(0, -1)),
         expectedIPFSGateway,
       );
     });
     it('converts when missing ipfs/', () => {
       assert.deepStrictEqual(
-        convertIPFSGatewayUrl('https://cloudflare-ipfs.com/'),
+        convertIPFSGatewayUrl(IPFS_GATEWAY.slice(0, -5)),
         expectedIPFSGateway,
       );
     });
     it('does not convert when passed correctly', () => {
       assert.deepStrictEqual(
-        convertIPFSGatewayUrl('https://cloudflare-ipfs.com/ipfs/'),
+        convertIPFSGatewayUrl(IPFS_GATEWAY),
         expectedIPFSGateway,
       );
     });
@@ -1026,7 +1026,7 @@ describe('utils', () => {
 
       generatedSchemas.forEach((schema) => {
         expect(
-          isDynamicKeyName(schema.name),
+          isDynamicKeyName(schema.key),
           'generated schema key should not be dynamic',
         ).to.be.false;
       });
