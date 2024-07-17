@@ -134,6 +134,10 @@ const verifiableURI = encodeDataSourceWithHash(
 Try running the code snippets below within your browser using [StackBlitz](https://stackblitz.com/edit/erc725js-instantiation?devtoolsheight=66&file=index.js).
 :::
 
+The _erc725.js_ contains multiple functionalities such as reading and decoding data. A full list is available under the [**Methods**](./methods.md) page.
+
+For fetching data, it is possible to query one data key (as a `string` name) or multiple data keys at once by passing an array parameter, as shown below.
+
 ```js
 await erc725.getOwner();
 // > '0x28D25E70819140daF65b724158D00c373D1a18ee'
