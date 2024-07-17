@@ -198,28 +198,31 @@ describe('utils', () => {
           name: 'AddressPermissions:AllowedCalls:<address>',
           key: '0x4b80742de2bf393a64c70000<address>',
           keyType: 'MappingWithGrouping',
-          valueType: '(bytes4,address,bytes4)[CompactBytesArray]',
-          valueContent: '(Bytes4,Address,Bytes4)',
+          valueType: '(bytes4,address,bytes4,bytes4)[CompactBytesArray]',
+          valueContent: '(BitArray,Address,Bytes4,Bytes4)',
         },
         decodedValue: [
           [
-            '0xcafecafe',
-            '0xDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5',
-            '0xcafecafe',
+            '0x00000003', // CALL and TRANSFERVALUE
+            '0xCA41e4ea94c8fA99889c8EA2c8948768cBaf4bc0', // addresses are decoded as checksummed
+            '0x3e89ad98', // LSP0 interface ID
+            '0xffffffff', // any function
           ],
           [
-            '0xbeefbeef',
-            '0xFE31320faF8Da1492Eadf8Deb79bd264D7cF2141',
-            '0xbeefbeef',
+            '0x00000002', // CALL only
+            '0xF70Ce3b58f275A4c28d06C98615760dDe774DE57',
+            '0xffffffff', // any standard interface ID
+            '0x760d9bba', // function selector of `transfer(address,address,uint256,bool,bytes)`
           ],
           [
-            '0xf00df00d',
-            '0xc527702b14BF2f79F70B32e09F62B6A74cADFd80',
-            '0xf00df00d',
+            '0x00000001', // TRANSFERVALUE only
+            '0xd3236aa1B8A4dDe5eA375fd1F2Fb5c354e686c9f',
+            '0xffffffff', // any standard interface ID
+            '0xffffffff', // any function
           ],
         ],
         encodedValue:
-          '0x001ccafecafeDAFEA492D9c6733ae3d56b7Ed1ADB60692c98Bc5cafecafe001cbeefbeefFE31320faF8Da1492Eadf8Deb79bd264D7cF2141beefbeef001cf00df00dc527702b14BF2f79F70B32e09F62B6A74cADFd80f00df00d'.toLowerCase(),
+          '0x002000000003ca41e4ea94c8fa99889c8ea2c8948768cbaf4bc03e89ad98ffffffff002000000002f70ce3b58f275a4c28d06c98615760dde774de57ffffffff760d9bba002000000001d3236aa1b8a4dde5ea375fd1f2fb5c354e686c9fffffffffffffffff',
       },
     ];
 
