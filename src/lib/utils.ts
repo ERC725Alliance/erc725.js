@@ -550,7 +550,7 @@ export function isDataAuthentic(
   options: Verification,
   capture?: string[],
 ): boolean {
-  if (!options || !options.method) {
+  if (!options?.method || options?.method === '0x00000000') {
     return true;
   }
 
