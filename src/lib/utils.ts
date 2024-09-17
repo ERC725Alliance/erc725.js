@@ -613,7 +613,9 @@ export function patchIPFSUrlsIfApplicable(
   receivedData: URLDataWithHash,
   ipfsGateway: string,
 ): URLDataWithHash {
-  if (receivedData?.url?.indexOf('ipfs://') !== -1) {
+  // Only map URL if it's indeed an ipfs:// URL and ignore if it's a data:// URL with JSON
+  // possibly containing an IPFS URL inside of the JSON data.
+  if (receivedData?.url?.startsWith('ipfs://')) {
     return {
       ...receivedData,
       url: receivedData.url.replace('ipfs://', ipfsGateway),
