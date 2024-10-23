@@ -3,7 +3,7 @@ sidebar_position: 1
 title: 'Methods'
 ---
 
-import CodeSandbox from "../../../src/components/CodeSandbox";
+import CodeSandbox from "@site/src/components/CodeSandbox";
 
 <CodeSandbox />
 
@@ -508,6 +508,64 @@ ERC725.encodeData(
 
 </details>
 
+<details>
+  <summary>Encode a tuple of <code>CompactBytesArray</code></summary>
+
+```ts title="Encode a tuple of CompactBytesArray"
+import ERC725 from '@erc725/erc725.js';
+
+const schemas = [
+{
+          name: 'AddressPermissions:AllowedCalls:<address>',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,address,bytes4,bytes4)[CompactBytesArray]',
+          valueContent: '(BitArray,Address,Bytes4,Bytes4)',
+        }
+];
+
+ERC725.encodeData(
+  [
+    {
+      keyName: 'AddressPermissions:AllowedCalls:<address>',
+      dynamicKeyParts: "0xcafecafecafecafecafecafecafecafecafecafe"
+      value: [
+            '0x00000003', // CALL and TRANSFERVALUE
+            '0xCA41e4ea94c8fA99889c8EA2c8948768cBaf4bc0', // addresses are decoded as checksummed
+            '0x3e89ad98', // LSP0 interface ID
+            '0xffffffff', // any function
+          ],
+          [
+            '0x00000002', // CALL only
+            '0xF70Ce3b58f275A4c28d06C98615760dDe774DE57',
+            '0xffffffff', // any standard interface ID
+            '0x760d9bba', // function selector of `transfer(address,address,uint256,bool,bytes)`
+          ],
+          [
+            '0x00000001', // TRANSFERVALUE only
+            '0xd3236aa1B8A4dDe5eA375fd1F2Fb5c354e686c9f',
+            '0xffffffff', // any standard interface ID
+            '0xffffffff', // any function
+          ],
+    },
+  ],
+  schemas,
+);
+/**
+{
+  keys: [
+    '0x4b80742de2bf393a64c70000cafecafecafecafecafecafecafecafecafecafe', // -> data key for `AddressPermissions:AllowedCalls:0xcafecafecafecafecafecafecafecafecafecafe`
+  ],
+  values: [
+    '0x002000000003ca41e4ea94c8fa99889c8ea2c8948768cbaf4bc03e89ad98ffffffff002000000002f70ce3b58f275a4c28d06c98615760dde774de57ffffffff760d9bba002000000001d3236aa1b8a4dde5ea375fd1f2fb5c354e686c9fffffffffffffffff', // (bytes4,address,bytes4,bytes4)[CompactBytesArray]
+  ],
+}
+*/
+
+```
+
+</details>
+
 ---
 
 ### encodeKeyName
@@ -963,6 +1021,61 @@ ERC725.decodeData(
     value: ['0x24871b3d', 11]
 }
 */
+```
+
+#### Tuple of CompactBytesArray Example
+
+```ts title="Decode a tuple of CompactBytesArray"
+import ERC725 from '@erc725/erc725.js';
+
+const schemas = [
+ {
+    name: 'AddressPermissions:AllowedCalls:<address>',
+    key: '0x4b80742de2bf393a64c70000<address>',
+    keyType: 'MappingWithGrouping',
+    valueType: '(bytes4,address,bytes4,bytes4)[CompactBytesArray]',
+    valueContent: '(BitArray,Address,Bytes4,Bytes4)',
+  }
+];
+
+ERC725.decodeData(
+  [
+    {
+      keyName: 'AddressPermissions:AllowedCalls:<address>',
+      dynamicKeyParts: "0xcafecafecafecafecafecafecafecafecafecafe"
+      value: '0x002000000003ca41e4ea94c8fa99889c8ea2c8948768cbaf4bc03e89ad98ffffffff002000000002f70ce3b58f275a4c28d06c98615760dde774de57ffffffff760d9bba002000000001d3236aa1b8a4dde5ea375fd1f2fb5c354e686c9fffffffffffffffff'
+    },
+  ],
+  schemas,
+);
+
+/**
+{
+   key: '0x4b80742de2bf393a64c70000cafecafecafecafecafecafecafecafecafecafe',
+   name: 'AddressPermissions:AllowedCalls:cafecafecafecafecafecafecafecafecafecafe',
+   value: [
+     [
+       '0x00000003', // CALL and TRANSFERVALUE
+       '0xCA41e4ea94c8fA99889c8EA2c8948768cBaf4bc0', // addresses are decoded as checksummed
+       '0x3e89ad98', // LSP0 interface ID
+       '0xffffffff', // any function
+     ],
+     [
+       '0x00000002', // CALL only
+       '0xF70Ce3b58f275A4c28d06C98615760dDe774DE57',
+       '0xffffffff', // any standard interface ID
+       '0x760d9bba', // function selector of `transfer(address,address,uint256,bool,bytes)`
+     ],
+     [
+       '0x00000001', // TRANSFERVALUE only
+       '0xd3236aa1B8A4dDe5eA375fd1F2Fb5c354e686c9f',
+       '0xffffffff', // any standard interface ID
+       '0xffffffff', // any function
+     ]
+   ]
+}
+*/
+
 ```
 
 ### decodeValueType

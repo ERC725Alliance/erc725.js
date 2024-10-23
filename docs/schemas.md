@@ -4,13 +4,17 @@ sidebar_position: 2
 
 # Schemas
 
-The `@erc725/erc725.js` library contains a range of standard [LSP ERC725 JSON schemas](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md).
+:::info 📄 Schema Specification
 
-Schemas allow erc725.js to know how to decode and encode data written in an [ERC725Y](https://eips.ethereum.org/EIPS/eip-725) smart contract.
+For more details on schemas, see the [**official specification** of the LSP2 ERC725 JSON schemas](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md) standard specification
+
+:::
+
+The ⚒️ [erc725.js](https://npmjs.com/package/@erc725/erc725.js) library works with [ERC725Y JSON schemas](../../standards/generic-standards/lsp2-json-schema). These schemas are JSON structures that tell developers and programs how to decode and encode 🗂️ [ERC725Y data keys](../../standards/lsp-background/erc725#erc725y-generic-data-keyvalue-store) from any [ERC725Y](https://eips.ethereum.org/EIPS/eip-725) smart contract.. You need to load the required schemas of the data keys you want to fetch when initializing the `ERC725` class.
+
+The most common and standard schemas are [available](../../tools/erc725js/schemas.md) directly within the _erc725.js_ library. But you can also create and load your own ERC725Y JSON schemas if you want to use custom data keys.
 
 _A quick reference for keys used in schema definitions can be seen below_
-
-[Official Documentation](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md).
 
 - `name`: An arbitrary name
 - `key`: The sha3 hash of the name
