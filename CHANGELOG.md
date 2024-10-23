@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.27.2](https://github.com/ERC725Alliance/erc725.js/compare/v0.27.1...v0.27.2) (2024-10-23)
+
+
+### Bug Fixes
+
+* allow `number` in types for `dynamicKeyParts` ([225a0b4](https://github.com/ERC725Alliance/erc725.js/commit/225a0b47035d301098dc24d510d599216257593c))
+* Compile temporary patch ([f5402b8](https://github.com/ERC725Alliance/erc725.js/commit/f5402b854f0b23de2867a172f1e21e56bba44070))
+* Make explicitely sure that method === 0x0000000 is also ignored in isDataAuthentic ([a39b965](https://github.com/ERC725Alliance/erc725.js/commit/a39b965bea3bfb402cad0be7cdab2accc2ce521c))
+* Repair patchIPFSUtlsIfApplication to only replace if the URL starts with ipfs:// ([27da039](https://github.com/ERC725Alliance/erc725.js/commit/27da039ca7055875e7bea5b129987f1da5b90376))
+
 ## [0.27.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.27.0...v0.27.1) (2024-07-12)
 
 
