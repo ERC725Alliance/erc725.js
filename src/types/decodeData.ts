@@ -4,7 +4,7 @@ import { EncodeDataType, URLDataWithHash } from './encodeData/JSONURL';
 export interface DataInput {
   keyName: string; // can be the name or the hex/hash
   value;
-  dynamicKeyParts?: string | string[];
+  dynamicKeyParts?: string | string[] | number;
   totalArrayLength?: number;
   startingIndex?: number;
 }
