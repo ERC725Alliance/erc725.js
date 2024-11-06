@@ -515,13 +515,13 @@ ERC725.encodeData(
 import ERC725 from '@erc725/erc725.js';
 
 const schemas = [
-{
-          name: 'AddressPermissions:AllowedCalls:<address>',
-          key: '0x4b80742de2bf393a64c70000<address>',
-          keyType: 'MappingWithGrouping',
-          valueType: '(bytes4,address,bytes4,bytes4)[CompactBytesArray]',
-          valueContent: '(BitArray,Address,Bytes4,Bytes4)',
-        }
+  {
+    name: 'AddressPermissions:AllowedCalls:<address>',
+    key: '0x4b80742de2bf393a64c70000<address>',
+    keyType: 'MappingWithGrouping',
+    valueType: '(bytes4,address,bytes4,bytes4)[CompactBytesArray]',
+    valueContent: '(BitArray,Address,Bytes4,Bytes4)',
+  }
 ];
 
 ERC725.encodeData(
@@ -530,23 +530,25 @@ ERC725.encodeData(
       keyName: 'AddressPermissions:AllowedCalls:<address>',
       dynamicKeyParts: "0xcafecafecafecafecafecafecafecafecafecafe"
       value: [
-            '0x00000003', // CALL and TRANSFERVALUE
-            '0xCA41e4ea94c8fA99889c8EA2c8948768cBaf4bc0', // addresses are decoded as checksummed
-            '0x3e89ad98', // LSP0 interface ID
-            '0xffffffff', // any function
-          ],
-          [
-            '0x00000002', // CALL only
-            '0xF70Ce3b58f275A4c28d06C98615760dDe774DE57',
-            '0xffffffff', // any standard interface ID
-            '0x760d9bba', // function selector of `transfer(address,address,uint256,bool,bytes)`
-          ],
-          [
-            '0x00000001', // TRANSFERVALUE only
-            '0xd3236aa1B8A4dDe5eA375fd1F2Fb5c354e686c9f',
-            '0xffffffff', // any standard interface ID
-            '0xffffffff', // any function
-          ],
+        [
+          '0x00000003', // CALL and TRANSFERVALUE
+          '0xCA41e4ea94c8fA99889c8EA2c8948768cBaf4bc0', // addresses are decoded as checksummed
+          '0x3e89ad98', // LSP0 interface ID
+          '0xffffffff', // any function
+        ],
+        [
+          '0x00000002', // CALL only
+          '0xF70Ce3b58f275A4c28d06C98615760dDe774DE57',
+          '0xffffffff', // any standard interface ID
+          '0x760d9bba', // function selector of `transfer(address,address,uint256,bool,bytes)`
+        ],
+        [
+          '0x00000001', // TRANSFERVALUE only
+          '0xd3236aa1B8A4dDe5eA375fd1F2Fb5c354e686c9f',
+          '0xffffffff', // any standard interface ID
+          '0xffffffff', // any function
+        ],
+      ]
     },
   ],
   schemas,
@@ -1123,9 +1125,9 @@ myErc725.decodeValueType(
 // [ 10, 20, 30 ]
 
 myErc725.decodeValueType(
-  'uint256[CompactBytesArray]'',
-  '0x0020000000000000000000000000000000000000000000000000000000000000000500200000000000000000000000000000000000000000000000000000000000000008'
-)
+  'uint256[CompactBytesArray]',
+  '0x0020000000000000000000000000000000000000000000000000000000000000000500200000000000000000000000000000000000000000000000000000000000000008',
+);
 // [ 5, 8 ]
 ```
 
