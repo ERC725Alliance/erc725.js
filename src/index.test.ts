@@ -951,6 +951,41 @@ describe('Running @erc725/erc725.js tests...', () => {
         assert.equal(result.values[0], expectedEncodedValue);
       });
     });
+
+    describe('for CompactBytesArray of tuples `(...,...)[CompactBytesArray]`', () => {
+      it(`encodes/decodes: [ ["0x00000002", "0xcafecafecafecafecafecafecafecafecafecafe", "0x11223344", "0xbb11bb11"] ] as (bytes4,address,bytes4,bytes4)[CompactBytesArray]`, () => {
+        const schema = {
+          name: 'AddressPermissions:AllowedCalls:<address>',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,address,bytes4,bytes4)[CompactBytesArray]',
+          valueContent: '(BitArray,Address,Bytes4,Bytes4)',
+        };
+
+        const expectedEncodedValue =
+          '0x002000000002cafecafecafecafecafecafecafecafecafecafe11223344bb11bb11';
+
+        const result = ERC725.encodeData(
+          [
+            {
+              keyName: 'AddressPermissions:AllowedCalls:<address>',
+              dynamicKeyParts: address,
+              value: [
+                [
+                  '0x00000002',
+                  '0xcafecafecafecafecafecafecafecafecafecafe',
+                  '0x11223344',
+                  '0xbb11bb11',
+                ],
+              ],
+            },
+          ],
+          [schema],
+        );
+
+        assert.equal(result.values[0], expectedEncodedValue);
+      });
+    });
   });
 
   describe('Testing utility encoding & decoding functions', () => {
