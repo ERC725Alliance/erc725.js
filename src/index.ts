@@ -26,16 +26,16 @@ import HttpProvider from 'web3-providers-http';
 import { ProviderWrapper } from './provider/providerWrapper';
 
 import {
-  encodeData,
   convertIPFSGatewayUrl,
-  generateSchemasFromDynamicKeys,
   duplicateMultiTypeERC725SchemaEntry,
+  encodeData,
+  generateSchemasFromDynamicKeys,
   getVerificationMethod,
   isDataAuthentic,
 } from './lib/utils';
 
-import { getSchema } from './lib/schemaParser';
 import { isValidSignature } from './lib/isValidSignature';
+import { getSchema } from './lib/schemaParser';
 
 import {
   DEFAULT_GAS_VALUE,
@@ -45,44 +45,44 @@ import {
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
 // Types
-import { ERC725Config, ERC725Options } from './types/Config';
-import { Permissions } from './types/Method';
+import { isAddress } from 'web3-validator';
+import { decodeData } from './lib/decodeData';
+import { decodeMappingKey } from './lib/decodeMappingKey';
+import { internalSupportsInterface } from './lib/detector';
 import {
-  ERC725JSONSchema,
-  ERC725JSONSchemaKeyType,
-  ERC725JSONSchemaValueContent,
-  ERC725JSONSchemaValueType,
-} from './types/ERC725JSONSchema';
+  decodeDataSourceWithHash,
+  decodeValueContent,
+  decodeValueType,
+  encodeDataSourceWithHash,
+  encodeValueContent,
+  encodeValueType,
+} from './lib/encoder';
+import { getData } from './lib/getData';
+import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
+import {
+  checkPermissions,
+  decodePermissions,
+  encodePermissions,
+  mapPermission,
+} from './lib/permissions';
+import { URLDataToEncode, URLDataWithHash, Verification } from './types';
+import { ERC725Config, ERC725Options } from './types/Config';
 import type {
   DecodeDataInput,
   DecodeDataOutput,
   EncodeDataInput,
   FetchDataOutput,
 } from './types/decodeData';
-import type { GetDataDynamicKey, GetDataInput } from './types/GetData';
-import { decodeData } from './lib/decodeData';
-import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 import type { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
-import { getData } from './lib/getData';
-import {
-  encodeDataSourceWithHash,
-  decodeDataSourceWithHash,
-  encodeValueType,
-  decodeValueType,
-  encodeValueContent,
-  decodeValueContent,
-} from './lib/encoder';
-import { internalSupportsInterface } from './lib/detector';
-import { decodeMappingKey } from './lib/decodeMappingKey';
-import {
-  encodePermissions,
-  decodePermissions,
-  checkPermissions,
-  mapPermission,
-} from './lib/permissions';
 import { AssetURLEncode } from './types/encodeData';
-import { URLDataToEncode, URLDataWithHash, Verification } from './types';
-import { isAddress } from 'web3-validator';
+import {
+  ERC725JSONSchema,
+  ERC725JSONSchemaKeyType,
+  ERC725JSONSchemaValueContent,
+  ERC725JSONSchemaValueType,
+} from './types/ERC725JSONSchema';
+import type { GetDataDynamicKey, GetDataInput } from './types/GetData';
+import { Permissions } from './types/Method';
 
 export type {
   ERC725JSONSchema,
@@ -92,32 +92,32 @@ export type {
   Permissions,
 };
 
-export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
-export {
-  encodeData,
-  encodeArrayKey,
-  getVerificationMethod,
-  isDataAuthentic,
-} from './lib/utils';
 export { decodeData } from './lib/decodeData';
-export { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 export { decodeMappingKey } from './lib/decodeMappingKey';
+export { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 export {
-  encodeDataSourceWithHash,
   decodeDataSourceWithHash,
-  encodeValueType,
-  decodeValueType,
-  encodeValueContent,
   decodeValueContent,
+  decodeValueType,
+  encodeDataSourceWithHash,
+  encodeValueContent,
+  encodeValueType,
 } from './lib/encoder';
 export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
 export {
-  encodePermissions,
-  decodePermissions,
   checkPermissions,
+  decodePermissions,
+  encodePermissions,
   mapPermission,
 } from './lib/permissions';
 export { getSchema } from './lib/schemaParser';
+export {
+  encodeArrayKey,
+  encodeData,
+  getVerificationMethod,
+  isDataAuthentic,
+} from './lib/utils';
+export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
 
 // PRIVATE FUNCTION
 function initializeProvider(providerOrRpcUrl, gasInfo) {
@@ -320,13 +320,13 @@ export class ERC725 {
 
   async fetchData(
     keyOrKeys?: Array<string | GetDataDynamicKey>,
-  ): Promise<FetchDataOutput[]>;
+  ): Promise<FetchDataOutput[] | null>;
   async fetchData(
     keyOrKeys?: string | GetDataDynamicKey,
-  ): Promise<FetchDataOutput>;
+  ): Promise<FetchDataOutput | null>;
   async fetchData(
     keyOrKeys?: GetDataInput,
-  ): Promise<FetchDataOutput | FetchDataOutput[]> {
+  ): Promise<FetchDataOutput | FetchDataOutput[] | null> {
     let keyNames: Array<string | GetDataDynamicKey>;
     let throwException = false;
     if (Array.isArray(keyOrKeys)) {
@@ -341,6 +341,10 @@ export class ERC725 {
     }
 
     const dataFromChain = await this.getData(keyNames);
+
+    if (!dataFromChain) {
+      return null;
+    }
 
     // NOTE: this step is executed in getData function above
     // We can optimize by computing it only once.

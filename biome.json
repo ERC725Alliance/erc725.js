@@ -23,7 +23,7 @@
     "formatter": {
       "semicolons": "always",
       "quoteStyle": "single",
-      "trailingComma": "all"
+      "trailingCommas": "all"
     }
   },
   "organizeImports": {

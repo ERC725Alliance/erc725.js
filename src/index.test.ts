@@ -20,12 +20,12 @@
 // Tests for the @erc725/erc725.js package
 import { assert } from 'chai';
 
-import Web3 from 'web3';
 import * as sinon from 'sinon';
+import Web3 from 'web3';
 import { leftPad, numberToHex, toNumber } from 'web3-utils';
 
 // examples of schemas to load (for testing)
-import { LSP1Schema, LSP12Schema, LSP3Schema, LSP6Schema } from './schemas';
+import { LSP12Schema, LSP1Schema, LSP3Schema, LSP6Schema } from './schemas';
 
 import ERC725, {
   checkPermissions,
@@ -35,13 +35,6 @@ import ERC725, {
   encodePermissions,
   supportsInterface,
 } from '.';
-import {
-  decodeKeyValue,
-  encodeKey,
-  encodeKeyValue,
-  hashData,
-} from './lib/utils';
-import { ERC725JSONSchema } from './types/ERC725JSONSchema';
 import { EthereumProvider, HttpProvider } from '../test/mockProviders';
 import { mockSchema } from '../test/mockSchema';
 import {
@@ -49,15 +42,22 @@ import {
   generateAllRawData,
   generateAllResults,
 } from '../test/testHelpers';
+import {
+  decodeKeyValue,
+  encodeKey,
+  encodeKeyValue,
+  hashData,
+} from './lib/utils';
+import { ERC725JSONSchema } from './types/ERC725JSONSchema';
 
+import { IPFS_GATEWAY } from '../test/server';
 import {
   ERC725Y_INTERFACE_IDS,
   LSP6_DEFAULT_PERMISSIONS,
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
 } from './constants/constants';
-import { decodeKey } from './lib/decodeData';
 import { INTERFACE_IDS_0_12_0 } from './constants/interfaces';
-import { IPFS_GATEWAY } from '../test/server';
+import { decodeKey } from './lib/decodeData';
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
 
@@ -549,6 +549,37 @@ describe('Running @erc725/erc725.js tests...', () => {
       });
     });
 
+    it('should return null if the key is not found inside of fetchData', async () => {
+      const provider = new HttpProvider(
+        {
+          returnData: [
+            {
+              key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+              value:
+                '0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000',
+            },
+          ],
+        },
+        [ERC725Y_INTERFACE_IDS.legacy],
+      );
+      const erc725 = new ERC725(
+        [
+          {
+            name: 'RandomKey',
+            key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+            keyType: 'Singleton',
+            valueContent: 'URL',
+            valueType: 'bytes',
+          },
+        ],
+        '0x24464DbA7e7781a21eD86133Ebe88Eb9C0762620', // result is mocked so we can use any address
+        provider,
+      );
+
+      const data = await erc725.fetchData('LSP3Profile');
+      assert.deepStrictEqual(data, null);
+    });
+
     it('should getData with multiple kind of input', async () => {
       // "Manual test" which checks if it handles well multiple kind of keys
       const provider = new HttpProvider(
@@ -816,7 +847,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             );
             const result = await erc725.fetchData('TestAssetURL');
 
-            assert.deepStrictEqual(result.value, {
+            assert.deepStrictEqual(result?.value, {
               hello: 'world',
             });
           } finally {
