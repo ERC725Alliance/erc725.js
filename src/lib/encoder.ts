@@ -515,8 +515,11 @@ const valueTypeEncodingMap = (
     case 'bool':
     case 'boolean':
       return {
-        encode: (value: boolean) => (value ? '0x01' : '0x00'),
-        decode: (value: string) => value === '0x01',
+        encode: (value: boolean) => (value
+                                     ? '0x0000000000000000000000000000000000000000000000000000000000000001'
+                                     : '0x0000000000000000000000000000000000000000000000000000000000000000'
+                                    ),
+        decode: (value: string) => value === '0x0000000000000000000000000000000000000000000000000000000000000001',
       };
     case 'string':
       return {
