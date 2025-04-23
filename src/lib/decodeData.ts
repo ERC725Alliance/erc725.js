@@ -20,7 +20,10 @@
  * @date 2023
  */
 import { isHexStrict } from 'web3-utils';
-import { COMPACT_BYTES_ARRAY_STRING } from '../constants/constants';
+import {
+  COMPACT_BYTES_ARRAY_STRING,
+  COMPACT_BYTES_ARRAY_STRING_AT_END,
+} from '../constants/constants';
 
 import { DecodeDataInput, DecodeDataOutput } from '../types/decodeData';
 import {
@@ -137,7 +140,10 @@ export const decodeTupleKeyValue = (
   // We assume data has already been validated at this stage
 
   // Sanitize the string to keep only the tuple, if we are dealing with `CompactBytesArray`
-  const valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
+  const valueTypeToDecode = valueType.replace(
+    COMPACT_BYTES_ARRAY_STRING_AT_END,
+    '',
+  );
 
   const valueTypeParts = extractTupleElements(valueTypeToDecode);
   const valueContentParts = extractTupleElements(valueContent);
@@ -145,6 +151,10 @@ export const decodeTupleKeyValue = (
   const bytesLengths: number[] = [];
 
   valueTypeParts.forEach((valueTypePart) => {
+    if (valueTypePart.endsWith(']')) {
+      bytesLengths.push(0);
+      return;
+    }
     const regexMatch = valueTypePart.match(tupleValueTypesRegex);
 
     // if we are dealing with `bytesN`
@@ -163,7 +173,7 @@ export const decodeTupleKeyValue = (
     0,
   );
 
-  if (value.length !== 2 + totalBytesLength * 2) {
+  if (value.length < 2 + totalBytesLength * 2) {
     console.error(
       `Trying to decode a value: ${value} which does not match the length of the valueType: ${valueType}. Expected ${totalBytesLength} bytes.`,
     );
@@ -172,7 +182,16 @@ export const decodeTupleKeyValue = (
 
   let cursor = 2; // to skip the 0x
 
-  const valueParts = bytesLengths.map((bytesLength) => {
+  const valueParts = bytesLengths.map((bytesLength, index, all) => {
+    if (bytesLength === 0) {
+      if (index !== all.length - 1) {
+        throw new Error(
+          'Array items must be last in a tuple schema definition.',
+        );
+      }
+      const splitValue = value.slice(cursor);
+      return `0x${splitValue}`;
+    }
     const splitValue = value.substring(cursor, cursor + bytesLength * 2);
     cursor += bytesLength * 2;
     return `0x${splitValue}`;
@@ -256,7 +275,7 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
         );
       }
 
-      if (schema.valueType.includes(COMPACT_BYTES_ARRAY_STRING)) {
+      if (schema.valueType.endsWith(COMPACT_BYTES_ARRAY_STRING)) {
         const valueType = schema.valueType.replace(
           COMPACT_BYTES_ARRAY_STRING,
           '',

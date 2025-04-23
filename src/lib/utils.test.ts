@@ -43,6 +43,61 @@ import {
 import { isDynamicKeyName } from './encodeKeyName';
 import { decodeKey } from './decodeData';
 
+console.log(
+  '(bytes4,bytes8,bytes32[CompactBytesArray])',
+  encodeData(
+    [
+      {
+        keyName: 'TupleWithArray',
+        value: [
+          '0xdeadbeaf',
+          12,
+          [
+            '0x1234567812345678123456781234567812345678123456781234567812345678',
+            '0x2345678123456781234567812345678123456781234567812345678123456789',
+          ],
+        ] as any,
+      },
+    ],
+    [
+      {
+        name: 'TupleWithArray',
+        key: '0x407aa9b2ee411784e88f84c077a615f183160b86b79e85162b55b86d94c29117',
+        keyType: 'Singleton',
+        valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
+        valueContent: '(Bytes4,Number,Bytes32[])',
+      },
+    ],
+  ),
+);
+console.log(
+  '(bytes4,bytes8,bytes32[])',
+  encodeData(
+    [
+      {
+        keyName: 'TupleWithArray',
+        value: [
+          '0xdeadbeaf',
+          12,
+          [
+            '0x1234567812345678123456781234567812345678123456781234567812345678',
+            '0x2345678123456781234567812345678123456781234567812345678123456789',
+          ],
+        ] as any,
+      },
+    ],
+    [
+      {
+        name: 'TupleWithArray',
+        key: '0x407aa9b2ee411784e88f84c077a615f183160b86b79e85162b55b86d94c29117',
+        keyType: 'Singleton',
+        valueType: '(bytes4,bytes8,bytes32[])',
+        valueContent: '(Bytes4,Number,Bytes32[])',
+      },
+    ],
+  ),
+);
+
 describe('utils', () => {
   describe('encodeKey/decodeKey', () => {
     const testCases = [
@@ -223,6 +278,26 @@ describe('utils', () => {
         ],
         encodedValue:
           '0x002000000003ca41e4ea94c8fa99889c8ea2c8948768cbaf4bc03e89ad98ffffffff002000000002f70ce3b58f275a4c28d06c98615760dde774de57ffffffff760d9bba002000000001d3236aa1b8a4dde5ea375fd1f2fb5c354e686c9fffffffffffffffff',
+      },
+      {
+        schema: {
+          name: 'TupleWithArray',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
+          valueContent: '(Bytes4,Number,Bytes32[])',
+        },
+        valueType: '',
+        decodedValue: [
+          '0xdeadbeaf',
+          12,
+          [
+            '0x1234567812345678123456781234567812345678123456781234567812345678',
+            '0x2345678123456781234567812345678123456781234567812345678123456789',
+          ],
+        ] as string[] | Array<string | string[]>,
+        encodedValue:
+          '0xdeadbeaf000000000000000c0020123456781234567812345678123456781234567812345678123456781234567800202345678123456781234567812345678123456781234567812345678123456789',
       },
     ];
 

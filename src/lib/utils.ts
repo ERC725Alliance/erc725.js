@@ -75,7 +75,18 @@ export function encodeKeyValue(
     | number[]
     | URLDataToEncode
     | URLDataToEncode[]
-    | boolean,
+    | boolean
+    | boolean[]
+    | Array<
+        | string
+        | string[]
+        | number
+        | number[]
+        | URLDataToEncode
+        | URLDataToEncode[]
+        | boolean
+        | boolean[]
+      >,
   name?: string,
 ): string | false {
   const isSupportedValueContent =
@@ -87,7 +98,7 @@ export function encodeKeyValue(
     );
   }
 
-  const isValueTypeArray = valueType.slice(valueType.length - 2) === '[]';
+  const isValueTypeArray = valueType.slice(valueType.length - 1) === ']';
 
   if (
     (valueType.startsWith('uint') || valueType.startsWith('bytes')) &&
@@ -126,7 +137,9 @@ export function encodeKeyValue(
     const results: Array<string | AssetURLEncode | false> = [];
     for (let index = 0; index < decodedValue.length; index++) {
       const element = decodedValue[index];
-      results.push(encodeValueContent(valueContent, element));
+      results.push(
+        encodeValueContent(valueContent.replace(/\[.*?\]$/, ''), element),
+      );
     }
 
     result = results;
@@ -190,7 +203,9 @@ export function guessKeyTypeFromKeyName(
 export const encodeTupleKeyValue = (
   valueContent: string, // i.e. (Bytes4,Number,Bytes16,Address)
   valueType: string, // i.e. (bytes4,uint128,bytes16,address)
-  decodedValues: Array<string | number | URLDataToEncode | string[]>,
+  decodedValues: Array<
+    string | number | URLDataToEncode | boolean | (string | number | boolean)[]
+  >,
 ) => {
   // We assume data has already been validated at this stage
 
@@ -239,11 +254,17 @@ export function encodeKey(
   value:
     | string
     | number
-    | (string | number)[]
-    | string[][]
     | URLDataToEncode
     | URLDataToEncode[]
-    | boolean,
+    | boolean
+    | Array<
+        | string
+        | number
+        | (string | number | boolean | string[])[]
+        | URLDataToEncode
+        | URLDataToEncode[]
+        | boolean
+      >,
   startingIndex = 0,
   totalArrayLength = Array.isArray(value) ? value.length : 0,
 ) {
@@ -323,7 +344,7 @@ export function encodeKey(
           );
         }
 
-        const isCompactBytesArray: boolean = schema.valueType.includes(
+        const isCompactBytesArray: boolean = schema.valueType.endsWith(
           COMPACT_BYTES_ARRAY_STRING,
         );
 
@@ -342,11 +363,13 @@ export function encodeKey(
           });
           return encodeValueType('bytes[CompactBytesArray]', encodedTuples);
         }
-
+        if (!Array.isArray(value)) {
+          throw new Error(`Array value required ${JSON.stringify(value)}`);
+        }
         return encodeTupleKeyValue(
           schema.valueContent,
           schema.valueType,
-          value,
+          value as any,
         );
       }
 
@@ -408,11 +431,11 @@ export function decodeKeyValue(
   let sameEncoding =
     valueContentEncodingMethods &&
     valueContentEncodingMethods.type === valueType.split('[]')[0];
-  const isArray = valueType.substring(valueType.length - 2) === '[]';
+  const isArray = valueType.substring(valueType.length - 1) === ']';
 
   // VALUE TYPE
   const valueTypeIsBytesNonArray =
-    valueType.slice(0, 5) === 'bytes' && valueType.slice(-2) !== '[]';
+    valueType.slice(0, 6) === 'bytes[' && valueType.slice(-1) !== ']';
 
   if (!valueTypeIsBytesNonArray && valueType !== 'string') {
     // eslint-disable-next-line no-param-reassign
@@ -437,7 +460,9 @@ export function decodeKeyValue(
 
     for (let index = 0; index < value.length; index++) {
       const element = value[index];
-      results.push(decodeValueContent(valueContent, element));
+      results.push(
+        decodeValueContent(valueContent.replace(/\[.*\]$/, ''), element),
+      );
     }
 
     return results;
