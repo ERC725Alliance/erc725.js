@@ -672,31 +672,28 @@ describe('Running @erc725/erc725.js tests...', () => {
       };
 
       it('fetchData JSONURL', async () => {
-        try {
-          const provider = new HttpProvider(
-            {
-              returnData: allRawData.filter(
-                (rawData) =>
-                  rawData.key ===
-                  '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
-              ),
-            },
-            [contractVersion.interface],
-          );
+        const provider = new HttpProvider(
+          {
+            returnData: allRawData.filter(
+              (rawData) =>
+                rawData.key ===
+                '0xd154e1e44d32870ff5ade9e8726fd06d0ed6c996f5946dabfdfd46aa6dd2ea99',
+            ),
+          },
+          [contractVersion.interface],
+        );
 
-          const erc725 = new ERC725([testJSONURLSchema], address, provider);
+        const erc725 = new ERC725([testJSONURLSchema], address, provider);
 
-          const jsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
+        const jsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
 
-          const result = await erc725.fetchData('TestJSONURL');
-          assert.deepStrictEqual(result, {
-            key: testJSONURLSchema.key,
-            name: testJSONURLSchema.name,
-            value: JSON.parse(jsonString),
-          });
-        } catch (error) {
-          console.error(error);
-        }
+        const result = await erc725.fetchData('TestJSONURL');
+        assert.deepStrictEqual(result, {
+          dynamicName: testJSONURLSchema.name,
+          key: testJSONURLSchema.key,
+          name: testJSONURLSchema.name,
+          value: JSON.parse(jsonString),
+        });
       });
 
       it('fetchData JSONURL with custom config.ipfsGateway', async () => {

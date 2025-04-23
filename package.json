@@ -16,6 +16,7 @@
     "build:module": "tsc -p tsconfig.module.json",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=text --reporter=lcov mocha",
     "lint": "biome check .",
+    "test:debug": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha",
     "lint:fix": "biome check --apply .",
     "format:fix": "prettier --write .",
     "format": "prettier .",

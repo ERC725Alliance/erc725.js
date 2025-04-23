@@ -942,7 +942,7 @@ export function decodeValueType(
 
 export function encodeValueContent(
   valueContent: string,
-  value: string | number | AssetURLEncode | URLDataToEncode | boolean,
+  value: string | number | AssetURLEncode | URLDataToEncode | boolean | unknown,
 ): string | false {
   if (isValueContentLiteralHex(valueContent)) {
     // hex characters are always lower case, even if the schema define some hex words uppercase
