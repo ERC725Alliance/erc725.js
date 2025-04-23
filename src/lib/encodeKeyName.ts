@@ -21,7 +21,7 @@ import { isAddress, isHex } from 'web3-validator';
 import { keccak256, leftPad, numberToHex, padLeft, padRight } from 'web3-utils';
 
 import { encodeArrayKey, guessKeyTypeFromKeyName } from './utils';
-import { DynamicKeyParts } from '../types/dynamicKeys';
+import type { DynamicKeyParts } from '../types/dynamicKeys';
 
 // https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md#mapping
 
@@ -75,6 +75,11 @@ export const encodeDynamicKeyPart = (
       ).slice(2);
     }
     case 'address': {
+      if (!value) {
+        throw new Error(
+          `Wrong value: ${value} for dynamic key with type: <address>. Value is empty.`,
+        );
+      }
       if (!value.startsWith('0x')) {
         value = `0x${value}`;
       }

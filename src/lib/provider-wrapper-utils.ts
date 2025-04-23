@@ -15,11 +15,11 @@
 import { decodeParameter } from 'web3-eth-abi';
 import { numberToHex } from 'web3-utils';
 
-import {
+import type {
   JsonRpc,
   JsonRpcEthereumProviderParamsWithLatest,
 } from '../types/JsonRpc';
-import { Method } from '../types/Method';
+import type { Method } from '../types/Method';
 
 import { METHODS } from '../constants/constants';
 
@@ -45,7 +45,6 @@ export function decodeResult(
   ) {
     return [null];
   }
-
   return decodedData;
 }
 

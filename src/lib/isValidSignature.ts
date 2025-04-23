@@ -18,7 +18,7 @@
  */
 
 import { keccak256 } from 'web3-utils';
-import { ProviderWrapper } from '../provider/providerWrapper';
+import type { ProviderWrapper } from '../provider/providerWrapper';
 
 const MAGIC_VALUE = '0x1626ba7e';
 
@@ -60,7 +60,7 @@ export const isValidSignature = async (
     );
 
     return value === MAGIC_VALUE;
-  } catch (err: any) {
+  } catch {
     throw new Error(
       `Error when checking signature. Is ${address} a valid contract address which supports EIP-1271 standard?`,
     );
