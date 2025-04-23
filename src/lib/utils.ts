@@ -21,13 +21,13 @@
 
 import { hexToBytes, leftPad, numberToHex, padLeft } from 'web3-utils';
 import { isAddress, isHexStrict } from 'web3-validator';
-import {
+import type {
   URLDataToEncode,
   EncodeDataReturn,
   URLDataWithHash,
   Verification,
 } from '../types';
-import {
+import type {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueType,
@@ -35,10 +35,10 @@ import {
 
 import {
   HASH_METHODS,
-  SUPPORTED_VERIFICATION_METHODS,
+  type SUPPORTED_VERIFICATION_METHODS,
   SUPPORTED_VERIFICATION_METHODS_LIST,
   COMPACT_BYTES_ARRAY_STRING,
-  SUPPORTED_VERIFICATION_METHOD_STRINGS,
+  type SUPPORTED_VERIFICATION_METHOD_STRINGS,
 } from '../constants/constants';
 import {
   decodeValueContent,
@@ -47,14 +47,15 @@ import {
   encodeValueType,
   valueContentEncodingMap as valueContentMap,
 } from './encoder';
-import { AssetURLEncode } from '../types/encodeData';
+import type { AssetURLEncode } from '../types/encodeData';
 import { isDynamicKeyName } from './encodeKeyName';
 import { getSchemaElement } from './getSchemaElement';
-import { EncodeDataInput } from '../types/decodeData';
-import { GetDataDynamicKey } from '../types/GetData';
+import type { EncodeDataInput } from '../types/decodeData';
+import type { GetDataDynamicKey } from '../types/GetData';
 import { isValidTuple } from './decodeData';
 import { stripHexPrefix } from 'web3-eth-accounts';
 import { checkAddressCheckSum } from 'web3-validator';
+import type { ERC725Options } from '../types/Config';
 
 /**
  *
@@ -75,7 +76,18 @@ export function encodeKeyValue(
     | number[]
     | URLDataToEncode
     | URLDataToEncode[]
-    | boolean,
+    | boolean
+    | boolean[]
+    | Array<
+        | string
+        | string[]
+        | number
+        | number[]
+        | URLDataToEncode
+        | URLDataToEncode[]
+        | boolean
+        | boolean[]
+      >,
   name?: string,
 ): string | false {
   const isSupportedValueContent =
@@ -87,7 +99,7 @@ export function encodeKeyValue(
     );
   }
 
-  const isValueTypeArray = valueType.slice(valueType.length - 2) === '[]';
+  const isValueTypeArray = valueType.slice(valueType.length - 1) === ']';
 
   if (
     (valueType.startsWith('uint') || valueType.startsWith('bytes')) &&
@@ -126,7 +138,9 @@ export function encodeKeyValue(
     const results: Array<string | AssetURLEncode | false> = [];
     for (let index = 0; index < decodedValue.length; index++) {
       const element = decodedValue[index];
-      results.push(encodeValueContent(valueContent, element));
+      results.push(
+        encodeValueContent(valueContent.replace(/\[.*?\]$/, ''), element),
+      );
     }
 
     result = results;
@@ -190,7 +204,9 @@ export function guessKeyTypeFromKeyName(
 export const encodeTupleKeyValue = (
   valueContent: string, // i.e. (Bytes4,Number,Bytes16,Address)
   valueType: string, // i.e. (bytes4,uint128,bytes16,address)
-  decodedValues: Array<string | number | URLDataToEncode | string[]>,
+  decodedValues: Array<
+    string | number | URLDataToEncode | boolean | (string | number | boolean)[]
+  >,
 ) => {
   // We assume data has already been validated at this stage
 
@@ -239,11 +255,17 @@ export function encodeKey(
   value:
     | string
     | number
-    | (string | number)[]
-    | string[][]
     | URLDataToEncode
     | URLDataToEncode[]
-    | boolean,
+    | boolean
+    | Array<
+        | string
+        | number
+        | (string | number | boolean | string[])[]
+        | URLDataToEncode
+        | URLDataToEncode[]
+        | boolean
+      >,
   startingIndex = 0,
   totalArrayLength = Array.isArray(value) ? value.length : 0,
 ) {
@@ -259,8 +281,7 @@ export function encodeKey(
       }
 
       if (!Array.isArray(value)) {
-        console.error("Can't encode a non array for key of type array");
-        return null;
+        throw new Error("Can't encode a non array for key of type array");
       }
 
       if (
@@ -323,7 +344,7 @@ export function encodeKey(
           );
         }
 
-        const isCompactBytesArray: boolean = schema.valueType.includes(
+        const isCompactBytesArray: boolean = schema.valueType.endsWith(
           COMPACT_BYTES_ARRAY_STRING,
         );
 
@@ -342,11 +363,13 @@ export function encodeKey(
           });
           return encodeValueType('bytes[CompactBytesArray]', encodedTuples);
         }
-
+        if (!Array.isArray(value)) {
+          throw new Error(`Array value required ${JSON.stringify(value)}`);
+        }
         return encodeTupleKeyValue(
           schema.valueContent,
           schema.valueType,
-          value,
+          value as any,
         );
       }
 
@@ -393,7 +416,7 @@ export function decodeKeyValue(
   valueContent: string,
   valueType: ERC725JSONSchemaValueType | string, // string for tuples and CompactBytesArray
   _value,
-  name?: string,
+  name?: string | { name?: string; bytes: number },
 ) {
   // Check for the missing map.
   const valueContentEncodingMethods = valueContentMap(valueContent);
@@ -401,22 +424,26 @@ export function decodeKeyValue(
 
   if (!valueContentEncodingMethods && valueContent.slice(0, 2) !== '0x') {
     throw new Error(
-      `The valueContent "${valueContent}" for "${name}" is not supported.`,
+      `The valueContent "${valueContent}" for "${typeof name === 'object' ? name.name : name}" is not supported.`,
     );
   }
 
   let sameEncoding =
     valueContentEncodingMethods &&
     valueContentEncodingMethods.type === valueType.split('[]')[0];
-  const isArray = valueType.substring(valueType.length - 2) === '[]';
+  const isArray = valueType.substring(valueType.length - 1) === ']';
 
   // VALUE TYPE
   const valueTypeIsBytesNonArray =
-    valueType.slice(0, 5) === 'bytes' && valueType.slice(-2) !== '[]';
+    valueType.slice(0, 6) === 'bytes[' && valueType.slice(-1) !== ']';
 
   if (!valueTypeIsBytesNonArray && valueType !== 'string') {
     // eslint-disable-next-line no-param-reassign
-    value = decodeValueType(valueType, value);
+    value = decodeValueType(
+      valueType,
+      value,
+      typeof name === 'object' ? name : undefined,
+    );
   }
 
   // As per exception above, if address and sameEncoding, then the address still needs to be handled
@@ -611,14 +638,32 @@ export const generateSchemasFromDynamicKeys = (
  */
 export function patchIPFSUrlsIfApplicable(
   receivedData: URLDataWithHash,
-  ipfsGateway: string,
+  ipfsGateway: string | ERC725Options,
 ): URLDataWithHash {
   // Only map URL if it's indeed an ipfs:// URL and ignore if it's a data:// URL with JSON
   // possibly containing an IPFS URL inside of the JSON data.
   if (receivedData?.url?.startsWith('ipfs://')) {
+    if (typeof ipfsGateway === 'string') {
+      return {
+        ...receivedData,
+        url: receivedData.url.replace('ipfs://', ipfsGateway),
+      };
+    }
+    if (typeof ipfsGateway !== 'object' || !ipfsGateway.ipfsGateway) {
+      throw new Error(
+        'Invalid ipfsGateway provided. It should be a string or an object with an ipfsGateway property.',
+      );
+    }
+    if (ipfsGateway.ipfsConvertUrl) {
+      const url = ipfsGateway.ipfsConvertUrl(receivedData.url);
+      return {
+        ...receivedData,
+        url,
+      };
+    }
     return {
       ...receivedData,
-      url: receivedData.url.replace('ipfs://', ipfsGateway),
+      url: receivedData.url.replace('ipfs://', ipfsGateway.ipfsGateway),
     };
   }
 

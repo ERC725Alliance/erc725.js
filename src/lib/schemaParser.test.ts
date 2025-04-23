@@ -13,7 +13,7 @@
 */
 
 import assert from 'assert';
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 
 import { getSchema } from './schemaParser';
 

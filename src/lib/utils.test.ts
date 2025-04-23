@@ -15,17 +15,20 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import assert from 'assert';
-import { IPFS_GATEWAY } from '../../test/server';
+import assert from 'node:assert';
+import { IPFS_GATEWAY, responseStore } from '../../test/serverHelpers';
 
-import { keccak256, utf8ToHex } from 'web3-utils';
-import {
+import { keccak256, utf8ToBytes, utf8ToHex } from 'web3-utils';
+import type {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
 } from '../types/ERC725JSONSchema';
-import { GetDataDynamicKey } from '../types/GetData';
+import type { GetDataDynamicKey } from '../types/GetData';
 
-import { SUPPORTED_VERIFICATION_METHOD_STRINGS } from '../constants/constants';
+import {
+  keccak256Method,
+  SUPPORTED_VERIFICATION_METHOD_STRINGS,
+} from '../constants/constants';
 import {
   guessKeyTypeFromKeyName,
   isDataAuthentic,
@@ -42,8 +45,63 @@ import {
 } from './utils';
 import { isDynamicKeyName } from './encodeKeyName';
 import { decodeKey } from './decodeData';
+import { mockJson } from '../../test/mockSchema';
+import ERC725, { decodeValueContent, encodeValueContent } from '..';
 
 describe('utils', () => {
+  describe('decodeKey edge cases', () => {
+    assert.deepEqual(
+      decodeKey(
+        {
+          name: 'NonExistingArray[]',
+          key: '0xd6cbdbfc8d25c9ce4720b5fe6fa8fc536803944271617bf5425b4bd579195840',
+          keyType: 'Array',
+          valueContent: 'Address',
+          valueType: 'address',
+          dynamicName: 'NonExistingArray[]',
+        },
+        [{}],
+      ),
+      [],
+    );
+    assert.equal(
+      decodeKey(
+        {
+          name: 'AddressPermissions:Permissions:<blah>',
+          key: '0x4b80742de2bf82acb3630000<blah>',
+          keyType: 'MappingWithGrouping',
+          valueType: 'bytes32',
+          valueContent: 'BitArray',
+        },
+        [{}],
+      ),
+      null,
+    );
+    assert.equal(
+      decodeKey(
+        {
+          name: 'AddressPermissions:Permissions:<address>',
+          key: '0x4b80742de2bf82acb3630000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: 'bytes32',
+          valueContent: 'BitArray',
+        },
+        [
+          {
+            name: 'AddressPermissions:Permissions:<address>',
+            key: '0x4b80742de2bf82acb3630000<address>',
+            keyType: 'MappingWithGrouping',
+            valueType: 'bytes32',
+            valueContent: 'BitArray',
+            value:
+              '0x0000000000000000000000000000000000000000000000000000000000000200',
+          },
+        ],
+      ),
+      '0x0000000000000000000000000000000000000000000000000000000000000200',
+    );
+  });
+
   describe('encodeKey/decodeKey', () => {
     const testCases = [
       // test encoding an array of address
@@ -86,7 +144,12 @@ describe('utils', () => {
           {
             verification: {
               method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
-              data: '0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d',
+              data: keccak256(
+                utf8ToBytes(
+                  responseStore.ipfs
+                    .QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd,
+                ),
+              ),
             },
             url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
           },
@@ -105,8 +168,7 @@ describe('utils', () => {
           },
           {
             key: '0x9985edaf12cbacf5ac7d6ed54f0445cc00000000000000000000000000000000',
-            value:
-              '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
+            value: `0x00006f357c6a0020${mockJson.hash.slice(2)}697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264`,
           },
           {
             key: '0x9985edaf12cbacf5ac7d6ed54f0445cc00000000000000000000000000000001',
@@ -224,19 +286,123 @@ describe('utils', () => {
         encodedValue:
           '0x002000000003ca41e4ea94c8fa99889c8ea2c8948768cbaf4bc03e89ad98ffffffff002000000002f70ce3b58f275a4c28d06c98615760dde774de57ffffffff760d9bba002000000001d3236aa1b8a4dde5ea375fd1f2fb5c354e686c9fffffffffffffffff',
       },
+      {
+        schema: {
+          name: 'TupleWithArray',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
+          valueContent: '(Bytes4,Number,Bytes32)',
+        },
+        valueType: '',
+        decodedValue: [
+          '0xdeadbeaf',
+          12,
+          [
+            '0x1234567812345678123456781234567812345678123456781234567812345678',
+            '0x2345678123456781234567812345678123456781234567812345678123456789',
+          ],
+        ] as string[] | Array<string | string[]>,
+        encodedValue:
+          '0xdeadbeaf000000000000000c0020123456781234567812345678123456781234567812345678123456781234567800202345678123456781234567812345678123456781234567812345678123456789',
+      },
+      {
+        schema: {
+          name: 'TupleWithArrayTruncated',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
+          valueContent: '(Bytes4,Number,Bytes32)',
+        },
+        valueType: '',
+        decodedValue: ['0xdeadbeaf', 12, null] as
+          | string[]
+          | Array<string | string[]>,
+        encodedValue: '0xdeadbeaf000000000000000c',
+      },
+      {
+        schema: {
+          name: 'TupleWithArrayPartial',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
+          valueContent: '(Bytes4,Number,Bytes32)',
+        },
+        valueType: '',
+        decodedValue: ['0xdeadbeaf', 12, null] as
+          | string[]
+          | Array<string | string[]>,
+        encodedValue: '0xdeadbeaf000000000000000c',
+        encodedError: '0xdeadbeaf000000000000000c0020', // This encoded value has the length item of the encoded array instead of null
+      },
+      {
+        schema: {
+          name: 'TupleWithBytes4Uint256',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'Singleton',
+          valueType: '(bytes4,uint256)',
+          valueContent: '(Bytes4,Number)',
+        },
+        valueType: '',
+        decodedValue: ['0xc52d6008', 1] as string[] | Array<string | string[]>,
+        encodedValue:
+          '0xc52d60080000000000000000000000000000000000000000000000000000000000000001',
+      },
+      {
+        schema: {
+          name: 'TupleWithArrayPartialMore',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
+          valueContent: '(Bytes4,Number,Bytes32)',
+        },
+        valueType: '',
+        decodedValue: ['0xdeadbeaf', 12, null] as
+          | string[]
+          | Array<string | string[]>,
+        encodedValue: '0xdeadbeaf000000000000000c',
+        encodedError: '0xdeadbeaf000000000000000c002001234342343', // This encoded value has the length and partial byte of the encoded array instead of null
+      },
+      {
+        schema: {
+          name: 'TupleWithArray',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,bytes32[],bytes8)',
+          valueContent: '(Bytes4,Bytes32,Number)',
+        },
+        valueType: '',
+        decodedValue: [
+          '0xdeadbeaf',
+          [
+            '0x1234567812345678123456781234567812345678123456781234567812345678',
+            '0x2345678123456781234567812345678123456781234567812345678123456789',
+          ],
+          12,
+        ] as string[] | Array<string | string[]>,
+        encodedValue:
+          '0xdeadbeaf0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000212345678123456781234567812345678123456781234567812345678123456782345678123456781234567812345678123456781234567812345678123456789000000000000000c',
+      },
     ];
 
     testCases.forEach((testCase) => {
       it(`encodes/decodes keyType Array / tuples (valueContent: ${testCase.schema.valueContent}, valueType: ${testCase.schema.valueType}`, () => {
         assert.deepStrictEqual(
           encodeKey(testCase.schema, testCase.decodedValue),
-          testCase.encodedValue,
+          testCase.encodedValue, // The encoder does this correctly in some cases so we can't compare to encodedValue all the time
         );
 
-        assert.deepStrictEqual(
-          decodeKey(testCase.schema, testCase.encodedValue),
-          testCase.decodedValue,
-        );
+        if (testCase.encodedError) {
+          // This means that the encoded value is invalid and should throw an error
+          assert.throws(() => {
+            decodeKey(testCase.schema, testCase.encodedError);
+          });
+        } else {
+          assert.deepStrictEqual(
+            decodeKey(testCase.schema, testCase.encodedValue),
+            testCase.decodedValue,
+          );
+        }
       });
     });
 
@@ -439,19 +605,82 @@ describe('utils', () => {
   });
 
   describe('encodeArrayKey', () => {
-    it('should encode the array length only if passing a number', async () => {
-      const schema: ERC725JSONSchema = {
-        name: 'LSP12IssuedAssets[]',
-        key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
-        keyType: 'Array',
-        valueContent: 'Address',
-        valueType: 'address',
-      };
+    const schema: ERC725JSONSchema = {
+      name: 'LSP12IssuedAssets[]',
+      key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
+      keyType: 'Array',
+      valueContent: 'Address',
+      valueType: 'address',
+    };
 
+    it('should encode the array length only if passing a number', async () => {
       const decodedValue = 3;
       const encodedValue = '0x00000000000000000000000000000003';
 
       assert.equal(encodeKey(schema, decodedValue), encodedValue);
+    });
+    it('should not encode if the indexes are wrong', async () => {
+      assert.throws(
+        () => encodeKey(schema, [], 'bla' as any),
+        /Invalid `startingIndex` or `totalArrayLength` parameters. Values must be of type number./,
+      );
+    });
+    it('should not encode if not an array', async () => {
+      assert.throws(
+        () => encodeKey(schema, 'bla'),
+        /Can't encode a non array for key of type array/,
+      );
+    });
+  });
+
+  describe('Invalid valueType', () => {
+    const schema: ERC725JSONSchema = {
+      name: 'TestStringWithBytes32ValueType',
+      dynamicName: 'TestStringWithBytes32ValueType',
+      key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',
+      keyType: 'Singleton',
+      valueContent: 'Bytes32',
+      valueType: 'bytes64',
+    };
+    it('should throw an error when encoding an invalid valueContent', () => {
+      assert.throws(
+        () => encodeKeyValue(schema.valueContent, schema.valueType, 'test'),
+        /Error: Can't encode test as bytes64. Invalid `bytesN` provided. Expected a `N` value for bytesN between 1 and 32./,
+      );
+    });
+  });
+
+  describe('Invalid valueContent in decodeValueContent', () => {
+    const schema: ERC725JSONSchema = {
+      name: 'TestStringWithBytes32ValueType',
+      dynamicName: 'TestStringWithBytes32ValueType',
+      key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',
+      keyType: 'Singleton',
+      valueContent: 'Bytes64',
+      valueType: 'bytes32',
+    };
+    it('should throw an error when encoding an invalid valueContent', () => {
+      assert.throws(
+        () => decodeValueContent(schema.valueContent, '0x12345678'),
+        /Error: Provided bytes length: 64 for encoding valueContent: Bytes64 is not valid./,
+      );
+    });
+  });
+
+  describe('Invalid valueType', () => {
+    const schema: ERC725JSONSchema = {
+      name: 'TestStringWithBytes32ValueType',
+      dynamicName: 'TestStringWithBytes32ValueType',
+      key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',
+      keyType: 'Singleton',
+      valueContent: 'Bytes32',
+      valueType: 'bytes32',
+    };
+    it('should throw an error when encoding an invalid valueContent', () => {
+      assert.throws(
+        () => encodeValueContent(schema.valueContent, 'test'),
+        /Error: Value: test is not hex./,
+      );
     });
   });
 
@@ -897,6 +1126,47 @@ describe('utils', () => {
       const expectedHash = keccak256(data);
 
       const isAuthentic = isDataAuthentic(data, {
+        data: expectedHash,
+        method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES,
+      });
+
+      assert.ok(isAuthentic);
+    });
+    it('returns true if data is authentic', () => {
+      const data = 'h3ll0HowAreYou?';
+      const expectedHash = keccak256(data);
+
+      const isAuthentic = ERC725.isDataAuthentic(data, {
+        data: expectedHash,
+        method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES,
+      });
+
+      assert.ok(isAuthentic);
+    });
+    it('gets keccak256 using keccak256Method', () => {
+      assert.equal(
+        keccak256Method(null),
+        '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470',
+      );
+      assert.equal(
+        keccak256Method(''),
+        '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470',
+      );
+      assert.equal(
+        keccak256Method('0x1234'),
+        '0x56570de287d73cd1cb6092bb8fdee6173974955fdef345ae579ee9f475ea7432',
+      );
+      assert.equal(
+        keccak256Method(new TextEncoder().encode('hello')),
+        '0x1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8',
+      );
+    });
+    it('returns true if data is authentic', () => {
+      const data = 'h3ll0HowAreYou?';
+      const expectedHash = keccak256(data);
+
+      const erc725 = new ERC725([]);
+      const isAuthentic = erc725.isDataAuthentic(data, {
         data: expectedHash,
         method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES,
       });
