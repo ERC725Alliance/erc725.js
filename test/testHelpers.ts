@@ -17,7 +17,7 @@
  * @date 2020
  */
 
-import { encodeArrayKey } from '../src/lib/utils';
+import { encodeArrayKey } from '../src/lib/utils'
 
 // /**
 //  * Takes the schema object and builds a full dataset as per expected from provider.
@@ -64,9 +64,9 @@ import { encodeArrayKey } from '../src/lib/utils';
  * Takes the schema object and builds a full dataset as per expected from provider.
  */
 export function generateAllData(schema) {
-  const results: any[] = [];
+  const results: any[] = []
   for (let index = 0; index < schema.length; index++) {
-    const element = schema[index];
+    const element = schema[index]
 
     // if is a 'nested' array, need to flatten it, and add {key,value} elements
     if (element.keyType === 'Array') {
@@ -77,25 +77,25 @@ export function generateAllData(schema) {
             results.push({
               key: element.key,
               value: e.toLowerCase(), // force address to lowercase
-            }); // we subtract one from length because this has the extra array length key in the array
+            }) // we subtract one from length because this has the extra array length key in the array
           }
         } else {
           // This is array length key/value pair
           results.push({
             key: encodeArrayKey(element.key, i - 1),
             value: e ? e.toLowerCase() : e, // force address to lowercase
-          });
+          })
         }
-      }); // end .forEach()
+      }) // end .forEach()
     } else {
       results.push({
         key: element.key,
         value: element.returnGraphData,
-      });
+      })
     }
   }
 
-  return results;
+  return results
 }
 
 /**
@@ -111,24 +111,24 @@ export function generateAllResults(schemas) {
         key: schema.key,
         value: schema.expectedResult,
         dynamicName: schema.dynamicName,
-      };
-    });
+      }
+    })
 }
 
 export function hexToBitPositions(hexString) {
-  const binaryString = BigInt(hexString).toString(2);
+  const binaryString = BigInt(hexString).toString(2)
 
-  const bitPositions: number[] = [];
+  const bitPositions: number[] = []
 
   for (let i = binaryString.length - 1; i >= 0; i--) {
     // The current bit is set to 1
     if (binaryString[i] === '1') {
       // Calculate the bit position. We subtract from the string's length to start counting from 0
-      const bitPosition = binaryString.length - 1 - i;
-      bitPositions.push(bitPosition);
+      const bitPosition = binaryString.length - 1 - i
+      bitPositions.push(bitPosition)
     }
   }
 
   // Return the array of bit positions
-  return bitPositions;
+  return bitPositions
 }

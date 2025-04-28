@@ -12,9 +12,9 @@
     along with @erc725/erc725.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { numberToHex, keccak256, toHex } from 'web3-utils';
+import { numberToHex, keccak256, toHex } from 'web3-utils'
 
-import { MethodData, Encoding, Method } from '../types/Method';
+import { type MethodData, Encoding, Method } from '../types/Method'
 
 // https://github.com/ERC725Alliance/ERC725/blob/develop/docs/ERC-725.md#specification
 export const ERC725Y_INTERFACE_IDS = {
@@ -41,7 +41,7 @@ export const ERC725Y_INTERFACE_IDS = {
   //     - getDataBatch(bytes32[])
   //     - setDataBatch(bytes32[],bytes[])
   '5.0': '0x629aa694',
-};
+}
 
 export enum ERC725_VERSION {
   NOT_ERC725 = 'NOT_ERC725',
@@ -89,9 +89,9 @@ export const METHODS: Record<Method, MethodData> = {
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES4,
   },
-};
+}
 
-export const NONE_VERIFICATION_METHOD = '0x00000000';
+export const NONE_VERIFICATION_METHOD = '0x00000000'
 
 export enum SUPPORTED_VERIFICATION_METHOD_STRINGS {
   KECCAK256_UTF8 = 'keccak256(utf8)',
@@ -105,51 +105,51 @@ export enum SUPPORTED_VERIFICATION_METHOD_HASHES {
 
 export type SUPPORTED_VERIFICATION_METHODS =
   | SUPPORTED_VERIFICATION_METHOD_STRINGS
-  | SUPPORTED_VERIFICATION_METHOD_HASHES;
+  | SUPPORTED_VERIFICATION_METHOD_HASHES
 
 export const SUPPORTED_VERIFICATION_METHODS_LIST = Object.values(
-  SUPPORTED_VERIFICATION_METHOD_STRINGS,
-);
+  SUPPORTED_VERIFICATION_METHOD_STRINGS
+)
 
 function keccak256Method(data: object | string | Uint8Array | null) {
   if (data === null) {
-    return keccak256('');
+    return keccak256('')
   }
   if (data instanceof Uint8Array) {
-    const buffer = toHex(data);
-    return keccak256(buffer);
+    const buffer = toHex(data)
+    return keccak256(buffer)
   }
   if (typeof data === 'object') {
-    const buffer = JSON.stringify(data);
-    return keccak256(buffer);
+    const buffer = JSON.stringify(data)
+    return keccak256(buffer)
   }
-  return keccak256(data);
+  return keccak256(data)
 }
 
 const KECCAK256_UTF8 = {
   method: keccak256Method,
   name: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
   sig: SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8,
-};
+}
 
 const KECCAK256_BYTES = {
   method: keccak256Method,
   name: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES,
   sig: SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_BYTES,
-};
+}
 
 export const HASH_METHODS: {
   [key: string]: {
-    method: (data: object | string | Uint8Array | null) => string;
-    name: SUPPORTED_VERIFICATION_METHOD_STRINGS;
-    sig: SUPPORTED_VERIFICATION_METHODS;
-  };
+    method: (data: object | string | Uint8Array | null) => string
+    name: SUPPORTED_VERIFICATION_METHOD_STRINGS
+    sig: SUPPORTED_VERIFICATION_METHODS
+  }
 } = {
   [SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8]: KECCAK256_UTF8,
   [SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8]: KECCAK256_UTF8,
   [SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES]: KECCAK256_BYTES,
   [SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_BYTES]: KECCAK256_BYTES,
-};
+}
 
 // TODO: These values can be imported from lsp-smartcontracts lib after release
 // biome-ignore format: Keep numeric alignment
@@ -182,8 +182,8 @@ export const LSP6_DEFAULT_PERMISSIONS = {
 };
 
 export const LSP6_ALL_PERMISSIONS =
-  '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+  '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 
-export const COMPACT_BYTES_ARRAY_STRING = '[CompactBytesArray]';
-export const COMPACT_BYTES_ARRAY_STRING_AT_END = /\[CompactBytesArray\]$/;
-export const DEFAULT_GAS_VALUE = 1_000_000;
+export const COMPACT_BYTES_ARRAY_STRING = '[CompactBytesArray]'
+export const COMPACT_BYTES_ARRAY_STRING_AT_END = /\[CompactBytesArray\]$/
+export const DEFAULT_GAS_VALUE = 1_000_000

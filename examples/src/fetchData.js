@@ -1,11 +1,11 @@
 // https://stackoverflow.com/questions/60059121/nodejs-es6-imports-cannot-find-module#comment106219502_60059121
 
 // eslint-disable-next-line import/extensions
-import { getInstance } from './instantiation.js';
+import { getInstance } from './instantiation.js'
 
-const myERC725 = getInstance();
+const myERC725 = getInstance()
 
-const dataAllKeys = await myERC725.fetchData();
+const dataAllKeys = await myERC725.fetchData()
 /**
 [
   {
@@ -42,7 +42,7 @@ const dataAllKeys = await myERC725.fetchData();
 ]
 */
 
-const dataOneKey = await myERC725.fetchData('LSP3Profile');
+const dataOneKey = await myERC725.fetchData('LSP3Profile')
 /**
 {
   key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
@@ -63,7 +63,7 @@ const dataOneKey = await myERC725.fetchData('LSP3Profile');
 const dataManyKeys = await myERC725.fetchData([
   'LSP3Profile',
   'LSP1UniversalReceiverDelegate',
-]);
+])
 /**
 [
   {
@@ -79,17 +79,17 @@ const dataManyKeys = await myERC725.fetchData([
 ]
 */
 
-console.log('/*--------------------------------------------/*');
-console.log('/* fetchData - all keys                       /*');
-console.log('/*--------------------------------------------/*');
-console.log(dataAllKeys);
+console.log('/*--------------------------------------------/*')
+console.log('/* fetchData - all keys                       /*')
+console.log('/*--------------------------------------------/*')
+console.log(dataAllKeys)
 
-console.log('/*--------------------------------------------/*');
-console.log('/* fetchData - one key                        /*');
-console.log('/*--------------------------------------------/*');
-console.log(dataOneKey);
+console.log('/*--------------------------------------------/*')
+console.log('/* fetchData - one key                        /*')
+console.log('/*--------------------------------------------/*')
+console.log(dataOneKey)
 
-console.log('/*--------------------------------------------/*');
-console.log('/* fetchData - many keys                      /*');
-console.log('/*--------------------------------------------/*');
-console.log(dataManyKeys);
+console.log('/*--------------------------------------------/*')
+console.log('/* fetchData - many keys                      /*')
+console.log('/*--------------------------------------------/*')
+console.log(dataManyKeys)

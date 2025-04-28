@@ -14,16 +14,16 @@
 
 /* eslint-disable no-unused-expressions */
 
-import { expect } from 'chai';
-import * as sinon from 'sinon';
+import { expect } from 'chai'
+import * as sinon from 'sinon'
 
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema'
 
-import { getDataFromExternalSources } from './getDataFromExternalSources';
-import { DecodeDataOutput } from '../types/decodeData';
-import { keccak256 } from 'web3-utils';
+import { getDataFromExternalSources } from './getDataFromExternalSources'
+import type { DecodeDataOutput } from '../types/decodeData'
+import { keccak256 } from 'web3-utils'
 
-const IPFS_GATEWAY_MOCK = 'https://mock-ipfs.mock/ipfs/';
+const IPFS_GATEWAY_MOCK = 'https://mock-ipfs.mock/ipfs/'
 
 describe('getDataFromExternalSources', () => {
   it('should not throw if the value of a JSONURL/ASSETURL is null', async () => {
@@ -35,7 +35,7 @@ describe('getDataFromExternalSources', () => {
         valueContent: 'JSONURL',
         valueType: 'bytes',
       },
-    ];
+    ]
 
     const dataFromChain: DecodeDataOutput[] = [
       {
@@ -44,16 +44,16 @@ describe('getDataFromExternalSources', () => {
         // @ts-ignore
         value: null,
       },
-    ];
+    ]
 
     expect(async () => {
       await getDataFromExternalSources(
         schemas,
         dataFromChain,
-        IPFS_GATEWAY_MOCK,
-      );
-    }).to.not.throw();
-  });
+        IPFS_GATEWAY_MOCK
+      )
+    }).to.not.throw()
+  })
 
   it("should return the right data when the schema's valueContent is VerifiableURI", async () => {
     const schema: ERC725JSONSchema = {
@@ -62,9 +62,9 @@ describe('getDataFromExternalSources', () => {
       keyType: 'Singleton',
       valueType: 'bytes',
       valueContent: 'VerifiableURI',
-    };
+    }
 
-    const jsonResult = { LSP3Profile: { name: 'Test', description: 'Cool' } };
+    const jsonResult = { LSP3Profile: { name: 'Test', description: 'Cool' } }
 
     const dataFromChain: DecodeDataOutput[] = [
       {
@@ -78,27 +78,27 @@ describe('getDataFromExternalSources', () => {
           url: 'ipfs://QmdMGUxuQsm1U9Qs8oJSn5PfY4B1apGG75YBRxQPybtRVm',
         },
       },
-    ];
+    ]
 
-    const fetchStub = sinon.stub(global, 'fetch');
+    const fetchStub = sinon.stub(global, 'fetch')
     try {
       fetchStub.onCall(0).returns(
         Promise.resolve(
           new Response(JSON.stringify(jsonResult), {
             headers: { 'content-type': 'application/json' },
-          }),
-        ),
-      );
+          })
+        )
+      )
 
       const [{ value: result }] = await getDataFromExternalSources(
         [schema],
         dataFromChain,
-        IPFS_GATEWAY_MOCK,
-      );
+        IPFS_GATEWAY_MOCK
+      )
 
-      expect(result).to.deep.equal(jsonResult);
+      expect(result).to.deep.equal(jsonResult)
     } finally {
-      fetchStub.restore();
+      fetchStub.restore()
     }
-  });
-});
+  })
+})

@@ -17,21 +17,21 @@
  * @date 2021
  */
 
-import assert from 'assert';
-import { keccak256 } from 'web3-utils';
+import assert from 'assert'
+import { keccak256 } from 'web3-utils'
 
 import {
   encodeDynamicKeyPart,
   encodeKeyName,
   generateDynamicKeyName,
   isDynamicKeyName,
-} from './encodeKeyName';
+} from './encodeKeyName'
 
 describe('encodeKeyName', () => {
   const testCases: {
-    keyName: string;
-    expectedKey: string;
-    dynamicKeyParts?: string | string[];
+    keyName: string
+    expectedKey: string
+    dynamicKeyParts?: string | string[]
   }[] = [
     {
       keyName: 'MyKeyName',
@@ -211,53 +211,53 @@ describe('encodeKeyName', () => {
         '0xaaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa',
       ],
     },
-  ];
+  ]
 
   testCases.forEach((testCase) => {
     it(`encodes ${testCase.keyName} key name correctly`, () => {
       assert.deepStrictEqual(
         encodeKeyName(testCase.keyName, testCase.dynamicKeyParts),
-        testCase.expectedKey,
-      );
-    });
-  });
+        testCase.expectedKey
+      )
+    })
+  })
 
   it('throws if trying to encode a dynamic key without any variable', () => {
-    assert.throws(() => encodeKeyName('MyDynamicKey:<address>'));
-  });
+    assert.throws(() => encodeKeyName('MyDynamicKey:<address>'))
+  })
   it('throws if trying to encode a dynamic key of type: Mapping with more or less than 1 variable', () => {
-    assert.throws(() => encodeKeyName('MyDynamicKey:<address>', []));
+    assert.throws(() => encodeKeyName('MyDynamicKey:<address>', []))
     assert.throws(() =>
       encodeKeyName('MyDynamicKey:<address>', [
         '0xcafecafecafecafecafecafecafecafecafecafe',
         'extraVariable',
-      ]),
-    );
-  });
+      ])
+    )
+  })
 
   it('throws if trying to encode a dynamic key of type: MappingWithGrouping with more wrong number of variables', () => {
-    assert.throws(() => encodeKeyName('MyDynamicKey:Grouping:<address>', []));
+    assert.throws(() => encodeKeyName('MyDynamicKey:Grouping:<address>', []))
     assert.throws(() =>
       encodeKeyName('MyDynamicKey:Group:<address>', [
         '0xcafecafecafecafecafecafecafecafecafecafe',
         'extraVariable',
-      ]),
-    );
+      ])
+    )
     assert.throws(() =>
-      encodeKeyName('MyDynamicKey:<string>:<address>', ['variable1']),
-    );
+      encodeKeyName('MyDynamicKey:<string>:<address>', ['variable1'])
+    )
     assert.throws(() =>
       encodeKeyName(
         'MyDynamicKey:<string>:0xcafecafecafecafecafecafecafecafecafecafe',
-        ['variable1', 'variable2'],
-      ),
-    );
-  });
+        ['variable1', 'variable2']
+      )
+    )
+  })
 
   it('throws if a dynamic key is given without dynamicKeyParts', () => {
-    assert.throws(() => encodeKeyName('MyDynamicKey:<address>'));
-  });
-});
+    assert.throws(() => encodeKeyName('MyDynamicKey:<address>'))
+  })
+})
 
 describe('isDynamicKeyName', () => {
   const testCases = [
@@ -285,7 +285,7 @@ describe('isDynamicKeyName', () => {
       keyName: '<string>',
       isDynamicKeyName: true,
     },
-  ];
+  ]
 
   testCases.forEach((testCase) => {
     it(`detects ${
@@ -293,11 +293,11 @@ describe('isDynamicKeyName', () => {
     } key name: ${testCase.keyName} correctly`, () => {
       assert.deepStrictEqual(
         isDynamicKeyName(testCase.keyName),
-        testCase.isDynamicKeyName,
-      );
-    });
-  });
-});
+        testCase.isDynamicKeyName
+      )
+    })
+  })
+})
 
 describe('encodeDynamicKeyPart', () => {
   const testCases = [
@@ -380,43 +380,43 @@ describe('encodeDynamicKeyPart', () => {
       bytes: 4,
       expectedEncoding: 'd1b2917d', // right padded/cut
     },
-  ];
+  ]
 
   testCases.forEach((testCase) => {
     it(`encodes: ${testCase.value} of type: ${testCase.type} correctly`, () => {
       assert.deepStrictEqual(
         encodeDynamicKeyPart(testCase.type, testCase.value, testCase.bytes),
-        testCase.expectedEncoding,
-      );
-    });
-  });
+        testCase.expectedEncoding
+      )
+    })
+  })
 
   it('throws if <bytesM> is called with non hex values', () => {
     assert.throws(() =>
-      encodeDynamicKeyPart('<bytes8>', 'thisisnotanhexstr', 20),
-    );
-  });
+      encodeDynamicKeyPart('<bytes8>', 'thisisnotanhexstr', 20)
+    )
+  })
 
   // Since we're allowing things to be truncated and right and left padded
   // This doesn't seem an ideal test case.
   it('throws if <bytesM> is called with wrong number of bytes', () => {
     assert.throws(() =>
-      encodeDynamicKeyPart('<bytes8>', '0xd1b2917d26eeeaad1234', 20),
-    );
-  });
+      encodeDynamicKeyPart('<bytes8>', '0xd1b2917d26eeeaad1234', 20)
+    )
+  })
 
   it('throws if <uintN> is called with too large of a number', () => {
-    assert.throws(() => encodeDynamicKeyPart('<uint8>', '0x100', 20));
-  });
+    assert.throws(() => encodeDynamicKeyPart('<uint8>', '0x100', 20))
+  })
 
   it('throws if <intN> is is used because intN is not supported (positive number)', () => {
-    assert.throws(() => encodeDynamicKeyPart('<int8>', '0x100', 20));
-  });
+    assert.throws(() => encodeDynamicKeyPart('<int8>', '0x100', 20))
+  })
 
   it('throws if <intN> is is used because intN is not supported (negative number)', () => {
-    assert.throws(() => encodeDynamicKeyPart('<int8>', '0xFFFFFFFF100', 20));
-  });
-});
+    assert.throws(() => encodeDynamicKeyPart('<int8>', '0xFFFFFFFF100', 20))
+  })
+})
 
 describe('generateDynamicKeyName', () => {
   const testCases = [
@@ -447,20 +447,20 @@ describe('generateDynamicKeyName', () => {
       ],
       expectedKeyName: 'Addresses:0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac',
     },
-  ];
+  ]
 
   testCases.forEach((testCase) => {
     it(`generates key name: ${testCase.keyName} correctly`, () => {
       assert.deepStrictEqual(
         generateDynamicKeyName(testCase.keyName, testCase.dynamicKeyParts),
-        testCase.expectedKeyName,
-      );
-    });
-  });
+        testCase.expectedKeyName
+      )
+    })
+  })
 
   it('throws if encoding with wrong number of dynamic values', () => {
     assert.throws(() =>
-      generateDynamicKeyName('Addresses:<bytes4>:<address>', '0x11223344'),
-    );
-  });
-});
+      generateDynamicKeyName('Addresses:<bytes4>:<address>', '0x11223344')
+    )
+  })
+})

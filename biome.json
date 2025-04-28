@@ -3,24 +3,16 @@
   "vcs": {
     "enabled": false,
     "clientKind": "git",
-    "useIgnoreFile": false
+    "useIgnoreFile": true
   },
   "files": {
     "ignoreUnknown": false,
     "ignore": [
-      "dist/",
-      "node_modules/",
-      "node_modules.prod/",
-      ".next/",
-      ".output/",
-      ".wrangler",
-      ".vercel",
-      "**/*.vue",
-      "./.dev.vars",
-      "package.json",
-      "db.json",
-      "packages/firebase-functions/lib/**",
-      "hardhat"
+      "./.vscode/**",
+      "./node_modules/**",
+      "./dist/**",
+      "./build/**",
+      "./coverage/**"
     ]
   },
   "formatter": {

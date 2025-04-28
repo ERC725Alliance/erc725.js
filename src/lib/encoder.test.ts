@@ -14,23 +14,23 @@
 
 /* eslint-disable no-unused-expressions */
 
-import { expect, assert } from 'chai';
-import { stripHexPrefix } from 'web3-eth-accounts';
+import { expect, assert } from 'chai'
+import { stripHexPrefix } from 'web3-eth-accounts'
 
-import { keccak256, utf8ToHex, toHex, padLeft, toBigInt } from 'web3-utils';
+import { keccak256, utf8ToHex, toHex, padLeft, toBigInt } from 'web3-utils'
 import {
   valueContentEncodingMap,
   encodeValueType,
   decodeValueType,
   encodeValueContent,
   decodeValueContent,
-} from './encoder';
+} from './encoder'
 import {
   NONE_VERIFICATION_METHOD,
   SUPPORTED_VERIFICATION_METHOD_HASHES,
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
-} from '../constants/constants';
-import { URLDataToEncode, URLDataWithHash } from '../types';
+} from '../constants/constants'
+import type { URLDataToEncode, URLDataWithHash } from '../types'
 
 describe('encoder', () => {
   describe('valueType', () => {
@@ -56,23 +56,23 @@ describe('encoder', () => {
           decodedValue: false,
           encodedValue: '0x00',
         },
-      ];
+      ]
 
       validTestCases.forEach((testCase) => {
         it(`encodes/decodes: ${testCase.decodedValue} as ${testCase.valueType}`, () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.decodedValue,
-          );
+            testCase.decodedValue
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
-    });
+            testCase.decodedValue
+          )
+        })
+      })
+    })
 
     describe('`bytes4` type', () => {
       const validTestCases = [
@@ -86,22 +86,22 @@ describe('encoder', () => {
           decodedValue: '0xcafecafe',
           encodedValue: '0xcafecafe',
         },
-      ];
+      ]
 
       validTestCases.forEach((testCase) => {
         it(`encodes/decodes: ${testCase.decodedValue} as ${testCase.valueType}`, () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.decodedValue,
-          );
+            testCase.decodedValue
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
+            testCase.decodedValue
+          )
+        })
+      })
 
       const errorEncodingTestCases = [
         {
@@ -120,15 +120,15 @@ describe('encoder', () => {
           valueType: 'bytes4',
           input: 2 ** (8 * 4), // max number (`uint32`), does not fit in 4 bytes (= 0x0100000000)
         },
-      ];
+      ]
 
       errorEncodingTestCases.forEach((testCase) => {
         it(`should throw when trying to encode ${testCase.input} as ${testCase.valueType}`, async () => {
           assert.throws(() =>
-            encodeValueType(testCase.valueType, testCase.input),
-          );
-        });
-      });
+            encodeValueType(testCase.valueType, testCase.input)
+          )
+        })
+      })
 
       // these cases are not symetric. The input is converted + encoded.
       // When decoding, we do not get the same input back, but its bytes4 hex representation
@@ -139,22 +139,22 @@ describe('encoder', () => {
           encodedValue: '0x7765656b', // utf8-encoded characters
           decodedValue: '0x7765656b',
         },
-      ];
+      ]
 
       oneWayEncodingTestCases.forEach((testCase) => {
         it(`encodes one way \`input\` = ${testCase.input} as ${testCase.valueType}, but does not decode back as the same input`, async () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.input,
-          );
+            testCase.input
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
+            testCase.decodedValue
+          )
+        })
+      })
 
       const leftPaddedTestCases = [
         {
@@ -163,23 +163,23 @@ describe('encoder', () => {
           encodedValue: '0x42e576f7', // number converted to hex + left padded still
           decodedValue: '0x42e576f7',
         },
-      ];
+      ]
 
       // numbers encoded as `bytesN` are left padded to allow symmetric encoding / decoding
       leftPaddedTestCases.forEach((testCase) => {
         it(`encodes + left pad numbers \`input\` = ${testCase.input} as ${testCase.valueType} padded on the left with \`00\`s`, async () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.input,
-          );
+            testCase.input
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
+            testCase.decodedValue
+          )
+        })
+      })
 
       // these cases are not symetric and right pad the value
       const rightPaddedTestCases = [
@@ -195,23 +195,23 @@ describe('encoder', () => {
           encodedValue: '0x79657300',
           decodedValue: '0x79657300',
         },
-      ];
+      ]
 
       rightPaddedTestCases.forEach((testCase) => {
         it(`encodes + right pad \`input\` = ${testCase.input} as ${testCase.valueType} padded on the right with \`00\`s`, async () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.input,
-          );
+            testCase.input
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
-    });
+            testCase.decodedValue
+          )
+        })
+      })
+    })
 
     describe('`bytes32` type', () => {
       const validTestCases = [
@@ -229,22 +229,22 @@ describe('encoder', () => {
           encodedValue:
             '0xcafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe',
         },
-      ];
+      ]
 
       validTestCases.forEach((testCase) => {
         it(`encodes/decodes: ${testCase.decodedValue} as ${testCase.valueType}`, () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.decodedValue,
-          );
+            testCase.decodedValue
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
+            testCase.decodedValue
+          )
+        })
+      })
 
       const errorEncodingTestCases = [
         {
@@ -263,19 +263,19 @@ describe('encoder', () => {
           // over the max uint256 allowed, does not fit in 32 bytes
           input: toHex(
             toBigInt(
-              '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-            ) + toBigInt(1),
+              '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+            ) + toBigInt(1)
           ),
         },
-      ];
+      ]
 
       errorEncodingTestCases.forEach((testCase) => {
         it(`should throw when trying to encode ${testCase.input} as ${testCase.valueType}`, async () => {
           assert.throws(() =>
-            encodeValueType(testCase.valueType, testCase.input),
-          );
-        });
-      });
+            encodeValueType(testCase.valueType, testCase.input)
+          )
+        })
+      })
 
       const oneWayEncodingTestCases = [
         {
@@ -286,22 +286,22 @@ describe('encoder', () => {
           encodedValue:
             '0x546869732073656e74656e6365206973203332206279746573206c6f6e672021',
         },
-      ];
+      ]
 
       oneWayEncodingTestCases.forEach((testCase) => {
         it(`encodes one way \`input\` = ${testCase.input} as ${testCase.valueType}, but does not decode back as the same input`, async () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.input,
-          );
+            testCase.input
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
+            testCase.decodedValue
+          )
+        })
+      })
 
       const leftPaddedTestCases = [
         {
@@ -312,22 +312,22 @@ describe('encoder', () => {
           encodedValue:
             '0x0000000000000000000000000000000000000000000000000000000000003039',
         },
-      ];
+      ]
 
       leftPaddedTestCases.forEach((testCase) => {
         it(`encodes + left pad number \`input\` = ${testCase.input} as ${testCase.valueType} padded on the left with \`00\`s`, async () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.input,
-          );
+            testCase.input
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
+            testCase.decodedValue
+          )
+        })
+      })
 
       // these cases are not symetric and right pad the value
       const rightPaddedTestCases = [
@@ -347,23 +347,23 @@ describe('encoder', () => {
           encodedValue:
             '0x68656c6c6f20776f726c64210000000000000000000000000000000000000000',
         },
-      ];
+      ]
 
       rightPaddedTestCases.forEach((testCase) => {
         it(`encodes + right pad \`input\` = ${testCase.input} as ${testCase.valueType} padded on the right with \`00\`s`, async () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.input,
-          );
+            testCase.input
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
-    });
+            testCase.decodedValue
+          )
+        })
+      })
+    })
 
     describe('`uintN` type', () => {
       const validTestCases = [
@@ -408,50 +408,50 @@ describe('encoder', () => {
           decodedValue: 0,
           encodedValue: '0x00000000000000000000000000000000',
         },
-      ];
+      ]
 
       validTestCases.forEach((testCase) => {
         it(`encodes/decodes: ${testCase.decodedValue} as ${testCase.valueType}`, () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.decodedValue,
-          );
+            testCase.decodedValue
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
+            testCase.decodedValue
+          )
+        })
+      })
 
       it('should throw an error when trying to encode/decode with an invalid `uintN` type', async () => {
         for (let ii = 1; ii <= 256; ii++) {
           // only test for uintN where N is a multiple of 8
           if (ii % 8 !== 0) {
-            assert.throws(() => encodeValueType(`uint${ii}`, 12345));
-            assert.throws(() => decodeValueType(`uint${ii}`, '0x00000001'));
+            assert.throws(() => encodeValueType(`uint${ii}`, 12345))
+            assert.throws(() => decodeValueType(`uint${ii}`, '0x00000001'))
 
             // test that `uintN` are encoded / decode correct when N is not a multiple of 8
           } else {
-            const expectedEncodedValue = `0x${'00'.repeat(ii / 8 - 1)}0a`;
-            const expectedDecodedValue = 10;
+            const expectedEncodedValue = `0x${'00'.repeat(ii / 8 - 1)}0a`
+            const expectedDecodedValue = 10
 
             const encodedValue = encodeValueType(
               `uint${ii}`,
-              expectedDecodedValue,
-            );
-            assert.equal(encodedValue, expectedEncodedValue);
+              expectedDecodedValue
+            )
+            assert.equal(encodedValue, expectedEncodedValue)
 
             const decodedValue = decodeValueType(
               `uint${ii}`,
-              expectedEncodedValue,
-            );
-            assert.equal(decodedValue, expectedDecodedValue);
+              expectedEncodedValue
+            )
+            assert.equal(decodedValue, expectedDecodedValue)
           }
         }
-      });
-    });
+      })
+    })
 
     describe('`string` type', () => {
       const validTestCases = [
@@ -460,42 +460,42 @@ describe('encoder', () => {
           decodedValue: 'Hello I am a string',
           encodedValue: '0x48656c6c6f204920616d206120737472696e67',
         },
-      ];
+      ]
 
       validTestCases.forEach((testCase) => {
         it(`encodes/decodes: ${testCase.decodedValue} as ${testCase.valueType}`, () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.decodedValue,
-          );
+            testCase.decodedValue
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
+            testCase.decodedValue
+          )
+        })
+      })
 
       it('should encode each letter in a number as a utf8 character, and decode it back as a string', () => {
         const testCase = {
           valueType: 'string',
           decodedValue: 12345, // encode each letter as a utf8 hex
           encodedValue: '0x3132333435',
-        };
+        }
 
         const encodedValue = encodeValueType(
           testCase.valueType,
-          testCase.decodedValue,
-        );
+          testCase.decodedValue
+        )
 
-        assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+        assert.deepStrictEqual(encodedValue, testCase.encodedValue)
         assert.deepStrictEqual(
           decodeValueType(testCase.valueType, encodedValue),
-          `${testCase.decodedValue}`,
-        );
-      });
-    });
+          `${testCase.decodedValue}`
+        )
+      })
+    })
 
     describe('`address` type', () => {
       const validTestCases = [
@@ -505,22 +505,22 @@ describe('encoder', () => {
           decodedValue: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
           encodedValue: '0xdac17f958d2ee523a2206206994597c13d831ec7',
         },
-      ];
+      ]
 
       validTestCases.forEach((testCase) => {
         it(`encodes/decodes: ${testCase.decodedValue} as ${testCase.valueType}`, () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.decodedValue,
-          );
+            testCase.decodedValue
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
+            testCase.decodedValue
+          )
+        })
+      })
 
       const errorEncodingTestCases = [
         {
@@ -531,16 +531,16 @@ describe('encoder', () => {
           valueType: 'address',
           input: '0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326818CA8B92', // more than 20 bytes
         },
-      ];
+      ]
 
       errorEncodingTestCases.forEach((testCase) => {
         it(`should throw when trying to encode ${testCase.input} as ${testCase.valueType}`, async () => {
           assert.throws(() =>
-            encodeValueType(testCase.valueType, testCase.input),
-          );
-        });
-      });
-    });
+            encodeValueType(testCase.valueType, testCase.input)
+          )
+        })
+      })
+    })
 
     describe('`bytes` type', () => {
       const validTestCases = [
@@ -561,23 +561,23 @@ describe('encoder', () => {
           decodedValue: '0x1337',
           encodedValue: '0x1337',
         },
-      ];
+      ]
 
       validTestCases.forEach((testCase) => {
         it(`encodes/decodes: ${testCase.decodedValue} as ${testCase.valueType}`, () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.decodedValue,
-          );
+            testCase.decodedValue
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
-    });
+            testCase.decodedValue
+          )
+        })
+      })
+    })
 
     describe('arrays `[]` of static types', () => {
       const validTestCases = [
@@ -650,34 +650,34 @@ describe('encoder', () => {
           encodedValue:
             '0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
         },
-      ];
+      ]
 
       validTestCases.forEach((testCase) => {
         it(`encodes/decodes: ${testCase.decodedValue} as ${testCase.valueType}`, () => {
-          let encodedValue: string;
+          let encodedValue: string
           try {
             encodedValue = encodeValueType(
               testCase.valueType,
-              testCase.decodedValue,
-            );
+              testCase.decodedValue
+            )
           } catch {
             encodedValue = encodeValueType(
               testCase.valueType,
-              testCase.decodedValue,
-            );
+              testCase.decodedValue
+            )
           }
           try {
-            assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+            assert.deepStrictEqual(encodedValue, testCase.encodedValue)
             assert.deepStrictEqual(
               decodeValueType(testCase.valueType, encodedValue),
-              testCase.decodedValue,
-            );
+              testCase.decodedValue
+            )
           } catch {
-            decodeValueType(testCase.valueType, encodedValue);
+            decodeValueType(testCase.valueType, encodedValue)
           }
-        });
-      });
-    });
+        })
+      })
+    })
 
     describe('when encoding a value that exceeds the maximal length of bytes than its type', () => {
       const validTestCases = [
@@ -688,30 +688,30 @@ describe('encoder', () => {
           encodedValue:
             '0xcafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe',
         },
-      ];
+      ]
 
       validTestCases.forEach((testCase) => {
         it('should throw', async () => {
           assert.throws(() =>
-            encodeValueType(testCase.valueType, testCase.decodedValue),
-          );
-        });
-      });
-    });
+            encodeValueType(testCase.valueType, testCase.decodedValue)
+          )
+        })
+      })
+    })
 
     describe('when encoding/decoding a value that is not a number as a `uint128`', () => {
       it('throws when trying to encode a string as `uint128`', () => {
-        assert.throws(() => encodeValueType('uint128', 'helloWorld'));
-      });
+        assert.throws(() => encodeValueType('uint128', 'helloWorld'))
+      })
 
       it('throws when trying to encode a bytes17 as `uint128`', () => {
         assert.throws(() =>
-          encodeValueType('uint128', '340282366920938463463374607431768211456'),
-        );
+          encodeValueType('uint128', '340282366920938463463374607431768211456')
+        )
         assert.throws(() =>
-          encodeValueType('uint128', '0x0100000000000000000000000000000000'),
-        );
-      });
+          encodeValueType('uint128', '0x0100000000000000000000000000000000')
+        )
+      })
 
       // We do not want to throw an Exception during decode. During encode we enforce the correct sizes.
       // If there is a value size exception then we should throw.
@@ -721,17 +721,17 @@ describe('encoder', () => {
           // NOTE: Since value sizes are now forgiving, it will ignore the 17th byte and only read up to the 16th byte.
           assert.equal(
             decodeValueType('uint128', '0x000000000000000000000000000000ffff'),
-            '0xff',
-          );
+            '0xff'
+          )
         } catch {
-          decodeValueType('uint128', '0x000000000000000000000000000000ffff');
+          decodeValueType('uint128', '0x000000000000000000000000000000ffff')
         }
         assert.equal(
           decodeValueType('uint128', '0x0100000000000000000000000000000000'),
-          '0x01000000000000000000000000000000',
-        );
-      });
-    });
+          '0x01000000000000000000000000000000'
+        )
+      })
+    })
 
     describe('`type[CompactBytesArray]` (of static types)', () => {
       const validTestCases = [
@@ -758,9 +758,9 @@ describe('encoder', () => {
             'Diagon Alley',
           ],
           encodedValue: `0x0011${stripHexPrefix(
-            utf8ToHex('one random string'),
+            utf8ToHex('one random string')
           )}0012${stripHexPrefix(
-            utf8ToHex('bring back my coke'),
+            utf8ToHex('bring back my coke')
           )}000c${stripHexPrefix(utf8ToHex('Diagon Alley'))}`,
         },
         {
@@ -778,22 +778,22 @@ describe('encoder', () => {
           ],
           encodedValue: '0x0004e65207260004272696e60004720626160004ab7f11e3',
         },
-      ];
+      ]
 
       validTestCases.forEach((testCase) => {
         it(`encodes/decodes: ${testCase.decodedValue} as ${testCase.valueType}`, () => {
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.decodedValue,
-          );
+            testCase.decodedValue
+          )
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
-        });
-      });
+            testCase.decodedValue
+          )
+        })
+      })
 
       describe('when encoding bytes[CompactBytesArray]', () => {
         it('should encode `0x` elements as `0x0000`', async () => {
@@ -801,28 +801,28 @@ describe('encoder', () => {
             valueType: 'bytes[CompactBytesArray]',
             decodedValue: ['0xaabb', '0x', '0x', '0xbeefbeefbeefbeefbeef'],
             encodedValue: '0x0002aabb00000000000abeefbeefbeefbeefbeef',
-          };
+          }
 
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.decodedValue,
-          );
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
-        });
+            testCase.decodedValue
+          )
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
+        })
 
         it("should encode '' (empty strings) elements as `0x0000`", async () => {
           const testCase = {
             valueType: 'bytes[CompactBytesArray]',
             decodedValue: ['0xaabb', '', '', '0xbeefbeefbeefbeefbeef'],
             encodedValue: '0x0002aabb00000000000abeefbeefbeefbeefbeef',
-          };
+          }
 
           const encodedValue = encodeValueType(
             testCase.valueType,
-            testCase.decodedValue,
-          );
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
-        });
+            testCase.decodedValue
+          )
+          assert.deepStrictEqual(encodedValue, testCase.encodedValue)
+        })
 
         it('should throw when trying to encode a array that contains non hex string as `bytes[CompactBytesArray]`', async () => {
           expect(() => {
@@ -830,39 +830,39 @@ describe('encoder', () => {
               'some random string',
               'another random strings',
               '0xaabbccdd',
-            ]);
+            ])
           }).to.throw(
-            "Couldn't encode bytes[CompactBytesArray], value at index 0 is not hex",
-          );
-        });
+            "Couldn't encode bytes[CompactBytesArray], value at index 0 is not hex"
+          )
+        })
 
         it('should throw when trying to encode a `bytes[CompactBytesArray]` with a bytes length bigger than 65_535', async () => {
           expect(() => {
             encodeValueType('bytes[CompactBytesArray]', [
               `0x${'ab'.repeat(66_0000)}`,
-            ]);
+            ])
           }).to.throw(
-            "Couldn't encode bytes[CompactBytesArray], value at index 0 exceeds 65_535 bytes",
-          );
-        });
-      });
+            "Couldn't encode bytes[CompactBytesArray], value at index 0 exceeds 65_535 bytes"
+          )
+        })
+      })
 
       describe('when encoding uintN[CompactBytesArray]', () => {
         it('should throw if trying to encode a value that exceeds the maximal length of bytes for this type', async () => {
           expect(() => {
-            encodeValueType('uint8[CompactBytesArray]', [15, 178, 266]);
-          }).to.throw('Hex uint8 value at index 2 does not fit in 1 bytes');
-        });
+            encodeValueType('uint8[CompactBytesArray]', [15, 178, 266])
+          }).to.throw('Hex uint8 value at index 2 does not fit in 1 bytes')
+        })
 
         it('should throw if trying to decode a value that exceeds the maximal length of bytes for this type', async () => {
           expect(() => {
             decodeValueType(
               'uint8[CompactBytesArray]',
-              '0x00010100012b00014900020100',
-            );
-          }).to.throw('Hex uint8 value at index 3 does not fit in 1 bytes');
-        });
-      });
+              '0x00010100012b00014900020100'
+            )
+          }).to.throw('Hex uint8 value at index 3 does not fit in 1 bytes')
+        })
+      })
 
       describe('when encoding bytesN[CompactBytesArray]', () => {
         it('should throw if trying to encode a value that exceeds the maximal length of bytes for this type', async () => {
@@ -872,19 +872,19 @@ describe('encoder', () => {
               '0x272696e6',
               '0x72062616',
               '0xab7f11e3aabbcc',
-            ]);
-          }).to.throw('Hex bytes4 value at index 3 does not fit in 4 bytes');
-        });
+            ])
+          }).to.throw('Hex bytes4 value at index 3 does not fit in 4 bytes')
+        })
 
         it('should throw if trying to decode a value that exceeds the maximal length of bytes for this type', async () => {
           expect(() => {
             decodeValueType(
               'bytes4[CompactBytesArray]',
-              '0x0004e65207260004272696e60004720626160007ab7f11e3aabbcc',
-            );
-          }).to.throw('Hex bytes4 value at index 3 does not fit in 4 bytes');
-        });
-      });
+              '0x0004e65207260004272696e60004720626160007ab7f11e3aabbcc'
+            )
+          }).to.throw('Hex bytes4 value at index 3 does not fit in 4 bytes')
+        })
+      })
 
       describe('when decoding a bytes[CompactBytesArray] that contains `0000` entries', () => {
         it("should decode as '' (empty string) in the decoded array", async () => {
@@ -892,32 +892,32 @@ describe('encoder', () => {
             valueType: 'bytes[CompactBytesArray]',
             decodedValue: ['0xaabb', '', '', '0xbeefbeefbeefbeefbeef'],
             encodedValue: '0x0002aabb00000000000abeefbeefbeefbeefbeef',
-          };
+          }
 
           const decodedValue = decodeValueType(
             testCase.valueType,
-            testCase.encodedValue,
-          );
-          assert.deepStrictEqual(decodedValue, testCase.decodedValue);
-        });
+            testCase.encodedValue
+          )
+          assert.deepStrictEqual(decodedValue, testCase.decodedValue)
+        })
 
         it('should throw when trying to decode a `bytes[CompactBytesArray]` with an invalid length byte', async () => {
           expect(() => {
-            decodeValueType('bytes[CompactBytesArray]', '0x0005cafe');
-          }).to.throw("Couldn't decode bytes[CompactBytesArray]");
-        });
-      });
-    });
+            decodeValueType('bytes[CompactBytesArray]', '0x0005cafe')
+          }).to.throw("Couldn't decode bytes[CompactBytesArray]")
+        })
+      })
+    })
 
     it('should throw when valueType is unknown', () => {
       assert.throws(() => {
-        encodeValueType('????', 'hi');
-      });
+        encodeValueType('????', 'hi')
+      })
       assert.throws(() => {
-        decodeValueType('whatIsthisType', 'hi');
-      });
-    });
-  });
+        decodeValueType('whatIsthisType', 'hi')
+      })
+    })
+  })
 
   describe('valueContent', () => {
     const testCases = [
@@ -1020,31 +1020,31 @@ describe('encoder', () => {
         encodedValue: '0x01',
         decodedValue: true,
       },
-    ];
+    ]
 
     testCases.forEach((testCase) => {
       it(`encodes/decodes: ${testCase.valueContent}`, () => {
         const encodedValue = encodeValueContent(
           testCase.valueContent,
-          testCase.decodedValue,
-        );
+          testCase.decodedValue
+        )
 
-        encodeValueContent(testCase.valueContent, testCase.decodedValue);
+        encodeValueContent(testCase.valueContent, testCase.decodedValue)
 
         assert.deepStrictEqual(
           encodedValue,
-          testCase.reencodedValue || testCase.encodedValue,
-        );
+          testCase.reencodedValue || testCase.encodedValue
+        )
 
         try {
-          const value = decodeValueContent(testCase.valueContent, encodedValue);
-          assert.deepStrictEqual(value, testCase.decodedValue);
+          const value = decodeValueContent(testCase.valueContent, encodedValue)
+          assert.deepStrictEqual(value, testCase.decodedValue)
         } catch (error) {
-          console.log(error);
-          decodeValueContent(testCase.valueContent, encodedValue);
+          console.log(error)
+          decodeValueContent(testCase.valueContent, encodedValue)
         }
-      });
-    });
+      })
+    })
 
     it('encodes/decodes: JSONURL', () => {
       const dataToEncode: URLDataToEncode = {
@@ -1055,23 +1055,23 @@ describe('encoder', () => {
             key: 123456,
           },
         },
-      };
-      const encodedValue = encodeValueContent('JSONURL', dataToEncode);
+      }
+      const encodedValue = encodeValueContent('JSONURL', dataToEncode)
 
       const verificationMethod =
-        SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8;
-      const hexUrl = utf8ToHex(dataToEncode.url).substring(2);
+        SUPPORTED_VERIFICATION_METHOD_HASHES.HASH_KECCAK256_UTF8
+      const hexUrl = utf8ToHex(dataToEncode.url).substring(2)
       const jsonVerificationData = keccak256(
-        JSON.stringify(dataToEncode.json),
-      ).substring(2);
+        JSON.stringify(dataToEncode.json)
+      ).substring(2)
 
       // Starting from v0.22.0, we force JSONURL encode to VerifiableURI as JSONURL is deprecated
       assert.deepStrictEqual(
         encodedValue,
         `0x0000${stripHexPrefix(verificationMethod)}${stripHexPrefix(
-          padLeft(jsonVerificationData.length / 2, 4),
-        )}${jsonVerificationData}${hexUrl}`,
-      );
+          padLeft(jsonVerificationData.length / 2, 4)
+        )}${jsonVerificationData}${hexUrl}`
+      )
 
       const expectedDecodedValue: URLDataWithHash = {
         verification: {
@@ -1079,39 +1079,39 @@ describe('encoder', () => {
           method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
         },
         url: dataToEncode.url,
-      };
+      }
 
       assert.deepStrictEqual(
         decodeValueContent('JSONURL', encodedValue),
-        expectedDecodedValue,
-      );
-    });
+        expectedDecodedValue
+      )
+    })
 
     it('should throw when encodeValueContent value is a string and valueContent is JSONURL or ASSETURL', () => {
       expect(() => {
-        encodeValueContent('AssetURL', 'imnotanobject!');
-      }).to.throw;
+        encodeValueContent('AssetURL', 'imnotanobject!')
+      }).to.throw
       expect(() => {
-        encodeValueContent('JSONURL', 'imnotanobject!');
-      }).to.throw;
-    });
+        encodeValueContent('JSONURL', 'imnotanobject!')
+      }).to.throw
+    })
 
     it('should throw when valueContent is unknown', () => {
       assert.throws(() => {
-        encodeValueContent('wrongContent', 'hi');
-      });
+        encodeValueContent('wrongContent', 'hi')
+      })
       assert.throws(() => {
-        decodeValueContent('wrongContent', 'hi');
-      });
-    });
+        decodeValueContent('wrongContent', 'hi')
+      })
+    })
 
     it('should return the value if the valueContent == value', () => {
       const value =
-        '0x027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168';
+        '0x027547537d35728a741470df1ccf65de10b454ca0def7c5c20b257b7b8d16168'
 
-      assert.deepStrictEqual(encodeValueContent(value, value), value);
-      assert.deepStrictEqual(decodeValueContent(value, value), value);
-    });
+      assert.deepStrictEqual(encodeValueContent(value, value), value)
+      assert.deepStrictEqual(decodeValueContent(value, value), value)
+    })
 
     describe('JSONURL', () => {
       it('throws when the verification method of JSON of JSONURL to encode is not keccak256(utf8)', () => {
@@ -1123,9 +1123,9 @@ describe('encoder', () => {
               data: '0x321',
             },
             url: 'https://file-desination.com/file-name',
-          });
-        }, `Chosen verification method 'whatever' is not supported. Supported verification methods: keccak256(utf8),keccak256(bytes)`);
-      });
+          })
+        }, `Chosen verification method 'whatever' is not supported. Supported verification methods: keccak256(utf8),keccak256(bytes)`)
+      })
 
       it('throws when JSONURL encode a JSON without json or verificationData key', () => {
         assert.throws(() => {
@@ -1135,9 +1135,9 @@ describe('encoder', () => {
               method: 'keccak256(utf8)',
             },
             url: 'https://file-desination.com/file-name',
-          });
-        }, 'You have to provide either the verification.data or the json via the respective properties');
-      });
-    });
-  });
-});
+          })
+        }, 'You have to provide either the verification.data or the json via the respective properties')
+      })
+    })
+  })
+})

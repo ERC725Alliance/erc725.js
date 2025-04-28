@@ -18,36 +18,36 @@ export enum Encoding {
 }
 
 export interface MethodData {
-  sig: string;
-  value: string;
-  returnEncoding: Encoding;
+  sig: string
+  value: string
+  returnEncoding: Encoding
 }
 
 export interface Permissions {
-  CHANGEOWNER?: boolean;
-  ADDCONTROLLER?: boolean;
-  EDITPERMISSIONS?: boolean;
-  ADDEXTENSIONS?: boolean;
-  CHANGEEXTENSIONS?: boolean;
-  ADDUNIVERSALRECEIVERDELEGATE?: boolean;
-  CHANGEUNIVERSALRECEIVERDELEGATE?: boolean;
-  REENTRANCY?: boolean;
-  SUPER_TRANSFERVALUE?: boolean;
-  TRANSFERVALUE?: boolean;
-  SUPER_CALL?: boolean;
-  CALL?: boolean;
-  SUPER_STATICCALL?: boolean;
-  STATICCALL?: boolean;
-  SUPER_DELEGATECALL?: boolean;
-  DELEGATECALL?: boolean;
-  DEPLOY?: boolean;
-  SUPER_SETDATA?: boolean;
-  SETDATA?: boolean;
-  ENCRYPT?: boolean;
-  DECRYPT?: boolean;
-  SIGN?: boolean;
-  EXECUTE_RELAY_CALL?: boolean;
-  ERC4337_PERMISSION?: boolean;
-  ALL_PERMISSIONS?: boolean;
-  [key: string]: boolean | undefined;
+  CHANGEOWNER?: boolean
+  ADDCONTROLLER?: boolean
+  EDITPERMISSIONS?: boolean
+  ADDEXTENSIONS?: boolean
+  CHANGEEXTENSIONS?: boolean
+  ADDUNIVERSALRECEIVERDELEGATE?: boolean
+  CHANGEUNIVERSALRECEIVERDELEGATE?: boolean
+  REENTRANCY?: boolean
+  SUPER_TRANSFERVALUE?: boolean
+  TRANSFERVALUE?: boolean
+  SUPER_CALL?: boolean
+  CALL?: boolean
+  SUPER_STATICCALL?: boolean
+  STATICCALL?: boolean
+  SUPER_DELEGATECALL?: boolean
+  DELEGATECALL?: boolean
+  DEPLOY?: boolean
+  SUPER_SETDATA?: boolean
+  SETDATA?: boolean
+  ENCRYPT?: boolean
+  DECRYPT?: boolean
+  SIGN?: boolean
+  EXECUTE_RELAY_CALL?: boolean
+  ERC4337_PERMISSION?: boolean
+  ALL_PERMISSIONS?: boolean
+  [key: string]: boolean | undefined
 }

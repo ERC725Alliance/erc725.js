@@ -20,49 +20,49 @@
 
 /* eslint-disable no-unused-expressions */
 
-import { expect } from 'chai';
-import * as sinon from 'sinon';
-import { INTERFACE_IDS_0_12_0 } from '../constants/interfaces';
+import { expect } from 'chai'
+import * as sinon from 'sinon'
+import { INTERFACE_IDS_0_12_0 } from '../constants/interfaces'
 
-import { internalSupportsInterface } from './detector';
+import { internalSupportsInterface } from './detector'
 
 describe('supportsInterface', () => {
   it('it should return true if the contract supports the interface with name', async () => {
-    const contractAddress = '0xcafecafecafecafecafecafecafecafecafecafe';
-    const interfaceName = 'LSP0ERC725Account';
+    const contractAddress = '0xcafecafecafecafecafecafecafecafecafecafe'
+    const interfaceName = 'LSP0ERC725Account'
 
-    const providerStub = { supportsInterface: sinon.stub() };
+    const providerStub = { supportsInterface: sinon.stub() }
 
     providerStub.supportsInterface
       .withArgs(contractAddress, INTERFACE_IDS_0_12_0[interfaceName])
-      .returns(Promise.resolve(true));
+      .returns(Promise.resolve(true))
 
     const doesSupportInterface = await internalSupportsInterface(
       interfaceName,
       {
         address: contractAddress,
         provider: providerStub,
-      },
-    );
+      }
+    )
 
-    expect(doesSupportInterface).to.be.true;
-  });
+    expect(doesSupportInterface).to.be.true
+  })
 
   it('it should return true if the contract supports the interface with interfaceId', async () => {
-    const contractAddress = '0xcafecafecafecafecafecafecafecafecafecafe';
-    const interfaceId = INTERFACE_IDS_0_12_0.LSP1UniversalReceiver;
+    const contractAddress = '0xcafecafecafecafecafecafecafecafecafecafe'
+    const interfaceId = INTERFACE_IDS_0_12_0.LSP1UniversalReceiver
 
-    const providerStub = { supportsInterface: sinon.stub() };
+    const providerStub = { supportsInterface: sinon.stub() }
 
     providerStub.supportsInterface
       .withArgs(contractAddress, interfaceId)
-      .returns(Promise.resolve(true));
+      .returns(Promise.resolve(true))
 
     const doesSupportInterface = await internalSupportsInterface(interfaceId, {
       address: contractAddress,
       provider: providerStub,
-    });
+    })
 
-    expect(doesSupportInterface).to.be.true;
-  });
-});
+    expect(doesSupportInterface).to.be.true
+  })
+})

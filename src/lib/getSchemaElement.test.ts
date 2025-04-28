@@ -12,10 +12,10 @@
     along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import assert from 'assert';
+import assert from 'assert'
 
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
-import { getSchemaElement } from './getSchemaElement';
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema'
+import { getSchemaElement } from './getSchemaElement'
 
 describe('getSchemaElement', () => {
   it('gets the schemaElement from key name and key hash (with and without 0x prefix) correctly', () => {
@@ -27,15 +27,15 @@ describe('getSchemaElement', () => {
         valueContent: 'JSONURL',
         valueType: 'bytes',
       },
-    ];
+    ]
 
-    assert.strictEqual(getSchemaElement(schemas, schemas[0].name), schemas[0]);
-    assert.strictEqual(getSchemaElement(schemas, schemas[0].key), schemas[0]);
+    assert.strictEqual(getSchemaElement(schemas, schemas[0].name), schemas[0])
+    assert.strictEqual(getSchemaElement(schemas, schemas[0].key), schemas[0])
     assert.strictEqual(
       getSchemaElement(schemas, schemas[0].key.slice(2)),
-      schemas[0],
-    );
-  });
+      schemas[0]
+    )
+  })
 
   const schemasWithDynamicKey: ERC725JSONSchema[] = [
     {
@@ -52,20 +52,20 @@ describe('getSchemaElement', () => {
       valueType: 'bytes',
       valueContent: 'JSONURL',
     },
-  ];
+  ]
 
   it('throws is attempt to get a dynamic key without dynamicKeyParts', () => {
     assert.throws(() =>
-      getSchemaElement(schemasWithDynamicKey, 'LSP12IssuedAssetsMap:<address>'),
-    );
-  });
+      getSchemaElement(schemasWithDynamicKey, 'LSP12IssuedAssetsMap:<address>')
+    )
+  })
 
   it('gets the schemeElement for a dynamic key correctly', () => {
     assert.deepStrictEqual(
       getSchemaElement(
         schemasWithDynamicKey,
         'LSP12IssuedAssetsMap:<address>',
-        ['0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac'],
+        ['0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac']
       ),
       {
         dynamicName:
@@ -76,7 +76,7 @@ describe('getSchemaElement', () => {
         valueType: '(bytes4,uint128)',
         valueContent: '(Bytes4,Number)',
         dynamicKeyParts: ['0x2ab3903c6e5815f4bc2a95b7f3b22b6a289bacac'],
-      },
-    );
-  });
-});
+      }
+    )
+  })
+})
