@@ -1,12 +1,12 @@
 // As Defined in: https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md
 
-import { DynamicKeyParts } from './dynamicKeys';
+import type { DynamicKeyParts } from './dynamicKeys'
 
 export type ERC725JSONSchemaKeyType =
   | 'Singleton'
   | 'Array'
   | 'Mapping'
-  | 'MappingWithGrouping';
+  | 'MappingWithGrouping'
 
 export type ERC725JSONSchemaValueContent =
   | 'Number'
@@ -18,7 +18,7 @@ export type ERC725JSONSchemaValueContent =
   | 'URL'
   | 'Markdown'
   | 'Boolean'
-  | string; // for tuples
+  | string // for tuples
 
 export const ALL_VALUE_TYPES = [
   // unsigned integers
@@ -136,14 +136,14 @@ export const ALL_VALUE_TYPES = [
   'bytes[]',
   'bool[]',
   'boolean[]',
-] as const;
+] as const
 
-export type ERC725JSONSchemaValueType = (typeof ALL_VALUE_TYPES)[number];
+export type ERC725JSONSchemaValueType = (typeof ALL_VALUE_TYPES)[number]
 
 export function isValidValueType(
-  value: string,
+  value: string
 ): value is ERC725JSONSchemaValueType {
-  return ALL_VALUE_TYPES.includes(value as ERC725JSONSchemaValueType);
+  return ALL_VALUE_TYPES.includes(value as ERC725JSONSchemaValueType)
 }
 
 /**
@@ -159,12 +159,12 @@ export function isValidValueType(
  * Detailed information available on [LSP-2-ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md)
  */
 export interface ERC725JSONSchema {
-  name: string; // Describes the name of the key, SHOULD be composed of the Standards name + sub type. e.g: LSP2Name
-  key: string; // The keccak256 hash of the name. This is the actual key that MUST be retrievable via ERC725Y.getData(bytes32 key)
-  keyType: ERC725JSONSchemaKeyType | string; // Types that determine how the values should be interpreted.
-  valueContent: ERC725JSONSchemaValueContent | string; // string holds '0x1345ABCD...' If the value content are specific bytes, than the returned value is expected to equal those bytes.
-  valueType: ERC725JSONSchemaValueType | string; // The type of the value. This is used to determine how the value should be encoded / decode (`string` for tuples and CompactBytesArray).
+  name: string // Describes the name of the key, SHOULD be composed of the Standards name + sub type. e.g: LSP2Name
+  key: string // The keccak256 hash of the name. This is the actual key that MUST be retrievable via ERC725Y.getData(bytes32 key)
+  keyType: ERC725JSONSchemaKeyType | string // Types that determine how the values should be interpreted.
+  valueContent: ERC725JSONSchemaValueContent | string // string holds '0x1345ABCD...' If the value content are specific bytes, than the returned value is expected to equal those bytes.
+  valueType: ERC725JSONSchemaValueType | string // The type of the value. This is used to determine how the value should be encoded / decode (`string` for tuples and CompactBytesArray).
 
-  dynamicName?: string; // Describes the name of the key where the dynamic part (<address>, <bytes32) is replaced by the actual mapped value.
-  dynamicKeyParts?: DynamicKeyParts;
+  dynamicName?: string // Describes the name of the key where the dynamic part (<address>, <bytes32) is replaced by the actual mapped value.
+  dynamicKeyParts?: DynamicKeyParts
 }

@@ -31,9 +31,9 @@ export const INTERFACE_IDS_0_12_0 = {
   LSP20CallVerification: '0x1a0eb6a5',
   LSP20CallVerifier: '0x0d6ecac7',
   LSP25ExecuteRelayCall: '0x5ac79908',
-};
+}
 
 export interface AddressProviderOptions {
-  address: string;
-  provider: any;
+  address: string
+  provider: any
 }

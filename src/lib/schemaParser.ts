@@ -16,134 +16,133 @@
  * @author Hugo Masclet <@Hugoo>
  * @date 2022
  */
-import { keccak256 } from 'web3-utils';
-import allSchemas from '../schemas';
+import { keccak256 } from 'web3-utils'
+import allSchemas from '../schemas'
 
-import {
+import type {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
-} from '../types/ERC725JSONSchema';
-import { dynamicTypesRegex, isDynamicKeyName } from './encodeKeyName';
+} from '../types/ERC725JSONSchema'
+import { dynamicTypesRegex, isDynamicKeyName } from './encodeKeyName'
 
 const getSchemasByKeyType = (
-  schemas: ERC725JSONSchema[],
+  schemas: ERC725JSONSchema[]
 ): Record<ERC725JSONSchemaKeyType, ERC725JSONSchema[]> => {
   return {
     Singleton: schemas.filter((schema) => schema.keyType === 'Singleton'),
     Array: schemas.filter((schema) => schema.keyType === 'Array'),
     Mapping: schemas.filter((schema) => schema.keyType === 'Mapping'),
     MappingWithGrouping: schemas.filter(
-      (schema) => schema.keyType === 'MappingWithGrouping',
+      (schema) => schema.keyType === 'MappingWithGrouping'
     ),
-  };
-};
+  }
+}
 
 const fillDynamicKeyPart = (
   key: string,
-  keySchema: ERC725JSONSchema | ERC725JSONSchema[],
+  keySchema: ERC725JSONSchema | ERC725JSONSchema[]
 ): ERC725JSONSchema => {
   const fillOneDynamicKeyPart = (
     key: string,
     keySchema: ERC725JSONSchema,
-    insertQuestionMarks = false,
+    insertQuestionMarks = false
   ) => {
     const result: ERC725JSONSchema = {
       ...keySchema,
       key,
-    };
+    }
 
-    const keyNameParts = keySchema.name.split(':');
-    const secondWordHex = key.substring(26);
+    const keyNameParts = keySchema.name.split(':')
+    const secondWordHex = key.substring(26)
 
     // 2. "Semi defined mappings" i.e. "SupportedStandards:??????"
-    let dynamicPartName = '??????'; // default for "unknown"
+    let dynamicPartName = '??????' // default for "unknown"
 
     // replace dynamic placeholder in the map part (e.g: <address>, <bytes32>) with the hex value
     if (isDynamicKeyName(keySchema.name) && !insertQuestionMarks) {
-      dynamicPartName = secondWordHex;
+      dynamicPartName = secondWordHex
 
-      let dynamicName = `${keyNameParts[0]}:0x${dynamicPartName}`;
-      let dynamicKeyPart = `0x${secondWordHex}`;
+      let dynamicName = `${keyNameParts[0]}:0x${dynamicPartName}`
+      let dynamicKeyPart = `0x${secondWordHex}`
 
-      const dynamicPartType = keyNameParts[1].match(dynamicTypesRegex);
+      const dynamicPartType = keyNameParts[1].match(dynamicTypesRegex)
 
       if (dynamicPartType) {
         const byteSize =
           dynamicPartType[1] === 'uint' || dynamicPartType[1] === 'int'
             ? Number.parseInt(dynamicPartType[2]) / 8 // e.g: uint128 -> 128 / 8 -> 16 bytes
-            : Number.parseInt(dynamicPartType[2]); // e.g: bytes8 -> 8 bytes
+            : Number.parseInt(dynamicPartType[2]) // e.g: bytes8 -> 8 bytes
 
         if (byteSize < 20) {
-          dynamicName = `${keyNameParts[0]}:0x${dynamicPartName.slice(0, byteSize * 2)}`;
+          dynamicName = `${keyNameParts[0]}:0x${dynamicPartName.slice(0, byteSize * 2)}`
 
-          dynamicKeyPart = `0x${secondWordHex.slice(0, byteSize * 2)}`;
+          dynamicKeyPart = `0x${secondWordHex.slice(0, byteSize * 2)}`
         }
       }
 
-      result.dynamicName = dynamicName;
-      result.dynamicKeyParts = dynamicKeyPart;
+      result.dynamicName = dynamicName
+      result.dynamicKeyParts = dynamicKeyPart
 
-      return result;
+      return result
     }
 
     // if first 20 bytes of the hash of second word in schema match,
     // display the map part as plain word
     if (keccak256(keyNameParts[1]).substring(0, 42) === `0x${secondWordHex}`) {
-      dynamicPartName = keyNameParts[1];
+      dynamicPartName = keyNameParts[1]
     }
 
     // DO NOT MODIFY THE NAME OF THE SCHEMA ITEM
     // OTHERWISE WE CAN NO LONGER FIND THE CORRESPONDING SCHEMA BY NAME.
     // result.name = `$keyNameParts[0]:$dynamicPartName`;
 
-    return result;
-  };
-  if (Array.isArray(keySchema)) {
-    const singleSchema = keySchema.find((schema) => schema.key === key);
-    if (singleSchema) {
-      return fillOneDynamicKeyPart(key, singleSchema);
-    }
-    return fillOneDynamicKeyPart(key, keySchema[0], true);
+    return result
   }
-  return fillOneDynamicKeyPart(key, keySchema);
-};
+  if (Array.isArray(keySchema)) {
+    const singleSchema = keySchema.find((schema) => schema.key === key)
+    if (singleSchema) {
+      return fillOneDynamicKeyPart(key, singleSchema)
+    }
+    return fillOneDynamicKeyPart(key, keySchema[0], true)
+  }
+  return fillOneDynamicKeyPart(key, keySchema)
+}
 
 const findSingletonSchemaForKey = (
   key: string,
-  schemas: ERC725JSONSchema[],
+  schemas: ERC725JSONSchema[]
 ): ERC725JSONSchema | null => {
-  return schemas.find((schema) => schema.key === key) || null;
-};
+  return schemas.find((schema) => schema.key === key) || null
+}
 
 const findArraySchemaForKey = (
   key: string,
-  schemas: ERC725JSONSchema[],
+  schemas: ERC725JSONSchema[]
 ): ERC725JSONSchema | null => {
   // Should detect:
 
   // 1. Initial key
-  const initialKeySchema = schemas.find((schema) => schema.key === key) || null;
+  const initialKeySchema = schemas.find((schema) => schema.key === key) || null
 
   if (initialKeySchema) {
-    return initialKeySchema;
+    return initialKeySchema
   }
 
   // 2. Subsequent keys
-  const bytes16Key = key.substring(0, 34);
+  const bytes16Key = key.substring(0, 34)
   const arraySchema =
-    schemas.find((schema) => schema.key.substring(0, 34) === bytes16Key) ||
-    null;
+    schemas.find((schema) => schema.key.substring(0, 34) === bytes16Key) || null
 
   if (!arraySchema) {
-    return null;
+    return null
   }
 
   // https://stackoverflow.com/a/1779019/651299
   if (!/^\d+$/.test(key.substring(34))) {
-    return null;
+    return null
   }
 
-  const elementIndex = Number.parseInt(key.substring(34), 10);
+  const elementIndex = Number.parseInt(key.substring(34), 10)
 
   return {
     ...arraySchema,
@@ -152,114 +151,114 @@ const findArraySchemaForKey = (
     dynamicKeyParts: `0x${key.substring(34)}`,
     name: arraySchema.name,
     keyType: 'Singleton',
-  };
-};
+  }
+}
 
 const findMappingSchemaForKey = (
   key: string,
-  schemas: ERC725JSONSchema[],
+  schemas: ERC725JSONSchema[]
 ): ERC725JSONSchema | null => {
-  const firstWordHex = key.substring(0, 26);
+  const firstWordHex = key.substring(0, 26)
   // Should detect:
 
   // Known/defined mapping
-  const keySchema = schemas.find((schema) => schema.key === key) || null;
+  const keySchema = schemas.find((schema) => schema.key === key) || null
 
   if (keySchema) {
-    return fillDynamicKeyPart(key, keySchema);
+    return fillDynamicKeyPart(key, keySchema)
   }
 
   const keySchemas = schemas.filter(
-    (schema) => `${schema.key.substring(0, 22)}0000` === firstWordHex,
-  );
+    (schema) => `${schema.key.substring(0, 22)}0000` === firstWordHex
+  )
 
   if (keySchemas.length === 0) {
-    return null;
+    return null
   }
 
-  return fillDynamicKeyPart(key, keySchemas);
-};
+  return fillDynamicKeyPart(key, keySchemas)
+}
 
 const findMappingWithGroupingSchemaForKey = (
   key: string,
-  schemas: ERC725JSONSchema[],
+  schemas: ERC725JSONSchema[]
 ): ERC725JSONSchema | null => {
   const keySchema =
     schemas.find(
-      (schema) => schema.key.substring(0, 26) === key.substring(0, 26),
-    ) || null;
+      (schema) => schema.key.substring(0, 26) === key.substring(0, 26)
+    ) || null
 
   if (keySchema) {
-    const keyNameParts = keySchema.name.split(':');
+    const keyNameParts = keySchema.name.split(':')
 
-    const dynamicKeyPart = key.substring(26);
+    const dynamicKeyPart = key.substring(26)
 
     if (isDynamicKeyName(keySchema.name)) {
-      keySchema.dynamicName = `${keyNameParts[0]}:${keyNameParts[1]}:0x${dynamicKeyPart}`;
-      keySchema.dynamicKeyParts = `0x${dynamicKeyPart}`;
+      keySchema.dynamicName = `${keyNameParts[0]}:${keyNameParts[1]}:0x${dynamicKeyPart}`
+      keySchema.dynamicKeyParts = `0x${dynamicKeyPart}`
     }
 
     return {
       ...keySchema,
       key,
-    };
+    }
   }
 
-  return null;
-};
+  return null
+}
 
 function schemaParser(
   key: string,
-  schemas: ERC725JSONSchema[],
+  schemas: ERC725JSONSchema[]
 ): ERC725JSONSchema | null {
-  const schemasByKeyType = getSchemasByKeyType(schemas);
+  const schemasByKeyType = getSchemasByKeyType(schemas)
 
-  let foundSchema: ERC725JSONSchema | null = null;
+  let foundSchema: ERC725JSONSchema | null = null
 
-  foundSchema = findSingletonSchemaForKey(key, schemasByKeyType.Singleton);
+  foundSchema = findSingletonSchemaForKey(key, schemasByKeyType.Singleton)
 
   if (foundSchema) {
-    return foundSchema;
+    return foundSchema
   }
 
-  foundSchema = findArraySchemaForKey(key, schemasByKeyType.Array);
+  foundSchema = findArraySchemaForKey(key, schemasByKeyType.Array)
 
   if (foundSchema) {
-    return foundSchema;
+    return foundSchema
   }
 
-  foundSchema = findMappingSchemaForKey(key, schemasByKeyType.Mapping);
+  foundSchema = findMappingSchemaForKey(key, schemasByKeyType.Mapping)
 
   if (foundSchema) {
-    return foundSchema;
+    return foundSchema
   }
 
   foundSchema = findMappingWithGroupingSchemaForKey(
     key,
-    schemasByKeyType.MappingWithGrouping,
-  );
+    schemasByKeyType.MappingWithGrouping
+  )
 
-  return foundSchema;
+  return foundSchema
 }
 
 export function getSchema(
   keyOrKeys: string | string[],
-  providedSchemas?: ERC725JSONSchema[],
+  providedSchemas?: ERC725JSONSchema[]
 ): ERC725JSONSchema | null | Record<string, ERC725JSONSchema | null> {
-  let fullSchema: ERC725JSONSchema[] = allSchemas;
+  let fullSchema: ERC725JSONSchema[] = allSchemas
   if (providedSchemas) {
-    fullSchema = fullSchema.concat(providedSchemas);
+    fullSchema = fullSchema.concat(providedSchemas)
   }
 
   if (Array.isArray(keyOrKeys)) {
     return keyOrKeys.reduce<Record<string, ERC725JSONSchema | null>>(
       (acc, key) => {
-        acc[key] = schemaParser(key, fullSchema);
-        return acc;
+        acc[key] = schemaParser(key, fullSchema)
+        return acc
       },
-      {},
-    );
+      {}
+    )
   }
 
-  return schemaParser(keyOrKeys, fullSchema);
+  return schemaParser(keyOrKeys, fullSchema)
 }

@@ -1,8 +1,8 @@
 // https://stackoverflow.com/questions/60059121/nodejs-es6-imports-cannot-find-module#comment106219502_60059121
 // eslint-disable-next-line import/extensions
-import { getInstance } from './instantiation.js';
+import { getInstance } from './instantiation.js'
 
-const myERC725 = getInstance();
+const myERC725 = getInstance()
 
 const decodedDataOneKey = myERC725.decodeData([
   {
@@ -10,7 +10,7 @@ const decodedDataOneKey = myERC725.decodeData([
     value:
       '0x00006f357c6a0020820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
   },
-]);
+])
 /**
 [
   {
@@ -51,7 +51,7 @@ const decodedDataManyKeys = myERC725.decodeData([
       },
     ],
   },
-]);
+])
 /**
 [
   {
@@ -75,11 +75,11 @@ const decodedDataManyKeys = myERC725.decodeData([
   }
 ]
 */
-console.log('/*--------------------------------------------/*');
-console.log('/* decodeData - one key (VerifiableURI)       /*');
-console.log('/*--------------------------------------------/*');
-console.log(decodedDataOneKey);
-console.log('/*--------------------------------------------/*');
-console.log('/* decodeData - many keys                     /*');
-console.log('/*--------------------------------------------/*');
-console.log(decodedDataManyKeys);
+console.log('/*--------------------------------------------/*')
+console.log('/* decodeData - one key (VerifiableURI)       /*')
+console.log('/*--------------------------------------------/*')
+console.log(decodedDataOneKey)
+console.log('/*--------------------------------------------/*')
+console.log('/* decodeData - many keys                     /*')
+console.log('/*--------------------------------------------/*')
+console.log(decodedDataManyKeys)

@@ -22,9 +22,9 @@
  */
 
 import {
-  AddressProviderOptions,
+  type AddressProviderOptions,
   INTERFACE_IDS_0_12_0,
-} from '../constants/interfaces';
+} from '../constants/interfaces'
 
 /**
  * Check if a smart contract address
@@ -36,21 +36,21 @@ import {
  */
 export const internalSupportsInterface = async (
   interfaceIdOrName: string,
-  options: AddressProviderOptions,
+  options: AddressProviderOptions
 ): Promise<boolean> => {
-  let plainInterfaceId: string;
+  let plainInterfaceId: string
   if (INTERFACE_IDS_0_12_0[interfaceIdOrName]) {
-    plainInterfaceId = INTERFACE_IDS_0_12_0[interfaceIdOrName];
+    plainInterfaceId = INTERFACE_IDS_0_12_0[interfaceIdOrName]
   } else {
-    plainInterfaceId = interfaceIdOrName;
+    plainInterfaceId = interfaceIdOrName
   }
 
   try {
     return await options.provider.supportsInterface(
       options.address,
-      plainInterfaceId,
-    );
+      plainInterfaceId
+    )
   } catch (error) {
-    throw new Error(`Error checking the interface: ${error}`);
+    throw new Error(`Error checking the interface: ${error}`)
   }
-};
+}

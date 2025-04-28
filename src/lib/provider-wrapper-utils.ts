@@ -12,44 +12,44 @@
     along with @erc725/erc725.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { decodeParameter } from 'web3-eth-abi';
-import { numberToHex } from 'web3-utils';
+import { decodeParameter } from 'web3-eth-abi'
+import { numberToHex } from 'web3-utils'
 
-import {
+import type {
   JsonRpc,
   JsonRpcEthereumProviderParamsWithLatest,
-} from '../types/JsonRpc';
-import { Method } from '../types/Method';
+} from '../types/JsonRpc'
+import type { Method } from '../types/Method'
 
-import { METHODS } from '../constants/constants';
+import { METHODS } from '../constants/constants'
 
-let idCount = 0;
+let idCount = 0
 
 export function decodeResult(
   method: Method,
-  hexString: string,
+  hexString: string
 ): Record<string, any> | null {
   if (!hexString || hexString === '0x' || hexString === '') {
-    return null;
+    return null
   }
 
   try {
     const decodedData = decodeParameter(
       METHODS[method].returnEncoding,
-      hexString,
-    ) as Record<string, any> | null;
+      hexString
+    ) as Record<string, any> | null
 
     if (
       Array.isArray(decodedData) &&
       decodedData.length === 1 &&
       decodedData[0] === '0x'
     ) {
-      return [null];
+      return [null]
     }
-    return decodedData;
+    return decodedData
   } catch (error) {
-    console.error(error);
-    throw error; // For debugging.
+    console.error(error)
+    throw error // For debugging.
   }
 }
 
@@ -57,11 +57,11 @@ const constructJSONRPCParams = (
   address: string,
   method: Method,
   gasInfo?: number,
-  methodParam?: string,
+  methodParam?: string
 ): JsonRpcEthereumProviderParamsWithLatest => {
   const data = methodParam
     ? METHODS[method].sig + methodParam.replace('0x', '')
-    : METHODS[method].sig;
+    : METHODS[method].sig
 
   return [
     {
@@ -71,20 +71,20 @@ const constructJSONRPCParams = (
       data,
     },
     'latest',
-  ];
-};
+  ]
+}
 
 export function constructJSONRPC(
   address: string,
   method: Method,
   gasInfo?: number,
-  methodParam?: string,
+  methodParam?: string
 ): JsonRpc {
-  idCount += 1;
+  idCount += 1
   return {
     jsonrpc: '2.0',
     method: 'eth_call',
     params: constructJSONRPCParams(address, method, gasInfo, methodParam),
     id: idCount,
-  };
+  }
 }

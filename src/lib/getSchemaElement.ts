@@ -17,15 +17,15 @@
  * @date 2021
  */
 
-import { isHex, isHexStrict } from 'web3-validator';
-import { DynamicKeyParts } from '../types/dynamicKeys';
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
+import { isHex, isHexStrict } from 'web3-validator'
+import type { DynamicKeyParts } from '../types/dynamicKeys'
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema'
 import {
   encodeKeyName,
   generateDynamicKeyName,
   isDynamicKeyName,
-} from './encodeKeyName';
-import { decodeMappingKey } from './decodeMappingKey';
+} from './encodeKeyName'
+import { decodeMappingKey } from './decodeMappingKey'
 
 /**
  *
@@ -37,30 +37,30 @@ import { decodeMappingKey } from './decodeMappingKey';
 const getSchemaElementForDynamicKeyName = (
   schemas: ERC725JSONSchema[],
   namedDynamicKey: string,
-  dynamicKeyParts: DynamicKeyParts,
+  dynamicKeyParts: DynamicKeyParts
 ): ERC725JSONSchema => {
   // In that case, we will generate a new schema element with the final computed name and encoded key hash.
 
-  const schemaElement = schemas.find((e) => e.name === namedDynamicKey);
+  const schemaElement = schemas.find((e) => e.name === namedDynamicKey)
 
   if (!schemaElement) {
     throw new Error(
-      `No matching schema found for dynamic key: ${namedDynamicKey}`,
-    );
+      `No matching schema found for dynamic key: ${namedDynamicKey}`
+    )
   }
 
   // once we have the schemaElement with dynamic parts, we need to replace the name and the key:
 
-  const key = encodeKeyName(namedDynamicKey, dynamicKeyParts);
-  const dynamicName = generateDynamicKeyName(namedDynamicKey, dynamicKeyParts);
+  const key = encodeKeyName(namedDynamicKey, dynamicKeyParts)
+  const dynamicName = generateDynamicKeyName(namedDynamicKey, dynamicKeyParts)
 
   return {
     ...schemaElement,
     dynamicName,
     key,
     dynamicKeyParts,
-  };
-};
+  }
+}
 
 /**
  *
@@ -73,56 +73,56 @@ const getSchemaElementForDynamicKeyName = (
 export function getSchemaElement(
   schemas: ERC725JSONSchema[],
   namedOrHashedKey: string,
-  dynamicKeyParts?: DynamicKeyParts,
+  dynamicKeyParts?: DynamicKeyParts
 ): ERC725JSONSchema {
-  let keyHash: string;
+  let keyHash: string
   if (namedOrHashedKey.startsWith('0x')) {
-    const index = namedOrHashedKey.indexOf('<');
+    const index = namedOrHashedKey.indexOf('<')
     if (index !== -1) {
-      const partial = namedOrHashedKey.slice(0, index);
+      const partial = namedOrHashedKey.slice(0, index)
       const schemaElement = schemas.find(
-        (e) => e.key.slice(0, index) === partial,
-      );
+        (e) => e.key.slice(0, index) === partial
+      )
       const dynamicKeyParts = decodeMappingKey(
         namedOrHashedKey,
-        schemaElement as ERC725JSONSchema,
-      ) as unknown as DynamicKeyParts;
+        schemaElement as ERC725JSONSchema
+      ) as unknown as DynamicKeyParts
       if (schemaElement) {
         return {
           ...schemaElement,
           ...(dynamicKeyParts ? { dynamicKeyParts } : {}),
-        };
+        }
       }
     }
   }
   if (isDynamicKeyName(namedOrHashedKey)) {
     if (!dynamicKeyParts) {
       throw new Error(
-        `Can't getSchemaElement for dynamic key: ${namedOrHashedKey} without dynamicKeyParts.`,
-      );
+        `Can't getSchemaElement for dynamic key: ${namedOrHashedKey} without dynamicKeyParts.`
+      )
     }
     return getSchemaElementForDynamicKeyName(
       schemas,
       namedOrHashedKey,
-      dynamicKeyParts,
-    );
+      dynamicKeyParts
+    )
   }
 
   if (isHex(namedOrHashedKey)) {
     keyHash = isHexStrict(namedOrHashedKey)
       ? namedOrHashedKey
-      : `0x${namedOrHashedKey}`;
+      : `0x${namedOrHashedKey}`
   } else {
-    keyHash = encodeKeyName(namedOrHashedKey);
+    keyHash = encodeKeyName(namedOrHashedKey)
   }
 
-  const schemaElement = schemas.find((e) => e.key === keyHash);
+  const schemaElement = schemas.find((e) => e.key === keyHash)
 
   if (!schemaElement) {
     throw new Error(
-      `No matching schema found for key: ${namedOrHashedKey} (${keyHash}).`,
-    );
+      `No matching schema found for key: ${namedOrHashedKey} (${keyHash}).`
+    )
   }
 
-  return schemaElement;
+  return schemaElement
 }

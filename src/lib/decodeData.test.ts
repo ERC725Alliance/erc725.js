@@ -14,10 +14,10 @@
 
 /* eslint-disable no-unused-expressions */
 
-import { expect } from 'chai';
+import { expect } from 'chai'
 
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
-import { decodeData, decodeTupleKeyValue, isValidTuple } from './decodeData';
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema'
+import { decodeData, decodeTupleKeyValue, isValidTuple } from './decodeData'
 
 describe('decodeData', () => {
   const schemas: ERC725JSONSchema[] = [
@@ -70,7 +70,7 @@ describe('decodeData', () => {
       valueType: '(bytes4,uint128)',
       valueContent: '(Bytes4,Number)',
     },
-  ];
+  ]
 
   it('decodes each key', () => {
     const decodedData = decodeData(
@@ -84,11 +84,11 @@ describe('decodeData', () => {
           value: '0x2222',
         },
       ],
-      schemas,
-    );
+      schemas
+    )
 
-    expect(decodedData.map(({ name }) => name)).to.eql(['KeyOne', 'KeyTwo']);
-  });
+    expect(decodedData.map(({ name }) => name)).to.eql(['KeyOne', 'KeyTwo'])
+  })
 
   it('is backward compatible with JSONURL and AssetURL and decodes these encoding correctly', () => {
     const decodedData = decodeData(
@@ -131,8 +131,8 @@ describe('decodeData', () => {
           valueType: 'bytes',
           valueContent: 'AssetURL', // Deprecated - We keep it for backward compatibility between v0.21.3 and v0.22.0
         },
-      ],
-    );
+      ]
+    )
 
     expect(decodedData.map(({ value }) => value)).to.eql([
       {
@@ -156,8 +156,8 @@ describe('decodeData', () => {
         },
         url: 'ipfs://QmW4nUNy3vtvr3DxZHuLfSLnhzKMe2WmgsUsEGPPFh8Ztp',
       },
-    ]);
-  });
+    ])
+  })
 
   it('parses non array input correctly', () => {
     const decodedData = decodeData(
@@ -165,11 +165,11 @@ describe('decodeData', () => {
         keyName: 'KeyOne',
         value: '0x1111',
       },
-      schemas,
-    );
+      schemas
+    )
 
-    expect(decodedData.name).to.eql('KeyOne');
-  });
+    expect(decodedData.name).to.eql('KeyOne')
+  })
 
   it('parses type tuples/Mixed correctly', () => {
     const schema: ERC725JSONSchema = {
@@ -178,7 +178,7 @@ describe('decodeData', () => {
       keyType: 'Singleton',
       valueType: '(bytes4,bytes8)',
       valueContent: '(Bytes4,Number)',
-    };
+    }
 
     const decodedData = decodeData(
       {
@@ -189,11 +189,11 @@ describe('decodeData', () => {
         //         bytes4     bytes8
         //         bytes4     number
       },
-      [schema],
-    );
+      [schema]
+    )
 
-    expect(decodedData.value).to.eql(['0x11223344', 12]);
-  });
+    expect(decodedData.value).to.eql(['0x11223344', 12])
+  })
 
   it('parses type Array correctly', () => {
     const decodedData = decodeData(
@@ -222,15 +222,15 @@ describe('decodeData', () => {
           valueContent: 'Address',
           valueType: 'address',
         },
-      ],
-    );
+      ]
+    )
 
-    expect(decodedData.name).to.eql('LSP12IssuedAssets[]');
+    expect(decodedData.name).to.eql('LSP12IssuedAssets[]')
     expect(decodedData.value).to.eql([
       '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
       '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826',
-    ]);
-  });
+    ])
+  })
 
   it('parses type Array correctly (even with uint256)', () => {
     const decodedData = decodeData(
@@ -260,15 +260,15 @@ describe('decodeData', () => {
           valueContent: 'Address',
           valueType: 'address',
         },
-      ],
-    );
+      ]
+    )
 
-    expect(decodedData.name).to.eql('LSP12IssuedAssets[]');
+    expect(decodedData.name).to.eql('LSP12IssuedAssets[]')
     expect(decodedData.value).to.eql([
       '0xD94353D9B005B3c0A9Da169b768a31C57844e490',
       '0xDaea594E385Fc724449E3118B2Db7E86dFBa1826',
-    ]);
-  });
+    ])
+  })
 
   it('parses type Array correctly but just the array length', () => {
     const decodedData = decodeData(
@@ -284,12 +284,12 @@ describe('decodeData', () => {
           valueContent: 'Address',
           valueType: 'address',
         },
-      ],
-    );
+      ]
+    )
 
-    expect(decodedData.name).to.eql('LSP12IssuedAssets[]');
-    expect(decodedData.value).to.eql(3);
-  });
+    expect(decodedData.name).to.eql('LSP12IssuedAssets[]')
+    expect(decodedData.value).to.eql(3)
+  })
 
   it('parses type Array correctly, return empty array when value is 0x', () => {
     const decodedData = decodeData(
@@ -305,12 +305,12 @@ describe('decodeData', () => {
           valueContent: 'Address',
           valueType: 'address',
         },
-      ],
-    );
+      ]
+    )
 
-    expect(decodedData.name).to.eql('LSP12IssuedAssets[]');
-    expect(decodedData.value).to.eql([]);
-  });
+    expect(decodedData.name).to.eql('LSP12IssuedAssets[]')
+    expect(decodedData.value).to.eql([])
+  })
 
   it('decodes dynamic keys', () => {
     const decodedData = decodeData(
@@ -335,16 +335,16 @@ describe('decodeData', () => {
           value: '0x2222',
         },
       ],
-      schemas,
-    );
+      schemas
+    )
 
     expect(decodedData.map(({ dynamicName }) => dynamicName)).to.eql([
       'MyKeyName2:0xaaaabbbbccccddddeeeeffff111122223333444455556666777788889999aaaa:true',
       'MyDynamicKey2:0xcafecafecafecafecafecafecafecafecafecafe',
       'KeyTwo',
-    ]);
-  });
-});
+    ])
+  })
+})
 
 describe('tuple', () => {
   describe('decodeTupleKeyValue', () => {
@@ -355,7 +355,7 @@ describe('tuple', () => {
         encodedValue: '0xdeadbeaf000000000000000c',
         decodedValue: ['0xdeadbeaf', 12],
       },
-    ]; // TODO: add more cases? Address, etc.
+    ] // TODO: add more cases? Address, etc.
 
     testCases.forEach((testCase) => {
       it('decodes tuple values', () => {
@@ -363,11 +363,11 @@ describe('tuple', () => {
           decodeTupleKeyValue(
             testCase.valueContent,
             testCase.valueType,
-            testCase.encodedValue,
-          ),
-        ).to.eql(testCase.decodedValue);
-      });
-    });
+            testCase.encodedValue
+          )
+        ).to.eql(testCase.decodedValue)
+      })
+    })
 
     describe('decodeTupleKeyValue larger', () => {
       const testCases = [
@@ -378,7 +378,7 @@ describe('tuple', () => {
             '0xdeadbeaf000000000000000c0000000000000000000000000000000000000000',
           decodedValue: ['0xdeadbeaf', 12],
         },
-      ]; // TODO: add more cases? Address, etc.
+      ] // TODO: add more cases? Address, etc.
 
       testCases.forEach((testCase) => {
         it('decodes tuple values', () => {
@@ -386,12 +386,12 @@ describe('tuple', () => {
             decodeTupleKeyValue(
               testCase.valueContent,
               testCase.valueType,
-              testCase.encodedValue,
-            ),
-          ).to.eql(testCase.decodedValue);
-        });
-      });
-    });
+              testCase.encodedValue
+            )
+          ).to.eql(testCase.decodedValue)
+        })
+      })
+    })
 
     describe('decodeTupleKeyValue compactArray', () => {
       const testCases = [
@@ -409,7 +409,7 @@ describe('tuple', () => {
             ],
           ],
         },
-      ]; // TODO: add more cases? Address, etc.
+      ] // TODO: add more cases? Address, etc.
 
       testCases.forEach((testCase) => {
         it('decodes tuple values', () => {
@@ -417,13 +417,13 @@ describe('tuple', () => {
             decodeTupleKeyValue(
               testCase.valueContent,
               testCase.valueType,
-              testCase.encodedValue,
-            ),
-          ).to.eql(testCase.decodedValue);
-        });
-      });
-    });
-  });
+              testCase.encodedValue
+            )
+          ).to.eql(testCase.decodedValue)
+        })
+      })
+    })
+  })
 
   describe('isValidTupleValueType', () => {
     const testCases = [
@@ -491,7 +491,7 @@ describe('tuple', () => {
         isTuple: false,
         shouldThrow: true, // valueContent is bytes5 vs bytes4
       },
-    ];
+    ]
 
     testCases.forEach((testCase) => {
       it(`detects valueType: ${testCase.valueType} valueContent: ${
@@ -499,15 +499,15 @@ describe('tuple', () => {
       } as ${testCase.isTuple ? 'tuple' : 'non tuple'}`, () => {
         if (testCase.shouldThrow) {
           expect(() => {
-            isValidTuple(testCase.valueType, testCase.valueContent);
-          }).to.throw();
-          return;
+            isValidTuple(testCase.valueType, testCase.valueContent)
+          }).to.throw()
+          return
         }
 
         expect(
-          isValidTuple(testCase.valueType, testCase.valueContent),
-        ).to.equal(testCase.isTuple);
-      });
-    });
-  });
-});
+          isValidTuple(testCase.valueType, testCase.valueContent)
+        ).to.equal(testCase.isTuple)
+      })
+    })
+  })
+})

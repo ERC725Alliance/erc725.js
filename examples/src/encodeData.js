@@ -1,8 +1,8 @@
 // https://stackoverflow.com/questions/60059121/nodejs-es6-imports-cannot-find-module#comment106219502_60059121
 // eslint-disable-next-line import/extensions
-import { getInstance, profileJson } from './instantiation.js';
+import { getInstance, profileJson } from './instantiation.js'
 
-const myERC725 = getInstance();
+const myERC725 = getInstance()
 
 const encodedDataOneKey = myERC725.encodeData({
   keyName: 'LSP3Profile',
@@ -10,7 +10,7 @@ const encodedDataOneKey = myERC725.encodeData({
     json: profileJson, // check instantiation.js to see the actual JSON
     url: 'ipfs://QmQTqheBLZFnQUxu5RDs8tA9JtkxfZqMBcmGd9sukXxwRm',
   },
-});
+})
 /**
 {
   keys: [
@@ -31,7 +31,7 @@ const encodedDataOneKeyV2 = myERC725.encodeData({
     },
     url: 'ipfs://QmYr1VJLwerg6pEoscdhVGugo39pa6rycEZLjtRPDfW84UAx',
   },
-});
+})
 /**
 {
   keys: [
@@ -65,7 +65,7 @@ const encodedDataManyKeys = myERC725.encodeData([
     keyName: 'LSP1UniversalReceiverDelegate',
     value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
   },
-]);
+])
 /**
 {
   keys: [
@@ -85,15 +85,15 @@ const encodedDataManyKeys = myERC725.encodeData([
 }
 */
 
-console.log('/*-----------------------------------------------------/*');
-console.log('/* encodedData - one key (LSP3Profile) with JSON       /*');
-console.log('/*-----------------------------------------------------/*');
-console.log(encodedDataOneKey);
-console.log('/*-----------------------------------------------------/*');
-console.log('/* encodedData - one key (LSP3Profile) with hash       /*');
-console.log('/*-----------------------------------------------------/*');
-console.log(encodedDataOneKeyV2);
-console.log('/*-----------------------------------------------------/*');
-console.log('/* encodedData - many keys                             /*');
-console.log('/*-----------------------------------------------------/*');
-console.log(encodedDataManyKeys);
+console.log('/*-----------------------------------------------------/*')
+console.log('/* encodedData - one key (LSP3Profile) with JSON       /*')
+console.log('/*-----------------------------------------------------/*')
+console.log(encodedDataOneKey)
+console.log('/*-----------------------------------------------------/*')
+console.log('/* encodedData - one key (LSP3Profile) with hash       /*')
+console.log('/*-----------------------------------------------------/*')
+console.log(encodedDataOneKeyV2)
+console.log('/*-----------------------------------------------------/*')
+console.log('/* encodedData - many keys                             /*')
+console.log('/*-----------------------------------------------------/*')
+console.log(encodedDataManyKeys)

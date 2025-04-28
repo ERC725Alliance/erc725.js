@@ -22,82 +22,80 @@
 import type {
   DecodeDataOutput,
   GetDataExternalSourcesOutput,
-} from '../types/decodeData';
-import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
-import { isDataAuthentic, patchIPFSUrlsIfApplicable } from './utils';
-import type { URLDataWithHash } from '../types';
+} from '../types/decodeData'
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema'
+import { isDataAuthentic, patchIPFSUrlsIfApplicable } from './utils'
+import type { URLDataWithHash } from '../types'
 
 export const getDataFromExternalSources = (
   schemas: ERC725JSONSchema[],
   dataFromChain: DecodeDataOutput[],
-  ipfsGateway: string,
+  ipfsGateway: string
 ): Promise<GetDataExternalSourcesOutput[]> => {
   const promises = dataFromChain.map(async (dataEntry) => {
-    const schemaElement = schemas.find(
-      (schema) => schema.key === dataEntry.key,
-    );
+    const schemaElement = schemas.find((schema) => schema.key === dataEntry.key)
 
     if (!schemaElement) {
       // It is weird if we can't find the schema element for the key...
       // Let's simply ignore and return it...
-      return dataEntry;
+      return dataEntry
     }
 
     if (
       !['jsonurl', 'asseturl', 'verifiableuri'].includes(
-        schemaElement.valueContent.toLowerCase(),
+        schemaElement.valueContent.toLowerCase()
       )
     ) {
-      return dataEntry;
+      return dataEntry
     }
 
     try {
       // At this stage, value should be of type jsonurl, verifiableuri or asseturl
       if (typeof dataEntry.value === 'string') {
         throw new Error(
-          `Value of key: ${dataEntry.name} (${dataEntry.value}) is string but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,
-        );
+          `Value of key: ${dataEntry.name} (${dataEntry.value}) is string but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`
+        )
       }
 
       if (!dataEntry.value) {
-        throw new Error(`Value of key: ${dataEntry.name} is empty`);
+        throw new Error(`Value of key: ${dataEntry.name} is empty`)
       }
 
       if (Array.isArray(dataEntry.value)) {
         throw new Error(
-          `Value of key: ${dataEntry.name} (${dataEntry.value}) is string[] but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`,
-        );
+          `Value of key: ${dataEntry.name} (${dataEntry.value}) is string[] but valueContent is: ${schemaElement.valueContent}. Expected type should be object with url key.`
+        )
       }
 
       const urlDataWithHash: URLDataWithHash =
-        dataEntry.value as URLDataWithHash; // Type URLDataWithHash
+        dataEntry.value as URLDataWithHash // Type URLDataWithHash
 
       const { url } = patchIPFSUrlsIfApplicable(
         urlDataWithHash as URLDataWithHash,
-        ipfsGateway,
-      );
+        ipfsGateway
+      )
 
       try {
-        let receivedData: Uint8Array;
-        const [, encoding, data] = url.match(/^data:.*?;(.*?),(.*)$/) || [];
+        let receivedData: Uint8Array
+        const [, encoding, data] = url.match(/^data:.*?;(.*?),(.*)$/) || []
         if (data) {
           receivedData = new TextEncoder().encode(
-            encoding === 'base64' ? atob(data) : data,
-          );
+            encoding === 'base64' ? atob(data) : data
+          )
         } else {
           if (/[=?/]$/.test(url)) {
             // this URL is not verifiable and the URL ends with a / or ? or = meaning it's not a file
             // and more likely to be some kind of directory or query BaseURI
-            return dataEntry;
+            return dataEntry
           }
           receivedData = await fetch(url).then(async (response) => {
             if (!response.ok) {
-              throw new Error(response.statusText);
+              throw new Error(response.statusText)
             }
             return response
               .arrayBuffer()
-              .then((buffer) => new Uint8Array(buffer));
-          });
+              .then((buffer) => new Uint8Array(buffer))
+          })
         }
         if (receivedData.length >= 2) {
           // JSON data cannot be less than 2 characters long.
@@ -112,18 +110,18 @@ export const getDataFromExternalSources = (
             // The 3 bytes can be `]` or '}' with either SPACE, LF or CRLF at the end.
             // When editing JSON using a text editor, a lot of time it's pretty printed
             // and an empty line added to the end. This is a common pattern.
-            const capture: number[] = [];
-            capture.push(receivedData[0]);
+            const capture: number[] = []
+            capture.push(receivedData[0])
             if (receivedData.length > 3) {
-              capture.push(receivedData[receivedData.length - 3]);
+              capture.push(receivedData[receivedData.length - 3])
             }
             if (receivedData.length > 2) {
-              capture.push(receivedData[receivedData.length - 2]);
+              capture.push(receivedData[receivedData.length - 2])
             }
             if (receivedData.length > 1) {
-              capture.push(receivedData[receivedData.length - 1]);
+              capture.push(receivedData[receivedData.length - 1])
             }
-            const key = String.fromCharCode.apply(null, capture);
+            const key = String.fromCharCode.apply(null, capture)
             // Currently not supported even though they could be added and can represent valid JSON.
             // " " => JSON.stringify("") NOT SUPPORTED as valid JSON
             // t or f and e => JSON.stringify(true) or JSON.stringify(false) NOT SUPPORTED as valid JSON
@@ -133,65 +131,65 @@ export const getDataFromExternalSources = (
             // { and } => JSON.stringify({...}) => pretty much 100% of our JSON will be this.
             // [ and ] => JSON.stringify([...])
             if (/^(\[.*\]|\{.*\})\s*$/.test(key)) {
-              const json = new TextDecoder().decode(receivedData);
-              const value = JSON.parse(json);
-              const mismatchedHashes = [];
+              const json = new TextDecoder().decode(receivedData)
+              const value = JSON.parse(json)
+              const mismatchedHashes = []
               if (
                 isDataAuthentic(
                   value,
                   urlDataWithHash.verification,
-                  mismatchedHashes,
+                  mismatchedHashes
                 )
               ) {
-                return { ...dataEntry, value };
+                return { ...dataEntry, value }
               }
               if (
                 isDataAuthentic(
                   receivedData,
                   urlDataWithHash.verification,
-                  mismatchedHashes,
+                  mismatchedHashes
                 )
               ) {
-                return { ...dataEntry, value };
+                return { ...dataEntry, value }
               }
               console.error(
                 `Hash mismatch, calculated hashes ("${mismatchedHashes.join(
-                  '", "',
+                  '", "'
                 )}") are both different from expected hash "${
                   urlDataWithHash.verification.data
-                }"`,
-              );
-              throw new Error('result did not correctly validate');
+                }"`
+              )
+              throw new Error('result did not correctly validate')
             }
           } catch {
             // ignore
           }
         }
         if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
-          return { ...dataEntry, value: receivedData };
+          return { ...dataEntry, value: receivedData }
         }
         return {
           ...dataEntry,
           value: null,
           error: new Error('result did not correctly validate'),
-        };
+        }
       } catch (error: any) {
-        error.message = `GET request to ${urlDataWithHash.url} (resolved as ${url}) failed: ${error.message}`;
+        error.message = `GET request to ${urlDataWithHash.url} (resolved as ${url}) failed: ${error.message}`
         return {
           ...dataEntry,
           value: null,
           error: new Error('result did not correctly validate'),
-        };
+        }
       }
     } catch (error: any) {
-      error.message = `Value of key: ${dataEntry.name} has an error: ${error.message}`;
+      error.message = `Value of key: ${dataEntry.name} has an error: ${error.message}`
       return {
         ...dataEntry,
         value: null,
         error: new Error('result did not correctly validate'),
-      };
+      }
     }
-  });
+  })
 
-  return Promise.all(promises);
-};
+  return Promise.all(promises)
+}

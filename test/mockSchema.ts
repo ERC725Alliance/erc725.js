@@ -1,31 +1,31 @@
 // Mock schema for tests
 // make one schema that tests every single type
 
-import { encodeParameter } from 'web3-eth-abi';
-import { keccak256, leftPad, utf8ToBytes, utf8ToHex } from 'web3-utils';
+import { encodeParameter } from 'web3-eth-abi'
+import { keccak256, leftPad, utf8ToBytes, utf8ToHex } from 'web3-utils'
 
-import type { ERC725JSONSchema } from '../src/types/ERC725JSONSchema';
+import type { ERC725JSONSchema } from '../src/types/ERC725JSONSchema'
 
-const mockJsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
+const mockJsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`
 
 export const mockJson = {
   hash: keccak256(utf8ToBytes(mockJsonString)),
   data: mockJsonString,
   url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
-};
+}
 
-const mockJsonString2 = '{"test1":"value1","test2":"value2","test3":"value3"}';
+const mockJsonString2 = '{"test1":"value1","test2":"value2","test3":"value3"}'
 
 export const mockJson2 = {
   hash: keccak256(utf8ToBytes(mockJsonString2)),
   data: mockJsonString2,
   url: 'ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd', // dummy url
-};
+}
 
 export const mockSchema: (ERC725JSONSchema & {
-  returnGraphData?;
-  dynamicKeyParts?: string | string[];
-  expectedResult?;
+  returnGraphData?
+  dynamicKeyParts?: string | string[]
+  expectedResult?
 })[] = [
   // Case 1
   {
@@ -111,7 +111,7 @@ export const mockSchema: (ERC725JSONSchema & {
     valueContent: 'Markdown',
     valueType: 'bytes',
     returnGraphData: utf8ToHex(
-      '# Testing markdown. \n Welcome to markdown **test**.',
+      '# Testing markdown. \n Welcome to markdown **test**.'
     ),
     expectedResult: '# Testing markdown. \n Welcome to markdown **test**.',
   },
@@ -137,7 +137,7 @@ export const mockSchema: (ERC725JSONSchema & {
     valueContent: 'URL',
     valueType: 'bytes',
     returnGraphData: utf8ToHex(
-      'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
+      'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd'
     ),
     expectedResult: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
   },
@@ -561,4 +561,4 @@ export const mockSchema: (ERC725JSONSchema & {
   //   ]
 
   // },
-];
+]

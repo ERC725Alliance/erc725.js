@@ -18,17 +18,17 @@
  * @date 2022
  */
 
-import { padLeft, padRight } from 'web3-utils';
-import { isHex } from 'web3-validator';
-import { decodeValueType } from './encoder';
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
-import { DynamicKeyPart } from '../types/dynamicKeys';
+import { padLeft, padRight } from 'web3-utils'
+import { isHex } from 'web3-validator'
+import { decodeValueType } from './encoder'
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema'
+import type { DynamicKeyPart } from '../types/dynamicKeys'
 
 function isDynamicKeyPart(keyPartName: string): boolean {
   return (
     keyPartName.slice(0, 1) === '<' &&
     keyPartName.slice(keyPartName.length - 1) === '>'
-  );
+  )
 }
 
 /**
@@ -39,32 +39,32 @@ function isDynamicKeyPart(keyPartName: string): boolean {
  */
 function decodeKeyPart(
   encodedKeyPart: string,
-  keyPartName: string,
+  keyPartName: string
 ): DynamicKeyPart | false {
-  if (!isDynamicKeyPart(keyPartName)) return false;
+  if (!isDynamicKeyPart(keyPartName)) return false
 
-  let decodedKey: string | number | boolean | undefined;
-  const type = keyPartName.slice(1, keyPartName.length - 1);
+  let decodedKey: string | number | boolean | undefined
+  const type = keyPartName.slice(1, keyPartName.length - 1)
   if (type === 'bool') {
-    decodedKey = encodedKeyPart.slice(encodedKeyPart.length - 1) === '1';
+    decodedKey = encodedKeyPart.slice(encodedKeyPart.length - 1) === '1'
   } else if (type.includes('uint'))
-    decodedKey = Number.parseInt(encodedKeyPart, 16);
+    decodedKey = Number.parseInt(encodedKeyPart, 16)
   else if (type.includes('bytes')) {
-    const charLength = Number.parseInt(type.replace('bytes', ''), 10) * 2;
+    const charLength = Number.parseInt(type.replace('bytes', ''), 10) * 2
     decodedKey = padRight(
       `0x${encodedKeyPart.slice(0, charLength)}`,
-      charLength,
-    );
+      charLength
+    )
   } else if (type === 'address') {
     // this is required if the 2nd word is an address in a MappingWithGrouping
-    const leftPaddedAddress = padLeft(`0x${encodedKeyPart}`, 40);
+    const leftPaddedAddress = padLeft(`0x${encodedKeyPart}`, 40)
 
-    decodedKey = decodeValueType(type, leftPaddedAddress);
+    decodedKey = decodeValueType(type, leftPaddedAddress)
   } else {
-    decodedKey = decodeValueType(type, encodedKeyPart);
+    decodedKey = decodeValueType(type, encodedKeyPart)
   }
 
-  return { type, value: decodedKey as string | number | boolean };
+  return { type, value: decodedKey as string | number | boolean }
 }
 
 /**
@@ -75,44 +75,43 @@ function decodeKeyPart(
  */
 export function decodeMappingKey(
   keyHash: string,
-  keyNameOrSchema: string | ERC725JSONSchema,
+  keyNameOrSchema: string | ERC725JSONSchema
 ): DynamicKeyPart[] {
-  let hashedKey = keyHash;
+  let hashedKey = keyHash
   if (hashedKey.length === 64 && hashedKey.slice(0, 2) !== '0x')
-    hashedKey = `0x${hashedKey}`;
+    hashedKey = `0x${hashedKey}`
 
   if (hashedKey.length !== 66)
     throw new Error(
-      'Invalid encodedKey length, key must be 32 bytes long hexadecimal value',
-    );
+      'Invalid encodedKey length, key must be 32 bytes long hexadecimal value'
+    )
   if (!isHex(hashedKey.slice(2)))
-    throw new Error('Invalid encodedKey, must be a hexadecimal value');
+    throw new Error('Invalid encodedKey, must be a hexadecimal value')
 
-  let keyParts: string[];
+  let keyParts: string[]
 
-  if (typeof keyNameOrSchema === 'string')
-    keyParts = keyNameOrSchema.split(':');
-  else keyParts = keyNameOrSchema.name.split(':');
+  if (typeof keyNameOrSchema === 'string') keyParts = keyNameOrSchema.split(':')
+  else keyParts = keyNameOrSchema.name.split(':')
 
   if (keyParts.some((p) => p.includes('string'))) {
     throw new Error(
-      "String dynamic key parts cannot be decoded, because it's formatted as a keccak256 hash",
-    );
+      "String dynamic key parts cannot be decoded, because it's formatted as a keccak256 hash"
+    )
   }
 
-  const dynamicParts: (DynamicKeyPart | false)[] = [];
+  const dynamicParts: (DynamicKeyPart | false)[] = []
   switch (keyParts.length) {
     case 2: // Mapping
-      dynamicParts.push(decodeKeyPart(hashedKey.slice(26), keyParts[1]));
-      break;
+      dynamicParts.push(decodeKeyPart(hashedKey.slice(26), keyParts[1]))
+      break
 
     case 3: // MappingWithGrouping
-      dynamicParts.push(decodeKeyPart(hashedKey.slice(14, 22), keyParts[1]));
-      dynamicParts.push(decodeKeyPart(hashedKey.slice(26), keyParts[2]));
-      break;
+      dynamicParts.push(decodeKeyPart(hashedKey.slice(14, 22), keyParts[1]))
+      dynamicParts.push(decodeKeyPart(hashedKey.slice(26), keyParts[2]))
+      break
     default:
-      break;
+      break
   }
 
-  return dynamicParts.filter((p) => p !== false) as DynamicKeyPart[];
+  return dynamicParts.filter((p) => p !== false) as DynamicKeyPart[]
 }

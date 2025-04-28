@@ -1,12 +1,12 @@
-import Web3 from 'web3';
-import { ERC725 } from '@erc725/erc725.js';
+import Web3 from 'web3'
+import { ERC725 } from '@erc725/erc725.js'
 
 // this is needed because node does not support `fetch` out of the box
 // cross-fetch is not needed in a browser environment
-import 'cross-fetch';
+import 'cross-fetch'
 
-const RPC_ENDPOINT = 'https://rpc.testnet.lukso.network';
-const IPFS_GATEWAY = 'https://api.universalprofile.cloud/ipfs/';
+const RPC_ENDPOINT = 'https://rpc.testnet.lukso.network'
+const IPFS_GATEWAY = 'https://api.universalprofile.cloud/ipfs/'
 
 export function getInstance() {
   const schema = [
@@ -38,15 +38,15 @@ export function getInstance() {
       valueContent: 'Address',
       valueType: 'address',
     },
-  ];
+  ]
 
-  const address = '0x7b2C957209897bc4423162e57D8C3CA863DCfBCc';
-  const provider = new Web3.providers.HttpProvider(RPC_ENDPOINT);
+  const address = '0x7b2C957209897bc4423162e57D8C3CA863DCfBCc'
+  const provider = new Web3.providers.HttpProvider(RPC_ENDPOINT)
   const config = {
     ipfsGateway: IPFS_GATEWAY,
-  };
+  }
 
-  return new ERC725(schema, address, provider, config);
+  return new ERC725(schema, address, provider, config)
 }
 
 export const profileJson = {
@@ -135,4 +135,4 @@ export const profileJson = {
     ],
     tags: ['public profile'],
   },
-};
+}

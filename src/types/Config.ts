@@ -1,4 +1,4 @@
-import { ERC725JSONSchema } from './ERC725JSONSchema';
+import type { ERC725JSONSchema } from './ERC725JSONSchema'
 
 export interface ERC725Config {
   /**
@@ -11,14 +11,14 @@ export interface ERC725Config {
    * Make sure to use the following format: `<url>/ipfs/`.<br/>
    * Another example: `https://cloudflare-ipfs.com/ipfs/`
    */
-  ipfsGateway?: string;
-  gas?: number;
+  ipfsGateway?: string
+  gas?: number
 }
 
 export interface ERC725Options {
-  schemas: ERC725JSONSchema[];
-  address?: string;
-  provider?;
-  ipfsGateway: string;
-  gas: number;
+  schemas: ERC725JSONSchema[]
+  address?: string
+  provider?
+  ipfsGateway: string
+  gas: number
 }
