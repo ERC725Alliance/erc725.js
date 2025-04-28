@@ -2,13 +2,27 @@
 // make one schema that tests every single type
 
 import { encodeParameter } from 'web3-eth-abi';
-import { leftPad, utf8ToHex } from 'web3-utils';
+import { keccak256, leftPad, utf8ToBytes, utf8ToHex } from 'web3-utils';
 
-import { ERC725JSONSchema } from '../src/types/ERC725JSONSchema';
+import type { ERC725JSONSchema } from '../src/types/ERC725JSONSchema';
+
+const mockJsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
+
+export const mockJson = {
+  hash: keccak256(utf8ToBytes(mockJsonString)),
+  data: mockJsonString,
+  url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
+};
+
+const mockJsonString2 = '{"test1":"value1","test2":"value2","test3":"value3"}';
+
+export const mockJson2 = {
+  hash: keccak256(utf8ToBytes(mockJsonString2)),
+  data: mockJsonString2,
+  url: 'ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd', // dummy url
+};
 
 export const mockSchema: (ERC725JSONSchema & {
-  returnRawData?: string | string[];
-  returnRawDataArray?; // Used for the array version of getData()
   returnGraphData?;
   dynamicKeyParts?: string | string[];
   expectedResult?;
@@ -22,8 +36,6 @@ export const mockSchema: (ERC725JSONSchema & {
     valueContent: '0x5ef83ad9',
     valueType: 'bytes',
     // Testing data
-    returnRawData: encodeParameter('bytes', '0x5ef83ad9'),
-    returnRawDataArray: encodeParameter('bytes[]', ['0x5ef83ad9']),
     returnGraphData: '0x5ef83ad9',
     expectedResult: '0x5ef83ad9',
   },
@@ -36,20 +48,11 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'JSONURL',
     valueType: 'bytes',
-    // Testing data
-    returnRawData: encodeParameter(
-      'bytes',
-      '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
-    ]),
-    returnGraphData:
-      '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
+    returnGraphData: `0x00006f357c6a0020${mockJson.hash.slice(2)}697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264`,
     expectedResult: {
       verification: {
         method: 'keccak256(utf8)',
-        data: '0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d', // hash of stringified json
+        data: mockJson.hash, // hash of stringified json
       },
       url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd', // same JSON url from LSP3Profile below
     },
@@ -63,20 +66,11 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'AssetURL',
     valueType: 'bytes',
-    // Testing data
-    returnRawData: encodeParameter(
-      'bytes',
-      '0x00006f357c6a0020a7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      '0x00006f357c6a0020a7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
-    ]),
-    returnGraphData:
-      '0x00006f357c6a0020a7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
+    returnGraphData: `0x00006f357c6a0020${mockJson.hash.slice(2)}697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264`,
     expectedResult: {
       verification: {
         method: 'keccak256(utf8)',
-        data: '0xa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81', // hash of address '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
+        data: mockJson.hash, // hash of address '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
       },
       url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd', // FAKE. just used from above TODO: fix this is not an asset URL but a JSON url !!
     },
@@ -90,14 +84,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'Keccak256',
     valueType: 'bytes32',
-    // Testing data
-    returnRawData: encodeParameter(
-      'bytes',
-      '0x4d75a97aff0964309140e9821514861e5ddcc827113b70a2b69db16dde0695dc',
-    ), // this is bytes
-    returnRawDataArray: encodeParameter('bytes[]', [
-      '0x4d75a97aff0964309140e9821514861e5ddcc827113b70a2b69db16dde0695dc',
-    ]),
     returnGraphData:
       '0x4d75a97aff0964309140e9821514861e5ddcc827113b70a2b69db16dde0695dc',
     expectedResult:
@@ -112,14 +98,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'Address',
     valueType: 'bytes',
-    // Testing data
-    returnRawData: encodeParameter(
-      'bytes',
-      '0x0c03fba782b07bcf810deb3b7f0595024a444f4e',
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      '0x0c03fba782b07bcf810deb3b7f0595024a444f4e',
-    ]),
     returnGraphData: '0x0c03fba782b07bcf810deb3b7f0595024a444f4e',
     expectedResult: '0x0C03fBa782b07bCf810DEb3b7f0595024A444F4e', // a real address
   },
@@ -132,14 +110,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'Markdown',
     valueType: 'bytes',
-    // Testing data
-    returnRawData: encodeParameter(
-      'bytes',
-      utf8ToHex('# Testing markdown. \n Welcome to markdown **test**.'),
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      utf8ToHex('# Testing markdown. \n Welcome to markdown **test**.'),
-    ]),
     returnGraphData: utf8ToHex(
       '# Testing markdown. \n Welcome to markdown **test**.',
     ),
@@ -154,9 +124,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'String',
     valueType: 'string',
-    // Testing data
-    returnRawData: encodeParameter('bytes', utf8ToHex('john-snow')),
-    returnRawDataArray: encodeParameter('bytes[]', [utf8ToHex('john-snow')]),
     returnGraphData: utf8ToHex('john-snow'),
     expectedResult: 'john-snow',
   },
@@ -169,14 +136,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'URL',
     valueType: 'bytes',
-    // testing data
-    returnRawData: encodeParameter(
-      'bytes',
-      utf8ToHex('ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd'),
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      utf8ToHex('ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd'),
-    ]),
     returnGraphData: utf8ToHex(
       'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
     ),
@@ -191,22 +150,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Array',
     valueContent: 'Address',
     valueType: 'address',
-    // testing data
-    // the full array of values
-    returnRawData: [
-      encodeParameter('bytes', leftPad(2, 32)), // array length
-      encodeParameter('bytes', '0xc444009d38d3046bb0cf81fa2cd295ce46a67c78'),
-      encodeParameter('bytes', '0x4febc3491230571f6e1829e46602e3b110215a2e'),
-    ],
-    returnRawDataArray: [
-      encodeParameter('bytes[]', [leftPad(2, 32)]), // array length
-      encodeParameter('bytes[]', [
-        '0xc444009d38d3046bb0cf81fa2cd295ce46a67c78',
-      ]),
-      encodeParameter('bytes[]', [
-        '0x4febc3491230571f6e1829e46602e3b110215a2e',
-      ]),
-    ],
     returnGraphData: [
       leftPad(2, 32), // array length
       '0xc444009d38d3046bb0cf81fa2cd295ce46a67c78',
@@ -225,20 +168,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Array',
     valueContent: 'Address',
     valueType: 'address',
-    // testing data
-    // the full array of values
-    returnRawData: [
-      encodeParameter('bytes', leftPad(2, 32)), // array length
-      encodeParameter('bytes', '0x'),
-      encodeParameter('bytes', '0x4febc3491230571f6e1829e46602e3b110215a2e'),
-    ],
-    returnRawDataArray: [
-      encodeParameter('bytes[]', [leftPad(2, 32)]),
-      encodeParameter('bytes[]', ['0x']),
-      encodeParameter('bytes[]', [
-        '0x4febc3491230571f6e1829e46602e3b110215a2e',
-      ]),
-    ],
     returnGraphData: [
       leftPad(2, 32), // array length
       '0x',
@@ -257,29 +186,9 @@ export const mockSchema: (ERC725JSONSchema & {
     valueType: 'bytes',
     // testing data
     // the full array of values
-    returnRawData: [
-      encodeParameter('bytes', leftPad(2, 32)), // array length
-      encodeParameter(
-        'bytes',
-        '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
-      ),
-      encodeParameter(
-        'bytes',
-        '0x00006f357c6a002081bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88697066733a2f2f516d6245724b6833466a7378787878787878787878787878787878787878787878787878787639414a4a765a6264',
-      ),
-    ],
-    returnRawDataArray: [
-      encodeParameter('bytes[]', [leftPad(2, 32)]),
-      encodeParameter('bytes[]', [
-        '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
-      ]),
-      encodeParameter('bytes[]', [
-        '0x00006f357c6a002081bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88697066733a2f2f516d6245724b6833466a7378787878787878787878787878787878787878787878787878787639414a4a765a6264',
-      ]),
-    ],
     returnGraphData: [
       leftPad(2, 32), // array length
-      '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
+      `0x00006f357c6a0020${mockJson.hash.slice(2)}697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264`,
       '0x00006f357c6a002081bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88697066733a2f2f516d6245724b6833466a7378787878787878787878787878787878787878787878787878787639414a4a765a6264',
     ],
     expectedResult: [
@@ -287,7 +196,7 @@ export const mockSchema: (ERC725JSONSchema & {
       {
         verification: {
           method: 'keccak256(utf8)',
-          data: '0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d', // hash of stringified json
+          data: mockJson.hash, // hash of stringified json
         },
         url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd', // same JSON url from LSP3Profile below
       },
@@ -295,13 +204,12 @@ export const mockSchema: (ERC725JSONSchema & {
       {
         verification: {
           method: 'keccak256(utf8)',
-          data: '0x81bd0b7ed5ac354abbf24619ce16933f00a4bdfa8fcaf3791d25f69b497abf88', // hash of stringified json
+          data: mockJson2.hash, // hash of stringified json
         },
         url: 'ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd', // dummy url
       },
     ],
   },
-
   // // Testing other valueTypes
 
   // Case 11
@@ -312,9 +220,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'String',
     valueType: 'string',
-    // Test data
-    returnRawData: encodeParameter('bytes', utf8ToHex('Great-string')),
-    returnRawDataArray: encodeParameter('bytes[]', [utf8ToHex('Great-string')]),
     returnGraphData: utf8ToHex('Great-string'),
     expectedResult: 'Great-string',
   },
@@ -327,14 +232,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'Number',
     valueType: 'uint256',
-    // Test data
-    returnRawData: encodeParameter(
-      'bytes',
-      '0x0000000000000000000000000000000000000000000000000000000000000063',
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      '0x0000000000000000000000000000000000000000000000000000000000000063',
-    ]),
     returnGraphData:
       '0x0000000000000000000000000000000000000000000000000000000000000063',
     expectedResult: 99,
@@ -348,14 +245,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'Number',
     valueType: 'bytes',
-    // Test data
-    returnRawData: encodeParameter(
-      'bytes',
-      '0x0000000000000000000000000000000000000000000000000000000000000063',
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      '0x0000000000000000000000000000000000000000000000000000000000000063',
-    ]),
     returnGraphData: '0x63',
     expectedResult: 99,
   },
@@ -368,14 +257,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'String',
     valueType: 'bytes',
-    // Test data
-    returnRawData: encodeParameter(
-      'bytes',
-      utf8ToHex('Ok this is a string stored as bytes...'),
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      utf8ToHex('Ok this is a string stored as bytes...'),
-    ]),
     returnGraphData: utf8ToHex('Ok this is a string stored as bytes...'),
     expectedResult: 'Ok this is a string stored as bytes...',
   },
@@ -389,20 +270,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'String',
     valueType: 'string[]',
-    // Testing fields
-    returnRawData: encodeParameter(
-      'bytes',
-      encodeParameter('bytes[]', [
-        utf8ToHex('apple sauce'),
-        utf8ToHex('butter chicken'),
-      ]),
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      encodeParameter('bytes[]', [
-        utf8ToHex('apple sauce'),
-        utf8ToHex('butter chicken'),
-      ]),
-    ]),
     returnGraphData: encodeParameter('bytes[]', [
       utf8ToHex('apple sauce'),
       utf8ToHex('butter chicken'),
@@ -418,20 +285,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'String',
     valueType: 'bytes[]',
-    // Testing fields
-    returnRawData: encodeParameter(
-      'bytes',
-      encodeParameter('bytes[]', [
-        utf8ToHex('apple sauce'),
-        utf8ToHex('butter chicken'),
-      ]),
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      encodeParameter('bytes[]', [
-        utf8ToHex('apple sauce'),
-        utf8ToHex('butter chicken'),
-      ]),
-    ]),
     returnGraphData: encodeParameter('bytes[]', [
       utf8ToHex('apple sauce'),
       utf8ToHex('butter chicken'),
@@ -447,20 +300,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'Address',
     valueType: 'address[]',
-    // Testing fields
-    returnRawData: encodeParameter(
-      'bytes',
-      encodeParameter('address[]', [
-        '0xCE3e75A43B0A29292219926EAdC8C5585651219C',
-        '0xba61a0b24a228807f23b46064773d28fe51da81c',
-      ]),
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      encodeParameter('address[]', [
-        '0xCE3e75A43B0A29292219926EAdC8C5585651219C',
-        '0xba61a0b24a228807f23b46064773d28fe51da81c',
-      ]),
-    ]),
     returnGraphData: encodeParameter('address[]', [
       '0xCE3e75A43B0A29292219926EAdC8C5585651219C',
       '0xba61a0b24a228807f23b46064773d28fe51da81c',
@@ -479,14 +318,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'Number',
     valueType: 'uint256[]',
-    // Testing fields
-    returnRawData: encodeParameter(
-      'bytes',
-      encodeParameter('uint256[]', [123, 456]),
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      encodeParameter('uint256[]', [123, 456]),
-    ]),
     returnGraphData: encodeParameter('uint256[]', [123, 456]),
     expectedResult: [
       123, // (firefox metamask key)
@@ -502,20 +333,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'Keccak256',
     valueType: 'bytes32[]',
-    // Testing fields
-    returnRawData: encodeParameter(
-      'bytes',
-      encodeParameter('bytes32[]', [
-        '0xe5d35cae7c9db9879eb8a205baa046ad99503414d6a55eb6725494a4254a6d3f',
-        '0x828e919feac2ec05939abd5d221692fbe6bac5667ba5af5d191df1f7ecb1ac21',
-      ]),
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      encodeParameter('bytes32[]', [
-        '0xe5d35cae7c9db9879eb8a205baa046ad99503414d6a55eb6725494a4254a6d3f',
-        '0x828e919feac2ec05939abd5d221692fbe6bac5667ba5af5d191df1f7ecb1ac21',
-      ]),
-    ]),
     returnGraphData: encodeParameter('bytes32[]', [
       '0xe5d35cae7c9db9879eb8a205baa046ad99503414d6a55eb6725494a4254a6d3f',
       '0x828e919feac2ec05939abd5d221692fbe6bac5667ba5af5d191df1f7ecb1ac21',
@@ -534,20 +351,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'URL',
     valueType: 'string[]',
-    // Testing fields
-    returnRawData: encodeParameter(
-      'bytes',
-      encodeParameter('string[]', [
-        'ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd',
-        'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
-      ]),
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      encodeParameter('string[]', [
-        'ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd',
-        'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
-      ]),
-    ]),
     returnGraphData: encodeParameter('string[]', [
       'ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd',
       'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
@@ -567,14 +370,6 @@ export const mockSchema: (ERC725JSONSchema & {
     valueContent:
       '0x9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658', // keccak hash of 'test'
     valueType: 'bytes32',
-    // Testing data
-    returnRawData: encodeParameter(
-      'bytes',
-      '0x9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658',
-    ), // this is bytes
-    returnRawDataArray: encodeParameter('bytes[]', [
-      '0x9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658',
-    ]),
     returnGraphData:
       '0x9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658',
     expectedResult:
@@ -589,9 +384,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Mapping',
     valueContent: '0x5ef83ad9',
     valueType: 'bytes',
-    // Testing data
-    returnRawData: encodeParameter('bytes', '0x5ef83ad9'),
-    returnRawDataArray: encodeParameter('bytes[]', ['0x5ef83ad9']),
     returnGraphData: '0x5ef83ad9',
     expectedResult: '0x5ef83ad9',
   },
@@ -604,9 +396,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'MappingWithGrouping',
     valueContent: '0x5ef83ad9',
     valueType: 'bytes',
-    // Testing data
-    returnRawData: encodeParameter('bytes', '0x5ef83ad9'),
-    returnRawDataArray: encodeParameter('bytes[]', ['0x5ef83ad9']),
     returnGraphData: '0x5ef83ad9',
     expectedResult: '0x5ef83ad9',
   },
@@ -618,19 +407,11 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'AssetURL',
     valueType: 'bytes',
-    // Testing data
-    returnRawData: encodeParameter(
-      'bytes',
-      '0x6f357c6aa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      '0x6f357c6aa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
-    ]),
-    returnGraphData: '0x0c03fba782b07bcf810deb3b7f0595024a444f4e',
+    returnGraphData: `0x6f357c6a${mockJson.hash.slice(2)}697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264`,
     expectedResult: {
       verification: {
         method: 'keccak256(utf8)',
-        data: '0xa7d9a84b44013f71356d72e6c15fdc2533c573271c53d053ed8ddcdaa60f4c81', // hash of address '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
+        data: mockJson.hash, // hash of address '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
       },
       url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd', // FAKE. just used from above TODO: fix this is not an asset URL but a JSON url !!
     },
@@ -642,9 +423,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'Bytes4',
     valueType: 'bytes',
-    // Test data
-    returnRawData: encodeParameter('bytes', '0xcafecafe'),
-    returnRawDataArray: encodeParameter('bytes[]', ['0xcafecafe']),
     expectedResult: '0xcafecafe',
     returnGraphData: '0xcafecafe',
   },
@@ -655,14 +433,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'Bytes32',
     valueType: 'bytes32',
-    // Test data
-    returnRawData: encodeParameter(
-      'bytes',
-      '0xcafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe',
-    ),
-    returnRawDataArray: encodeParameter('bytes[]', [
-      '0xcafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe',
-    ]),
     expectedResult:
       '0xcafecafecafecafecafecafecafecafecafecafecafecafecafecafecafecafe',
     returnGraphData:
@@ -675,9 +445,6 @@ export const mockSchema: (ERC725JSONSchema & {
     keyType: 'Singleton',
     valueContent: 'Bytes4',
     valueType: 'bytes4',
-    // Test data
-    returnRawData: encodeParameter('bytes', '0xcafecafe'),
-    returnRawDataArray: encodeParameter('bytes[]', ['0xcafecafe']),
     expectedResult: '0xcafecafe',
     returnGraphData: '0xcafecafe',
   },
@@ -693,12 +460,6 @@ export const mockSchema: (ERC725JSONSchema & {
   //   "valueType": "string[]",
   //   // testing data
   //   // the full array of values
-  //   "returnRawData": [
-  //     "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003", // array length
-  //     "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000016000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000000a737472696e672d6f6e6500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a737472696e672d74776f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c737472696e672d74687265650000000000000000000000000000000000000000",
-  //     "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b737472696e672d666f7572000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000b737472696e672d66697665000000000000000000000000000000000000000000",
-  //     "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000a737472696e672d73697800000000000000000000000000000000000000000000",
-  //   ],
   //   "returnGraphData": [
   //     "0x0000000000000000000000000000000000000000000000000000000000000003", // array length
   //     "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000000a737472696e672d6f6e6500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a737472696e672d74776f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c737472696e672d74687265650000000000000000000000000000000000000000",
@@ -722,12 +483,6 @@ export const mockSchema: (ERC725JSONSchema & {
   //   "valueType": "bytes[]",
   //   // testing data
   //   // the full array of values
-  //   "returnRawData": [
-  //     "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003", // array length
-  //     "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000001c000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000000396f357c6acadb1115f687654d9b8077b1c0b8553f294e54862cf17e6afc0cade73dc35c88697066733a2f2f51773039656a66646b6a667878780000000000000000000000000000000000000000000000000000000000000000000000000000396f357c6ab0bf98bf562a0191622eb530e185cff88dc086b92faa27cb535513a62591a5f7697066733a2f2f51773039656a66646b6a667979790000000000000000000000000000000000000000000000000000000000000000000000000000396f357c6ad74263f10a321b733c6dc6aea656e383ce31d653814d1bcb35630729d2bf993c697066733a2f2f51773039656a66646b6a667a7a7a00000000000000",
-  //     "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000396f357c6acadb1115f687654d9b8077b1c0b8553f294e54862cf17e6afc0cade73dc35c88697066733a2f2f51773039656a66646b6a667878780000000000000000000000000000000000000000000000000000000000000000000000000000396f357c6ab0bf98bf562a0191622eb530e185cff88dc086b92faa27cb535513a62591a5f7697066733a2f2f51773039656a66646b6a6679797900000000000000",
-  //     "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000396f357c6acadb1115f687654d9b8077b1c0b8553f294e54862cf17e6afc0cade73dc35c88697066733a2f2f51773039656a66646b6a6678787800000000000000",
-  //   ],
   //   "returnGraphData": [
   //     "0x0000000000000000000000000000000000000000000000000000000000000003", // array length
   //     "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000000396f357c6acadb1115f687654d9b8077b1c0b8553f294e54862cf17e6afc0cade73dc35c88697066733a2f2f51773039656a66646b6a667878780000000000000000000000000000000000000000000000000000000000000000000000000000396f357c6ab0bf98bf562a0191622eb530e185cff88dc086b92faa27cb535513a62591a5f7697066733a2f2f51773039656a66646b6a667979790000000000000000000000000000000000000000000000000000000000000000000000000000396f357c6ad74263f10a321b733c6dc6aea656e383ce31d653814d1bcb35630729d2bf993c697066733a2f2f51773039656a66646b6a667a7a7a00000000000000",

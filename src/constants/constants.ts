@@ -56,19 +56,19 @@ export enum ERC725_VERSION {
 export const METHODS: Record<Method, MethodData> = {
   [Method.GET_DATA_LEGACY]: {
     // Legacy version of ERC725Y - before v0.3.0
-    sig: '0x54f6127f',
+    sig: '0x54f6127f', // getData(bytes32)
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES,
   },
   [Method.GET_DATA]: {
     // https://github.com/ERC725Alliance/ERC725/blob/v4.0.0/docs/ERC-725.md#erc725y
-    sig: '0x4e3e6e9c',
+    sig: '0x4e3e6e9c', // getData(bytes32[])
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES_ARRAY,
   },
   [Method.GET_DATA_BATCH]: {
     // https://github.com/ERC725Alliance/ERC725/blob/v5.1.0/docs/ERC-725.md#erc725y
-    sig: '0xdedff9c6',
+    sig: '0xdedff9c6', // getDataBatch(bytes32[])
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES_ARRAY,
   },

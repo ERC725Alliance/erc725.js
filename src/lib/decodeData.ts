@@ -19,85 +19,88 @@
  * @author Callum Grindle <@CallumGrindle>
  * @date 2023
  */
-import { isHexStrict } from 'web3-utils';
+import { isHexStrict } from 'web3-utils'
 import {
   COMPACT_BYTES_ARRAY_STRING,
   COMPACT_BYTES_ARRAY_STRING_AT_END,
-} from '../constants/constants';
+} from '../constants/constants'
 
-import { DecodeDataInput, DecodeDataOutput } from '../types/decodeData';
+import type { DecodeDataInput, DecodeDataOutput } from '../types/decodeData'
 import {
   ALL_VALUE_TYPES,
-  ERC725JSONSchema,
+  type ERC725JSONSchema,
   isValidValueType,
-} from '../types/ERC725JSONSchema';
-import { isDynamicKeyName } from './encodeKeyName';
-import { valueContentEncodingMap, decodeValueType } from './encoder';
-import { getSchemaElement } from './getSchemaElement';
-import { countNumberOfBytes, decodeKeyValue, encodeArrayKey } from './utils';
+} from '../types/ERC725JSONSchema'
+import { isDynamicKeyName } from './encodeKeyName'
+import { valueContentEncodingMap, decodeValueType } from './encoder'
+import { getSchemaElement } from './getSchemaElement'
+import { countNumberOfBytes, decodeKeyValue, encodeArrayKey } from './utils'
+import type { ConsumedPtr } from '../types'
 
-const tupleValueTypesRegex = /bytes(\d+)/;
-const valueContentsBytesRegex = /Bytes(\d+)/;
+const tupleValueTypesRegex = /bytes(\d+)/
+const valueContentsBytesRegex = /Bytes(\d+)/
 
 const isValidTupleDefinition = (tupleContent: string): boolean => {
   if (tupleContent.length <= 2) {
-    return false;
+    return false
   }
   if (
     tupleContent[0] !== '(' &&
     tupleContent[tupleContent.length - 1] !== ')'
   ) {
-    return false;
+    return false
   }
 
-  return true;
-};
+  return true
+}
 
 const extractTupleElements = (tupleContent: string): string[] =>
-  tupleContent.substring(1, tupleContent.length - 1).split(',');
+  tupleContent.substring(1, tupleContent.length - 1).split(',')
 
 export const isValidTuple = (valueType: string, valueContent: string) => {
   if (
     !isValidTupleDefinition(valueType) ||
     !isValidTupleDefinition(valueContent)
   ) {
-    return false;
+    return false
   }
 
   // At this stage, we can assume the user is trying to use a tuple,
   // let's throw errors instead of returning false
 
   // Sanitize the string to keep only the tuple, if we are dealing with `CompactBytesArray`
-  const valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
+  const valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '')
 
-  const valueTypeParts = extractTupleElements(valueTypeToDecode);
-  const valueContentParts = extractTupleElements(valueContent);
+  const valueTypeParts = extractTupleElements(valueTypeToDecode)
+  const valueContentParts = extractTupleElements(valueContent)
 
   if (valueTypeParts.length !== valueContentParts.length) {
     throw new Error(
-      `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. They should have the same number of elements. Got: ${valueTypeParts.length} and ${valueContentParts.length}`,
-    );
+      `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. They should have the same number of elements. Got: ${valueTypeParts.length} and ${valueContentParts.length}`
+    )
   }
 
   for (let i = 0; i < valueTypeParts.length; i++) {
     if (!isValidValueType(valueTypeParts[i])) {
       throw new Error(
-        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. Type: ${valueTypeParts[i]} is not valid. Valid types are: ${ALL_VALUE_TYPES}`,
-      );
+        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. Type: ${valueTypeParts[i]} is not valid. Valid types are: ${ALL_VALUE_TYPES}`
+      )
     }
 
-    const valueTypeBytesLength = valueTypeParts[i].split('bytes')[1];
+    const valueTypeBytesLength = valueTypeParts[i]
+      .replace(/\[.*?\]$/, '')
+      .split('bytes')[1]
 
     if (
       valueTypeParts[i].match(tupleValueTypesRegex) &&
       valueContentParts[i].match(valueContentsBytesRegex)
     ) {
-      const valueContentBytesLength = valueContentParts[i].slice(5);
+      const valueContentBytesLength = valueContentParts[i].slice(5)
 
       if (valueTypeBytesLength > valueContentBytesLength) {
         throw new Error(
-          `Invalid tuple (${valueType},${valueContent}: ${valueType[i]} cannot fit in ${valueContent[i]}`,
-        );
+          `Invalid tuple (${valueType},${valueContent}: ${valueType[i]} cannot fit in ${valueContent[i]}`
+        )
       }
     }
 
@@ -107,100 +110,59 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
       valueContentParts[i].slice(0, 2) !== '0x'
     ) {
       throw new Error(
-        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. valueContent of type: ${valueContentParts[i]} is not valid`,
-      );
+        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. valueContent of type: ${valueContentParts[i]} is not valid`
+      )
     }
 
     if (isHexStrict(valueContentParts[i])) {
       // check if length of a hex literal in valueContent (e.g: 0x122334455)
       // is compatible with the valueType (e.g: bytes4)
-      const hexLiteralLength = valueContentParts[i].length - 2;
+      const hexLiteralLength = valueContentParts[i].length - 2
 
       if (Number.parseInt(valueTypeBytesLength, 10) < hexLiteralLength) {
         throw new Error(
-          `Invalid tuple (${valueType},${valueContent}: ${valueContent[i]} cannot fit in ${valueType[i]}`,
-        );
+          `Invalid tuple (${valueType},${valueContent}: ${valueContent[i]} cannot fit in ${valueType[i]}`
+        )
       }
     } else if (valueContentParts[i].startsWith('0x')) {
       // Value starts with 0x bit is not hex... hmmm... weird :)
       throw new Error(
-        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. valueContent of type: ${valueContentParts[i]} is not a valid hex value`,
-      );
+        `Invalid tuple for valueType: ${valueType} / valueContent: ${valueContent}. valueContent of type: ${valueContentParts[i]} is not a valid hex value`
+      )
     }
   }
 
-  return true;
-};
+  return true
+}
 
 export const decodeTupleKeyValue = (
   valueContent: string, // i.e. (bytes4,Number,bytes16)
   valueType: string, // i.e. (bytes4,bytes8,bytes16)
-  value: string, // should start with 0x
+  value: string // should start with 0x
 ): Array<string> => {
   // We assume data has already been validated at this stage
 
   // Sanitize the string to keep only the tuple, if we are dealing with `CompactBytesArray`
   const valueTypeToDecode = valueType.replace(
     COMPACT_BYTES_ARRAY_STRING_AT_END,
-    '',
-  );
+    ''
+  )
 
-  const valueTypeParts = extractTupleElements(valueTypeToDecode);
-  const valueContentParts = extractTupleElements(valueContent);
+  const valueTypeParts = extractTupleElements(valueTypeToDecode)
+  const valueContentParts = extractTupleElements(valueContent)
 
-  const bytesLengths: number[] = [];
-
-  valueTypeParts.forEach((valueTypePart) => {
-    if (valueTypePart.endsWith(']')) {
-      bytesLengths.push(0);
-      return;
-    }
-    const regexMatch = valueTypePart.match(tupleValueTypesRegex);
-
-    // if we are dealing with `bytesN`
-    if (regexMatch) bytesLengths.push(Number.parseInt(regexMatch[1], 10));
-
-    const numericMatch = valueTypePart.match(/u?int(\d+)/);
-
-    if (numericMatch)
-      bytesLengths.push(Number.parseInt(numericMatch[1], 10) / 8);
-
-    if (valueTypePart === 'address') bytesLengths.push(20);
-  });
-
-  const totalBytesLength = bytesLengths.reduce(
-    (acc, bytesLength) => acc + bytesLength,
-    0,
-  );
-
-  if (value.length < 2 + totalBytesLength * 2) {
-    console.error(
-      `Trying to decode a value: ${value} which does not match the length of the valueType: ${valueType}. Expected ${totalBytesLength} bytes.`,
-    );
-    return [];
+  const consumed: ConsumedPtr = {
+    bytes: 0,
   }
-
-  let cursor = 2; // to skip the 0x
-
-  const valueParts = bytesLengths.map((bytesLength, index, all) => {
-    if (bytesLength === 0) {
-      if (index !== all.length - 1) {
-        throw new Error(
-          'Array items must be last in a tuple schema definition.',
-        );
-      }
-      const splitValue = value.slice(cursor);
-      return `0x${splitValue}`;
-    }
-    const splitValue = value.substring(cursor, cursor + bytesLength * 2);
-    cursor += bytesLength * 2;
-    return `0x${splitValue}`;
-  });
-
-  return valueContentParts.map((valueContentPart, i) =>
-    decodeKeyValue(valueContentPart, valueTypeParts[i], valueParts[i]),
-  );
-};
+  return valueTypeParts.map((valueTypePart, index) => {
+    return decodeKeyValue(
+      valueContentParts[index],
+      valueTypePart,
+      `0x${value ? value.slice(consumed.bytes * 2 + 2) : ''}`,
+      consumed
+    )
+  })
+}
 
 /**
  *
@@ -210,37 +172,40 @@ export const decodeTupleKeyValue = (
  * @return the decoded value/values as per the schema definition.
  */
 export function decodeKey(schema: ERC725JSONSchema, value) {
-  const lowerCaseKeyType = schema.keyType.toLowerCase();
+  const lowerCaseKeyType = schema.keyType.toLowerCase()
 
   switch (lowerCaseKeyType) {
     case 'array': {
       // If user has requested a key which does not exist in the contract, value will be: 0x and value.find() will fail.
       if (!value || value === '0x') {
-        return [];
+        return []
       }
 
       // Decode as a Number when when the encoded value is to set the Array length only
       if (typeof value === 'string' && countNumberOfBytes(value) === 16) {
-        return decodeKeyValue('Number', 'uint128', value, schema.name) || 0;
+        return decodeKeyValue('Number', 'uint128+', value, schema.name) || 0
       }
 
-      const valueElement = value.find((e) => e.key === schema.key);
+      const valueElement = value.find((e) => e.key === schema.key)
       // Handle empty/non-existent array
       if (!valueElement) {
-        return [];
+        return []
       }
 
+      const consumed: ConsumedPtr & { name: string } = {
+        bytes: 0,
+        name: schema.name,
+      }
       const arrayLength =
-        decodeKeyValue('Number', 'uint128', valueElement.value, schema.name) ||
-        0;
+        decodeKeyValue('Number', 'uint128+', valueElement.value, consumed) || 0
 
-      const results: any[] = [];
+      const results: any[] = []
 
       // This will not run if no match or arrayLength
       for (let index = 0; index < arrayLength; index++) {
         const dataElement = value.find(
-          (e) => e.key === encodeArrayKey(schema.key, index),
-        );
+          (e) => e.key === encodeArrayKey(schema.key, index)
+        )
 
         if (dataElement) {
           results.push(
@@ -248,75 +213,71 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
               schema.valueContent,
               schema.valueType,
               dataElement.value,
-              schema.name,
-            ),
-          );
+              consumed
+            )
+          )
         }
       } // end for loop
 
-      return results;
+      return results
     }
     case 'mappingwithgrouping':
     case 'singleton':
     case 'mapping': {
       if (Array.isArray(value)) {
-        const newValue = value.find((e) => e.key === schema.key);
+        const newValue = value.find((e) => e.key === schema.key)
 
         // Handle empty or non-values
         if (!newValue) {
-          return null;
+          return null
         }
 
         return decodeKeyValue(
           schema.valueContent,
           schema.valueType,
           newValue.value,
-          schema.name,
-        );
+          schema.name
+        )
       }
 
       if (schema.valueType.endsWith(COMPACT_BYTES_ARRAY_STRING)) {
         const valueType = schema.valueType.replace(
-          COMPACT_BYTES_ARRAY_STRING,
-          '',
-        );
+          COMPACT_BYTES_ARRAY_STRING_AT_END,
+          ''
+        )
         const valueContent = schema.valueContent.replace(
-          COMPACT_BYTES_ARRAY_STRING,
-          '',
-        );
+          COMPACT_BYTES_ARRAY_STRING_AT_END,
+          ''
+        )
 
         if (valueType[0] === '(' && valueType[valueType.length - 1] === ')') {
           const decodedCompactBytesArray = decodeValueType(
             'bytes[CompactBytesArray]',
-            value,
-          );
+            value
+          )
           return decodedCompactBytesArray.map((element) =>
-            decodeTupleKeyValue(valueContent, valueType, element),
-          );
+            decodeTupleKeyValue(valueContent, valueType, element)
+          )
         }
-        return decodeValueType(schema.valueType, value);
+        return decodeValueType(schema.valueType, value)
       }
 
       if (isValidTuple(schema.valueType, schema.valueContent)) {
-        return decodeTupleKeyValue(
-          schema.valueContent,
-          schema.valueType,
-          value,
-        );
+        return decodeTupleKeyValue(schema.valueContent, schema.valueType, value)
       }
 
       return decodeKeyValue(
         schema.valueContent,
         schema.valueType,
         value,
-        schema.name,
-      );
+        schema.name
+      )
     }
     default: {
       console.error(
-        `Incorrect data match or keyType in schema from decodeKey(): "${schema.keyType}"`,
-      );
-      return null;
+        `Incorrect data match or keyType in schema from decodeKey(): "${schema.keyType}"`
+      )
+      return null
     }
   }
 }
@@ -329,47 +290,47 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
  */
 export function decodeData(
   data: DecodeDataInput[],
-  schema: ERC725JSONSchema[],
-): DecodeDataOutput[];
+  schema: ERC725JSONSchema[]
+): DecodeDataOutput[]
 export function decodeData(
   data: DecodeDataInput,
-  schema: ERC725JSONSchema[],
-): DecodeDataOutput;
+  schema: ERC725JSONSchema[]
+): DecodeDataOutput
 export function decodeData(
   data: DecodeDataInput | DecodeDataInput[],
-  schema: ERC725JSONSchema[],
+  schema: ERC725JSONSchema[]
 ): DecodeDataOutput | DecodeDataOutput[] {
   const processDataInput = (
     { keyName, dynamicKeyParts, value }: DecodeDataInput,
-    throwException = true,
+    throwException = true
   ) => {
-    const isDynamic = isDynamicKeyName(keyName);
+    const isDynamic = isDynamicKeyName(keyName)
 
     const schemaElement: ERC725JSONSchema = isDynamic
       ? getSchemaElement(schema, keyName, dynamicKeyParts)
-      : getSchemaElement(schema, keyName);
-    let decodedValue: any = null;
+      : getSchemaElement(schema, keyName)
+    let decodedValue: any = null
     try {
-      decodedValue = decodeKey(schemaElement, value);
+      decodedValue = decodeKey(schemaElement, value)
     } catch (error) {
       if (throwException) {
-        throw error;
+        throw error
       }
-      console.error(error);
+      console.error(error)
     }
-    const { key, name, dynamicName } = schemaElement;
+    const { key, name, dynamicName } = schemaElement
     return {
       key,
       name,
       ...(dynamicName ? { dynamicName } : { dynamicName: name }),
       ...(dynamicKeyParts ? { dynamicKeyParts } : {}),
       value: decodedValue,
-    };
-  };
-
-  if (Array.isArray(data)) {
-    return data.map((dataInput) => processDataInput(dataInput, false));
+    }
   }
 
-  return processDataInput(data);
+  if (Array.isArray(data)) {
+    return data.map((dataInput) => processDataInput(dataInput, false))
+  }
+
+  return processDataInput(data)
 }

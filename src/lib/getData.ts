@@ -1,15 +1,15 @@
-import { DecodeDataOutput } from '../types/decodeData';
-import { GetDataDynamicKey, GetDataInput } from '../types/GetData';
-import { isDynamicKeyName } from './encodeKeyName';
+import type { DecodeDataOutput } from '../types/decodeData'
+import type { GetDataDynamicKey, GetDataInput } from '../types/GetData'
+import { isDynamicKeyName } from './encodeKeyName'
 import {
   decodeKeyValue,
   encodeArrayKey,
   generateSchemasFromDynamicKeys,
-} from './utils';
-import { KeyValuePair } from '../types';
-import { decodeData } from './decodeData';
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
-import { ERC725Options } from '../types/Config';
+} from './utils'
+import type { KeyValuePair } from '../types'
+import { decodeData } from './decodeData'
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema'
+import type { ERC725Options } from '../types/Config'
 
 /**
  * @internal
@@ -22,86 +22,87 @@ import { ERC725Options } from '../types/Config';
 const getArrayValues = async (
   erc725Options: ERC725Options,
   schema: ERC725JSONSchema,
-  data: Record<string, any>,
+  data: Record<string, any>
 ) => {
   if (schema.keyType !== 'Array') {
     throw new Error(
       `The "getArrayValues" method requires a schema definition with "keyType: Array",
-         ${schema}`,
-    );
+         ${schema}`
+    )
   }
-  const results: { key: string; value }[] = [];
+  const results: { key: string; value }[] = []
 
   // 1. get the array length
-  const value = data[schema.key]; // get the length key/value pair
+  const value = data[schema.key] // get the length key/value pair
 
   if (!value || !value.value) {
-    return results;
+    return results
   } // Handle empty/non-existent array
 
   const arrayLength = await decodeKeyValue(
     'Number',
-    'uint128',
+    'uint128+',
     value.value,
-    schema.name,
-  ); // get the int array length
+    schema.name
+  ) // get the int array length
 
-  const arrayElementKeys: string[] = [];
+  const arrayElementKeys: string[] = []
   for (let index = 0; index < arrayLength; index++) {
-    const arrayElementKey = encodeArrayKey(schema.key, index);
+    const arrayElementKey = encodeArrayKey(schema.key, index)
     if (!data[arrayElementKey]) {
-      arrayElementKeys.push(arrayElementKey);
+      arrayElementKeys.push(arrayElementKey)
     }
   }
 
   try {
     const arrayElements = await erc725Options.provider?.getAllData(
       erc725Options.address as string,
-      arrayElementKeys,
-    );
+      arrayElementKeys
+    )
 
-    results.push(...arrayElements);
-  } catch (err) {
+    results.push(...arrayElements)
+  } catch {
     // This case may happen if user requests an array key which does not exist in the contract.
     // In this case, we simply skip
   }
 
-  return results;
-};
+  return results
+}
 
 const getDataMultiple = async (
   erc725Options: ERC725Options,
-  keyNames: Array<string | GetDataDynamicKey>,
+  keyNames: Array<string | GetDataDynamicKey>
 ) => {
   const schemas = generateSchemasFromDynamicKeys(
     keyNames,
-    erc725Options.schemas,
-  );
+    erc725Options.schemas
+  )
 
+  const allKeys: string[] = schemas.map((schema) => schema.key)
   // Get all the raw data from the provider based on schema key hashes
   const allRawData: KeyValuePair[] = await erc725Options.provider?.getAllData(
     erc725Options.address as string,
-    schemas.map((schema) => schema.key),
-  );
+    allKeys
+  )
 
   const keyValueMap = allRawData.reduce<{ [key: string]: any }>(
     (accumulator, current) => {
-      accumulator[current.key] = current.value;
-      return accumulator;
+      accumulator[current.key] = current.value
+      return accumulator
     },
-    {},
-  );
+    {}
+  )
 
   const schemasWithValue = schemas.map((schema) => {
-    return { ...schema, value: keyValueMap[schema.key] || null };
-  });
+    return { ...schema, value: keyValueMap[schema.key] || null }
+  })
 
   // ------- BEGIN ARRAY HANDLER -------
   // Get missing 'Array' fields for all arrays, as necessary
 
   const arraySchemas = schemas.filter(
-    (e) => e.keyType.toLowerCase() === 'array',
-  );
+    (e) => e.keyType.toLowerCase() === 'array'
+  )
 
   // Looks like it gets array even if not requested as it gets the arrays from the this.options.schemas?
   // eslint-disable-next-line no-restricted-syntax
@@ -112,22 +113,22 @@ const getDataMultiple = async (
           key: keySchema.key,
           value: keyValueMap[keySchema.key],
         },
-      };
+      }
       const arrayValues = await getArrayValues(
         erc725Options,
         keySchema,
-        dataKeyValue,
-      );
+        dataKeyValue
+      )
 
       if (arrayValues && arrayValues.length > 0) {
-        arrayValues.push(dataKeyValue[keySchema.key]); // add the raw data array length
+        arrayValues.push(dataKeyValue[keySchema.key]) // add the raw data array length
 
         schemasWithValue[
           schemasWithValue.findIndex((schema) => schema.key === keySchema.key)
-        ] = { ...keySchema, value: arrayValues };
+        ] = { ...keySchema, value: arrayValues }
       }
     } catch (error) {
-      console.error(error);
+      console.error(error)
     }
   }
   // ------- END ARRAY HANDLER -------
@@ -138,11 +139,11 @@ const getDataMultiple = async (
         keyName: key,
         value,
         // no need to add dynamic key parts here as the schemas object below already holds the "generated" schemas for the dynamic keys
-      };
+      }
     }),
-    schemas,
-  );
-};
+    schemas
+  )
+}
 
 /**
  * Gets **decoded data** for one, many or all keys of the specified `ERC725` smart-contract.
@@ -160,21 +161,21 @@ const getDataMultiple = async (
 
 export const getData = async (
   erc725Options: ERC725Options,
-  _keyOrKeys?: GetDataInput,
+  _keyOrKeys?: GetDataInput
 ): Promise<DecodeDataOutput | DecodeDataOutput[]> => {
-  let keyOrKeys = _keyOrKeys;
+  let keyOrKeys = _keyOrKeys
   if (!keyOrKeys) {
     // eslint-disable-next-line no-param-reassign
     keyOrKeys = erc725Options.schemas
       .map((element) => element.name)
-      .filter((key) => !isDynamicKeyName(key));
+      .filter((key) => !isDynamicKeyName(key))
   }
 
   if (Array.isArray(keyOrKeys)) {
-    return getDataMultiple(erc725Options, keyOrKeys);
+    return getDataMultiple(erc725Options, keyOrKeys)
   }
 
-  const data = await getDataMultiple(erc725Options, [keyOrKeys]);
+  const data = await getDataMultiple(erc725Options, [keyOrKeys])
 
-  return data[0];
-};
+  return data[0]
+}

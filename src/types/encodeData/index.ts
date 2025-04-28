@@ -1,6 +1,6 @@
-import { Verification } from './JSONURL';
+import type { Verification } from './JSONURL'
 
 export interface AssetURLEncode {
-  verification: Verification;
-  url: string;
+  verification: Verification
+  url: string
 }

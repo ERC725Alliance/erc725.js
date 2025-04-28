@@ -19,42 +19,42 @@
  * @date 2020
  */
 
-import { hexToBytes, leftPad, numberToHex, padLeft } from 'web3-utils';
-import { isAddress, isHexStrict } from 'web3-validator';
-import {
+import { hexToBytes, leftPad, numberToHex, padLeft } from 'web3-utils'
+import { isAddress, isHexStrict } from 'web3-validator'
+import type {
   URLDataToEncode,
   EncodeDataReturn,
   URLDataWithHash,
   Verification,
-} from '../types';
-import {
+} from '../types'
+import type {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueType,
-} from '../types/ERC725JSONSchema';
+} from '../types/ERC725JSONSchema'
 
 import {
   HASH_METHODS,
-  SUPPORTED_VERIFICATION_METHODS,
+  type SUPPORTED_VERIFICATION_METHODS,
   SUPPORTED_VERIFICATION_METHODS_LIST,
   COMPACT_BYTES_ARRAY_STRING,
-  SUPPORTED_VERIFICATION_METHOD_STRINGS,
-} from '../constants/constants';
+  type SUPPORTED_VERIFICATION_METHOD_STRINGS,
+} from '../constants/constants'
 import {
   decodeValueContent,
   decodeValueType,
   encodeValueContent,
   encodeValueType,
   valueContentEncodingMap as valueContentMap,
-} from './encoder';
-import { AssetURLEncode } from '../types/encodeData';
-import { isDynamicKeyName } from './encodeKeyName';
-import { getSchemaElement } from './getSchemaElement';
-import { EncodeDataInput } from '../types/decodeData';
-import { GetDataDynamicKey } from '../types/GetData';
-import { isValidTuple } from './decodeData';
-import { stripHexPrefix } from 'web3-eth-accounts';
-import { checkAddressCheckSum } from 'web3-validator';
+} from './encoder'
+import type { AssetURLEncode } from '../types/encodeData'
+import { isDynamicKeyName } from './encodeKeyName'
+import { getSchemaElement } from './getSchemaElement'
+import type { EncodeDataInput } from '../types/decodeData'
+import type { GetDataDynamicKey } from '../types/GetData'
+import { isValidTuple } from './decodeData'
+import { stripHexPrefix } from 'web3-eth-accounts'
+import { checkAddressCheckSum } from 'web3-validator'
 
 /**
  *
@@ -87,36 +87,36 @@ export function encodeKeyValue(
         | boolean
         | boolean[]
       >,
-  name?: string,
+  name?: string
 ): string | false {
   const isSupportedValueContent =
-    !!valueContentMap(valueContent) || isValueContentLiteralHex(valueContent);
+    !!valueContentMap(valueContent) || isValueContentLiteralHex(valueContent)
 
   if (!isSupportedValueContent) {
     throw new Error(
-      `The valueContent '${valueContent}' for ${name} is not supported.`,
-    );
+      `The valueContent '${valueContent}' for ${name} is not supported.`
+    )
   }
 
-  const isValueTypeArray = valueType.slice(valueType.length - 1) === ']';
+  const isValueTypeArray = valueType.slice(valueType.length - 1) === ']'
 
   if (
     (valueType.startsWith('uint') || valueType.startsWith('bytes')) &&
     typeof decodedValue !== 'object'
   ) {
-    return encodeValueType(valueType, decodedValue);
+    return encodeValueType(valueType, decodedValue)
   }
 
   if (!isValueTypeArray && !Array.isArray(decodedValue)) {
     // Straight forward encode
-    return encodeValueContent(valueContent, decodedValue);
+    return encodeValueContent(valueContent, decodedValue)
   }
 
-  const valueContentEncodingMethods = valueContentMap(valueContent);
+  const valueContentEncodingMethods = valueContentMap(valueContent)
 
   const isSameEncoding =
     valueContentEncodingMethods &&
-    valueContentEncodingMethods.type === valueType.split('[]')[0];
+    valueContentEncodingMethods.type === valueType.split('[]')[0]
 
   let result:
     | (string | false | AssetURLEncode)[]
@@ -127,22 +127,22 @@ export function encodeKeyValue(
     | boolean
     | string[]
     | number[]
-    | boolean[];
+    | boolean[]
 
   // We only loop if the valueType done by abi.encodeParameter can not handle it directly
   if (Array.isArray(decodedValue)) {
     // value type encoding will handle it?
 
     // we handle an array element encoding
-    const results: Array<string | AssetURLEncode | false> = [];
+    const results: Array<string | AssetURLEncode | false> = []
     for (let index = 0; index < decodedValue.length; index++) {
-      const element = decodedValue[index];
+      const element = decodedValue[index]
       results.push(
-        encodeValueContent(valueContent.replace(/\[.*?\]$/, ''), element),
-      );
+        encodeValueContent(valueContent.replace(/\[.*?\]$/, ''), element)
+      )
     }
 
-    result = results;
+    result = results
   }
 
   if (
@@ -153,13 +153,13 @@ export function encodeKeyValue(
   ) {
     result = encodeValueType(
       valueType,
-      result as string | number | boolean | string[] | number[] | boolean[],
-    );
+      result as string | number | boolean | string[] | number[] | boolean[]
+    )
   } else if (isValueTypeArray && isSameEncoding) {
-    result = encodeValueType(valueType, decodedValue as any);
+    result = encodeValueType(valueType, decodedValue as any)
   }
 
-  return result as string | false;
+  return result as string | false
 }
 
 /**
@@ -169,7 +169,7 @@ export function encodeKeyValue(
  * @return The raw bytes key for the array element
  */
 export function encodeArrayKey(key: string, index: number) {
-  return key.slice(0, 34) + padLeft(numberToHex(index), 32).replace('0x', '');
+  return key.slice(0, 34) + padLeft(numberToHex(index), 32).replace('0x', '')
 }
 
 /**
@@ -178,26 +178,26 @@ export function encodeArrayKey(key: string, index: number) {
  * @returns a guess of the schema key type
  */
 export function guessKeyTypeFromKeyName(
-  keyName: string,
+  keyName: string
 ): ERC725JSONSchemaKeyType {
   // This function could not work with subsequents keys of an Array
   // It will always assume the given key, if array, is the initial array key.
 
-  const splittedKeyName = keyName.replace(/[^:]</g, ':').split(':');
+  const splittedKeyName = keyName.replace(/[^:]</g, ':').split(':')
 
   if (splittedKeyName.length === 3) {
-    return 'MappingWithGrouping';
+    return 'MappingWithGrouping'
   }
 
   if (splittedKeyName.length === 2) {
-    return 'Mapping';
+    return 'Mapping'
   }
 
   if (keyName.substring(keyName.length - 2, keyName.length) === '[]') {
-    return 'Array';
+    return 'Array'
   }
 
-  return 'Singleton';
+  return 'Singleton'
 }
 
 export const encodeTupleKeyValue = (
@@ -205,22 +205,20 @@ export const encodeTupleKeyValue = (
   valueType: string, // i.e. (bytes4,uint128,bytes16,address)
   decodedValues: Array<
     string | number | URLDataToEncode | boolean | (string | number | boolean)[]
-  >,
+  >
 ) => {
   // We assume data has already been validated at this stage
 
-  const valueTypeParts = valueType
-    .substring(1, valueType.length - 1)
-    .split(',');
+  const valueTypeParts = valueType.substring(1, valueType.length - 1).split(',')
 
   const valueContentParts = valueContent
     .substring(1, valueContent.length - 1)
-    .split(',');
+    .split(',')
 
   if (valueTypeParts.length !== decodedValues.length) {
     throw new Error(
-      `Can not encode tuple key value: ${decodedValues}. Expecte array of length: ${valueTypeParts.length}`,
-    );
+      `Can not encode tuple key value: ${decodedValues}. Expecte array of length: ${valueTypeParts.length}`
+    )
   }
 
   const returnValue = `0x${valueContentParts
@@ -228,19 +226,19 @@ export const encodeTupleKeyValue = (
       const encodedKeyValue = encodeKeyValue(
         valueContentPart,
         valueTypeParts[i],
-        decodedValues[i],
-      );
+        decodedValues[i]
+      )
 
       if (!encodedKeyValue) {
-        return ''; // may cause issues?
+        return '' // may cause issues?
       }
 
-      return stripHexPrefix(encodedKeyValue);
+      return stripHexPrefix(encodedKeyValue)
     })
-    .join('')}`;
+    .join('')}`
 
-  return returnValue;
-};
+  return returnValue
+}
 
 /**
  *
@@ -266,22 +264,22 @@ export function encodeKey(
         | boolean
       >,
   startingIndex = 0,
-  totalArrayLength = Array.isArray(value) ? value.length : 0,
+  totalArrayLength = Array.isArray(value) ? value.length : 0
 ) {
   // NOTE: This will not guarantee order of array as on chain. Assumes developer must set correct order
 
-  const lowerCaseKeyType = schema.keyType.toLowerCase();
+  const lowerCaseKeyType = schema.keyType.toLowerCase()
 
   switch (lowerCaseKeyType) {
     case 'array': {
       // if we are encoding only the Array length
       if (typeof value === 'number') {
-        return encodeValueType('uint128', value);
+        return encodeValueType('uint128', value)
       }
 
       if (!Array.isArray(value)) {
-        console.error("Can't encode a non array for key of type array");
-        return null;
+        console.error("Can't encode a non array for key of type array")
+        return null
       }
 
       if (
@@ -289,23 +287,23 @@ export function encodeKey(
         typeof totalArrayLength !== 'number'
       ) {
         throw new Error(
-          'Invalid `startingIndex` or `totalArrayLength` parameters. Values must be of type number.',
-        );
+          'Invalid `startingIndex` or `totalArrayLength` parameters. Values must be of type number.'
+        )
       }
 
       if (startingIndex < 0) {
         throw new Error(
-          'Invalid `startingIndex` parameter. Value cannot be negative.',
-        );
+          'Invalid `startingIndex` parameter. Value cannot be negative.'
+        )
       }
 
       if (totalArrayLength < value.length) {
         throw new Error(
-          'Invalid `totalArrayLength` parameter. Array length must be at least as large as the number of elements of the value array.',
-        );
+          'Invalid `totalArrayLength` parameter. Array length must be at least as large as the number of elements of the value array.'
+        )
       }
 
-      const results: { key: string; value: string }[] = [];
+      const results: { key: string; value: string }[] = []
 
       for (let index = 0; index < value.length; index++) {
         if (index === 0) {
@@ -315,11 +313,11 @@ export function encodeKey(
             key: schema.key,
             // Encode the explicitly provided or default array length
             value: encodeValueType('uint128', totalArrayLength),
-          });
+          })
         }
 
-        const elementIndex = startingIndex + index;
-        const dataElement = value[index];
+        const elementIndex = startingIndex + index
+        const dataElement = value[index]
 
         results.push({
           key: encodeArrayKey(schema.key, elementIndex),
@@ -327,12 +325,12 @@ export function encodeKey(
             schema.valueContent,
             schema.valueType,
             dataElement,
-            schema.name,
+            schema.name
           ) as string,
-        });
+        })
       }
 
-      return results;
+      return results
     }
     case 'mappingwithgrouping':
     case 'singleton':
@@ -340,37 +338,37 @@ export function encodeKey(
       if (isValidTuple(schema.valueType, schema.valueContent)) {
         if (!Array.isArray(value)) {
           throw new Error(
-            `Incorrect value for tuple. Got: ${value}, expected array.`,
-          );
+            `Incorrect value for tuple. Got: ${value}, expected array.`
+          )
         }
 
         const isCompactBytesArray: boolean = schema.valueType.endsWith(
-          COMPACT_BYTES_ARRAY_STRING,
-        );
+          COMPACT_BYTES_ARRAY_STRING
+        )
 
         if (Array.isArray(value[0]) && isCompactBytesArray) {
           const valueType = schema.valueType.replace(
             COMPACT_BYTES_ARRAY_STRING,
-            '',
-          );
+            ''
+          )
           const valueContent = schema.valueContent.replace(
             COMPACT_BYTES_ARRAY_STRING,
-            '',
-          );
+            ''
+          )
 
           const encodedTuples = value.map((element) => {
-            return encodeTupleKeyValue(valueContent, valueType, element);
-          });
-          return encodeValueType('bytes[CompactBytesArray]', encodedTuples);
+            return encodeTupleKeyValue(valueContent, valueType, element)
+          })
+          return encodeValueType('bytes[CompactBytesArray]', encodedTuples)
         }
         if (!Array.isArray(value)) {
-          throw new Error(`Array value required ${JSON.stringify(value)}`);
+          throw new Error(`Array value required ${JSON.stringify(value)}`)
         }
         return encodeTupleKeyValue(
           schema.valueContent,
           schema.valueType,
-          value as any,
-        );
+          value as any
+        )
       }
 
       // This adds an extra check to ensure the casting below is safe
@@ -380,7 +378,7 @@ export function encodeKey(
         Array.isArray(value[0]) &&
         !isValidTuple(schema.valueType, schema.valueContent)
       ) {
-        throw new Error('Incorrect value for nested array: not a tuple.');
+        throw new Error('Incorrect value for nested array: not a tuple.')
       }
 
       return encodeKeyValue(
@@ -393,13 +391,13 @@ export function encodeKey(
           | number[]
           | URLDataToEncode
           | URLDataToEncode[],
-        schema.name,
-      );
+        schema.name
+      )
     default:
       console.error(
-        `Incorrect data match or keyType in schema from encodeKey(): "${schema.keyType}"`,
-      );
-      return null;
+        `Incorrect data match or keyType in schema from encodeKey(): "${schema.keyType}"`
+      )
+      return null
   }
 }
 
@@ -416,39 +414,43 @@ export function decodeKeyValue(
   valueContent: string,
   valueType: ERC725JSONSchemaValueType | string, // string for tuples and CompactBytesArray
   _value,
-  name?: string,
+  name?: string | { name?: string; bytes: number }
 ) {
   // Check for the missing map.
-  const valueContentEncodingMethods = valueContentMap(valueContent);
-  let value = _value;
+  const valueContentEncodingMethods = valueContentMap(valueContent)
+  let value = _value
 
   if (!valueContentEncodingMethods && valueContent.slice(0, 2) !== '0x') {
     throw new Error(
-      `The valueContent "${valueContent}" for "${name}" is not supported.`,
-    );
+      `The valueContent "${valueContent}" for "${typeof name === 'object' ? name.name : name}" is not supported.`
+    )
   }
 
   let sameEncoding =
     valueContentEncodingMethods &&
-    valueContentEncodingMethods.type === valueType.split('[]')[0];
-  const isArray = valueType.substring(valueType.length - 1) === ']';
+    valueContentEncodingMethods.type === valueType.split('[]')[0]
+  const isArray = valueType.substring(valueType.length - 1) === ']'
 
   // VALUE TYPE
   const valueTypeIsBytesNonArray =
-    valueType.slice(0, 6) === 'bytes[' && valueType.slice(-1) !== ']';
+    valueType.slice(0, 6) === 'bytes[' && valueType.slice(-1) !== ']'
 
   if (!valueTypeIsBytesNonArray && valueType !== 'string') {
     // eslint-disable-next-line no-param-reassign
-    value = decodeValueType(valueType, value);
+    value = decodeValueType(
+      valueType,
+      value,
+      typeof name === 'object' ? name : undefined
+    )
   }
 
   // As per exception above, if address and sameEncoding, then the address still needs to be handled
   if (sameEncoding && isAddress(value) && !checkAddressCheckSum(value)) {
-    sameEncoding = !sameEncoding;
+    sameEncoding = !sameEncoding
   }
 
   if (sameEncoding && valueType !== 'string') {
-    return value;
+    return value
   }
 
   // VALUE CONTENT
@@ -456,19 +458,17 @@ export function decodeKeyValue(
 
   if (isArray && Array.isArray(value)) {
     // value must be an array also
-    const results: (string | URLDataWithHash | number | null | boolean)[] = [];
+    const results: (string | URLDataWithHash | number | null | boolean)[] = []
 
     for (let index = 0; index < value.length; index++) {
-      const element = value[index];
-      results.push(
-        decodeValueContent(valueContent.replace(/\[.*\]$/, ''), element),
-      );
+      const element = value[index]
+      results.push(decodeValueContent(valueContent, element))
     }
 
-    return results;
+    return results
   }
 
-  return decodeValueContent(valueContent, value);
+  return decodeValueContent(valueContent, value)
 }
 
 /**
@@ -477,93 +477,93 @@ export function decodeKeyValue(
  */
 export function encodeData(
   data: EncodeDataInput | EncodeDataInput[],
-  schema: ERC725JSONSchema[],
+  schema: ERC725JSONSchema[]
 ): EncodeDataReturn {
-  const dataAsArray = Array.isArray(data) ? data : [data];
+  const dataAsArray = Array.isArray(data) ? data : [data]
 
   return dataAsArray.reduce(
     (
       accumulator,
-      { keyName, value, dynamicKeyParts, startingIndex, totalArrayLength },
+      { keyName, value, dynamicKeyParts, startingIndex, totalArrayLength }
     ) => {
-      let schemaElement: ERC725JSONSchema | null = null;
+      let schemaElement: ERC725JSONSchema | null = null
       let encodedValue:
         | string
         | false
         | {
-            key: string;
-            value: string;
+            key: string
+            value: string
           }[]
-        | null; // would be nice to type this
+        | null // would be nice to type this
 
       // Switch between non dynamic and dynamic keys:
       if (isDynamicKeyName(keyName)) {
         // In case of a dynamic key, we need to check if the value is of type DynamicKeyPartIntput.
         if (!dynamicKeyParts) {
           throw new Error(
-            `Can't encodeData for dynamic key: ${keyName} with non dynamic values. Got: ${value}, expected object.`,
-          );
+            `Can't encodeData for dynamic key: ${keyName} with non dynamic values. Got: ${value}, expected object.`
+          )
         }
 
-        schemaElement = getSchemaElement(schema, keyName, dynamicKeyParts);
+        schemaElement = getSchemaElement(schema, keyName, dynamicKeyParts)
         encodedValue = encodeKey(
           schemaElement,
           value,
           startingIndex,
-          totalArrayLength,
-        );
+          totalArrayLength
+        )
       } else {
-        schemaElement = getSchemaElement(schema, keyName);
+        schemaElement = getSchemaElement(schema, keyName)
         encodedValue = encodeKey(
           schemaElement,
           value as any,
           startingIndex,
-          totalArrayLength,
-        );
+          totalArrayLength
+        )
       }
 
       if (typeof encodedValue === 'string') {
-        accumulator.keys.push(schemaElement.key);
-        accumulator.values.push(encodedValue);
+        accumulator.keys.push(schemaElement.key)
+        accumulator.values.push(encodedValue)
       } else if (encodedValue !== false && encodedValue != null) {
         for (let i = 0; i < encodedValue.length; i++) {
-          const { key, value: _value } = encodedValue[i];
-          accumulator.keys.push(key);
-          accumulator.values.push(_value);
+          const { key, value: _value } = encodedValue[i]
+          accumulator.keys.push(key)
+          accumulator.values.push(_value)
         }
       }
 
-      return accumulator;
+      return accumulator
     },
-    { keys: [], values: [] } as EncodeDataReturn,
-  );
+    { keys: [], values: [] } as EncodeDataReturn
+  )
 }
 
 export function getVerificationMethod(nameOrSig: string):
   | {
-      method: (data: string | object | Uint8Array | null) => string;
-      name: SUPPORTED_VERIFICATION_METHOD_STRINGS;
-      sig: SUPPORTED_VERIFICATION_METHODS;
+      method: (data: string | object | Uint8Array | null) => string
+      name: SUPPORTED_VERIFICATION_METHOD_STRINGS
+      sig: SUPPORTED_VERIFICATION_METHODS
     }
   | undefined {
   const verificationMethod = Object.values(HASH_METHODS).find(
-    ({ name, sig }) => name === nameOrSig || sig === nameOrSig,
-  );
+    ({ name, sig }) => name === nameOrSig || sig === nameOrSig
+  )
 
   if (!verificationMethod && nameOrSig !== '0x00000000') {
     throw new Error(
-      `Chosen verification method '${nameOrSig}' is not supported. Supported verification methods: ${SUPPORTED_VERIFICATION_METHODS_LIST}`,
-    );
+      `Chosen verification method '${nameOrSig}' is not supported. Supported verification methods: ${SUPPORTED_VERIFICATION_METHODS_LIST}`
+    )
   }
 
-  return verificationMethod;
+  return verificationMethod
 }
 
 export function hashData(
   data: string | Uint8Array | Record<string, any>,
-  nameOrSig: SUPPORTED_VERIFICATION_METHODS | string,
+  nameOrSig: SUPPORTED_VERIFICATION_METHODS | string
 ): string {
-  return getVerificationMethod(nameOrSig)?.method(data) || leftPad(0, 64);
+  return getVerificationMethod(nameOrSig)?.method(data) || leftPad(0, 64)
 }
 
 /**
@@ -573,25 +573,25 @@ export function hashData(
 export function isDataAuthentic(
   data: string | Uint8Array,
   options: Verification,
-  capture?: string[],
+  capture?: string[]
 ): boolean {
   if (!options?.method || options?.method === '0x00000000') {
-    return true;
+    return true
   }
 
-  const dataHash = hashData(data, options.method);
+  const dataHash = hashData(data, options.method)
   if (dataHash !== options.data) {
     if (capture) {
-      capture.push(dataHash);
+      capture.push(dataHash)
     } else {
       console.error(
-        `Hash mismatch, calculated hash ("${dataHash}") is different from expected hash "${options.data}"`,
-      );
+        `Hash mismatch, calculated hash ("${dataHash}") is different from expected hash "${options.data}"`
+      )
     }
-    return false;
+    return false
   }
 
-  return true;
+  return true
 }
 
 /**
@@ -601,17 +601,17 @@ export function isDataAuthentic(
  * @return {*}  string converted IPFS gateway URL
  */
 export function convertIPFSGatewayUrl(ipfsGateway: string) {
-  let convertedIPFSGateway = ipfsGateway;
+  let convertedIPFSGateway = ipfsGateway
 
   if (ipfsGateway.endsWith('/') && !ipfsGateway.endsWith('/ipfs/')) {
-    convertedIPFSGateway = `${ipfsGateway}ipfs/`;
+    convertedIPFSGateway = `${ipfsGateway}ipfs/`
   } else if (ipfsGateway.endsWith('/ipfs')) {
-    convertedIPFSGateway = `${ipfsGateway}/`;
+    convertedIPFSGateway = `${ipfsGateway}/`
   } else if (!ipfsGateway.endsWith('/ipfs/')) {
-    convertedIPFSGateway = `${ipfsGateway}/ipfs/`;
+    convertedIPFSGateway = `${ipfsGateway}/ipfs/`
   }
 
-  return convertedIPFSGateway;
+  return convertedIPFSGateway
 }
 
 /**
@@ -620,15 +620,15 @@ export function convertIPFSGatewayUrl(ipfsGateway: string) {
  */
 export const generateSchemasFromDynamicKeys = (
   keyNames: Array<string | GetDataDynamicKey>,
-  schemas: ERC725JSONSchema[],
+  schemas: ERC725JSONSchema[]
 ) => {
   return keyNames.map((keyName) => {
     if (typeof keyName === 'string') {
-      return getSchemaElement(schemas, keyName);
+      return getSchemaElement(schemas, keyName)
     }
-    return getSchemaElement(schemas, keyName.keyName, keyName.dynamicKeyParts);
-  });
-};
+    return getSchemaElement(schemas, keyName.keyName, keyName.dynamicKeyParts)
+  })
+}
 
 /**
  * Changes the protocol from `ipfs://` to `http(s)://` and adds the selected IPFS gateway.
@@ -636,7 +636,7 @@ export const generateSchemasFromDynamicKeys = (
  */
 export function patchIPFSUrlsIfApplicable(
   receivedData: URLDataWithHash,
-  ipfsGateway: string,
+  ipfsGateway: string
 ): URLDataWithHash {
   // Only map URL if it's indeed an ipfs:// URL and ignore if it's a data:// URL with JSON
   // possibly containing an IPFS URL inside of the JSON data.
@@ -644,18 +644,18 @@ export function patchIPFSUrlsIfApplicable(
     return {
       ...receivedData,
       url: receivedData.url.replace('ipfs://', ipfsGateway),
-    };
+    }
   }
 
-  return receivedData;
+  return receivedData
 }
 
 export function countNumberOfBytes(data: string) {
-  return stripHexPrefix(data).length / 2;
+  return stripHexPrefix(data).length / 2
 }
 
 export function countSignificantBits(data: string) {
-  const bytes = hexToBytes(data);
+  const bytes = hexToBytes(data)
   for (let i = 0; i < bytes.length; i++) {
     if (bytes[i] !== 0) {
       return (
@@ -664,10 +664,10 @@ export function countSignificantBits(data: string) {
         // The docs for Math.clz32 are:
         //   Returns the number of leading zero bits in the 32-bit binary representation of a number.
         //   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/clz32
-      );
+      )
     }
   }
-  return 0;
+  return 0
 }
 
 /**
@@ -684,15 +684,15 @@ export function countSignificantBits(data: string) {
  */
 export const splitMultiDynamicKeyNamePart = (keyName: string): string[] => {
   if (keyName.length <= 1) {
-    return [keyName];
+    return [keyName]
   }
 
   if (keyName.charAt(0) !== '<' || keyName.slice(-1) !== '>') {
-    return [keyName];
+    return [keyName]
   }
 
-  return keyName.substring(1, keyName.length - 1).split('|');
-};
+  return keyName.substring(1, keyName.length - 1).split('|')
+}
 
 /**
  * This function helps to duplicate schema entries with multiple types to prepare schemas loaded on init.
@@ -729,27 +729,27 @@ export const splitMultiDynamicKeyNamePart = (keyName: string): string[] => {
  * @param schema
  */
 export const duplicateMultiTypeERC725SchemaEntry = (
-  schema: ERC725JSONSchema,
+  schema: ERC725JSONSchema
 ): ERC725JSONSchema[] => {
   if (Array.isArray(schema)) {
     throw new Error(
-      'Input schema should be a ERC725JSONSchema and not an array.',
-    );
+      'Input schema should be a ERC725JSONSchema and not an array.'
+    )
   }
 
   if (!('name' in schema) || !('key' in schema) || !('keyType' in schema)) {
     throw new Error(
-      "Input schema object is missing 'name', 'key' and 'keyType' properties. Did you pass a valid ERC725JSONSchema object?",
-    );
+      "Input schema object is missing 'name', 'key' and 'keyType' properties. Did you pass a valid ERC725JSONSchema object?"
+    )
   }
 
-  const lowerCaseKeyType = schema.keyType.toLowerCase();
+  const lowerCaseKeyType = schema.keyType.toLowerCase()
 
   if (
     lowerCaseKeyType !== 'mapping' &&
     lowerCaseKeyType !== 'mappingwithgrouping'
   ) {
-    return [schema];
+    return [schema]
   }
 
   // A very naive way to check for dynamic parts...
@@ -758,36 +758,36 @@ export const duplicateMultiTypeERC725SchemaEntry = (
     !schema.name.includes('|') ||
     !schema.name.includes('>')
   ) {
-    return [schema];
+    return [schema]
   }
 
   if (schema.name.indexOf(':') === -1) {
     throw new Error(
-      `Input schema type is Mapping or MappingWithGroups but the key: ${schema.key} is not valid (missing ':').`,
-    );
+      `Input schema type is Mapping or MappingWithGroups but the key: ${schema.key} is not valid (missing ':').`
+    )
   }
 
-  const nameGroups = schema.name.split(':'); // The check above ensures this split is ok
-  const baseKey = schema.key.substring(0, schema.key.indexOf('<'));
+  const nameGroups = schema.name.split(':') // The check above ensures this split is ok
+  const baseKey = schema.key.substring(0, schema.key.indexOf('<'))
 
   const baseSchema: ERC725JSONSchema = {
     ...schema,
     name: nameGroups.shift() as string, // The first element of the key name is never dynamic.
     key: baseKey,
-  };
+  }
 
   // Case for Mapping, there is only one group left, and this group is dynamic
   if (nameGroups.length === 1) {
-    const dynamicTypes = splitMultiDynamicKeyNamePart(nameGroups[0]);
+    const dynamicTypes = splitMultiDynamicKeyNamePart(nameGroups[0])
     const finalSchemas = dynamicTypes.map((dynamicType) => {
       return {
         ...baseSchema,
         name: `${baseSchema.name}:<${dynamicType}>`,
         key: `${baseSchema.key}<${dynamicType}>`,
-      };
-    });
+      }
+    })
 
-    return finalSchemas;
+    return finalSchemas
   }
 
   // Case MappingWithGrouping (name groups had multiple :)
@@ -795,7 +795,7 @@ export const duplicateMultiTypeERC725SchemaEntry = (
   //    1. One dynamic type: Name:LastName:<address|uint256>
   //    2. Two dynamic types: Name:<address|bytes>:<address|uint256>
 
-  let finalSchemas: ERC725JSONSchema[];
+  let finalSchemas: ERC725JSONSchema[]
 
   // Case 1 - middle part is not dynamic
   if (nameGroups[0].charAt(0) !== '<' || nameGroups[0].slice(-1) !== '>') {
@@ -805,21 +805,21 @@ export const duplicateMultiTypeERC725SchemaEntry = (
         name: `${baseSchema.name}:${nameGroups[0]}`,
         key: `${baseSchema.key}`,
       },
-    ];
+    ]
   } else {
     // Case 2 - middle part is dynamic
-    const dynamicTypes = splitMultiDynamicKeyNamePart(nameGroups[0]);
+    const dynamicTypes = splitMultiDynamicKeyNamePart(nameGroups[0])
     finalSchemas = dynamicTypes.map((dynamicType) => {
       return {
         ...baseSchema,
         name: `${baseSchema.name}:<${dynamicType}>`,
         key: `${baseSchema.key}<${dynamicType}>`,
-      };
-    });
+      }
+    })
   }
 
   // Processing of the last part of the group - which is dynamic
-  const lastDynamicTypes = splitMultiDynamicKeyNamePart(nameGroups[1]);
+  const lastDynamicTypes = splitMultiDynamicKeyNamePart(nameGroups[1])
 
   return finalSchemas.flatMap((finalSchema) => {
     return lastDynamicTypes.map((lastDynamicType) => {
@@ -827,10 +827,10 @@ export const duplicateMultiTypeERC725SchemaEntry = (
         ...finalSchema,
         name: `${finalSchema.name}:<${lastDynamicType}>`,
         key: `${finalSchema.key}<${lastDynamicType}>`,
-      };
-    });
-  });
-};
+      }
+    })
+  })
+}
 
 /*
  * `uintN` must be a valid number of bits between 8 and 256, in multiple of 8
@@ -839,7 +839,7 @@ export const duplicateMultiTypeERC725SchemaEntry = (
  * @param bitSize the size of the uint in bits
  */
 export function isValidUintSize(bitSize: number) {
-  return bitSize >= 8 && bitSize <= 256 && bitSize % 8 === 0;
+  return bitSize >= 8 && bitSize <= 256 && bitSize % 8 === 0
 }
 
 /*
@@ -849,7 +849,7 @@ export function isValidUintSize(bitSize: number) {
  * @param bytesSize the size of the fixed size bytes value
  */
 export function isValidByteSize(bytesSize: number) {
-  return bytesSize >= 1 && bytesSize <= 32;
+  return bytesSize >= 1 && bytesSize <= 32
 }
 
 /**
@@ -858,5 +858,5 @@ export function isValidByteSize(bytesSize: number) {
  * @returns true or false
  */
 export function isValueContentLiteralHex(valueContent: string): boolean {
-  return isHexStrict(valueContent);
+  return isHexStrict(valueContent)
 }

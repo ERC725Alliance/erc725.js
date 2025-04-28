@@ -22,80 +22,80 @@
   in accordance with implementation of smart contract interfaces of ERC725
 */
 
-import { encodeParameter, encodeParameters } from 'web3-eth-abi';
+import { encodeParameter, encodeParameters } from 'web3-eth-abi'
 
-import type { JsonRpc } from '../types/JsonRpc';
-import { Method } from '../types/Method';
-import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
-import { ProviderTypes } from '../types/provider';
-import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../constants/constants';
+import type { JsonRpc } from '../types/JsonRpc'
+import { Method } from '../types/Method'
+import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils'
+import { ProviderTypes } from '../types/provider'
+import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../constants/constants'
 
 interface GetDataReturn {
-  key: string;
-  value: Record<string, any> | null;
+  key: string
+  value: Record<string, any> | null
 }
 
 export class ProviderWrapper {
-  type: ProviderTypes;
-  provider: any;
-  gas: number;
+  type: ProviderTypes
+  provider: any
+  gas: number
   constructor(provider: any, gasInfo: number) {
     if (typeof provider.request === 'function') {
-      this.type = ProviderTypes.ETHEREUM;
+      this.type = ProviderTypes.ETHEREUM
     } else {
-      this.type = ProviderTypes.WEB3;
+      this.type = ProviderTypes.WEB3
     }
-    this.provider = provider;
-    this.gas = gasInfo;
+    this.provider = provider
+    this.gas = gasInfo
   }
 
   async getOwner(address: string) {
     const result = await this.callContract(
-      constructJSONRPC(address, Method.OWNER, this.gas),
-    );
-    return decodeResult(Method.OWNER, result);
+      constructJSONRPC(address, Method.OWNER, this.gas)
+    )
+    return decodeResult(Method.OWNER, result)
   }
 
   async getErc725YVersion(address: string): Promise<ERC725_VERSION> {
     const isErc725Yv5 = await this.supportsInterface(
       address,
-      ERC725Y_INTERFACE_IDS['5.0'],
-    );
+      ERC725Y_INTERFACE_IDS['5.0']
+    )
 
     if (isErc725Yv5) {
-      return ERC725_VERSION.ERC725_v5;
+      return ERC725_VERSION.ERC725_v5
     }
 
     const isErc725Yv3 = await this.supportsInterface(
       address,
-      ERC725Y_INTERFACE_IDS['3.0'],
-    );
+      ERC725Y_INTERFACE_IDS['3.0']
+    )
 
     // The version 3 of the package can use the getData function from v2, still compatible
     if (isErc725Yv3) {
-      return ERC725_VERSION.ERC725_v2;
+      return ERC725_VERSION.ERC725_v2
     }
 
     const isErc725Yv2 = await this.supportsInterface(
       address,
-      ERC725Y_INTERFACE_IDS['2.0'],
-    );
+      ERC725Y_INTERFACE_IDS['2.0']
+    )
 
     if (isErc725Yv2) {
-      return ERC725_VERSION.ERC725_v2;
+      return ERC725_VERSION.ERC725_v2
     }
 
     // v0.2.0 and v0.6.0 have the same function signatures for getData, only versions before v0.2.0 requires a different call
 
     const isErc725YLegacy = await this.supportsInterface(
       address,
-      ERC725Y_INTERFACE_IDS.legacy,
-    );
+      ERC725Y_INTERFACE_IDS.legacy
+    )
 
     if (isErc725YLegacy) {
-      return ERC725_VERSION.ERC725_LEGACY;
+      return ERC725_VERSION.ERC725_LEGACY
     }
-    return ERC725_VERSION.NOT_ERC725;
+    return ERC725_VERSION.NOT_ERC725
   }
 
   /**
@@ -106,20 +106,17 @@ export class ProviderWrapper {
    */
   async supportsInterface(
     address: string,
-    interfaceId: string,
+    interfaceId: string
   ): Promise<boolean> {
     const result = await this.callContract(
       constructJSONRPC(
         address,
         Method.SUPPORTS_INTERFACE,
         this.gas,
-        `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`,
-      ),
-    );
-    return decodeResult(
-      Method.SUPPORTS_INTERFACE,
-      result,
-    ) as unknown as boolean;
+        `${interfaceId}${'00000000000000000000000000000000000000000000000000000000'}`
+      )
+    )
+    return decodeResult(Method.SUPPORTS_INTERFACE, result) as unknown as boolean
   }
 
   /**
@@ -132,77 +129,74 @@ export class ProviderWrapper {
   async isValidSignature(
     address: string,
     hash: string,
-    signature: string,
+    signature: string
   ): Promise<string> {
     if (this.type === ProviderTypes.ETHEREUM) {
       const encodedParams = encodeParameters(
         ['bytes32', 'bytes'],
-        [hash, signature],
-      );
+        [hash, signature]
+      )
 
       const result = await this.callContract(
         constructJSONRPC(
           address,
           Method.IS_VALID_SIGNATURE,
           undefined, // this.gas,
-          encodedParams,
-        ),
-      );
+          encodedParams
+        )
+      )
 
       if (result.error) {
-        throw result.error;
+        throw result.error
       }
 
       // Passing Method.IS_VALID_SIGNATURE ensures this will be string
       return decodeResult(
         Method.IS_VALID_SIGNATURE,
-        result,
-      ) as unknown as string;
+        result
+      ) as unknown as string
     }
 
     const encodedParams = encodeParameters(
       ['bytes32', 'bytes'],
-      [hash, signature],
-    );
+      [hash, signature]
+    )
 
     const results = await this.callContract([
       constructJSONRPC(
         address,
         Method.IS_VALID_SIGNATURE,
         undefined, // this.gas,
-        encodedParams,
+        encodedParams
       ),
-    ]);
-    if (results.error) {
-      throw results.error;
-    }
+    ])
 
     // Passing Method.IS_VALID_SIGNATURE ensures this will be string
     return decodeResult(
       Method.IS_VALID_SIGNATURE,
-      results[0].result,
-    ) as unknown as string;
+      results[0]
+    ) as unknown as string
   }
 
   async getData(address: string, keyHash: string) {
-    const result = await this.getAllData(address, [keyHash]);
+    const result = await this.getAllData(address, [keyHash])
     try {
-      return result[0].value;
+      return result[0].value
     } catch {
-      return null;
+      return null
     }
   }
 
   async getAllData(
     address: string,
-    keyHashes: string[],
+    keyHashes: string[]
   ): Promise<GetDataReturn[]> {
-    const erc725Version = await this.getErc725YVersion(address);
+    const erc725Version = await this.getErc725YVersion(address)
 
     if (erc725Version === ERC725_VERSION.NOT_ERC725) {
       throw new Error(
-        `Contract: ${address} does not support ERC725Y interface.`,
-      );
+        `Contract: ${address} does not support ERC725Y interface.`
+      )
     }
 
     switch (erc725Version) {
@@ -210,21 +204,21 @@ export class ProviderWrapper {
         return this._getAllDataGeneric(
           address,
           keyHashes,
-          Method.GET_DATA_BATCH,
-        );
+          Method.GET_DATA_BATCH
+        )
       case ERC725_VERSION.ERC725_v2:
-        return this._getAllDataGeneric(address, keyHashes, Method.GET_DATA);
+        return this._getAllDataGeneric(address, keyHashes, Method.GET_DATA)
       case ERC725_VERSION.ERC725_LEGACY:
-        return this._getAllDataLegacy(address, keyHashes);
+        return this._getAllDataLegacy(address, keyHashes)
       default:
-        return [];
+        return []
     }
   }
 
   private async _getAllDataGeneric(
     address: string,
     keyHashes: string[],
-    method: Method.GET_DATA | Method.GET_DATA_BATCH,
+    method: Method.GET_DATA | Method.GET_DATA_BATCH
   ): Promise<GetDataReturn[]> {
     if (this.type === ProviderTypes.ETHEREUM) {
       const encodedResults = await this.callContract(
@@ -232,16 +226,16 @@ export class ProviderWrapper {
           address,
           method,
           undefined, // this.gas,
-          encodeParameter('bytes32[]', keyHashes),
-        ),
-      );
+          encodeParameter('bytes32[]', keyHashes)
+        )
+      )
 
-      const decodedValues = decodeResult(method, encodedResults);
+      const decodedValues = decodeResult(method, encodedResults)
 
       return keyHashes.map<GetDataReturn>((keyHash, index) => ({
         key: keyHash,
         value: decodedValues ? decodedValues[index] : decodedValues,
-      }));
+      }))
     }
 
     const payload: JsonRpc[] = [
@@ -249,41 +243,41 @@ export class ProviderWrapper {
         address,
         method,
         undefined, // this.gas,
-        encodeParameter('bytes32[]', keyHashes),
+        encodeParameter('bytes32[]', keyHashes)
       ),
-    ];
+    ]
 
-    const results: any = await this.callContract(payload);
-    const decodedValues = decodeResult(method, results[0].result);
+    const results: any = await this.callContract(payload)
+    const decodedValues = decodeResult(method, results[0])
 
     return keyHashes.map<GetDataReturn>((key, index) => ({
       key,
       value: decodedValues ? decodedValues[index] : decodedValues,
-    }));
+    }))
   }
 
   private async _getAllDataLegacy(
     address: string,
-    keyHashes: string[],
+    keyHashes: string[]
   ): Promise<GetDataReturn[]> {
     if (this.type === ProviderTypes.ETHEREUM) {
       // Here we could use `getDataMultiple` instead of sending multiple calls to `getData`
       // But this is already legacy and it won't be used anymore..
       const encodedResultsPromises = keyHashes.map((keyHash) =>
         this.callContract(
-          constructJSONRPC(address, Method.GET_DATA_LEGACY, this.gas, keyHash),
-        ),
-      );
+          constructJSONRPC(address, Method.GET_DATA_LEGACY, this.gas, keyHash)
+        )
+      )
 
-      const decodedResults = await Promise.all(encodedResultsPromises);
+      const decodedResults = await Promise.all(encodedResultsPromises)
 
       return decodedResults.map((decodedResult, index) => ({
         key: keyHashes[index],
         value: decodeResult(Method.GET_DATA_LEGACY, decodedResult),
-      }));
+      }))
     }
 
-    const payload: JsonRpc[] = [];
+    const payload: JsonRpc[] = []
     // Here we could use `getDataMultiple` instead of sending multiple calls to `getData`
     // But this is already legacy and it won't be used anymore..
     for (let index = 0; index < keyHashes.length; index++) {
@@ -292,20 +286,19 @@ export class ProviderWrapper {
           address,
           Method.GET_DATA_LEGACY,
           this.gas,
-          keyHashes[index],
-        ),
-      );
+          keyHashes[index]
+        )
+      )
     }
 
-    const results: any = await this.callContract(payload);
+    const results: string[] = await this.callContract(payload)
 
-    return payload.map<GetDataReturn>((payloadCall, index) => ({
-      key: keyHashes[index],
-      value: decodeResult(
-        Method.GET_DATA_LEGACY,
-        results.find((element) => payloadCall.id === element.id).result,
-      ),
-    }));
+    return payload.map<GetDataReturn>((_payloadCall, index) => {
+      return {
+        key: keyHashes[index],
+        value: decodeResult(Method.GET_DATA_LEGACY, results[index]),
+      }
+    })
   }
 
   private async callContract(payload: JsonRpc[] | JsonRpc): Promise<any> {
@@ -313,43 +306,50 @@ export class ProviderWrapper {
     // So if the result is wrapped in an object as result.result then unwrap it.
     // Some code was assuming it's wrapped and other was it's not wrapped.
     if (this.type === ProviderTypes.ETHEREUM) {
-      const result = await this.provider.request(payload);
+      const result = await this.provider.request(payload)
       if (result.error) {
-        const error = new Error('Call failed');
-        Object.assign(error, result.error);
-        throw error;
+        const error = new Error('Call failed')
+        Object.assign(error, result.error)
+        throw error
       }
       if (result.result) {
-        return result.result;
+        return result.result
       }
-      return result;
+      return result
     }
 
-    return new Promise((resolve, reject) => {
-      // Send old web3 method with callback to resolve promise
-      // This is deprecated: https://docs.metamask.io/guide/ethereum-provider.html#ethereum-send-deprecated
+    const handleOne = async (payload: JsonRpc) => {
+      return new Promise((resolve, reject) => {
+        // Send old web3 method with callback to resolve promise
+        // This is deprecated: https://docs.metamask.io/guide/ethereum-provider.html#ethereum-send-deprecated
 
-      this.provider.send(payload, (e, r) => {
-        if (e) {
-          reject(e);
-        } else {
+        const doResolve = (r) => {
           if (r.error) {
-            let error: any;
-            ({ error } = r);
+            let error: any
+            ;({ error } = r)
             if (!(error instanceof Error)) {
-              error = new Error('Call failed');
-              Object.assign(error, r.error);
+              error = new Error('Call failed')
+              Object.assign(error, r.error)
             }
-            reject(error);
-            return;
+            return reject(error)
           }
-          if (r.result) {
-            resolve(r.result);
-            return;
-          }
-          resolve(r);
+          return resolve(r.result || '0x')
         }
-      });
-    });
+        const promise = this.provider.send(payload, (e, r) => {
+          if (e) {
+            reject(e)
+          } else {
+            doResolve(r)
+          }
+        })
+        if (promise && typeof promise.then === 'function') {
+          promise.then(doResolve, reject)
+        }
+      })
+    }
+    if (Array.isArray(payload)) {
+      return Promise.all(payload.map(handleOne))
+    }
+    return handleOne(payload)
   }
 }

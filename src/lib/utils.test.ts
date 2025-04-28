@@ -14,18 +14,18 @@
 
 /* eslint-disable no-unused-expressions */
 
-import { expect } from 'chai';
-import assert from 'assert';
-import { IPFS_GATEWAY } from '../../test/server';
+import { expect } from 'chai'
+import assert from 'assert'
+import { IPFS_GATEWAY, responseStore } from '../../test/server'
 
-import { keccak256, utf8ToHex } from 'web3-utils';
-import {
+import { keccak256, utf8ToBytes, utf8ToHex } from 'web3-utils'
+import type {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
-} from '../types/ERC725JSONSchema';
-import { GetDataDynamicKey } from '../types/GetData';
+} from '../types/ERC725JSONSchema'
+import type { GetDataDynamicKey } from '../types/GetData'
 
-import { SUPPORTED_VERIFICATION_METHOD_STRINGS } from '../constants/constants';
+import { SUPPORTED_VERIFICATION_METHOD_STRINGS } from '../constants/constants'
 import {
   guessKeyTypeFromKeyName,
   isDataAuthentic,
@@ -39,64 +39,10 @@ import {
   duplicateMultiTypeERC725SchemaEntry,
   splitMultiDynamicKeyNamePart,
   countSignificantBits,
-} from './utils';
-import { isDynamicKeyName } from './encodeKeyName';
-import { decodeKey } from './decodeData';
-
-console.log(
-  '(bytes4,bytes8,bytes32[CompactBytesArray])',
-  encodeData(
-    [
-      {
-        keyName: 'TupleWithArray',
-        value: [
-          '0xdeadbeaf',
-          12,
-          [
-            '0x1234567812345678123456781234567812345678123456781234567812345678',
-            '0x2345678123456781234567812345678123456781234567812345678123456789',
-          ],
-        ] as any,
-      },
-    ],
-    [
-      {
-        name: 'TupleWithArray',
-        key: '0x407aa9b2ee411784e88f84c077a615f183160b86b79e85162b55b86d94c29117',
-        keyType: 'Singleton',
-        valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
-        valueContent: '(Bytes4,Number,Bytes32[])',
-      },
-    ],
-  ),
-);
-console.log(
-  '(bytes4,bytes8,bytes32[])',
-  encodeData(
-    [
-      {
-        keyName: 'TupleWithArray',
-        value: [
-          '0xdeadbeaf',
-          12,
-          [
-            '0x1234567812345678123456781234567812345678123456781234567812345678',
-            '0x2345678123456781234567812345678123456781234567812345678123456789',
-          ],
-        ] as any,
-      },
-    ],
-    [
-      {
-        name: 'TupleWithArray',
-        key: '0x407aa9b2ee411784e88f84c077a615f183160b86b79e85162b55b86d94c29117',
-        keyType: 'Singleton',
-        valueType: '(bytes4,bytes8,bytes32[])',
-        valueContent: '(Bytes4,Number,Bytes32[])',
-      },
-    ],
-  ),
-);
+} from './utils'
+import { isDynamicKeyName } from './encodeKeyName'
+import { decodeKey } from './decodeData'
+import { mockJson } from '../../test/mockSchema'
 
 describe('utils', () => {
   describe('encodeKey/decodeKey', () => {
@@ -141,7 +87,12 @@ describe('utils', () => {
           {
             verification: {
               method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
-              data: '0x733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d',
+              data: keccak256(
+                utf8ToBytes(
+                  responseStore.ipfs
+                    .QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd
+                )
+              ),
             },
             url: 'ipfs://QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd',
           },
@@ -160,8 +111,7 @@ describe('utils', () => {
           },
           {
             key: '0x9985edaf12cbacf5ac7d6ed54f0445cc00000000000000000000000000000000',
-            value:
-              '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264',
+            value: `0x00006f357c6a0020${mockJson.hash.slice(2)}697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264`,
           },
           {
             key: '0x9985edaf12cbacf5ac7d6ed54f0445cc00000000000000000000000000000001',
@@ -285,7 +235,7 @@ describe('utils', () => {
           key: '0x4b80742de2bf393a64c70000<address>',
           keyType: 'MappingWithGrouping',
           valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
-          valueContent: '(Bytes4,Number,Bytes32[])',
+          valueContent: '(Bytes4,Number,Bytes32)',
         },
         valueType: '',
         decodedValue: [
@@ -299,21 +249,92 @@ describe('utils', () => {
         encodedValue:
           '0xdeadbeaf000000000000000c0020123456781234567812345678123456781234567812345678123456781234567800202345678123456781234567812345678123456781234567812345678123456789',
       },
-    ];
+      {
+        schema: {
+          name: 'TupleWithArrayTruncated',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
+          valueContent: '(Bytes4,Number,Bytes32)',
+        },
+        valueType: '',
+        decodedValue: ['0xdeadbeaf', 12, null] as
+          | string[]
+          | Array<string | string[]>,
+        encodedValue: '0xdeadbeaf000000000000000c',
+      },
+      {
+        schema: {
+          name: 'TupleWithArrayPartial',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
+          valueContent: '(Bytes4,Number,Bytes32)',
+        },
+        valueType: '',
+        decodedValue: ['0xdeadbeaf', 12, null] as
+          | string[]
+          | Array<string | string[]>,
+        encodedValue: '0xdeadbeaf000000000000000c',
+        encodedError: '0xdeadbeaf000000000000000c0020', // This encoded value has the length item of the encoded array instead of null
+      },
+      {
+        schema: {
+          name: 'TupleWithArrayPartialMore',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
+          valueContent: '(Bytes4,Number,Bytes32)',
+        },
+        valueType: '',
+        decodedValue: ['0xdeadbeaf', 12, null] as
+          | string[]
+          | Array<string | string[]>,
+        encodedValue: '0xdeadbeaf000000000000000c',
+        encodedError: '0xdeadbeaf000000000000000c002001234342343', // This encoded value has the length and partial byte of the encoded array instead of null
+      },
+      {
+        schema: {
+          name: 'TupleWithArray',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: '(bytes4,bytes32[],bytes8)',
+          valueContent: '(Bytes4,Bytes32,Number)',
+        },
+        valueType: '',
+        decodedValue: [
+          '0xdeadbeaf',
+          [
+            '0x1234567812345678123456781234567812345678123456781234567812345678',
+            '0x2345678123456781234567812345678123456781234567812345678123456789',
+          ],
+          12,
+        ] as string[] | Array<string | string[]>,
+        encodedValue:
+          '0xdeadbeaf0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000212345678123456781234567812345678123456781234567812345678123456782345678123456781234567812345678123456781234567812345678123456789000000000000000c',
+      },
+    ]
 
     testCases.forEach((testCase) => {
       it(`encodes/decodes keyType Array / tuples (valueContent: ${testCase.schema.valueContent}, valueType: ${testCase.schema.valueType}`, () => {
         assert.deepStrictEqual(
           encodeKey(testCase.schema, testCase.decodedValue),
-          testCase.encodedValue,
-        );
+          testCase.encodedValue // The encoder does this correctly in some cases so we can't compare to encodedValue all the time
+        )
 
-        assert.deepStrictEqual(
-          decodeKey(testCase.schema, testCase.encodedValue),
-          testCase.decodedValue,
-        );
-      });
-    });
+        if (testCase.encodedError) {
+          // This means that the encoded value is invalid and should throw an error
+          assert.throws(() => {
+            decodeKey(testCase.schema, testCase.encodedError)
+          })
+        } else {
+          assert.deepStrictEqual(
+            decodeKey(testCase.schema, testCase.encodedValue),
+            testCase.decodedValue
+          )
+        }
+      })
+    })
 
     it('should encode the array length only if passing a number', async () => {
       const schema: ERC725JSONSchema = {
@@ -322,14 +343,14 @@ describe('utils', () => {
         keyType: 'Array',
         valueContent: 'Address',
         valueType: 'address',
-      };
+      }
 
-      const decodedValue = 3;
-      const encodedValue = '0x00000000000000000000000000000003';
+      const decodedValue = 3
+      const encodedValue = '0x00000000000000000000000000000003'
 
-      assert.equal(encodeKey(schema, decodedValue), encodedValue);
-    });
-  });
+      assert.equal(encodeKey(schema, decodedValue), encodedValue)
+    })
+  })
 
   describe('count bits', () => {
     const testCases = [
@@ -343,13 +364,13 @@ describe('utils', () => {
       },
       { value: '0x1000', result: 13 },
       { value: '0x000f', result: 4 },
-    ];
+    ]
     testCases.forEach(({ value, result }) => {
       it(`should count the number of bits in ${value}`, () => {
-        assert.equal(countSignificantBits(value), result);
-      });
-    });
-  });
+        assert.equal(countSignificantBits(value), result)
+      })
+    })
+  })
 
   describe('encodeKeyValue/decodeKeyValue', () => {
     const testCases = [
@@ -458,7 +479,7 @@ describe('utils', () => {
         decodedValue: '0xc9aaAE3201F40fd0fF04D9c885769d8256A456ab',
         encodedValue: '0xc9aaae3201f40fd0ff04d9c885769d8256a456ab',
       },
-    ];
+    ]
 
     testCases.forEach((testCase) => {
       it(`encodes correctly valueContent ${testCase.valueContent} to valueType: ${testCase.valueType}`, () => {
@@ -466,23 +487,23 @@ describe('utils', () => {
           encodeKeyValue(
             testCase.valueContent,
             testCase.valueType,
-            testCase.decodedValue,
+            testCase.decodedValue
           ),
-          testCase.encodedValue,
-        );
-      });
+          testCase.encodedValue
+        )
+      })
       it(`decodes correctly valueContent: ${testCase.valueContent} to valueType: ${testCase.valueType}`, () => {
         assert.deepStrictEqual(
           decodeKeyValue(
             testCase.valueContent,
             testCase.valueType,
-            testCase.encodedValue,
+            testCase.encodedValue
           ),
-          testCase.decodedValue,
-        );
-      });
-    });
-  });
+          testCase.decodedValue
+        )
+      })
+    })
+  })
 
   describe('encodeTupleKeyValue', () => {
     const testCases = [
@@ -498,7 +519,7 @@ describe('utils', () => {
         encodedValue: '0xdeadbeaf00000000000000000000000000000020',
         decodedValue: ['0xdeadbeaf', 32],
       },
-    ]; // we may need to add more test cases! Address, etc.
+    ] // we may need to add more test cases! Address, etc.
 
     testCases.forEach((testCase) => {
       it('encodes tuple values', () => {
@@ -506,12 +527,12 @@ describe('utils', () => {
           encodeTupleKeyValue(
             testCase.valueContent,
             testCase.valueType,
-            testCase.decodedValue,
-          ),
-        ).to.eq(testCase.encodedValue);
-      });
-    });
-  });
+            testCase.decodedValue
+          )
+        ).to.eq(testCase.encodedValue)
+      })
+    })
+  })
 
   describe('encodeArrayKey', () => {
     it('should encode the array length only if passing a number', async () => {
@@ -521,14 +542,14 @@ describe('utils', () => {
         keyType: 'Array',
         valueContent: 'Address',
         valueType: 'address',
-      };
+      }
 
-      const decodedValue = 3;
-      const encodedValue = '0x00000000000000000000000000000003';
+      const decodedValue = 3
+      const encodedValue = '0x00000000000000000000000000000003'
 
-      assert.equal(encodeKey(schema, decodedValue), encodedValue);
-    });
-  });
+      assert.equal(encodeKey(schema, decodedValue), encodedValue)
+    })
+  })
 
   describe('encodeData', () => {
     const schemas: ERC725JSONSchema[] = [
@@ -554,14 +575,14 @@ describe('utils', () => {
         valueType: 'bytes',
         valueContent: 'JSONURL',
       },
-    ];
+    ]
 
     const expectedResult = {
       keys: [
         '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
       ],
       values: ['0x1183790f29be3cdfd0a102862fea1a4a30b3adab'],
-    };
+    }
 
     it('encodes data with named key - [array input]', () => {
       const encodedDataByNamedKey = encodeData(
@@ -571,10 +592,10 @@ describe('utils', () => {
             value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
           },
         ],
-        schemas,
-      );
-      assert.deepStrictEqual(encodedDataByNamedKey, expectedResult);
-    });
+        schemas
+      )
+      assert.deepStrictEqual(encodedDataByNamedKey, expectedResult)
+    })
 
     it('encodes data with named key - [non array input]', () => {
       const encodedDataByNamedKey = encodeData(
@@ -583,14 +604,14 @@ describe('utils', () => {
           value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
         },
 
-        schemas,
-      );
-      assert.deepStrictEqual(encodedDataByNamedKey, expectedResult);
-    });
+        schemas
+      )
+      assert.deepStrictEqual(encodedDataByNamedKey, expectedResult)
+    })
 
     it('encodes data with hashed key', () => {
       const hashedKey =
-        '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
+        '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47'
 
       const encodedDataByHashKey = encodeData(
         [
@@ -599,14 +620,14 @@ describe('utils', () => {
             value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
           },
         ],
-        schemas,
-      );
-      assert.deepStrictEqual(encodedDataByHashKey, expectedResult);
-    });
+        schemas
+      )
+      assert.deepStrictEqual(encodedDataByHashKey, expectedResult)
+    })
 
     it('encodes data with hashed key without 0x prefix', () => {
       const hashedKey =
-        '0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47';
+        '0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47'
 
       const encodedDataByHashKeyWithout0xPrefix = encodeData(
         [
@@ -615,14 +636,14 @@ describe('utils', () => {
             value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
           },
         ],
-        schemas,
-      );
+        schemas
+      )
 
       assert.deepStrictEqual(
         encodedDataByHashKeyWithout0xPrefix,
-        expectedResult,
-      );
-    });
+        expectedResult
+      )
+    })
 
     it('encodes array', () => {
       const encodedDataWithMultipleKeys = encodeData(
@@ -632,8 +653,8 @@ describe('utils', () => {
             value: ['0xa3e6F38477D45727F6e6f853Cdb479b0D60c0aC9'],
           },
         ],
-        schemas,
-      );
+        schemas
+      )
 
       assert.deepStrictEqual(encodedDataWithMultipleKeys, {
         keys: [
@@ -644,8 +665,8 @@ describe('utils', () => {
           '0x00000000000000000000000000000001',
           '0xa3e6f38477d45727f6e6f853cdb479b0d60c0ac9',
         ],
-      });
-    });
+      })
+    })
 
     it('encodes array', () => {
       const addressArray = [
@@ -660,7 +681,7 @@ describe('utils', () => {
         '0xfd5a7c50c0cf665a772407af3f05522784589c44',
         '0x13de082cf8a499eee75b0681cfa0141a145f15d9',
         '0xe3610d0eb167fe7a7b7c25d0aee8874eb8b113ef',
-      ];
+      ]
       const encodedDataWithMultipleKeys = encodeData(
         [
           {
@@ -668,8 +689,8 @@ describe('utils', () => {
             value: addressArray,
           },
         ],
-        schemas,
-      );
+        schemas
+      )
 
       assert.deepStrictEqual(encodedDataWithMultipleKeys, {
         keys: [
@@ -687,11 +708,11 @@ describe('utils', () => {
           '0x7c8c3416d6cda87cd42c71ea1843df280000000000000000000000000000000a',
         ],
         values: ['0x0000000000000000000000000000000b', ...addressArray],
-      });
-    });
+      })
+    })
 
     it('encodes array length only if giving a number', () => {
-      const length = 5;
+      const length = 5
 
       const encodedArrayLengthKey = encodeData(
         [
@@ -700,16 +721,16 @@ describe('utils', () => {
             value: length,
           },
         ],
-        schemas,
-      );
+        schemas
+      )
 
       assert.deepStrictEqual(encodedArrayLengthKey, {
         keys: [
           '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
         ],
         values: ['0x00000000000000000000000000000005'],
-      });
-    });
+      })
+    })
 
     it('encodes multiple keys', () => {
       const encodedMultipleKeys = encodeData(
@@ -736,8 +757,8 @@ describe('utils', () => {
             value: '0x1183790f29BE3cDfD0A102862fEA1a4a30b3AdAb',
           },
         ],
-        schemas,
-      );
+        schemas
+      )
 
       assert.deepStrictEqual(encodedMultipleKeys, {
         keys: [
@@ -754,11 +775,11 @@ describe('utils', () => {
           '0xdaea594e385fc724449e3118b2db7e86dfba1826',
           '0x1183790f29be3cdfd0a102862fea1a4a30b3adab',
         ],
-      });
-    });
+      })
+    })
 
     it('encodes dynamic keys', () => {
-      const address = '0x78c964cd805233eb39f2db152340079088809725';
+      const address = '0x78c964cd805233eb39f2db152340079088809725'
 
       const encodedDynamicKeys = encodeData(
         [
@@ -788,8 +809,8 @@ describe('utils', () => {
             valueType: 'bytes',
             valueContent: 'Address',
           },
-        ],
-      );
+        ]
+      )
 
       assert.deepStrictEqual(encodedDynamicKeys, {
         keys: [
@@ -800,9 +821,9 @@ describe('utils', () => {
           '0xc57390642767fc9adb0e4211fac735abe2edcfde',
           '0x5bed9e061cea8b4be17d3b5ea85de62f483a40fd',
         ],
-      });
-    });
-  });
+      })
+    })
+  })
 
   describe('encodeData with custom array length and starting index', () => {
     const schemas: ERC725JSONSchema[] = [
@@ -813,7 +834,7 @@ describe('utils', () => {
         valueType: 'address',
         valueContent: 'Address',
       },
-    ];
+    ]
 
     it('should be able to specify the array length + starting index', () => {
       const encodedArraySection = encodeData(
@@ -828,8 +849,8 @@ describe('utils', () => {
             startingIndex: 21,
           },
         ],
-        schemas,
-      );
+        schemas
+      )
 
       // Expected result with custom startingIndex and totalArrayLength
       const expectedResult = {
@@ -843,14 +864,14 @@ describe('utils', () => {
           '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
           '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
         ],
-      };
+      }
 
       assert.deepStrictEqual(
         encodedArraySection,
         expectedResult,
-        'Encoding with custom starting index and array length should match the expected result.',
-      );
-    });
+        'Encoding with custom starting index and array length should match the expected result.'
+      )
+    })
 
     it('should throw if startingIndex is negative', () => {
       const encodeDataWithNegativeStartingIndex = () => {
@@ -863,16 +884,16 @@ describe('utils', () => {
               startingIndex: -1,
             },
           ],
-          schemas,
-        );
-      };
+          schemas
+        )
+      }
 
       assert.throws(
         encodeDataWithNegativeStartingIndex,
         /Invalid `startingIndex`/,
-        'Should throw an error for negative startingIndex',
-      );
-    });
+        'Should throw an error for negative startingIndex'
+      )
+    })
 
     it('should throw if totalArrayLength is smaller than elements in provided value array', () => {
       const encodeDataWithLowerTotalArrayLength = () => {
@@ -888,16 +909,16 @@ describe('utils', () => {
               startingIndex: 0,
             },
           ],
-          schemas,
-        );
-      };
+          schemas
+        )
+      }
 
       assert.throws(
         encodeDataWithLowerTotalArrayLength,
         /Invalid `totalArrayLength`/,
-        'Should throw an error for totalArrayLength smaller than the number of provided elements',
-      );
-    });
+        'Should throw an error for totalArrayLength smaller than the number of provided elements'
+      )
+    })
 
     it('should start from 0 if startingIndex is not provided', () => {
       const result = encodeData(
@@ -908,8 +929,8 @@ describe('utils', () => {
             totalArrayLength: 1,
           },
         ],
-        schemas,
-      );
+        schemas
+      )
 
       const expectedResult = {
         keys: [
@@ -920,14 +941,14 @@ describe('utils', () => {
           '0x00000000000000000000000000000001',
           '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
         ],
-      };
+      }
 
       assert.deepStrictEqual(
         result,
         expectedResult,
-        'Should encode starting from index 0 if startingIndex is not provided',
-      );
-    });
+        'Should encode starting from index 0 if startingIndex is not provided'
+      )
+    })
 
     it('should use the number of elements in value field if totalArrayLength is not provided', () => {
       const result = encodeData(
@@ -942,8 +963,8 @@ describe('utils', () => {
             startingIndex: 0,
           },
         ],
-        schemas,
-      );
+        schemas
+      )
 
       const expectedResult = {
         keys: [
@@ -956,40 +977,40 @@ describe('utils', () => {
           '0x983abc616f2442bab7a917e6bb8660df8b01f3bf',
           '0x56ecbc104136d00eb37aa0dce60e075f10292d81',
         ],
-      };
+      }
 
       assert.deepStrictEqual(
         result,
         expectedResult,
-        'should use the number of elements in value field if totalArrayLength is not provided',
-      );
-    });
-  });
+        'should use the number of elements in value field if totalArrayLength is not provided'
+      )
+    })
+  })
 
   describe('isDataAuthentic', () => {
     it('returns true if data is authentic', () => {
-      const data = 'h3ll0HowAreYou?';
-      const expectedHash = keccak256(data);
+      const data = 'h3ll0HowAreYou?'
+      const expectedHash = keccak256(data)
 
       const isAuthentic = isDataAuthentic(data, {
         data: expectedHash,
         method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES,
-      });
+      })
 
-      assert.ok(isAuthentic);
-    });
+      assert.ok(isAuthentic)
+    })
     it('returns false if data is not authentic', () => {
-      const data = 'h3ll0HowAreYou?';
-      const expectedHash = 'wrongHash';
+      const data = 'h3ll0HowAreYou?'
+      const expectedHash = 'wrongHash'
 
       const isAuthentic = isDataAuthentic(data, {
         data: expectedHash,
         method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES,
-      });
+      })
 
-      assert.strictEqual(isAuthentic, false);
-    });
-  });
+      assert.strictEqual(isAuthentic, false)
+    })
+  })
 
   describe('guessKeyTypeFromKeyName', () => {
     const testCases: { keyType: ERC725JSONSchemaKeyType; keyName: string }[] = [
@@ -1023,46 +1044,46 @@ describe('utils', () => {
         keyName:
           'AddressPermissions:Permissions:cafecafecafecafecafecafecafecafecafecafe',
       },
-    ];
+    ]
 
     testCases.forEach((testCase) => {
       it(`guesses ${testCase.keyType}`, () => {
         assert.deepStrictEqual(
           guessKeyTypeFromKeyName(testCase.keyName),
-          testCase.keyType,
-        );
-      });
-    });
-  });
+          testCase.keyType
+        )
+      })
+    })
+  })
 
   describe('convertIPFSGatewayUrl', () => {
-    const expectedIPFSGateway = IPFS_GATEWAY;
+    const expectedIPFSGateway = IPFS_GATEWAY
 
     it('converts when missing /ipfs/', () => {
       assert.deepStrictEqual(
         convertIPFSGatewayUrl(IPFS_GATEWAY.slice(0, -5)),
-        expectedIPFSGateway,
-      );
-    });
+        expectedIPFSGateway
+      )
+    })
     it('converts when missing /', () => {
       assert.deepStrictEqual(
         convertIPFSGatewayUrl(IPFS_GATEWAY.slice(0, -1)),
-        expectedIPFSGateway,
-      );
-    });
+        expectedIPFSGateway
+      )
+    })
     it('converts when missing ipfs/', () => {
       assert.deepStrictEqual(
         convertIPFSGatewayUrl(IPFS_GATEWAY.slice(0, -5)),
-        expectedIPFSGateway,
-      );
-    });
+        expectedIPFSGateway
+      )
+    })
     it('does not convert when passed correctly', () => {
       assert.deepStrictEqual(
         convertIPFSGatewayUrl(IPFS_GATEWAY),
-        expectedIPFSGateway,
-      );
-    });
-  });
+        expectedIPFSGateway
+      )
+    })
+  })
 
   describe('generateSchemasFromDynamicKeys', () => {
     it('generates a non dynamic schema correctly', () => {
@@ -1088,7 +1109,7 @@ describe('utils', () => {
           valueType: 'bytes',
           valueContent: 'Bytes4',
         },
-      ];
+      ]
 
       const keys: Array<string | GetDataDynamicKey> = [
         'AddressPermissions[]',
@@ -1096,37 +1117,37 @@ describe('utils', () => {
           keyName: 'LSP4CreatorsMap:<address>',
           dynamicKeyParts: '0xcafecafecafecafecafecafecafecafecafecafe',
         },
-      ];
+      ]
 
-      const generatedSchemas = generateSchemasFromDynamicKeys(keys, schemas);
+      const generatedSchemas = generateSchemasFromDynamicKeys(keys, schemas)
 
-      expect(generatedSchemas.length).to.equal(keys.length);
+      expect(generatedSchemas.length).to.equal(keys.length)
 
       generatedSchemas.forEach((schema) => {
         expect(
           isDynamicKeyName(schema.key),
-          'generated schema key should not be dynamic',
-        ).to.be.false;
-      });
-    });
-  });
+          'generated schema key should not be dynamic'
+        ).to.be.false
+      })
+    })
+  })
 
   describe('splitMultiDynamicKeyNamePart', () => {
     it('returns the exact input string if it is not a dynamic string', () => {
-      const keyName = 'ImNotDynamic';
+      const keyName = 'ImNotDynamic'
 
-      assert.deepStrictEqual(splitMultiDynamicKeyNamePart(keyName), [keyName]);
-    });
+      assert.deepStrictEqual(splitMultiDynamicKeyNamePart(keyName), [keyName])
+    })
     it('returns an array with each type when the input is a dynamic string', () => {
-      const keyName = '<address|bytes32|uint256>';
+      const keyName = '<address|bytes32|uint256>'
 
       assert.deepStrictEqual(splitMultiDynamicKeyNamePart(keyName), [
         'address',
         'bytes32',
         'uint256',
-      ]);
-    });
-  });
+      ])
+    })
+  })
 
   describe('duplicateMultiTypeERC725SchemaEntry', () => {
     it('returns the exact input in an array if there is no dynamic type in it', () => {
@@ -1136,12 +1157,12 @@ describe('utils', () => {
         keyType: 'Array',
         valueType: 'address',
         valueContent: 'Address',
-      };
+      }
 
-      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema);
+      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema)
 
-      assert.deepStrictEqual(duplicatedSchemas, [schema]);
-    });
+      assert.deepStrictEqual(duplicatedSchemas, [schema])
+    })
     it('returns the exact input in an array if there is only one dynamic type in it for Mapping', () => {
       const schema: ERC725JSONSchema = {
         name: 'LSP1UniversalReceiverDelegate:<bytes32>',
@@ -1149,12 +1170,12 @@ describe('utils', () => {
         keyType: 'Mapping',
         valueType: 'address',
         valueContent: 'Address',
-      };
+      }
 
-      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema);
+      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema)
 
-      assert.deepStrictEqual(duplicatedSchemas, [schema]);
-    });
+      assert.deepStrictEqual(duplicatedSchemas, [schema])
+    })
     it('returns the exact input in an array if there is only one dynamic type in it for MappingWithGrouping', () => {
       const schema: ERC725JSONSchema = {
         name: 'AddressPermissions:AllowedCalls:<address>',
@@ -1162,12 +1183,12 @@ describe('utils', () => {
         keyType: 'MappingWithGrouping',
         valueType: '(bytes4,address,bytes4,bytes4)[CompactBytesArray]',
         valueContent: '(BitArray,Address,Bytes4,Bytes4)',
-      };
+      }
 
-      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema);
+      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema)
 
-      assert.deepStrictEqual(duplicatedSchemas, [schema]);
-    });
+      assert.deepStrictEqual(duplicatedSchemas, [schema])
+    })
     it('splits and returns one schema for each dynamic name type for Mapping', () => {
       const schema: ERC725JSONSchema = {
         name: 'LSP8MetadataTokenURI:<address|uint256|bytes32|string>',
@@ -1175,7 +1196,7 @@ describe('utils', () => {
         keyType: 'Mapping',
         valueType: '(bytes4,string)',
         valueContent: '(Bytes4,URI)',
-      };
+      }
 
       const expectedSchemas: ERC725JSONSchema[] = [
         {
@@ -1206,12 +1227,12 @@ describe('utils', () => {
           valueType: '(bytes4,string)',
           valueContent: '(Bytes4,URI)',
         },
-      ];
+      ]
 
-      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema);
+      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema)
 
-      assert.deepStrictEqual(duplicatedSchemas, expectedSchemas);
-    });
+      assert.deepStrictEqual(duplicatedSchemas, expectedSchemas)
+    })
     it('splits and returns one schema for each dynamic name type for MappingWithGrouping', () => {
       const schema: ERC725JSONSchema = {
         name: 'AddressPermissions:AllowedCalls:<address|string>',
@@ -1219,7 +1240,7 @@ describe('utils', () => {
         keyType: 'MappingWithGrouping',
         valueType: 'address',
         valueContent: 'Address',
-      };
+      }
 
       const expectedSchemas: ERC725JSONSchema[] = [
         {
@@ -1236,12 +1257,12 @@ describe('utils', () => {
           valueType: 'address',
           valueContent: 'Address',
         },
-      ];
+      ]
 
-      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema);
+      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema)
 
-      assert.deepStrictEqual(duplicatedSchemas, expectedSchemas);
-    });
+      assert.deepStrictEqual(duplicatedSchemas, expectedSchemas)
+    })
     it('splits and returns one schema for each dynamic name type for MappingWithGrouping with multiple types', () => {
       const schema: ERC725JSONSchema = {
         name: 'MyKeyName:<bytes2|address>:<uint32|address>',
@@ -1249,7 +1270,7 @@ describe('utils', () => {
         keyType: 'MappingWithGrouping',
         valueType: 'address',
         valueContent: 'Address',
-      };
+      }
 
       const expectedSchemas: ERC725JSONSchema[] = [
         {
@@ -1280,11 +1301,11 @@ describe('utils', () => {
           valueType: 'address',
           valueContent: 'Address',
         },
-      ];
+      ]
 
-      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema);
+      const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema)
 
-      assert.deepStrictEqual(duplicatedSchemas, expectedSchemas);
-    });
-  });
-});
+      assert.deepStrictEqual(duplicatedSchemas, expectedSchemas)
+    })
+  })
+})
