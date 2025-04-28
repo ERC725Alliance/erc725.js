@@ -21,9 +21,9 @@
  * @date 2020
  */
 
-import HttpProvider from 'web3-providers-http';
+import HttpProvider from 'web3-providers-http'
 
-import { ProviderWrapper } from './provider/providerWrapper';
+import { ProviderWrapper } from './provider/providerWrapper'
 
 import {
   encodeData,
@@ -32,38 +32,38 @@ import {
   duplicateMultiTypeERC725SchemaEntry,
   getVerificationMethod,
   isDataAuthentic,
-} from './lib/utils';
+} from './lib/utils'
 
-import { getSchema } from './lib/schemaParser';
-import { isValidSignature } from './lib/isValidSignature';
+import { getSchema } from './lib/schemaParser'
+import { isValidSignature } from './lib/isValidSignature'
 
 import {
   DEFAULT_GAS_VALUE,
-  SUPPORTED_VERIFICATION_METHODS,
-  SUPPORTED_VERIFICATION_METHOD_STRINGS,
-} from './constants/constants';
-import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
+  type SUPPORTED_VERIFICATION_METHODS,
+  type SUPPORTED_VERIFICATION_METHOD_STRINGS,
+} from './constants/constants'
+import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName'
 
 // Types
-import { ERC725Config, ERC725Options } from './types/Config';
-import { Permissions } from './types/Method';
-import {
+import type { ERC725Config, ERC725Options } from './types/Config'
+import type { Permissions } from './types/Method'
+import type {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
-} from './types/ERC725JSONSchema';
+} from './types/ERC725JSONSchema'
 import type {
   DecodeDataInput,
   DecodeDataOutput,
   EncodeDataInput,
   FetchDataOutput,
-} from './types/decodeData';
-import type { GetDataDynamicKey, GetDataInput } from './types/GetData';
-import { decodeData } from './lib/decodeData';
-import { getDataFromExternalSources } from './lib/getDataFromExternalSources';
-import type { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys';
-import { getData } from './lib/getData';
+} from './types/decodeData'
+import type { GetDataDynamicKey, GetDataInput } from './types/GetData'
+import { decodeData } from './lib/decodeData'
+import { getDataFromExternalSources } from './lib/getDataFromExternalSources'
+import type { DynamicKeyPart, DynamicKeyParts } from './types/dynamicKeys'
+import { getData } from './lib/getData'
 import {
   encodeDataSourceWithHash,
   decodeDataSourceWithHash,
@@ -71,18 +71,18 @@ import {
   decodeValueType,
   encodeValueContent,
   decodeValueContent,
-} from './lib/encoder';
-import { internalSupportsInterface } from './lib/detector';
-import { decodeMappingKey } from './lib/decodeMappingKey';
+} from './lib/encoder'
+import { internalSupportsInterface } from './lib/detector'
+import { decodeMappingKey } from './lib/decodeMappingKey'
 import {
   encodePermissions,
   decodePermissions,
   checkPermissions,
   mapPermission,
-} from './lib/permissions';
-import { AssetURLEncode } from './types/encodeData';
-import { URLDataToEncode, URLDataWithHash, Verification } from './types';
-import { isAddress } from 'web3-validator';
+} from './lib/permissions'
+import type { AssetURLEncode } from './types/encodeData'
+import type { URLDataToEncode, URLDataWithHash, Verification } from './types'
+import { isAddress } from 'web3-validator'
 
 export type {
   ERC725JSONSchema,
@@ -90,18 +90,18 @@ export type {
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
   Permissions,
-};
+}
 
-export { ERC725Config, KeyValuePair, ProviderTypes } from './types';
+export { ERC725Config, KeyValuePair, ProviderTypes } from './types'
 export {
   encodeData,
   encodeArrayKey,
   getVerificationMethod,
   isDataAuthentic,
-} from './lib/utils';
-export { decodeData } from './lib/decodeData';
-export { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
-export { decodeMappingKey } from './lib/decodeMappingKey';
+} from './lib/utils'
+export { decodeData } from './lib/decodeData'
+export { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName'
+export { decodeMappingKey } from './lib/decodeMappingKey'
 export {
   encodeDataSourceWithHash,
   decodeDataSourceWithHash,
@@ -109,50 +109,50 @@ export {
   decodeValueType,
   encodeValueContent,
   decodeValueContent,
-} from './lib/encoder';
-export { getDataFromExternalSources } from './lib/getDataFromExternalSources';
+} from './lib/encoder'
+export { getDataFromExternalSources } from './lib/getDataFromExternalSources'
 export {
   encodePermissions,
   decodePermissions,
   checkPermissions,
   mapPermission,
-} from './lib/permissions';
-export { getSchema } from './lib/schemaParser';
+} from './lib/permissions'
+export { getSchema } from './lib/schemaParser'
 
 // PRIVATE FUNCTION
 function initializeProvider(providerOrRpcUrl, gasInfo) {
   // do not fail on no-provider
-  if (!providerOrRpcUrl) return undefined;
+  if (!providerOrRpcUrl) return undefined
 
   // if provider is a string, assume it's a rpcUrl
   if (typeof providerOrRpcUrl === 'string') {
-    return new ProviderWrapper(new HttpProvider(providerOrRpcUrl), gasInfo);
+    return new ProviderWrapper(new HttpProvider(providerOrRpcUrl), gasInfo)
   }
 
   if (
     typeof providerOrRpcUrl.request === 'function' ||
     typeof providerOrRpcUrl.send === 'function'
   )
-    return new ProviderWrapper(providerOrRpcUrl, gasInfo);
+    return new ProviderWrapper(providerOrRpcUrl, gasInfo)
 
-  throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`);
+  throw new Error(`Incorrect or unsupported provider ${providerOrRpcUrl}`)
 }
 
 // PUBLIC FUNCTION
 export async function supportsInterface(
   interfaceIdOrName: string,
   options: {
-    address: string;
-    rpcUrl: string;
-    gas?: number;
-    provider?: ProviderWrapper;
-  },
+    address: string
+    rpcUrl: string
+    gas?: number
+    provider?: ProviderWrapper
+  }
 ): Promise<boolean> {
   if (!isAddress(options.address)) {
-    throw new Error('Invalid address');
+    throw new Error('Invalid address')
   }
   if (!options.rpcUrl) {
-    throw new Error('Missing RPC URL');
+    throw new Error('Missing RPC URL')
   }
 
   return internalSupportsInterface(interfaceIdOrName, {
@@ -161,9 +161,9 @@ export async function supportsInterface(
       options.provider ||
       initializeProvider(
         options.rpcUrl,
-        options?.gas ? options?.gas : DEFAULT_GAS_VALUE,
+        options?.gas ? options?.gas : DEFAULT_GAS_VALUE
       ),
-  });
+  })
 }
 
 /**
@@ -173,7 +173,7 @@ export async function supportsInterface(
  *
  */
 export class ERC725 {
-  options: ERC725Options;
+  options: ERC725Options
 
   /**
    * Creates an instance of ERC725.
@@ -187,36 +187,34 @@ export class ERC725 {
     schemas: ERC725JSONSchema[],
     address?,
     provider?: any,
-    config?: ERC725Config,
+    config?: ERC725Config
   ) {
     // NOTE: provider param can be either the provider, or and object with {provider:xxx ,type:xxx}
 
     // TODO: Add check for schema format?
     if (!schemas) {
-      throw new Error('Missing schema.');
+      throw new Error('Missing schema.')
     }
 
     const defaultConfig = {
       ipfsGateway: 'https://api.universalprofile.cloud/ipfs/',
       gas: DEFAULT_GAS_VALUE,
-    };
+    }
 
     this.options = {
       schemas: this.validateSchemas(
-        schemas.flatMap((schema) =>
-          duplicateMultiTypeERC725SchemaEntry(schema),
-        ),
+        schemas.flatMap((schema) => duplicateMultiTypeERC725SchemaEntry(schema))
       ),
       address,
       provider: initializeProvider(
         provider,
-        config?.gas ? config?.gas : defaultConfig.gas,
+        config?.gas ? config?.gas : defaultConfig.gas
       ),
       ipfsGateway: config?.ipfsGateway
         ? convertIPFSGatewayUrl(config?.ipfsGateway)
         : defaultConfig.ipfsGateway,
       gas: config?.gas ? config?.gas : defaultConfig.gas,
-    };
+    }
   }
 
   /**
@@ -232,52 +230,62 @@ export class ERC725 {
         schema.valueContent === 'AssetURL' ||
         schema.valueContent === 'JSONURL'
       ) {
-        console.warn(
-          `[Deprecation notice] The schema with keyName: ${schema.name} uses deprecated valueContent: ${schema.valueContent}. It has been replaced by VerifiableURI. Decoding is backward compatible but value will be encoded as VerifiableURI.`,
-        );
+        if (!process.env.TESTING) {
+          console.warn(
+            `[Deprecation notice] The schema with keyName: ${schema.name} uses deprecated valueContent: ${schema.valueContent}. It has been replaced by VerifiableURI. Decoding is backward compatible but value will be encoded as VerifiableURI.`
+          )
+        }
       }
 
       try {
-        const encodedKeyName = encodeKeyName(schema.name);
+        let isKeyValid: boolean | null = null
+        // Check schema item for dynamic key names. If it has, then make sure they have valid types.
+        schema.name.replace(/<(.*?)>/g, (_, item) => {
+          if (isKeyValid == null) {
+            isKeyValid = true
+          }
+          isKeyValid &&= /bytes\d*|string|bool|address|u?int\d*/.test(item)
+          return ''
+        })
 
-        const isKeyValid = schema.key === encodedKeyName;
+        let encodedKeyName = ''
+        if (isKeyValid == null) {
+          // If this key is not dynamic, then isKeyValid is null at this point.
+          encodedKeyName = encodeKeyName(schema.name)
+
+          isKeyValid = schema.key === encodedKeyName
+        }
 
         if (!isKeyValid) {
           console.warn(
-            `The schema with keyName: ${schema.name} is skipped because its key hash does not match its key name (expected: ${encodedKeyName}, got: ${schema.key}).`,
-          );
+            `The schema with keyName: ${schema.name} is skipped because its key hash does not match its key name ${encodedKeyName ? `(expected: ${encodedKeyName}, got: ${schema.key})` : ''}.`
+          )
         }
 
-        return isKeyValid;
-      } catch (err: any) {
+        return isKeyValid
+      } catch {
         // We could not encodeKeyName, probably because the key is dynamic (Mapping or MappingWithGrouping).
-
-        // TODO: make sure the dynamic key name is valid:
-        // - has max 2 variables
-        // - variables are correct (<string>, <bool>, etc.)
-
-        // Keeping dynamic keys may be an issue for getData / fetchData functions.
-        return true;
+        return true
       }
-    });
+    })
   }
 
   protected static initializeProvider(providerOrRpcUrl, gasInfo) {
-    return initializeProvider(providerOrRpcUrl, gasInfo);
+    return initializeProvider(providerOrRpcUrl, gasInfo)
   }
 
   private getAddressAndProvider() {
     if (!this.options.address || !isAddress(this.options.address)) {
-      throw new Error('Missing ERC725 contract address.');
+      throw new Error('Missing ERC725 contract address.')
     }
     if (!this.options.provider) {
-      throw new Error('Missing provider.');
+      throw new Error('Missing provider.')
     }
 
     return {
       address: this.options.address,
       provider: this.options.provider,
-    };
+    }
   }
 
   /**
@@ -294,16 +302,16 @@ export class ERC725 {
    * @returns If the input is an array: an object with schema element key names as properties, with corresponding **decoded** data as values. If the input is a string, it directly returns the **decoded** data.
    */
   async getData(
-    keyOrKeys?: Array<string | GetDataDynamicKey>,
-  ): Promise<DecodeDataOutput[]>;
+    keyOrKeys?: Array<string | GetDataDynamicKey>
+  ): Promise<DecodeDataOutput[]>
   async getData(
-    keyOrKeys?: string | GetDataDynamicKey,
-  ): Promise<DecodeDataOutput>;
+    keyOrKeys?: string | GetDataDynamicKey
+  ): Promise<DecodeDataOutput>
   async getData(
-    keyOrKeys?: GetDataInput,
+    keyOrKeys?: GetDataInput
   ): Promise<DecodeDataOutput | DecodeDataOutput[]> {
-    this.getAddressAndProvider();
-    return getData(this.options, keyOrKeys);
+    this.getAddressAndProvider()
+    return getData(this.options, keyOrKeys)
   }
 
   /**
@@ -319,52 +327,49 @@ export class ERC725 {
    */
 
   async fetchData(
-    keyOrKeys?: Array<string | GetDataDynamicKey>,
-  ): Promise<FetchDataOutput[]>;
+    keyOrKeys?: Array<string | GetDataDynamicKey>
+  ): Promise<FetchDataOutput[]>
   async fetchData(
-    keyOrKeys?: string | GetDataDynamicKey,
-  ): Promise<FetchDataOutput>;
+    keyOrKeys?: string | GetDataDynamicKey
+  ): Promise<FetchDataOutput>
   async fetchData(
-    keyOrKeys?: GetDataInput,
+    keyOrKeys?: GetDataInput
   ): Promise<FetchDataOutput | FetchDataOutput[]> {
-    let keyNames: Array<string | GetDataDynamicKey>;
-    let throwException = false;
+    let keyNames: Array<string | GetDataDynamicKey>
     if (Array.isArray(keyOrKeys)) {
-      keyNames = keyOrKeys;
+      keyNames = keyOrKeys
     } else if (!keyOrKeys) {
       keyNames = this.options.schemas
         .map((element) => element.name)
-        .filter((key) => !isDynamicKeyName(key));
+        .filter((key) => !isDynamicKeyName(key))
     } else {
-      throwException = true; // If it's explicitely a single key, then we allow throwing an exception
-      keyNames = [keyOrKeys];
+      keyNames = [keyOrKeys]
     }
 
-    const dataFromChain = await this.getData(keyNames);
+    const dataFromChain = await this.getData(keyNames)
 
     // NOTE: this step is executed in getData function above
     // We can optimize by computing it only once.
     const schemas = generateSchemasFromDynamicKeys(
       keyNames,
-      this.options.schemas,
-    );
+      this.options.schemas
+    )
 
     const dataFromExternalSources = await getDataFromExternalSources(
       schemas,
       dataFromChain,
-      this.options.ipfsGateway,
-      throwException,
-    );
+      this.options.ipfsGateway
+    )
 
     if (
       keyOrKeys &&
       !Array.isArray(keyOrKeys) &&
       dataFromExternalSources.length > 0
     ) {
-      return dataFromExternalSources[0];
+      return dataFromExternalSources[0]
     }
 
-    return dataFromExternalSources;
+    return dataFromExternalSources
   }
 
   /**
@@ -379,20 +384,20 @@ export class ERC725 {
    */
   getSchema(
     keyOrKeys: string[],
-    providedSchemas?: ERC725JSONSchema[],
-  ): Record<string, ERC725JSONSchema | null>;
+    providedSchemas?: ERC725JSONSchema[]
+  ): Record<string, ERC725JSONSchema | null>
   getSchema(
     keyOrKeys: string,
-    providedSchemas?: ERC725JSONSchema[],
-  ): ERC725JSONSchema | null;
+    providedSchemas?: ERC725JSONSchema[]
+  ): ERC725JSONSchema | null
   getSchema(
     keyOrKeys: string | string[],
-    providedSchemas?: ERC725JSONSchema[],
+    providedSchemas?: ERC725JSONSchema[]
   ): ERC725JSONSchema | null | Record<string, ERC725JSONSchema | null> {
     return getSchema(
       keyOrKeys,
-      this.options.schemas.concat(providedSchemas || []),
-    );
+      this.options.schemas.concat(providedSchemas || [])
+    )
   }
 
   /**
@@ -409,8 +414,8 @@ export class ERC725 {
   encodeData(data: EncodeDataInput[], schemas?: ERC725JSONSchema[]) {
     return encodeData(
       data,
-      Array.prototype.concat(this.options.schemas, schemas),
-    );
+      Array.prototype.concat(this.options.schemas, schemas)
+    )
   }
 
   /**
@@ -425,7 +430,7 @@ export class ERC725 {
    * The JSON will be hashed with `keccak256`.
    */
   static encodeData(data: EncodeDataInput[], schemas: ERC725JSONSchema[]) {
-    return encodeData(data, schemas);
+    return encodeData(data, schemas)
   }
 
   /**
@@ -442,12 +447,12 @@ export class ERC725 {
    */
   decodeData(
     data: DecodeDataInput[],
-    schemas?: ERC725JSONSchema[],
+    schemas?: ERC725JSONSchema[]
   ): { [key: string]: any } {
     return decodeData(
       data,
-      Array.prototype.concat(this.options.schemas, schemas),
-    );
+      Array.prototype.concat(this.options.schemas, schemas)
+    )
   }
 
   /**
@@ -464,9 +469,9 @@ export class ERC725 {
    */
   static decodeData(
     data: DecodeDataInput[],
-    schemas: ERC725JSONSchema[],
+    schemas: ERC725JSONSchema[]
   ): { [key: string]: any } {
-    return decodeData(data, schemas);
+    return decodeData(data, schemas)
   }
 
   /**
@@ -487,9 +492,9 @@ export class ERC725 {
    * ```
    */
   async getOwner(_address?: string) {
-    const { address, provider } = this.getAddressAndProvider();
+    const { address, provider } = this.getAddressAndProvider()
 
-    return provider.getOwner(_address || address);
+    return provider.getOwner(_address || address)
   }
 
   /**
@@ -501,21 +506,21 @@ export class ERC725 {
    */
   async isValidSignature(
     messageOrHash: string,
-    signature: string,
+    signature: string
   ): Promise<boolean> {
     if (!this.options.address || !isAddress(this.options.address)) {
-      throw new Error('Missing ERC725 contract address.');
+      throw new Error('Missing ERC725 contract address.')
     }
     if (!this.options.provider) {
-      throw new Error('Missing provider.');
+      throw new Error('Missing provider.')
     }
 
     return isValidSignature(
       messageOrHash,
       signature,
       this.options.address,
-      this.options.provider,
-    );
+      this.options.provider
+    )
   }
 
   /**
@@ -528,9 +533,9 @@ export class ERC725 {
    */
   static encodeKeyName(
     keyName: string,
-    dynamicKeyParts?: DynamicKeyParts,
+    dynamicKeyParts?: DynamicKeyParts
   ): string {
-    return encodeKeyName(keyName, dynamicKeyParts);
+    return encodeKeyName(keyName, dynamicKeyParts)
   }
 
   /**
@@ -542,7 +547,7 @@ export class ERC725 {
    * @returns {string} The keccak256 hash of the provided key name. This is the key that must be retrievable from the ERC725Y contract via ERC725Y.getData(bytes32 key).
    */
   encodeKeyName(keyName: string, dynamicKeyParts?: DynamicKeyParts): string {
-    return encodeKeyName(keyName, dynamicKeyParts);
+    return encodeKeyName(keyName, dynamicKeyParts)
   }
 
   /**
@@ -555,9 +560,9 @@ export class ERC725 {
    */
   static decodeMappingKey(
     keyHash: string,
-    keyNameOrSchema: string | ERC725JSONSchema,
+    keyNameOrSchema: string | ERC725JSONSchema
   ): DynamicKeyPart[] {
-    return decodeMappingKey(keyHash, keyNameOrSchema);
+    return decodeMappingKey(keyHash, keyNameOrSchema)
   }
 
   /**
@@ -570,9 +575,9 @@ export class ERC725 {
    */
   decodeMappingKey(
     keyHash: string,
-    keyNameOrSchema: string | ERC725JSONSchema,
+    keyNameOrSchema: string | ERC725JSONSchema
   ): DynamicKeyPart[] {
-    return decodeMappingKey(keyHash, keyNameOrSchema);
+    return decodeMappingKey(keyHash, keyNameOrSchema)
   }
 
   /**
@@ -583,12 +588,12 @@ export class ERC725 {
    * @returns {Promise<boolean>} if interface is supported.
    */
   async supportsInterface(interfaceIdOrName: string): Promise<boolean> {
-    const { address, provider } = this.getAddressAndProvider();
+    const { address, provider } = this.getAddressAndProvider()
 
     return internalSupportsInterface(interfaceIdOrName, {
       address,
       provider,
-    });
+    })
   }
 
   /**
@@ -601,9 +606,9 @@ export class ERC725 {
    */
   static async supportsInterface(
     interfaceIdOrName: string,
-    options: { address: string; rpcUrl: string; gas?: number },
+    options: { address: string; rpcUrl: string; gas?: number }
   ): Promise<boolean> {
-    return supportsInterface(interfaceIdOrName, options);
+    return supportsInterface(interfaceIdOrName, options)
   }
 
   // Permissions related functions
@@ -617,7 +622,7 @@ export class ERC725 {
    * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
    */
   static encodePermissions(permissions: Permissions): string {
-    return encodePermissions(permissions);
+    return encodePermissions(permissions)
   }
 
   /**
@@ -628,7 +633,7 @@ export class ERC725 {
    * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
    */
   encodePermissions(permissions: Permissions): string {
-    return encodePermissions(permissions);
+    return encodePermissions(permissions)
   }
 
   /**
@@ -639,7 +644,7 @@ export class ERC725 {
    * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
    */
   static decodePermissions(permissionHex: string) {
-    return decodePermissions(permissionHex);
+    return decodePermissions(permissionHex)
   }
 
   /**
@@ -650,7 +655,7 @@ export class ERC725 {
    * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
    */
   decodePermissions(permissionHex: string) {
-    return decodePermissions(permissionHex);
+    return decodePermissions(permissionHex)
   }
 
   /**
@@ -663,9 +668,9 @@ export class ERC725 {
    */
   static checkPermissions(
     requiredPermissions: string[] | string,
-    grantedPermissions: string,
+    grantedPermissions: string
   ): boolean {
-    return checkPermissions(requiredPermissions, grantedPermissions);
+    return checkPermissions(requiredPermissions, grantedPermissions)
   }
 
   /**
@@ -678,17 +683,17 @@ export class ERC725 {
    */
   checkPermissions(
     requiredPermissions: string[] | string,
-    grantedPermissions: string,
+    grantedPermissions: string
   ): boolean {
-    return checkPermissions(requiredPermissions, grantedPermissions);
+    return checkPermissions(requiredPermissions, grantedPermissions)
   }
 
   static mapPermission(permission: string): string | null {
-    return mapPermission(permission);
+    return mapPermission(permission)
   }
 
   mapPermission(permission: string): string | null {
-    return mapPermission(permission);
+    return mapPermission(permission)
   }
 
   // Encoding methods
@@ -701,16 +706,16 @@ export class ERC725 {
    */
   static encodeValueType(
     type: string,
-    value: string | string[] | number | number[] | boolean | boolean[],
+    value: string | string[] | number | number[] | boolean | boolean[]
   ): string {
-    return encodeValueType(type, value);
+    return encodeValueType(type, value)
   }
 
   encodeValueType(
     type: string,
-    value: string | string[] | number | number[] | boolean | boolean[],
+    value: string | string[] | number | number[] | boolean | boolean[]
   ): string {
-    return encodeValueType(type, value);
+    return encodeValueType(type, value)
   }
 
   /**
@@ -719,39 +724,39 @@ export class ERC725 {
    * @returns The decoded value
    */
   static decodeValueType(type: string, data: string) {
-    return decodeValueType(type, data);
+    return decodeValueType(type, data)
   }
 
   decodeValueType(type: string, data: string) {
-    return decodeValueType(type, data);
+    return decodeValueType(type, data)
   }
 
   static encodeValueContent(
     valueContent: string,
-    value: string | number | AssetURLEncode | URLDataToEncode | boolean,
+    value: string | number | AssetURLEncode | URLDataToEncode | boolean
   ): string | false {
-    return encodeValueContent(valueContent, value);
+    return encodeValueContent(valueContent, value)
   }
 
   encodeValueContent(
     valueContent: string,
-    value: string | number | AssetURLEncode | URLDataToEncode | boolean,
+    value: string | number | AssetURLEncode | URLDataToEncode | boolean
   ): string | false {
-    return encodeValueContent(valueContent, value);
+    return encodeValueContent(valueContent, value)
   }
 
   static decodeValueContent(
     valueContent: string,
-    value: string,
+    value: string
   ): string | URLDataWithHash | number | boolean | null {
-    return decodeValueContent(valueContent, value);
+    return decodeValueContent(valueContent, value)
   }
 
   decodeValueContent(
     valueContent: string,
-    value: string,
+    value: string
   ): string | URLDataWithHash | number | boolean | null {
-    return decodeValueContent(valueContent, value);
+    return decodeValueContent(valueContent, value)
   }
 
   // External Data Source utilities (`VerifiableURI` and `JSONURI`)
@@ -759,59 +764,59 @@ export class ERC725 {
 
   encodeDataSourceWithHash(
     verification: undefined | Verification,
-    dataSource: string,
+    dataSource: string
   ): string {
-    return encodeDataSourceWithHash(verification, dataSource);
+    return encodeDataSourceWithHash(verification, dataSource)
   }
 
   static encodeDataSourceWithHash(
     verification: undefined | Verification,
-    dataSource: string,
+    dataSource: string
   ): string {
-    return encodeDataSourceWithHash(verification, dataSource);
+    return encodeDataSourceWithHash(verification, dataSource)
   }
 
   decodeDataSourceWithHash(value: string): URLDataWithHash {
-    return decodeDataSourceWithHash(value);
+    return decodeDataSourceWithHash(value)
   }
 
   static decodeDataSourceWithHash(value: string): URLDataWithHash {
-    return decodeDataSourceWithHash(value);
+    return decodeDataSourceWithHash(value)
   }
 
   static getVerificationMethod(nameOrSig: string):
     | {
-        method: (data: string | object | Uint8Array | null) => string;
-        name: SUPPORTED_VERIFICATION_METHOD_STRINGS;
-        sig: SUPPORTED_VERIFICATION_METHODS;
+        method: (data: string | object | Uint8Array | null) => string
+        name: SUPPORTED_VERIFICATION_METHOD_STRINGS
+        sig: SUPPORTED_VERIFICATION_METHODS
       }
     | undefined {
-    return getVerificationMethod(nameOrSig);
+    return getVerificationMethod(nameOrSig)
   }
 
   getVerificationMethod(nameOrSig: string):
     | {
-        method: (data: string | object | Uint8Array | null) => string;
-        name: SUPPORTED_VERIFICATION_METHOD_STRINGS;
-        sig: SUPPORTED_VERIFICATION_METHODS;
+        method: (data: string | object | Uint8Array | null) => string
+        name: SUPPORTED_VERIFICATION_METHOD_STRINGS
+        sig: SUPPORTED_VERIFICATION_METHODS
       }
     | undefined {
-    return getVerificationMethod(nameOrSig);
+    return getVerificationMethod(nameOrSig)
   }
 
   static isDataAuthentic(
     data: string | Uint8Array,
-    verificationOptions: Verification,
+    verificationOptions: Verification
   ): boolean {
-    return isDataAuthentic(data, verificationOptions);
+    return isDataAuthentic(data, verificationOptions)
   }
 
   isDataAuthentic(
     data: string | Uint8Array,
-    verificationOptions: Verification,
+    verificationOptions: Verification
   ): boolean {
-    return isDataAuthentic(data, verificationOptions);
+    return isDataAuthentic(data, verificationOptions)
   }
 }
 
-export default ERC725;
+export default ERC725

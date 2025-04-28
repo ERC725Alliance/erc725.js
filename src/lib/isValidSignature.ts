@@ -17,14 +17,14 @@
  * @date 2022
  */
 
-import { keccak256 } from 'web3-utils';
-import { ProviderWrapper } from '../provider/providerWrapper';
+import { keccak256 } from 'web3-utils'
+import type { ProviderWrapper } from '../provider/providerWrapper'
 
-const MAGIC_VALUE = '0x1626ba7e';
+const MAGIC_VALUE = '0x1626ba7e'
 
 // https://ethereum.stackexchange.com/a/72625
 function validateHash(hash) {
-  return /^0x([A-Fa-f0-9]{64})$/.test(hash);
+  return /^0x([A-Fa-f0-9]{64})$/.test(hash)
 }
 
 /**
@@ -40,29 +40,29 @@ export const isValidSignature = async (
   messageOrHash: string,
   signature: string,
   address: string,
-  wrappedProvider: ProviderWrapper,
+  wrappedProvider: ProviderWrapper
 ): Promise<boolean> => {
   const hash = validateHash(messageOrHash)
     ? messageOrHash
     : keccak256(
-        `\x19Ethereum Signed Message:\n${messageOrHash.length}${messageOrHash}`,
-      );
+        `\x19Ethereum Signed Message:\n${messageOrHash.length}${messageOrHash}`
+      )
 
   if (signature.length !== 132) {
-    throw new Error('Signature length should be 132 (65bytes)');
+    throw new Error('Signature length should be 132 (65bytes)')
   }
 
   try {
     const value = await wrappedProvider.isValidSignature(
       address,
       hash,
-      signature,
-    );
+      signature
+    )
 
-    return value === MAGIC_VALUE;
-  } catch (err: any) {
+    return value === MAGIC_VALUE
+  } catch {
     throw new Error(
-      `Error when checking signature. Is ${address} a valid contract address which supports EIP-1271 standard?`,
-    );
+      `Error when checking signature. Is ${address} a valid contract address which supports EIP-1271 standard?`
+    )
   }
-};
+}

@@ -19,19 +19,18 @@
  * @date 2021
  */
 
-import {
+import type {
   DecodeDataOutput,
   GetDataExternalSourcesOutput,
 } from '../types/decodeData';
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { isDataAuthentic, patchIPFSUrlsIfApplicable } from './utils';
-import { URLDataWithHash } from '../types';
+import type { URLDataWithHash } from '../types';
 
 export const getDataFromExternalSources = (
   schemas: ERC725JSONSchema[],
   dataFromChain: DecodeDataOutput[],
   ipfsGateway: string,
-  throwException = true,
 ): Promise<GetDataExternalSourcesOutput[]> => {
   const promises = dataFromChain.map(async (dataEntry) => {
     const schemaElement = schemas.find(
@@ -171,20 +170,27 @@ export const getDataFromExternalSources = (
         if (isDataAuthentic(receivedData, urlDataWithHash.verification)) {
           return { ...dataEntry, value: receivedData };
         }
-        throw new Error('result did not correctly validate');
+        return {
+          ...dataEntry,
+          value: null,
+          error: new Error('result did not correctly validate'),
+        };
       } catch (error: any) {
         error.message = `GET request to ${urlDataWithHash.url} (resolved as ${url}) failed: ${error.message}`;
-        throw error;
+        return {
+          ...dataEntry,
+          value: null,
+          error: new Error('result did not correctly validate'),
+        };
       }
     } catch (error: any) {
       error.message = `Value of key: ${dataEntry.name} has an error: ${error.message}`;
-      if (throwException) {
-        throw error;
-      }
-      console.error(error);
+      return {
+        ...dataEntry,
+        value: null,
+        error: new Error('result did not correctly validate'),
+      };
     }
-    // Invalid data
-    return { ...dataEntry, value: null };
   });
 
   return Promise.all(promises);

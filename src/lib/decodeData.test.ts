@@ -396,7 +396,7 @@ describe('tuple', () => {
     describe('decodeTupleKeyValue compactArray', () => {
       const testCases = [
         {
-          valueContent: '(Bytes4,Number,Bytes32[])',
+          valueContent: '(Bytes4,Number,Bytes32)',
           valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
           encodedValue:
             '0xdeadbeaf000000000000000c0020123456781234567812345678123456781234567812345678123456781234567800202345678123456781234567812345678123456781234567812345678123456789',

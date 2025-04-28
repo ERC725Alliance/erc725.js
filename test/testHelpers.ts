@@ -17,49 +17,48 @@
  * @date 2020
  */
 
-import { encodeKeyName, isDynamicKeyName } from '../src';
 import { encodeArrayKey } from '../src/lib/utils';
 
-/**
- * Takes the schema object and builds a full dataset as per expected from provider.
- */
-export function generateAllRawData(schema, isArrayMode: boolean) {
-  const results: { key: string; value: string }[] = [];
-  for (let index = 0; index < schema.length; index++) {
-    const element = schema[index];
-    // if is array push data
-    if (element.keyType === 'Array') {
-      const correctReturnRawData = isArrayMode
-        ? element.returnRawDataArray
-        : element.returnRawData;
+// /**
+//  * Takes the schema object and builds a full dataset as per expected from provider.
+//  */
+// export function generateAllRawData(schema, isArrayMode: boolean) {
+//   const results: { key: string; value: string }[] = [];
+//   for (let index = 0; index < schema.length; index++) {
+//     const element = schema[index];
+//     // if is array push data
+//     if (element.keyType === 'Array') {
+//       const correctReturnRawData = isArrayMode
+//         ? element.returnRawDataArray
+//         : element.returnRawData;
 
-      correctReturnRawData.forEach((e, i) => {
-        // we assume always first element in the array in returnData array is the length
-        if (i === 0) {
-          results.push({
-            key: element.key,
-            value: e,
-          });
-        } else {
-          // This is array length key/value pair
-          results.push({
-            key: encodeArrayKey(element.key, i - 1),
-            value: e,
-          });
-        }
-      });
-    } else {
-      results.push({
-        key: isDynamicKeyName(element.key)
-          ? encodeKeyName(element.name, element.dynamicKeyParts)
-          : element.key,
-        value: isArrayMode ? element.returnRawDataArray : element.returnRawData,
-      });
-    }
-  }
+//       correctReturnRawData.forEach((e, i) => {
+//         // we assume always first element in the array in returnData array is the length
+//         if (i === 0) {
+//           results.push({
+//             key: element.key,
+//             value: e,
+//           });
+//         } else {
+//           // This is array length key/value pair
+//           results.push({
+//             key: encodeArrayKey(element.key, i - 1),
+//             value: e,
+//           });
+//         }
+//       });
+//     } else {
+//       results.push({
+//         key: isDynamicKeyName(element.key)
+//           ? encodeKeyName(element.name, element.dynamicKeyParts)
+//           : element.key,
+//         value: isArrayMode ? element.returnRawDataArray : element.returnRawData,
+//       });
+//     }
+//   }
 
-  return results;
-}
+//   return results;
+// }
 
 /**
  * Takes the schema object and builds a full dataset as per expected from provider.

@@ -33,20 +33,24 @@ export function decodeResult(
     return null;
   }
 
-  const decodedData = decodeParameter(
-    METHODS[method].returnEncoding,
-    hexString,
-  ) as Record<string, any> | null;
+  try {
+    const decodedData = decodeParameter(
+      METHODS[method].returnEncoding,
+      hexString,
+    ) as Record<string, any> | null;
 
-  if (
-    Array.isArray(decodedData) &&
-    decodedData.length === 1 &&
-    decodedData[0] === '0x'
-  ) {
-    return [null];
+    if (
+      Array.isArray(decodedData) &&
+      decodedData.length === 1 &&
+      decodedData[0] === '0x'
+    ) {
+      return [null];
+    }
+    return decodedData;
+  } catch (error) {
+    console.error(error);
+    throw error; // For debugging.
   }
-
-  return decodedData;
 }
 
 const constructJSONRPCParams = (
