@@ -20,7 +20,7 @@
 // Tests for the @erc725/erc725.js package
 import { assert } from 'chai'
 
-import Web3 from 'web3'
+import Web3, { type EthExecutionAPI, type Web3BaseProvider } from 'web3'
 import { leftPad, numberToHex, toNumber } from 'web3-utils'
 
 // examples of schemas to load (for testing)
@@ -59,6 +59,19 @@ import { createPublicClient, http } from 'viem'
 import { luksoTestnet } from 'viem/chains'
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
+
+// Create legacy provider wrapper for testing.
+class LegacyProviderWrapper {
+  constructor(private provider: Web3BaseProvider<EthExecutionAPI>) {}
+
+  send(payload, callback) {
+    // Convert modern Promise-based provider to callback style
+    Promise.resolve()
+      .then(() => this.provider.request(payload))
+      .then((result) => callback(null, result))
+      .catch((error) => callback(error, null))
+  }
+}
 
 describe('Running @erc725/erc725.js tests...', () => {
   const web3 = new Web3('https://rpc.testnet.lukso.network')
@@ -159,6 +172,24 @@ describe('Running @erc725/erc725.js tests...', () => {
       assert.deepStrictEqual(res, true)
     })
 
+    it('should return true if the signature is valid [EthereumProvider (legacy)]', async () => {
+      const provider = new LegacyProviderWrapper(
+        new web3.providers.HttpProvider('https://rpc.testnet.lukso.network')
+      )
+      const erc725 = new ERC725(
+        [],
+        '0xD295E4748c1DFDFE028D7Dd2FEC3e52de2b1EB42', // result is mocked so we can use any address
+        provider
+      )
+
+      const res = await erc725.isValidSignature(
+        'hello',
+        '0x6c54ad4814ed6de85b9786e79de48ad0d597a243158194fa6b3604254ff58f9c2e4ffcc080e18a68c8e813f720b893c8d47d6f757b9e288a5814263642811c1b1c'
+      )
+
+      assert.deepStrictEqual(res, true)
+    })
+
     it('should return true if teh signature is valid [mock viem client]', async () => {
       const client = createPublicClient({
         chain: luksoTestnet,
@@ -200,6 +231,25 @@ describe('Running @erc725/erc725.js tests...', () => {
 
     it('should return false if the signature is valid [EthereumProvider (ethers)]', async () => {
       const provider = getDefaultProvider('https://rpc.testnet.lukso.network') // we mock a valid return response
+      const erc725 = new ERC725(
+        [],
+        '0xD295E4748c1DFDFE028D7Dd2FEC3e52de2b1EB42', // result is mocked so we can use any address
+        provider
+      )
+      responseStore.isValidSignature = false
+
+      const res = await erc725.isValidSignature(
+        'hello',
+        '0xcafecafecafecafecafe6ce85b786ef79de48a43158194fa6b3604254ff58f9c2e4ffcc080e18a68c8e813f720b893c8d47d6f757b9e288a5814263642811c1b1c'
+      )
+
+      assert.deepStrictEqual(res, false)
+    })
+
+    it('should return false if the signature is valid [EthereumProvider (legacy)]', async () => {
+      const provider = new LegacyProviderWrapper(
+        new web3.providers.HttpProvider('https://rpc.testnet.lukso.network')
+      )
       const erc725 = new ERC725(
         [],
         '0xD295E4748c1DFDFE028D7Dd2FEC3e52de2b1EB42', // result is mocked so we can use any address
@@ -733,6 +783,18 @@ describe('Running @erc725/erc725.js tests...', () => {
           ]
           const provider = getDefaultProvider(
             'https://rpc.testnet.lukso.network'
+          )
+          const erc725 = new ERC725(mockSchema, address, provider)
+          const result = await erc725.getData()
+          assert.deepStrictEqual(result, fullResults)
+        })
+
+        it('with ethereumProvider EIP 1193 (legacy ethereum provider)', async () => {
+          responseStore.supportsInterfaces = [
+            contractVersion.interface as `0x${string}`,
+          ]
+          const provider = new LegacyProviderWrapper(
+            new web3.providers.HttpProvider('https://rpc.testnet.lukso.network')
           )
           const erc725 = new ERC725(mockSchema, address, provider)
           const result = await erc725.getData()
