@@ -280,6 +280,19 @@ describe('utils', () => {
       },
       {
         schema: {
+          name: 'TupleWithBytes4Uint256',
+          key: '0x4b80742de2bf393a64c70000<address>',
+          keyType: 'Singleton',
+          valueType: '(bytes4,uint256)',
+          valueContent: '(Bytes4,Number)',
+        },
+        valueType: '',
+        decodedValue: ['0xc52d6008', 1] as string[] | Array<string | string[]>,
+        encodedValue:
+          '0xc52d60080000000000000000000000000000000000000000000000000000000000000001',
+      },
+      {
+        schema: {
           name: 'TupleWithArrayPartialMore',
           key: '0x4b80742de2bf393a64c70000<address>',
           keyType: 'MappingWithGrouping',
