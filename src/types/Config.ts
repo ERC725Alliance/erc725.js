@@ -12,6 +12,8 @@ export interface ERC725Config {
    * Another example: `https://cloudflare-ipfs.com/ipfs/`
    */
   ipfsGateway?: string
+  ipfsFetch?: (url: string, init?: unknown) => Promise<any>
+  ipfsConvertUrl?: (url: string) => string
   gas?: number
 }
 
@@ -20,5 +22,7 @@ export interface ERC725Options {
   address?: string
   provider?
   ipfsGateway: string
+  ipfsFetch?: (url: string, init?: unknown) => Promise<any>
+  ipfsConvertUrl?: (url: string) => string
   gas: number
 }
