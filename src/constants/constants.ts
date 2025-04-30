@@ -181,9 +181,6 @@ export const LSP6_DEFAULT_PERMISSIONS = {
   ALL_PERMISSIONS                  : '0x00000000000000000000000000000000000000000000000000000000007f3f7f'
 };
 
-export const LSP6_ALL_PERMISSIONS =
-  '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-
 export const COMPACT_BYTES_ARRAY_STRING = '[CompactBytesArray]'
 export const COMPACT_BYTES_ARRAY_STRING_AT_END = /\[CompactBytesArray\]$/
 export const DEFAULT_GAS_VALUE = 1_000_000
