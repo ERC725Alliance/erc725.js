@@ -210,6 +210,8 @@ export class ERC725 {
         provider,
         config?.gas ? config?.gas : defaultConfig.gas
       ),
+      ipfsFetch: config?.ipfsFetch,
+      ipfsConvertUrl: config?.ipfsConvertUrl,
       ipfsGateway: config?.ipfsGateway
         ? convertIPFSGatewayUrl(config?.ipfsGateway)
         : defaultConfig.ipfsGateway,
@@ -358,7 +360,7 @@ export class ERC725 {
     const dataFromExternalSources = await getDataFromExternalSources(
       schemas,
       dataFromChain,
-      this.options.ipfsGateway
+      this.options
     )
 
     if (

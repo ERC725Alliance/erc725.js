@@ -55,6 +55,7 @@ import type { GetDataDynamicKey } from '../types/GetData'
 import { isValidTuple } from './decodeData'
 import { stripHexPrefix } from 'web3-eth-accounts'
 import { checkAddressCheckSum } from 'web3-validator'
+import type { ERC725Options } from '../types/Config'
 
 /**
  *
@@ -636,14 +637,32 @@ export const generateSchemasFromDynamicKeys = (
  */
 export function patchIPFSUrlsIfApplicable(
   receivedData: URLDataWithHash,
-  ipfsGateway: string
+  ipfsGateway: string | ERC725Options
 ): URLDataWithHash {
   // Only map URL if it's indeed an ipfs:// URL and ignore if it's a data:// URL with JSON
   // possibly containing an IPFS URL inside of the JSON data.
   if (receivedData?.url?.startsWith('ipfs://')) {
+    if (typeof ipfsGateway === 'string') {
+      return {
+        ...receivedData,
+        url: receivedData.url.replace('ipfs://', ipfsGateway),
+      }
+    }
+    if (typeof ipfsGateway !== 'object' || !ipfsGateway.ipfsGateway) {
+      throw new Error(
+        'Invalid ipfsGateway provided. It should be a string or an object with an ipfsGateway property.'
+      )
+    }
+    if (ipfsGateway.ipfsConvertUrl) {
+      const url = ipfsGateway.ipfsConvertUrl(receivedData.url)
+      return {
+        ...receivedData,
+        url,
+      }
+    }
     return {
       ...receivedData,
-      url: receivedData.url.replace('ipfs://', ipfsGateway),
+      url: receivedData.url.replace('ipfs://', ipfsGateway.ipfsGateway),
     }
   }
 
