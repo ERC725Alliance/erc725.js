@@ -15,7 +15,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai'
-import assert from 'assert'
+import assert from 'node:assert'
 import { IPFS_GATEWAY, responseStore } from '../../test/serverHelpers'
 
 import { keccak256, utf8ToBytes, utf8ToHex } from 'web3-utils'
