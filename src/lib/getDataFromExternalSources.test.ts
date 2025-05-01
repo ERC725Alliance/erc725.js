@@ -53,6 +53,28 @@ describe('getDataFromExternalSources', () => {
         IPFS_GATEWAY_MOCK
       )
     }).to.not.throw()
+    expect(async () => {
+      await getDataFromExternalSources(
+        [
+          {
+            name: 'LSP3Profile2',
+            key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bdd',
+            keyType: 'Singleton',
+            valueContent: 'JSONURL',
+            valueType: 'bytes',
+          },
+        ],
+        [
+          {
+            name: 'LSP3Profile2',
+            key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bdd',
+            // @ts-ignore
+            value: null,
+          },
+        ],
+        IPFS_GATEWAY_MOCK
+      )
+    }).to.not.throw()
   })
 
   it("should return the right data when the schema's valueContent is VerifiableURI", async () => {

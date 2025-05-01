@@ -46,7 +46,7 @@ import {
 import { isDynamicKeyName } from './encodeKeyName'
 import { decodeKey } from './decodeData'
 import { mockJson } from '../../test/mockSchema'
-import ERC725, { decodeValueContent } from '..'
+import ERC725, { decodeValueContent, encodeValueContent } from '..'
 
 describe('utils', () => {
   describe('decodeKey edge cases', () => {
@@ -657,6 +657,23 @@ describe('utils', () => {
       assert.throws(
         () => decodeValueContent(schema.valueContent, '0x12345678'),
         /Error: Provided bytes length: 64 for encoding valueContent: Bytes64 is not valid./
+      )
+    })
+  })
+
+  describe('Invalid valueType', () => {
+    const schema: ERC725JSONSchema = {
+      name: 'TestStringWithBytes32ValueType',
+      dynamicName: 'TestStringWithBytes32ValueType',
+      key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',
+      keyType: 'Singleton',
+      valueContent: 'Bytes32',
+      valueType: 'bytes32',
+    }
+    it('should throw an error when encoding an invalid valueContent', () => {
+      assert.throws(
+        () => encodeValueContent(schema.valueContent, 'test'),
+        /Error: Value: test is not hex./
       )
     })
   })
