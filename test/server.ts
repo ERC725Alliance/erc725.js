@@ -15,7 +15,6 @@ process.env.TESTING = 'true'
 
 const handlers = [
   http.get(`${IPFS_GATEWAY}:splat*`, async ({ params }) => {
-    console.log('Mocking IPFS response', params.splat)
     const data =
       responseStore.ipfs[
         (Array.isArray(params.splat) ? params.splat : [params.splat]).join('/')
