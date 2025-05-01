@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x, 22.x]
+        node-version: [22.x, 20.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -37,7 +37,19 @@ jobs:
         run: npm run build --if-present
 
       - name: Test
-        run: npm test
+        run: npm test:ci
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always() && matrix.node-version == '22.x'
+        with:
+          files: |
+            ./test-results.json
+    
+      - name: 📊 Code Coverage
+        uses: ArtiomTr/jest-coverage-report-action@v2
+        if: always() && matrix.node-version == '22.x'
+        with:
+          coverage-file: ./coverage/coverage-final.json
+          base-coverage-file: ./coverage/coverage-final.json
+          skip-step: all
