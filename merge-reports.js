@@ -1,24 +1,24 @@
 #!/usr/bin/env node
 
-const fs = require('node:fs');
-const path = require('node:path');
+const fs = require('node:fs')
+const path = require('node:path')
 
 // Read the nyc coverage report
 const coverage = JSON.parse(
-  fs.readFileSync(path.resolve('coverage/coverage-final.json'), 'utf8'),
-);
+  fs.readFileSync(path.resolve('coverage/coverage-final.json'), 'utf8')
+)
 
 // Read the mocha test results
 const mochaResults = JSON.parse(
-  fs.readFileSync(path.resolve('mocha-results.json'), 'utf8'),
-);
+  fs.readFileSync(path.resolve('mocha-results.json'), 'utf8')
+)
 
 // Count test files and determine failures
 const testFiles = [
   ...new Set(mochaResults.tests.map((test) => test.file || 'unknown')),
-];
-const numTestFiles = testFiles.length;
-const hasRealFailures = mochaResults.stats.failures > 0;
+]
+const numTestFiles = testFiles.length
+const hasRealFailures = mochaResults.stats.failures > 0
 
 // Create a Jest-like report structure
 const jestReport = {
@@ -54,17 +54,17 @@ const jestReport = {
   testResults: [],
   wasInterrupted: false,
   coverageMap: coverage,
-};
+}
 
 // Group tests by file path to simulate Jest test suites
-const testsByFile = {};
+const testsByFile = {}
 mochaResults.tests.forEach((test) => {
-  const filePath = test.file || 'unknown';
+  const filePath = test.file || 'unknown'
   if (!testsByFile[filePath]) {
-    testsByFile[filePath] = [];
+    testsByFile[filePath] = []
   }
-  testsByFile[filePath].push(test);
-});
+  testsByFile[filePath].push(test)
+})
 
 // Create test results for each file
 Object.entries(testsByFile).forEach(([filePath, tests]) => {
@@ -75,60 +75,43 @@ Object.entries(testsByFile).forEach(([filePath, tests]) => {
       test.err &&
       typeof test.err === 'object' &&
       Object.keys(test.err).length > 0 &&
-      test.err.message,
-  );
+      test.err.message
+  )
 
-  const hasFailingTests = failedTests.length > 0;
+  const hasFailingTests = failedTests.length > 0
 
   // Create the test result entry for this file
   const testSuite = {
-    assertionResults: tests.map((test) => {
-      // For failing tests, include full details including failure messages
-      if (test.state === 'failed' && test.err && test.err.message) {
-        return {
-          ancestorTitles: test.fullTitle.split(' ').slice(0, -1),
-          failureMessages: [test.err.message || String(test.err)],
-          fullName: test.fullTitle,
-          location: {
-            column: 1,
-            line: 1,
-          },
-          status: 'failed',
-          title: test.title,
-        };
-      }
-
-      // For passing tests, include minimal info with no failure messages
-      return {
-        ancestorTitles: test.fullTitle.split(' ').slice(0, -1),
-        failureMessages: [], // Empty array for passing tests
-        fullName: test.fullTitle,
-        location: {
-          column: 1,
-          line: 1,
-        },
-        status: 'passed',
-        title: test.title,
-      };
-    }),
+    // Only include failed tests in assertionResults
+    assertionResults: failedTests.map((test) => ({
+      ancestorTitles: test.fullTitle.split(' ').slice(0, -1),
+      failureMessages: [test.err.message || String(test.err)],
+      fullName: test.fullTitle,
+      location: {
+        column: 1,
+        line: 1,
+      },
+      status: 'failed',
+      title: test.title,
+    })),
     endTime: new Date(
       new Date(mochaResults.stats.start).getTime() +
-        tests.reduce((sum, test) => sum + (test.duration || 0), 0),
+        tests.reduce((sum, test) => sum + (test.duration || 0), 0)
     ).getTime(),
     message: hasFailingTests ? 'One or more tests failed' : '',
     name: filePath,
     startTime: new Date(mochaResults.stats.start).getTime(),
     status: hasFailingTests ? 'failed' : 'passed',
     summary: '',
-  };
+  }
 
-  jestReport.testResults.push(testSuite);
-});
+  jestReport.testResults.push(testSuite)
+})
 
 // Write the combined report
 fs.writeFileSync(
   path.resolve('report.json'),
-  JSON.stringify(jestReport, null, 2),
-);
+  JSON.stringify(jestReport, null, 2)
+)
 
-console.log('Combined report generated at report.json');
+console.log('Combined report generated at report.json')
