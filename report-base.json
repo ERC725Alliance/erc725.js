@@ -2,13 +2,13 @@
   "numFailedTestSuites": 0,
   "numFailedTests": 0,
   "numPassedTestSuites": 13,
-  "numPassedTests": 718,
+  "numPassedTests": 719,
   "numPendingTestSuites": 0,
   "numPendingTests": 0,
   "numRuntimeErrorTestSuites": 0,
   "numTodoTests": 0,
   "numTotalTestSuites": 13,
-  "numTotalTests": 718,
+  "numTotalTests": 719,
   "openHandles": [],
   "snapshot": {
     "added": 0,
@@ -26,123 +26,123 @@
     "unmatched": 0,
     "updated": 0
   },
-  "startTime": 1746136626938,
+  "startTime": 1746137706765,
   "success": true,
   "testResults": [
     {
       "assertionResults": [],
-      "endTime": 1746136628132,
+      "endTime": 1746137707898,
       "message": "",
       "name": "/Users/andy/Development/erc725/src/index.test.ts",
-      "startTime": 1746136626938,
+      "startTime": 1746137706765,
       "status": "passed",
       "summary": ""
     },
     {
       "assertionResults": [],
-      "endTime": 1746136626942,
+      "endTime": 1746137706774,
       "message": "",
       "name": "/Users/andy/Development/erc725/src/lib/decodeData.test.ts",
-      "startTime": 1746136626938,
+      "startTime": 1746137706765,
       "status": "passed",
       "summary": ""
     },
     {
       "assertionResults": [],
-      "endTime": 1746136626938,
+      "endTime": 1746137706766,
       "message": "",
       "name": "/Users/andy/Development/erc725/src/lib/decodeMappingKey.test.ts",
-      "startTime": 1746136626938,
+      "startTime": 1746137706765,
       "status": "passed",
       "summary": ""
     },
     {
       "assertionResults": [],
-      "endTime": 1746136626941,
+      "endTime": 1746137706768,
       "message": "",
       "name": "/Users/andy/Development/erc725/src/lib/detector.test.ts",
-      "startTime": 1746136626938,
+      "startTime": 1746137706765,
       "status": "passed",
       "summary": ""
     },
     {
       "assertionResults": [],
-      "endTime": 1746136626942,
+      "endTime": 1746137706768,
       "message": "",
       "name": "/Users/andy/Development/erc725/src/lib/encodeKeyName.test.ts",
-      "startTime": 1746136626938,
+      "startTime": 1746137706765,
       "status": "passed",
       "summary": ""
     },
     {
       "assertionResults": [],
-      "endTime": 1746136626983,
+      "endTime": 1746137706813,
       "message": "",
       "name": "/Users/andy/Development/erc725/src/lib/encoder.test.ts",
-      "startTime": 1746136626938,
+      "startTime": 1746137706765,
       "status": "passed",
       "summary": ""
     },
     {
       "assertionResults": [],
-      "endTime": 1746136626939,
+      "endTime": 1746137706766,
       "message": "",
       "name": "/Users/andy/Development/erc725/src/lib/getDataFromExternalSources.test.ts",
-      "startTime": 1746136626938,
+      "startTime": 1746137706765,
       "status": "passed",
       "summary": ""
     },
     {
       "assertionResults": [],
-      "endTime": 1746136626938,
+      "endTime": 1746137706766,
       "message": "",
       "name": "/Users/andy/Development/erc725/src/lib/getSchemaElement.test.ts",
-      "startTime": 1746136626938,
+      "startTime": 1746137706765,
       "status": "passed",
       "summary": ""
     },
     {
       "assertionResults": [],
-      "endTime": 1746136626938,
+      "endTime": 1746137706765,
       "message": "",
       "name": "/Users/andy/Development/erc725/src/lib/permissions.test.ts",
-      "startTime": 1746136626938,
+      "startTime": 1746137706765,
       "status": "passed",
       "summary": ""
     },
     {
       "assertionResults": [],
-      "endTime": 1746136626939,
+      "endTime": 1746137706766,
       "message": "",
       "name": "/Users/andy/Development/erc725/src/lib/schemaParser.test.ts",
-      "startTime": 1746136626938,
+      "startTime": 1746137706765,
       "status": "passed",
       "summary": ""
     },
     {
       "assertionResults": [],
-      "endTime": 1746136626948,
+      "endTime": 1746137706775,
       "message": "",
       "name": "/Users/andy/Development/erc725/src/lib/utils-class.test.ts",
-      "startTime": 1746136626938,
+      "startTime": 1746137706765,
       "status": "passed",
       "summary": ""
     },
     {
       "assertionResults": [],
-      "endTime": 1746136626950,
+      "endTime": 1746137706779,
       "message": "",
       "name": "/Users/andy/Development/erc725/src/lib/utils.test.ts",
-      "startTime": 1746136626938,
+      "startTime": 1746137706765,
       "status": "passed",
       "summary": ""
     },
     {
       "assertionResults": [],
-      "endTime": 1746136626942,
+      "endTime": 1746137706769,
       "message": "",
       "name": "/Users/andy/Development/erc725/src/provider/providerWrapper.test.ts",
-      "startTime": 1746136626938,
+      "startTime": 1746137706765,
       "status": "passed",
       "summary": ""
     }
@@ -4491,7 +4491,7 @@
         "30": 2,
         "31": 2,
         "32": 2,
-        "33": 2,
+        "33": 3,
         "34": 3,
         "35": 2,
         "36": 2,
@@ -4634,7 +4634,7 @@
         "9": 0,
         "10": 0,
         "11": 0,
-        "12": 0,
+        "12": 1,
         "13": 1,
         "14": 0,
         "15": 117,
@@ -21689,9 +21689,9 @@
         "262": 1,
         "263": 1,
         "264": 2,
-        "265": 1415,
-        "266": 1415,
-        "267": 1415,
+        "265": 1416,
+        "266": 1416,
+        "267": 1416,
         "268": 45,
         "269": 9,
         "270": 3,
@@ -21728,9 +21728,9 @@
         "301": 1,
         "302": 31,
         "303": 85,
-        "304": 239,
-        "305": 4,
-        "306": 0,
+        "304": 240,
+        "305": 5,
+        "306": 1,
         "307": 4,
         "308": 0,
         "309": 4,
@@ -21770,17 +21770,17 @@
         "343": 839,
         "344": 4,
         "345": 835,
-        "346": 181,
+        "346": 182,
         "347": 1,
-        "348": 180,
-        "349": 180,
+        "348": 181,
+        "349": 181,
         "350": 0,
-        "351": 180,
+        "351": 181,
         "352": 3,
-        "353": 177,
+        "353": 178,
         "354": 0,
         "355": 0,
-        "356": 177,
+        "356": 178,
         "357": 424,
         "358": 34,
         "359": 390,
@@ -21851,7 +21851,7 @@
         "60": 0,
         "61": 1,
         "62": 1,
-        "63": 1415,
+        "63": 1416,
         "64": 9,
         "65": 3,
         "66": 9,
@@ -21866,7 +21866,7 @@
         "75": 17,
         "76": 32,
         "77": 85,
-        "78": 4,
+        "78": 5,
         "79": 64,
         "80": 3,
         "81": 8,
@@ -21875,7 +21875,7 @@
         "84": 1,
         "85": 1,
         "86": 463,
-        "87": 181,
+        "87": 182,
         "88": 424
       },
       "b": {
@@ -22074,7 +22074,7 @@
           0
         ],
         "52": [
-          227,
+          228,
           1188
         ],
         "53": [
@@ -22087,7 +22087,7 @@
           46,
           196,
           212,
-          239,
+          240,
           20,
           12,
           42
@@ -22116,11 +22116,11 @@
           0
         ],
         "61": [
-          0
+          1
         ],
         "62": [
-          4,
-          4
+          5,
+          5
         ],
         "63": [
           0
@@ -22202,16 +22202,16 @@
           3
         ],
         "86": [
-          180,
-          177
+          181,
+          178
         ],
         "87": [
           0
         ],
         "88": [
-          177,
-          171,
-          153,
+          178,
+          172,
+          154,
           30
         ],
         "89": [
@@ -24604,18 +24604,18 @@
       "s": {
         "0": 2,
         "1": 2,
-        "2": 14,
-        "3": 14,
-        "4": 14,
-        "5": 14,
+        "2": 15,
+        "3": 15,
+        "4": 15,
+        "5": 15,
         "6": 0,
-        "7": 14,
+        "7": 15,
         "8": 4,
-        "9": 10,
-        "10": 10,
+        "9": 11,
+        "10": 11,
         "11": 0,
-        "12": 10,
-        "13": 1,
+        "12": 11,
+        "13": 2,
         "14": 9,
         "15": 0,
         "16": 9,
@@ -24654,15 +24654,15 @@
         "49": 0,
         "50": 0,
         "51": 0,
-        "52": 1,
-        "53": 1,
-        "54": 14,
+        "52": 2,
+        "53": 2,
+        "54": 15,
         "55": 2
       },
       "f": {
-        "0": 14,
-        "1": 14,
-        "2": 14,
+        "0": 15,
+        "1": 15,
+        "2": 15,
         "3": 9,
         "4": 9
       },
@@ -24677,7 +24677,7 @@
           0
         ],
         "3": [
-          1
+          2
         ],
         "4": [
           0
@@ -26646,8 +26646,8 @@
         "13": 2919,
         "14": 2919,
         "15": 2816,
-        "16": 1402,
-        "17": 1414,
+        "16": 1377,
+        "17": 1439,
         "18": 126,
         "19": 31,
         "20": 31,
@@ -26688,8 +26688,8 @@
           2816
         ],
         "1": [
-          1402,
-          1414
+          1377,
+          1439
         ],
         "2": [
           4
@@ -35716,7 +35716,7 @@
         "230": 2,
         "231": 305,
         "232": 141,
-        "233": 605
+        "233": 606
       },
       "f": {
         "0": 210,
@@ -35747,7 +35747,7 @@
         "25": 6,
         "26": 305,
         "27": 141,
-        "28": 605
+        "28": 606
       },
       "b": {
         "0": [
