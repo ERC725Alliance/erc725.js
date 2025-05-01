@@ -43,6 +43,7 @@ import {
 import { isDynamicKeyName } from './encodeKeyName'
 import { decodeKey } from './decodeData'
 import { mockJson } from '../../test/mockSchema'
+import ERC725 from '..'
 
 describe('utils', () => {
   describe('encodeKey/decodeKey', () => {
@@ -1006,6 +1007,29 @@ describe('utils', () => {
       const expectedHash = keccak256(data)
 
       const isAuthentic = isDataAuthentic(data, {
+        data: expectedHash,
+        method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES,
+      })
+
+      assert.ok(isAuthentic)
+    })
+    it('returns true if data is authentic', () => {
+      const data = 'h3ll0HowAreYou?'
+      const expectedHash = keccak256(data)
+
+      const isAuthentic = ERC725.isDataAuthentic(data, {
+        data: expectedHash,
+        method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES,
+      })
+
+      assert.ok(isAuthentic)
+    })
+    it('returns true if data is authentic', () => {
+      const data = 'h3ll0HowAreYou?'
+      const expectedHash = keccak256(data)
+
+      const erc725 = new ERC725([])
+      const isAuthentic = erc725.isDataAuthentic(data, {
         data: expectedHash,
         method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_BYTES,
       })

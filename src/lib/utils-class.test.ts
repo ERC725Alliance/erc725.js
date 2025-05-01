@@ -2,7 +2,7 @@ import assert from 'assert'
 
 import type { ERC725JSONSchema } from '../types/ERC725JSONSchema'
 import { mockSchema } from '../../test/mockSchema'
-import ERC725 from '..'
+import ERC725, { supportsInterface } from '..'
 import { INTERFACE_IDS_0_12_0 } from '../constants/interfaces'
 import { expect } from 'chai'
 import Web3 from 'web3'
@@ -575,6 +575,58 @@ describe('utils (on ERC725 class)', () => {
 
       const doesSupportInterface =
         await erc725Utils.supportsInterface(interfaceName)
+
+      expect(doesSupportInterface).to.be.true
+    })
+
+    it('it should return true if the contract supports the interface with name (global method)', async () => {
+      const contractAddress = '0xcafecafecafecafecafecafecafecafecafecafe'
+      const interfaceName = 'LSP0ERC725Account'
+      const iid = getInterfaceByName(interfaceName)
+      expect(iid).to.not.be.undefined
+
+      responseStore.supportsInterfaces = [iid as `0x${string}`]
+
+      const doesSupportInterface = await ERC725.supportsInterface(
+        interfaceName,
+        {
+          address: contractAddress,
+          rpcUrl: 'https://rpc.testnet.lukso.network',
+        }
+      )
+
+      expect(doesSupportInterface).to.be.true
+    })
+
+    it('it should return true if the contract supports the interface with name (global method)', async () => {
+      const contractAddress = '0xcafecafecafecafecafecafecafecafecafecafe'
+      const interfaceName = 'LSP0ERC725Account'
+      const iid = getInterfaceByName(interfaceName)
+      expect(iid).to.not.be.undefined
+
+      responseStore.supportsInterfaces = [iid as `0x${string}`]
+
+      const doesSupportInterface = await supportsInterface(interfaceName, {
+        address: contractAddress,
+        rpcUrl: 'https://rpc.testnet.lukso.network',
+      })
+
+      expect(doesSupportInterface).to.be.true
+    })
+
+    it('it should return true if the contract supports the interface with name (global method gas)', async () => {
+      const contractAddress = '0xcafecafecafecafecafecafecafecafecafecafe'
+      const interfaceName = 'LSP0ERC725Account'
+      const iid = getInterfaceByName(interfaceName)
+      expect(iid).to.not.be.undefined
+
+      responseStore.supportsInterfaces = [iid as `0x${string}`]
+
+      const doesSupportInterface = await supportsInterface(interfaceName, {
+        address: contractAddress,
+        rpcUrl: 'https://rpc.testnet.lukso.network',
+        gas: 100000,
+      })
 
       expect(doesSupportInterface).to.be.true
     })
