@@ -25,7 +25,10 @@ import type {
 } from '../types/ERC725JSONSchema'
 import type { GetDataDynamicKey } from '../types/GetData'
 
-import { SUPPORTED_VERIFICATION_METHOD_STRINGS } from '../constants/constants'
+import {
+  keccak256Method,
+  SUPPORTED_VERIFICATION_METHOD_STRINGS,
+} from '../constants/constants'
 import {
   guessKeyTypeFromKeyName,
   isDataAuthentic,
@@ -43,9 +46,62 @@ import {
 import { isDynamicKeyName } from './encodeKeyName'
 import { decodeKey } from './decodeData'
 import { mockJson } from '../../test/mockSchema'
-import ERC725 from '..'
+import ERC725, { decodeValueContent } from '..'
 
 describe('utils', () => {
+  describe('decodeKey edge cases', () => {
+    assert.deepEqual(
+      decodeKey(
+        {
+          name: 'NonExistingArray[]',
+          key: '0xd6cbdbfc8d25c9ce4720b5fe6fa8fc536803944271617bf5425b4bd579195840',
+          keyType: 'Array',
+          valueContent: 'Address',
+          valueType: 'address',
+          dynamicName: 'NonExistingArray[]',
+        },
+        [{}]
+      ),
+      []
+    )
+    assert.equal(
+      decodeKey(
+        {
+          name: 'AddressPermissions:Permissions:<blah>',
+          key: '0x4b80742de2bf82acb3630000<blah>',
+          keyType: 'MappingWithGrouping',
+          valueType: 'bytes32',
+          valueContent: 'BitArray',
+        },
+        [{}]
+      ),
+      null
+    )
+    assert.equal(
+      decodeKey(
+        {
+          name: 'AddressPermissions:Permissions:<address>',
+          key: '0x4b80742de2bf82acb3630000<address>',
+          keyType: 'MappingWithGrouping',
+          valueType: 'bytes32',
+          valueContent: 'BitArray',
+        },
+        [
+          {
+            name: 'AddressPermissions:Permissions:<address>',
+            key: '0x4b80742de2bf82acb3630000<address>',
+            keyType: 'MappingWithGrouping',
+            valueType: 'bytes32',
+            valueContent: 'BitArray',
+            value:
+              '0x0000000000000000000000000000000000000000000000000000000000000200',
+          },
+        ]
+      ),
+      '0x0000000000000000000000000000000000000000000000000000000000000200'
+    )
+  })
+
   describe('encodeKey/decodeKey', () => {
     const testCases = [
       // test encoding an array of address
@@ -549,19 +605,59 @@ describe('utils', () => {
   })
 
   describe('encodeArrayKey', () => {
-    it('should encode the array length only if passing a number', async () => {
-      const schema: ERC725JSONSchema = {
-        name: 'LSP12IssuedAssets[]',
-        key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
-        keyType: 'Array',
-        valueContent: 'Address',
-        valueType: 'address',
-      }
+    const schema: ERC725JSONSchema = {
+      name: 'LSP12IssuedAssets[]',
+      key: '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd',
+      keyType: 'Array',
+      valueContent: 'Address',
+      valueType: 'address',
+    }
 
+    it('should encode the array length only if passing a number', async () => {
       const decodedValue = 3
       const encodedValue = '0x00000000000000000000000000000003'
 
       assert.equal(encodeKey(schema, decodedValue), encodedValue)
+    })
+    it('should not encode if the indexes are wrong', async () => {
+      assert.throws(
+        () => encodeKey(schema, '', 'bla' as any),
+        /Can't encode a non array for key of type array/
+      )
+    })
+  })
+
+  describe('Invalid valueType', () => {
+    const schema: ERC725JSONSchema = {
+      name: 'TestStringWithBytes32ValueType',
+      dynamicName: 'TestStringWithBytes32ValueType',
+      key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',
+      keyType: 'Singleton',
+      valueContent: 'Bytes32',
+      valueType: 'bytes64',
+    }
+    it('should throw an error when encoding an invalid valueContent', () => {
+      assert.throws(
+        () => encodeKeyValue(schema.valueContent, schema.valueType, 'test'),
+        /Error: Can't encode test as bytes64. Invalid `bytesN` provided. Expected a `N` value for bytesN between 1 and 32./
+      )
+    })
+  })
+
+  describe('Invalid valueContent in decodeValueContent', () => {
+    const schema: ERC725JSONSchema = {
+      name: 'TestStringWithBytes32ValueType',
+      dynamicName: 'TestStringWithBytes32ValueType',
+      key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',
+      keyType: 'Singleton',
+      valueContent: 'Bytes64',
+      valueType: 'bytes32',
+    }
+    it('should throw an error when encoding an invalid valueContent', () => {
+      assert.throws(
+        () => decodeValueContent(schema.valueContent, '0x12345678'),
+        /Error: Provided bytes length: 64 for encoding valueContent: Bytes64 is not valid./
+      )
     })
   })
 
@@ -1023,6 +1119,24 @@ describe('utils', () => {
       })
 
       assert.ok(isAuthentic)
+    })
+    it('gets keccak256 using keccak256Method', () => {
+      assert.equal(
+        keccak256Method(null),
+        '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'
+      )
+      assert.equal(
+        keccak256Method(''),
+        '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'
+      )
+      assert.equal(
+        keccak256Method('0x1234'),
+        '0x56570de287d73cd1cb6092bb8fdee6173974955fdef345ae579ee9f475ea7432'
+      )
+      assert.equal(
+        keccak256Method(new TextEncoder().encode('hello')),
+        '0x1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8'
+      )
     })
     it('returns true if data is authentic', () => {
       const data = 'h3ll0HowAreYou?'

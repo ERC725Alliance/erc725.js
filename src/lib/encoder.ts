@@ -978,10 +978,10 @@ export const valueContentEncodingMap = (
           }
 
           if (bytesLength && !isValidByteSize(bytesLength)) {
-            console.error(
+            // This is a schema error and not a data error so we can throw it.
+            throw new Error(
               `Provided bytes length: ${bytesLength} for encoding valueContent: ${valueContent} is not valid.`
             )
-            return null
           }
 
           if (bytesLength && value.length !== 2 + bytesLength * 2) {
