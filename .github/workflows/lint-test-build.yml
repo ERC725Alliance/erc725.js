@@ -51,5 +51,6 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always() && matrix.node-version == '22.x'
         with:
+          time_unit: milliseconds
           files: |
             ./test-results.json
