@@ -54,12 +54,13 @@ jobs:
         with:
           time_unit: milliseconds
           files: |
-            ./test-results.json
+            ./report.json
     
       - name: 📊 Code Coverage
         uses: ArtiomTr/jest-coverage-report-action@v2
         if: always() && matrix.node-version == '22.x'
         with:
-          coverage-file: ./coverage/coverage-final.json
-          base-coverage-file: coverage-base.json
-          skip-step: all
+          test-script: npm run test:ci
+          coverage-file: report.json
+          base-coverage-file: report-base.json
+          skip-step: install

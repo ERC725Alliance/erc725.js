@@ -7,4 +7,6 @@ docs/html
 coverage
 *.tgz
 .DS_Store
-test-results.json
+/test-results.json
+/report.json
+/mocha-results.json
