@@ -56,3 +56,4 @@ jobs:
           coverage-file: report.json
           base-coverage-file: report-base.json
           skip-step: install
+          annotations: 'failed-tests'

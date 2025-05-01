@@ -232,11 +232,9 @@ export class ERC725 {
         schema.valueContent === 'AssetURL' ||
         schema.valueContent === 'JSONURL'
       ) {
-        if (!process.env.TESTING) {
-          console.warn(
-            `[Deprecation notice] The schema with keyName: ${schema.name} uses deprecated valueContent: ${schema.valueContent}. It has been replaced by VerifiableURI. Decoding is backward compatible but value will be encoded as VerifiableURI.`
-          )
-        }
+        console.warn(
+          `[Deprecation notice] The schema with keyName: ${schema.name} uses deprecated valueContent: ${schema.valueContent}. It has been replaced by VerifiableURI. Decoding is backward compatible but value will be encoded as VerifiableURI.`
+        )
       }
 
       try {
@@ -272,7 +270,7 @@ export class ERC725 {
     })
   }
 
-  protected static initializeProvider(providerOrRpcUrl, gasInfo) {
+  public static initializeProvider(providerOrRpcUrl, gasInfo) {
     return initializeProvider(providerOrRpcUrl, gasInfo)
   }
 
