@@ -145,7 +145,7 @@ export async function supportsInterface(
     address: string
     rpcUrl: string
     gas?: number
-    provider?: ProviderWrapper
+    provider?: any
   }
 ): Promise<boolean> {
   if (!isAddress(options.address)) {
@@ -199,23 +199,26 @@ export class ERC725 {
     const defaultConfig = {
       ipfsGateway: 'https://api.universalprofile.cloud/ipfs/',
       gas: DEFAULT_GAS_VALUE,
+      throwSchemaErrors: false,
     }
+
+    const gas = config?.gas ? config?.gas : defaultConfig.gas
 
     this.options = {
       schemas: this.validateSchemas(
-        schemas.flatMap((schema) => duplicateMultiTypeERC725SchemaEntry(schema))
+        schemas.flatMap((schema) =>
+          duplicateMultiTypeERC725SchemaEntry(schema)
+        ),
+        config?.throwSchemaErrors || defaultConfig.throwSchemaErrors
       ),
       address,
-      provider: initializeProvider(
-        provider,
-        config?.gas ? config?.gas : defaultConfig.gas
-      ),
+      provider: initializeProvider(provider, gas),
       ipfsFetch: config?.ipfsFetch,
       ipfsConvertUrl: config?.ipfsConvertUrl,
       ipfsGateway: config?.ipfsGateway
         ? convertIPFSGatewayUrl(config?.ipfsGateway)
         : defaultConfig.ipfsGateway,
-      gas: config?.gas ? config?.gas : defaultConfig.gas,
+      gas,
     }
   }
 
@@ -226,7 +229,7 @@ export class ERC725 {
    * @returns
    */
   // eslint-disable-next-line class-methods-use-this
-  private validateSchemas(schemas: ERC725JSONSchema[]) {
+  private validateSchemas(schemas: ERC725JSONSchema[], doThrow: boolean) {
     return schemas.filter((schema) => {
       if (
         schema.valueContent === 'AssetURL' ||
@@ -237,41 +240,55 @@ export class ERC725 {
         )
       }
 
-      try {
-        let isKeyValid: boolean | null = null
-        // Check schema item for dynamic key names. If it has, then make sure they have valid types.
-        schema.name.replace(/<(.*?)>/g, (_, item) => {
-          if (isKeyValid == null) {
-            isKeyValid = true
+      let isKeyValid: true | false | null = null
+      const segments: string[] = []
+      const errors: string[] = []
+      // Check schema item for dynamic key names. If it has, then make sure they have valid types.
+      schema.name.replace(/<(.*?)>/g, (_, item) => {
+        if (isKeyValid == null) {
+          isKeyValid = true
+        }
+        const valid = /bytes\d*|string|bool|address|u?int\d*/.test(item)
+        if (!valid) {
+          isKeyValid &&= valid
+          errors.push(`invalid dynamic key type: ${item} in name`)
+        }
+        segments.push(item)
+        return ''
+      })
+      if (isKeyValid === true) {
+        let index = 0
+        schema.key.replace(/<(.*?)>/g, (_, item) => {
+          if (segments[index] !== item) {
+            isKeyValid = false
+            errors.push(`dynamic ${segments[index]} != ${item} in key`)
           }
-          isKeyValid &&= /bytes\d*|string|bool|address|u?int\d*/.test(item)
+          index++
           return ''
         })
-
-        let encodedKeyName = ''
-        if (isKeyValid == null) {
-          // If this key is not dynamic, then isKeyValid is null at this point.
-          encodedKeyName = encodeKeyName(schema.name)
-
-          isKeyValid = schema.key === encodedKeyName
-        }
-
-        if (!isKeyValid) {
-          console.warn(
-            `The schema with keyName: ${schema.name} is skipped because its key hash does not match its key name ${encodedKeyName ? `(expected: ${encodedKeyName}, got: ${schema.key})` : ''}.`
-          )
-        }
-
-        return isKeyValid
-      } catch {
-        // We could not encodeKeyName, probably because the key is dynamic (Mapping or MappingWithGrouping).
-        return true
       }
-    })
-  }
 
-  public static initializeProvider(providerOrRpcUrl, gasInfo) {
-    return initializeProvider(providerOrRpcUrl, gasInfo)
+      let encodedKeyName = ''
+      if (isKeyValid == null) {
+        // If this key is not dynamic, then isKeyValid is null at this point.
+        encodedKeyName = encodeKeyName(schema.name)
+
+        if (schema.key !== encodedKeyName) {
+          isKeyValid = false
+          errors.push(`key hash ${encodedKeyName} != ${schema.key}`)
+        }
+      }
+
+      if (isKeyValid === false) {
+        const message = `The schema with keyName: ${schema.name} is skipped because ${errors.join(', ')}`
+        if (doThrow) {
+          throw new Error(message)
+        }
+        console.warn(message)
+      }
+
+      return isKeyValid !== false
+    })
   }
 
   private getAddressAndProvider() {
@@ -731,14 +748,14 @@ export class ERC725 {
   static encodeValueContent(
     valueContent: string,
     value: string | number | AssetURLEncode | URLDataToEncode | boolean
-  ): string | false {
+  ): string {
     return encodeValueContent(valueContent, value)
   }
 
   encodeValueContent(
     valueContent: string,
     value: string | number | AssetURLEncode | URLDataToEncode | boolean
-  ): string | false {
+  ): string {
     return encodeValueContent(valueContent, value)
   }
 

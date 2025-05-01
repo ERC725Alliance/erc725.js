@@ -15,6 +15,7 @@ export interface ERC725Config {
   ipfsFetch?: (url: string, init?: unknown) => Promise<any>
   ipfsConvertUrl?: (url: string) => string
   gas?: number
+  throwSchemaErrors?: boolean // Defaults to false
 }
 
 export interface ERC725Options {

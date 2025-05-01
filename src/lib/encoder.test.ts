@@ -24,6 +24,8 @@ import {
   decodeValueType,
   encodeValueContent,
   decodeValueContent,
+  encodeDataSourceWithHash,
+  decodeDataSourceWithHash,
 } from './encoder'
 import {
   NONE_VERIFICATION_METHOD,
@@ -31,6 +33,8 @@ import {
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
 } from '../constants/constants'
 import type { URLDataToEncode, URLDataWithHash } from '../types'
+import ERC725, { getVerificationMethod } from '..'
+import { mockJson } from '../../test/mockSchema'
 
 describe('encoder', () => {
   describe('valueType', () => {
@@ -274,6 +278,9 @@ describe('encoder', () => {
           assert.throws(() =>
             encodeValueType(testCase.valueType, testCase.input)
           )
+          assert.throws(() =>
+            encodeValueType(testCase.valueType, testCase.input)
+          )
         })
       })
 
@@ -420,6 +427,15 @@ describe('encoder', () => {
           assert.deepStrictEqual(encodedValue, testCase.encodedValue)
           assert.deepStrictEqual(
             decodeValueType(testCase.valueType, encodedValue),
+            testCase.decodedValue
+          )
+          assert.deepStrictEqual(
+            ERC725.decodeValueType(testCase.valueType, encodedValue),
+            testCase.decodedValue
+          )
+          const erc725 = new ERC725([])
+          assert.deepStrictEqual(
+            erc725.decodeValueType(testCase.valueType, encodedValue),
             testCase.decodedValue
           )
         })
@@ -822,6 +838,19 @@ describe('encoder', () => {
             testCase.decodedValue
           )
           assert.deepStrictEqual(encodedValue, testCase.encodedValue)
+
+          const erc725 = new ERC725([])
+          const encodedValue2 = erc725.encodeValueType(
+            testCase.valueType,
+            testCase.decodedValue
+          )
+          assert.deepStrictEqual(encodedValue2, testCase.encodedValue)
+
+          const encodedValue3 = ERC725.encodeValueType(
+            testCase.valueType,
+            testCase.decodedValue
+          )
+          assert.deepStrictEqual(encodedValue3, testCase.encodedValue)
         })
 
         it('should throw when trying to encode a array that contains non hex string as `bytes[CompactBytesArray]`', async () => {
@@ -1029,20 +1058,48 @@ describe('encoder', () => {
           testCase.decodedValue
         )
 
-        encodeValueContent(testCase.valueContent, testCase.decodedValue)
+        assert.deepStrictEqual(
+          encodedValue,
+          testCase.reencodedValue || testCase.encodedValue
+        )
+
+        const value = decodeValueContent(testCase.valueContent, encodedValue)
+        assert.deepStrictEqual(value, testCase.decodedValue)
+      })
+      it(`encodes/decodes: ${testCase.valueContent} (instance)`, () => {
+        const erc725 = new ERC725([])
+        const encodedValue = erc725.encodeValueContent(
+          testCase.valueContent,
+          testCase.decodedValue
+        )
 
         assert.deepStrictEqual(
           encodedValue,
           testCase.reencodedValue || testCase.encodedValue
         )
 
-        try {
-          const value = decodeValueContent(testCase.valueContent, encodedValue)
-          assert.deepStrictEqual(value, testCase.decodedValue)
-        } catch (error) {
-          console.log(error)
-          decodeValueContent(testCase.valueContent, encodedValue)
-        }
+        const value = erc725.decodeValueContent(
+          testCase.valueContent,
+          encodedValue
+        )
+        assert.deepStrictEqual(value, testCase.decodedValue)
+      })
+      it(`encodes/decodes: ${testCase.valueContent}`, () => {
+        const encodedValue = ERC725.encodeValueContent(
+          testCase.valueContent,
+          testCase.decodedValue
+        )
+
+        assert.deepStrictEqual(
+          encodedValue,
+          testCase.reencodedValue || testCase.encodedValue
+        )
+
+        const value = ERC725.decodeValueContent(
+          testCase.valueContent,
+          encodedValue
+        )
+        assert.deepStrictEqual(value, testCase.decodedValue)
       })
     })
 
@@ -1094,6 +1151,96 @@ describe('encoder', () => {
       expect(() => {
         encodeValueContent('JSONURL', 'imnotanobject!')
       }).to.throw
+    })
+
+    it('should be able to use encodeDataSourceWithHash', () => {
+      assert.equal(
+        encodeDataSourceWithHash(
+          {
+            method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+            data: mockJson.hash || '0x',
+          },
+          mockJson.url
+        ),
+        '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264'
+      )
+      assert.equal(
+        ERC725.encodeDataSourceWithHash(
+          {
+            method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+            data: mockJson.hash || '0x',
+          },
+          mockJson.url
+        ),
+        '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264'
+      )
+      const erc725 = new ERC725([])
+      assert.equal(
+        erc725.encodeDataSourceWithHash(
+          {
+            method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+            data: mockJson.hash || '0x',
+          },
+          mockJson.url
+        ),
+        '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264'
+      )
+    })
+
+    it('should be able to use decodeDataSourceWithHash', () => {
+      assert.deepEqual(
+        decodeDataSourceWithHash(
+          '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264'
+        ),
+        {
+          verification: {
+            method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+            data: mockJson.hash || '0x',
+          },
+          url: mockJson.url,
+        }
+      )
+      assert.deepEqual(
+        ERC725.decodeDataSourceWithHash(
+          '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264'
+        ),
+        {
+          verification: {
+            method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+            data: mockJson.hash || '0x',
+          },
+          url: mockJson.url,
+        }
+      )
+      const erc725 = new ERC725([])
+      assert.deepEqual(
+        erc725.decodeDataSourceWithHash(
+          '0x00006f357c6a0020733e78f2fc4a3304c141e8424d02c9069fe08950c6514b27289ead8ef4faa49d697066733a2f2f516d6245724b6833466a73415236596a73546a485a4e6d364d6344703661527438324674637639414a4a765a6264'
+        ),
+        {
+          verification: {
+            method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
+            data: mockJson.hash || '0x',
+          },
+          url: mockJson.url,
+        }
+      )
+    })
+
+    it('should be able to use getVerificationMethod', () => {
+      assert.equal(
+        getVerificationMethod('keccak256(utf8)')?.name,
+        SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8
+      )
+      assert.equal(
+        ERC725.getVerificationMethod('keccak256(utf8)')?.name,
+        SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8
+      )
+      const erc725 = new ERC725([])
+      assert.equal(
+        erc725.getVerificationMethod('keccak256(utf8)')?.name,
+        SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8
+      )
     })
 
     it('should throw when valueContent is unknown', () => {

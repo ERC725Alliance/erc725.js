@@ -15,7 +15,7 @@
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
     "test:lcov": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=lcov mocha --silent --verbose",
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=json --reporter=text mocha --silent",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=json --reporter=text mocha",
     "test:ci": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --reporter json > mocha-results.json && nyc --reporter=json --reporter=text mocha --silent && node ./merge-reports.js",
     "test:capture": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --silent --reporter json > mocha-results.json && nyc --reporter=json --reporter=text mocha --silent && node ./merge-reports.js && cp ./report.json ./report-base.json",
     "lint": "biome check .",

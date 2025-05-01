@@ -10,11 +10,17 @@ import {
   resolvedSchema,
   responseStore,
 } from './serverHelpers'
+import * as chai from 'chai'
 
-console.log = () => {}
-console.warn = () => {}
-console.error = () => {}
-console.info = () => {}
+chai.config.truncateThreshold = 0
+
+const warn = console.warn
+console.warn = (msg, ...args: any[]) => {
+  if (msg.includes('deprecated')) {
+    return
+  }
+  warn(msg, ...args)
+}
 
 const handlers = [
   http.get(`${IPFS_GATEWAY}:splat*`, async ({ params }) => {
@@ -127,9 +133,8 @@ const handlers = [
                 return { id, jsonrpc, result: isValidSignatureResponse }
               }
             }
-            throw new Error(
-              `Sig not supports: ${sig}: ${JSON.stringify(data, null, 2)}`
-            )
+            // console.error('Unsupported method', { sig, data })
+            throw new Error('Sig not supported')
           }
         }
       } catch (error) {

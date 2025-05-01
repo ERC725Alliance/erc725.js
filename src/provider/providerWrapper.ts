@@ -301,7 +301,8 @@ export class ProviderWrapper {
     })
   }
 
-  private async callContract(payload: JsonRpc[] | JsonRpc): Promise<any> {
+  // public for testing
+  public async callContract(payload: JsonRpc[] | JsonRpc): Promise<any> {
     // Make this mock provider always return the result in terms of data.
     // So if the result is wrapped in an object as result.result then unwrap it.
     // Some code was assuming it's wrapped and other was it's not wrapped.

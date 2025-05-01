@@ -58,6 +58,7 @@ import { after } from 'mocha'
 import { getDefaultProvider } from 'ethers'
 import { createPublicClient, http } from 'viem'
 import { luksoTestnet } from 'viem/chains'
+import { mapPermission } from '../build/main/src'
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e'
 
@@ -95,6 +96,113 @@ describe('Running @erc725/erc725.js tests...', () => {
     }, /Incorrect or unsupported provider/)
   })
 
+  it('should throw warn with invalid schema', () => {
+    assert.throws(() => {
+      // @ts-ignore
+      // eslint-disable-next-line no-new
+      new ERC725(
+        [
+          {
+            key: 'bogus',
+          } as any,
+          ...mockSchema,
+        ],
+        address,
+        web3.currentProvider
+      )
+    }, /Input schema object is missing/)
+  })
+
+  it('should throw warn with invalid schema', () => {
+    assert.throws(() => {
+      // @ts-ignore
+      // eslint-disable-next-line no-new
+      new ERC725(
+        [
+          {
+            name: 'AddressPermissions:Permissions:<blah>',
+            key: '0x4b80742de2bf82acb3630000<blah>',
+            keyType: 'MappingWithGrouping',
+            valueType: 'bytes32',
+            valueContent: 'BitArray',
+          },
+          ...mockSchema,
+        ],
+        address,
+        web3.currentProvider,
+        { throwSchemaErrors: true, gas: 20000 }
+      )
+    }, 'The schema with keyName: AddressPermissions:Permissions:<blah> is skipped because invalid dynamic key type: blah in name')
+  })
+
+  it('should throw warn with invalid schema', () => {
+    assert.throws(() => {
+      // @ts-ignore
+      // eslint-disable-next-line no-new
+      new ERC725(
+        [
+          {
+            name: 'SupportedStandards:LSP3Profile',
+            dynamicName: 'SupportedStandards:LSP3Profile',
+            key: '0xeafec4d89fa9619884b600005ef83ad9559033e6e941db7d7c495acdc6666347',
+            keyType: 'Mapping',
+            valueContent: '0x5ef83ad9',
+            valueType: 'bytes',
+          },
+          ...mockSchema,
+        ],
+        address,
+        web3.currentProvider,
+        { throwSchemaErrors: true, gas: 100000 }
+      )
+    }, 'The schema with keyName: SupportedStandards:LSP3Profile is skipped because key hash 0xeafec4d89fa9619884b600005ef83ad9559033e6e941db7d7c495acdce616347 != 0xeafec4d89fa9619884b600005ef83ad9559033e6e941db7d7c495acdc6666347')
+  })
+
+  it('should throw warn with invalid schema', () => {
+    assert.throws(() => {
+      // @ts-ignore
+      // eslint-disable-next-line no-new
+      new ERC725(
+        [
+          {
+            name: 'AddressPermissions:Permissions:<address>',
+            key: '0x4b80742de2bf82acb3630000<bytes32>',
+            keyType: 'MappingWithGrouping',
+            valueType: 'bytes32',
+            valueContent: 'BitArray',
+          },
+          ...mockSchema,
+        ],
+        address,
+        web3.currentProvider,
+        { throwSchemaErrors: true, gas: 10000 }
+      )
+    }, 'The schema with keyName: AddressPermissions:Permissions:<address> is skipped because dynamic address != bytes32 in key')
+  })
+
+  it('should skit invalid schema', () => {
+    // @ts-ignore
+    // eslint-disable-next-line no-new
+    const { options } = new ERC725(
+      [
+        {
+          name: 'AddressPermissions:Permissions:<blah>',
+          key: '0x4b80742de2bf82acb3630000<blah>',
+          keyType: 'MappingWithGrouping',
+          valueType: 'bytes32',
+          valueContent: 'BitArray',
+        },
+        ...mockSchema,
+      ],
+      address,
+      web3.currentProvider
+    )
+    const item = options.schemas.find((schema) => {
+      return schema.name === 'AddressPermissions:Permissions:<blah>'
+    })
+    assert.strictEqual(item, undefined)
+  })
+
   it('should allow importing the schemas and instantiating with them', async () => {
     const schemasToLoad = [
       ...LSP1Schema,
@@ -124,6 +232,70 @@ describe('Running @erc725/erc725.js tests...', () => {
   })
 
   describe('isValidSignature', () => {
+    it('should error on invalid signature', async () => {
+      const rpcUrl = 'https://rpc.testnet.lukso.network'
+      const erc725 = new ERC725(
+        [],
+        '0xD295E4748c1DFDFE028D7Dd2FEC3e52de2b1EB42', // result is mocked so we can use any address
+        rpcUrl
+      )
+      responseStore.isValidSignature = true
+      try {
+        await erc725.isValidSignature(
+          'hello',
+          '0x6c54ad4814ed6de85b9786e79de48ad0d5194fa6b3604254ff58f9c2e4ffcc080e18a68c8e813f720b893c8d47d6f757b9e288a5814263642811c1b1c'
+        )
+        assert.fail('Expected error to thrown')
+      } catch (error) {
+        assert.deepStrictEqual(
+          (error as { message: string }).message,
+          'Signature length should be 132 (65bytes)'
+        )
+      }
+    })
+
+    it('should error on no address', async () => {
+      const rpcUrl = 'https://rpc.testnet.lukso.network'
+      const erc725 = new ERC725(
+        [],
+        '', // result is mocked so we can use any address
+        rpcUrl
+      )
+      responseStore.isValidSignature = true
+      try {
+        await erc725.isValidSignature(
+          'hello',
+          '0x6c54ad4814ed6de85b9786e79de48ad0d5194fa6b3604254ff58f9c2e4ffcc080e18a68c8e813f720b893c8d47d6f757b9e288a5814263642811c1b1c'
+        )
+        assert.fail('Expected error to thrown')
+      } catch (error) {
+        assert.deepStrictEqual(
+          (error as { message: string }).message,
+          'Missing ERC725 contract address.'
+        )
+      }
+    })
+
+    it('should error on no provider', async () => {
+      const erc725 = new ERC725(
+        [],
+        '0xD295E4748c1DFDFE028D7Dd2FEC3e52de2b1EB42' // result is mocked so we can use any address
+      )
+      responseStore.isValidSignature = true
+      try {
+        await erc725.isValidSignature(
+          'hello',
+          '0x6c54ad4814ed6de85b9786e79de48ad0d5194fa6b3604254ff58f9c2e4ffcc080e18a68c8e813f720b893c8d47d6f757b9e288a5814263642811c1b1c'
+        )
+        assert.fail('Expected error to thrown')
+      } catch (error) {
+        assert.deepStrictEqual(
+          (error as { message: string }).message,
+          'Missing provider.'
+        )
+      }
+    })
+
     it('should return true if the signature is valid [using rpcUrl]', async () => {
       const rpcUrl = 'https://rpc.testnet.lukso.network'
       const erc725 = new ERC725(
@@ -690,6 +862,39 @@ describe('Running @erc725/erc725.js tests...', () => {
         })
       })
 
+      it('should return null if the JSONURL is not set [fetchData (array input)]', async () => {
+        responseStore.rpc.getData = (key: `0x${string}`) => {
+          if (
+            key ===
+            '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5'
+          ) {
+            return '0x'
+          }
+          return
+        }
+        const erc725 = new ERC725(
+          [
+            {
+              name: 'LSP3Profile',
+              key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+              keyType: 'Singleton',
+              valueContent: 'URL',
+              valueType: 'bytes',
+            },
+          ],
+          '0x24464DbA7e7781a21eD86133Ebe88Eb9C0762620', // result is mocked so we can use any address
+          web3.currentProvider
+        )
+
+        const data = await erc725.fetchData(['LSP3Profile'])
+        assert.deepStrictEqual(data[0], {
+          name: 'LSP3Profile',
+          key: '0x5ef83ad9559033e6e941db7d7c495acdce616347d28e90c7ce47cbfcfcad3bc5',
+          value: null,
+          dynamicName: 'LSP3Profile',
+        })
+      })
+
       it('should return null if the JSONURL is not set [fetchData] with ipfsGateway config', async () => {
         responseStore.rpc.getData = (key: `0x${string}`) => {
           if (
@@ -941,6 +1146,29 @@ describe('Running @erc725/erc725.js tests...', () => {
             value: JSON.parse(jsonString),
             dynamicName: testJSONURLSchema.name,
           })
+        })
+
+        it('fetchData JSONURL with custom config.ipfsGateway (all)', async () => {
+          const erc725 = new ERC725(
+            [testJSONURLSchema],
+            address,
+            web3.currentProvider,
+            {
+              ipfsGateway: IPFS_GATEWAY,
+            }
+          )
+
+          const jsonString = mockJson.data
+
+          const result = await erc725.fetchData()
+          assert.deepStrictEqual(result, [
+            {
+              key: testJSONURLSchema.key,
+              name: testJSONURLSchema.name,
+              value: JSON.parse(jsonString),
+              dynamicName: testJSONURLSchema.name,
+            },
+          ])
         })
 
         if (contractVersion.interface === ERC725Y_INTERFACE_IDS['3.0']) {
@@ -1343,6 +1571,23 @@ describe('Running @erc725/erc725.js tests...', () => {
             ])
             assert.deepStrictEqual(results[0].value, intendedResults)
           })
+
+          it(`decode all data values for keyType "Array" in naked class instance: ${schemaElement.name}`, async () => {
+            const values = allGraphData.filter(
+              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34)
+            )
+            const intendedResults = schemaElement.expectedResult
+            const results = ERC725.decodeData(
+              [
+                {
+                  keyName: schemaElement.name,
+                  value: values,
+                },
+              ],
+              [schemaElement]
+            )
+            assert.deepStrictEqual(results[0].value, intendedResults)
+          })
         } else {
           if (schemaElement.dynamicKeyParts) {
             // eslint-disable-next-line no-continue
@@ -1703,6 +1948,13 @@ describe('Running @erc725/erc725.js tests...', () => {
             '0x0000000000000000000000000000000000000000000000000000000000040004'
           )
           assert.deepStrictEqual(
+            ERC725.encodePermissions({
+              EDITPERMISSIONS: true,
+              SETDATA: true,
+            }),
+            '0x0000000000000000000000000000000000000000000000000000000000040004'
+          )
+          assert.deepStrictEqual(
             erc725Instance.encodePermissions({
               EDITPERMISSIONS: true,
               SETDATA: true,
@@ -1908,6 +2160,11 @@ describe('Running @erc725/erc725.js tests...', () => {
               erc725Instance.decodePermissions(testCase.hex),
               testCase.permissions
             )
+
+            assert.deepStrictEqual(
+              ERC725.decodePermissions(testCase.hex),
+              testCase.permissions
+            )
           })
         })
         it('Decodes 0xfff...fff admin permission correctly but re-encodes only known', () => {
@@ -2087,6 +2344,15 @@ describe('Running @erc725/erc725.js tests...', () => {
         encodeKeyName('MyKeyName'),
         '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2'
       )
+      assert.deepStrictEqual(
+        ERC725.encodeKeyName('MyKeyName'),
+        '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2'
+      )
+      const erc725Instance = new ERC725([])
+      assert.deepStrictEqual(
+        erc725Instance.encodeKeyName('MyKeyName'),
+        '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2'
+      )
     })
 
     it('works for dynamic keys', () => {
@@ -2175,9 +2441,27 @@ describe('Running @erc725/erc725.js tests...', () => {
       const grantedPermissions =
         '0x000000000000000000000000000000000000000000000000000000000000ff51'
 
-      const result = checkPermissions(requiredPermissions, grantedPermissions)
+      const result = ERC725.checkPermissions(
+        requiredPermissions,
+        grantedPermissions
+      )
 
       assert.equal(result, false)
+    })
+
+    it('has mapPermissions', () => {
+      assert.equal(
+        mapPermission('SETDATA'),
+        '0x0000000000000000000000000000000000000000000000000000000000040000'
+      )
+      assert.equal(
+        ERC725.mapPermission('SETDATA'),
+        '0x0000000000000000000000000000000000000000000000000000000000040000'
+      )
+      assert.equal(
+        new ERC725([]).mapPermission('SETDATA'),
+        '0x0000000000000000000000000000000000000000000000000000000000040000'
+      )
     })
   })
 
@@ -2196,7 +2480,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         ]
       )
       assert.deepStrictEqual(
-        decodeMappingKey(
+        ERC725.decodeMappingKey(
           encodeKeyName('MyKeyName:<bytes16>', ['0x12345678']),
           'MyKeyName:<bytes16>'
         ),
@@ -2207,8 +2491,9 @@ describe('Running @erc725/erc725.js tests...', () => {
           },
         ]
       )
+      const erc725 = new ERC725([])
       assert.deepStrictEqual(
-        decodeMappingKey(
+        erc725.decodeMappingKey(
           '0x35e6950bc8d21a1699e50000cafecafecafecafecafecafecafecafecafecafe',
           'MyKeyName:<address>'
         ),
