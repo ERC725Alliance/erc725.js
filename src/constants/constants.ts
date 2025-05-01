@@ -111,7 +111,7 @@ export const SUPPORTED_VERIFICATION_METHODS_LIST = Object.values(
   SUPPORTED_VERIFICATION_METHOD_STRINGS
 )
 
-function keccak256Method(data: object | string | Uint8Array | null) {
+export function keccak256Method(data: object | string | Uint8Array | null) {
   if (data === null) {
     return keccak256('')
   }

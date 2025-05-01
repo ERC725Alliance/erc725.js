@@ -279,8 +279,7 @@ export function encodeKey(
       }
 
       if (!Array.isArray(value)) {
-        console.error("Can't encode a non array for key of type array")
-        return null
+        throw new Error("Can't encode a non array for key of type array")
       }
 
       if (
