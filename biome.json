@@ -12,7 +12,9 @@
       "./node_modules/**",
       "./dist/**",
       "./build/**",
-      "./coverage/**"
+      "./coverage/**",
+      "./.nyc_output/**",
+      "package.json"
     ]
   },
   "formatter": {
