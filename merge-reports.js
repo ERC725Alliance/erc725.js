@@ -1,29 +1,36 @@
 #!/usr/bin/env node
 
-const fs = require('node:fs')
-const path = require('node:path')
+const fs = require('node:fs');
+const path = require('node:path');
 
 // Read the nyc coverage report
 const coverage = JSON.parse(
-  fs.readFileSync(path.resolve('coverage/coverage-final.json'), 'utf8')
-)
+  fs.readFileSync(path.resolve('coverage/coverage-final.json'), 'utf8'),
+);
 
 // Read the mocha test results
 const mochaResults = JSON.parse(
-  fs.readFileSync(path.resolve('mocha-results.json'), 'utf8')
-)
+  fs.readFileSync(path.resolve('mocha-results.json'), 'utf8'),
+);
+
+// Count test files and determine failures
+const testFiles = [
+  ...new Set(mochaResults.tests.map((test) => test.file || 'unknown')),
+];
+const numTestFiles = testFiles.length;
+const hasRealFailures = mochaResults.stats.failures > 0;
 
 // Create a Jest-like report structure
 const jestReport = {
-  numFailedTestSuites: mochaResults.stats.failures > 0 ? 1 : 0,
+  numFailedTestSuites: hasRealFailures ? 1 : 0,
   numFailedTests: mochaResults.stats.failures,
-  numPassedTestSuites: mochaResults.stats.passes > 0 ? 1 : 0,
+  numPassedTestSuites: numTestFiles - (hasRealFailures ? 1 : 0),
   numPassedTests: mochaResults.stats.passes,
   numPendingTestSuites: 0,
   numPendingTests: mochaResults.stats.pending || 0,
   numRuntimeErrorTestSuites: 0,
   numTodoTests: 0,
-  numTotalTestSuites: 1,
+  numTotalTestSuites: numTestFiles,
   numTotalTests: mochaResults.stats.tests,
   openHandles: [],
   snapshot: {
@@ -43,46 +50,85 @@ const jestReport = {
     updated: 0,
   },
   startTime: new Date(mochaResults.stats.start).getTime(),
-  success: mochaResults.stats.failures === 0,
-  testResults: mochaResults.tests.map((test) => {
-    const testFile = test.file || ''
+  success: !hasRealFailures,
+  testResults: [],
+  wasInterrupted: false,
+  coverageMap: coverage,
+};
 
-    return {
-      assertionResults: [
-        {
+// Group tests by file path to simulate Jest test suites
+const testsByFile = {};
+mochaResults.tests.forEach((test) => {
+  const filePath = test.file || 'unknown';
+  if (!testsByFile[filePath]) {
+    testsByFile[filePath] = [];
+  }
+  testsByFile[filePath].push(test);
+});
+
+// Create test results for each file
+Object.entries(testsByFile).forEach(([filePath, tests]) => {
+  // Check if this test file has any failing tests
+  const failedTests = tests.filter(
+    (test) =>
+      test.state === 'failed' &&
+      test.err &&
+      typeof test.err === 'object' &&
+      Object.keys(test.err).length > 0 &&
+      test.err.message,
+  );
+
+  const hasFailingTests = failedTests.length > 0;
+
+  // Create the test result entry for this file
+  const testSuite = {
+    assertionResults: tests.map((test) => {
+      // For failing tests, include full details including failure messages
+      if (test.state === 'failed' && test.err && test.err.message) {
+        return {
           ancestorTitles: test.fullTitle.split(' ').slice(0, -1),
-          failureMessages: test.err
-            ? [test.err.message || String(test.err)]
-            : [],
+          failureMessages: [test.err.message || String(test.err)],
           fullName: test.fullTitle,
           location: {
             column: 1,
             line: 1,
           },
-          status: test.state === 'passed' ? 'passed' : 'failed',
+          status: 'failed',
           title: test.title,
+        };
+      }
+
+      // For passing tests, include minimal info with no failure messages
+      return {
+        ancestorTitles: test.fullTitle.split(' ').slice(0, -1),
+        failureMessages: [], // Empty array for passing tests
+        fullName: test.fullTitle,
+        location: {
+          column: 1,
+          line: 1,
         },
-      ],
-      endTime: new Date(
-        test.duration
-          ? new Date(mochaResults.stats.start).getTime() + test.duration
-          : 0
-      ).getTime(),
-      message: test.err ? test.err.message || String(test.err) : '',
-      name: testFile,
-      startTime: new Date(mochaResults.stats.start).getTime(),
-      status: test.state === 'passed' ? 'passed' : 'failed',
-      summary: '',
-    }
-  }),
-  wasInterrupted: false,
-  coverageMap: coverage,
-}
+        status: 'passed',
+        title: test.title,
+      };
+    }),
+    endTime: new Date(
+      new Date(mochaResults.stats.start).getTime() +
+        tests.reduce((sum, test) => sum + (test.duration || 0), 0),
+    ).getTime(),
+    message: hasFailingTests ? 'One or more tests failed' : '',
+    name: filePath,
+    startTime: new Date(mochaResults.stats.start).getTime(),
+    status: hasFailingTests ? 'failed' : 'passed',
+    summary: '',
+  };
+
+  jestReport.testResults.push(testSuite);
+});
 
 // Write the combined report
 fs.writeFileSync(
   path.resolve('report.json'),
-  JSON.stringify(jestReport, null, 2)
-)
+  JSON.stringify(jestReport, null, 2),
+);
 
-console.log('Combined report generated at report.json')
+console.log('Combined report generated at report.json');

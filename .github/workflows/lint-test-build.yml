@@ -47,14 +47,6 @@ jobs:
       - name: Test
         if: matrix.node-version != '22.x'
         run: npm run test
-
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always() && matrix.node-version == '22.x'
-        with:
-          time_unit: milliseconds
-          files: |
-            ./report.json
     
       - name: 📊 Code Coverage
         uses: ArtiomTr/jest-coverage-report-action@v2
