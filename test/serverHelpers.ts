@@ -42,6 +42,7 @@ const defaultResponses = {
     QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd: mockJson2.data,
   },
   rpc: {
+    owner: '0x',
     getDataBatch: (keys: `0x${string}`[]): `0x${string}`[] => {
       const result: `0x${string}`[] = []
       for (const key of keys) {

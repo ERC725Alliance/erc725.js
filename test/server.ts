@@ -11,7 +11,10 @@ import {
   responseStore,
 } from './serverHelpers'
 
-process.env.TESTING = 'true'
+console.log = () => {}
+console.warn = () => {}
+console.error = () => {}
+console.info = () => {}
 
 const handlers = [
   http.get(`${IPFS_GATEWAY}:splat*`, async ({ params }) => {
@@ -56,6 +59,11 @@ const handlers = [
           case 'eth_call': {
             const sig = data.params[0]?.data.slice(0, 10)
             switch (sig) {
+              case METHODS.owner.sig: {
+                // getOwner
+                const result = responseStore.rpc.owner
+                return { id, jsonrpc, result: result || '0x' }
+              }
               case METHODS.getData.sig:
               case METHODS.getDataBatch.sig: {
                 const keys = decodeParameters(

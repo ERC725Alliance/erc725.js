@@ -75,6 +75,11 @@ export const encodeDynamicKeyPart = (
       ).slice(2)
     }
     case 'address': {
+      if (!value) {
+        throw new Error(
+          `Wrong value: ${value} for dynamic key with type: <address>. Value is empty.`
+        )
+      }
       if (!value.startsWith('0x')) {
         value = `0x${value}`
       }
