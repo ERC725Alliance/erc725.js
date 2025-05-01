@@ -92,7 +92,7 @@ export type {
   Permissions,
 }
 
-export { ERC725Config, KeyValuePair, ProviderTypes } from './types'
+export type { ERC725Config, KeyValuePair, ProviderTypes } from './types'
 export {
   encodeData,
   encodeArrayKey,
@@ -396,10 +396,7 @@ export class ERC725 {
     keyOrKeys: string | string[],
     providedSchemas?: ERC725JSONSchema[]
   ): ERC725JSONSchema | null | Record<string, ERC725JSONSchema | null> {
-    return getSchema(
-      keyOrKeys,
-      this.options.schemas.concat(providedSchemas || [])
-    )
+    return getSchema(keyOrKeys, providedSchemas || this.options.schemas)
   }
 
   /**
@@ -413,11 +410,11 @@ export class ERC725 {
    * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
    * The JSON will be hashed with `keccak256`.
    */
-  encodeData(data: EncodeDataInput[], schemas?: ERC725JSONSchema[]) {
-    return encodeData(
-      data,
-      Array.prototype.concat(this.options.schemas, schemas)
-    )
+  encodeData(
+    data: EncodeDataInput[] | EncodeDataInput,
+    schemas?: ERC725JSONSchema[]
+  ) {
+    return encodeData(data, schemas || this.options.schemas)
   }
 
   /**
@@ -431,7 +428,10 @@ export class ERC725 {
    * When encoding JSON it is possible to pass in the JSON object and the URL where it is available publicly.
    * The JSON will be hashed with `keccak256`.
    */
-  static encodeData(data: EncodeDataInput[], schemas: ERC725JSONSchema[]) {
+  static encodeData(
+    data: EncodeDataInput[] | EncodeDataInput,
+    schemas: ERC725JSONSchema[]
+  ) {
     return encodeData(data, schemas)
   }
 
@@ -451,10 +451,7 @@ export class ERC725 {
     data: DecodeDataInput[],
     schemas?: ERC725JSONSchema[]
   ): { [key: string]: any } {
-    return decodeData(
-      data,
-      Array.prototype.concat(this.options.schemas, schemas)
-    )
+    return decodeData(data, schemas || this.options.schemas)
   }
 
   /**
