@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2024",
     "outDir": "build/main",
     "rootDirs": ["src", "schemas"],
     "moduleResolution": "node",
@@ -25,7 +25,7 @@
     "listFiles": false /* Print names of files part of the compilation. */,
     "pretty": true /* Stylize errors and messages using color and context. */,
 
-    "lib": ["es2019", "dom"],
+    "lib": ["es2024", "dom"],
     "types": ["mocha", "node"],
     "typeRoots": ["node_modules/@types", "src/types"]
   },

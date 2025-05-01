@@ -247,7 +247,7 @@ export function getSchema(
 ): ERC725JSONSchema | null | Record<string, ERC725JSONSchema | null> {
   let fullSchema: ERC725JSONSchema[] = allSchemas
   if (providedSchemas) {
-    fullSchema = fullSchema.concat(providedSchemas)
+    fullSchema = providedSchemas.concat(fullSchema)
   }
 
   if (Array.isArray(keyOrKeys)) {

@@ -32,6 +32,7 @@ import ERC725, {
   decodePermissions,
   encodeKeyName,
   encodePermissions,
+  getSchema,
   supportsInterface,
 } from '.'
 import {
@@ -52,7 +53,7 @@ import {
 } from './constants/constants'
 import { decodeKey } from './lib/decodeData'
 import { INTERFACE_IDS_0_12_0 } from './constants/interfaces'
-import { IPFS_GATEWAY, resetMocks, responseStore } from '../test/server'
+import { IPFS_GATEWAY, resetMocks, responseStore } from '../test/serverHelpers'
 import { after } from 'mocha'
 import { getDefaultProvider } from 'ethers'
 import { createPublicClient, http } from 'viem'
@@ -2061,9 +2062,7 @@ describe('Running @erc725/erc725.js tests...', () => {
         valueType: 'bytes',
       }
 
-      const erc725 = new ERC725([schema])
-
-      const foundSchema = erc725.getSchema(schema.key)
+      const foundSchema = getSchema(schema.key, [schema])
 
       assert.deepStrictEqual(foundSchema, schema)
     })
@@ -2076,24 +2075,16 @@ describe('Running @erc725/erc725.js tests...', () => {
         valueType: 'bytes',
       }
 
-      const erc725 = new ERC725([])
-
-      const foundSchema = erc725.getSchema(schema.key, [schema])
+      const foundSchema = getSchema(schema.key, [schema])
 
       assert.deepStrictEqual(foundSchema, schema)
     })
   })
 
   describe('encodeKeyName', () => {
-    const erc725Instance = new ERC725([])
-
     it('is available on instance and class', () => {
       assert.deepStrictEqual(
         encodeKeyName('MyKeyName'),
-        '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2'
-      )
-      assert.deepStrictEqual(
-        erc725Instance.encodeKeyName('MyKeyName'),
         '0x35e6950bc8d21a1699e58328a3c4066df5803bb0b570d0150cb3819288e764b2'
       )
     })
@@ -2106,22 +2097,11 @@ describe('Running @erc725/erc725.js tests...', () => {
         ),
         '0x31145577efe228036af40000a4fbbfe353124e6fa6bb7f8e088a9269df552ea2'
       )
-      assert.deepStrictEqual(
-        erc725Instance.encodeKeyName(
-          'FavouriteFood:<address>',
-          '0xa4FBbFe353124E6fa6Bb7f8e088a9269dF552EA2'
-        ),
-        '0x31145577efe228036af40000a4fbbfe353124e6fa6bb7f8e088a9269df552ea2'
-      )
     })
 
     it('works for Array keys with index as `dynamicKeyParts', () => {
       assert.deepStrictEqual(
         encodeKeyName('MusicPlaylist[]', 2),
-        '0x03573598507fc76d82171baa336b7fd700000000000000000000000000000002'
-      )
-      assert.deepStrictEqual(
-        erc725Instance.encodeKeyName('MusicPlaylist[]', 2),
         '0x03573598507fc76d82171baa336b7fd700000000000000000000000000000002'
       )
     })

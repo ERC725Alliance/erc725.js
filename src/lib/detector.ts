@@ -54,3 +54,12 @@ export const internalSupportsInterface = async (
     throw new Error(`Error checking the interface: ${error}`)
   }
 }
+
+export const getInterfaceByName = (
+  interfaceName: string
+): `0x${string}` | undefined => {
+  if (INTERFACE_IDS_0_12_0[interfaceName]) {
+    return INTERFACE_IDS_0_12_0[interfaceName]
+  }
+  return
+}

@@ -16,7 +16,7 @@
 
 import { expect } from 'chai'
 import assert from 'assert'
-import { IPFS_GATEWAY, responseStore } from '../../test/server'
+import { IPFS_GATEWAY, responseStore } from '../../test/serverHelpers'
 
 import { keccak256, utf8ToBytes, utf8ToHex } from 'web3-utils'
 import type {
