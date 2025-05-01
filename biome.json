@@ -14,7 +14,8 @@
       "./build/**",
       "./coverage/**",
       "./.nyc_output/**",
-      "package.json"
+      "package.json",
+      "coverage-base.json"
     ]
   },
   "formatter": {
