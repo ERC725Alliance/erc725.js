@@ -15,7 +15,9 @@
       "./coverage/**",
       "./.nyc_output/**",
       "package.json",
-      "report.json"
+      "report.json",
+      "mocha-results.json",
+      "report-base.json"
     ]
   },
   "formatter": {
