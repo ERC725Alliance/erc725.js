@@ -34,8 +34,21 @@ jobs:
         run: npm run lint
 
       - name: 🎯 Test
-        run: npm test
-
+        run: npm test:ci
+      
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            ./test-results.json
+    
+      - name: 📊 Code Coverage
+        uses: ArtiomTr/jest-coverage-report-action@v2
+        with:
+          coverage-file: ./coverage/coverage-final.json
+          base-coverage-file: ./coverage/coverage-final.json
+          skip-step: all
       - name: 🛠 Build
         run: npm run build
 
