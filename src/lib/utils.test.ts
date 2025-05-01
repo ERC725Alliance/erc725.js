@@ -621,7 +621,13 @@ describe('utils', () => {
     })
     it('should not encode if the indexes are wrong', async () => {
       assert.throws(
-        () => encodeKey(schema, '', 'bla' as any),
+        () => encodeKey(schema, [], 'bla' as any),
+        /Invalid `startingIndex` or `totalArrayLength` parameters. Values must be of type number./
+      )
+    })
+    it('should not encode if not an array', async () => {
+      assert.throws(
+        () => encodeKey(schema, 'bla'),
         /Can't encode a non array for key of type array/
       )
     })

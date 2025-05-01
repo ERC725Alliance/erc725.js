@@ -1024,14 +1024,10 @@ export const valueContentEncodingMap = (
           return valueTypeEncodingMap('bool').encode(value)
         },
         decode: (value: string, consumed?: ConsumedPtr): boolean => {
-          try {
-            return valueTypeEncodingMap('bool').decode(
-              value,
-              consumed
-            ) as any as boolean
-          } catch {
-            throw new Error(`Value ${value} is not a boolean`)
-          }
+          return valueTypeEncodingMap('bool').decode(
+            value,
+            consumed
+          ) as any as boolean
         },
       }
     }
