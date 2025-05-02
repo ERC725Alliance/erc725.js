@@ -47,6 +47,7 @@ import { isDynamicKeyName } from './encodeKeyName';
 import { decodeKey } from './decodeData';
 import { mockJson } from '../../test/mockSchema';
 import ERC725, { decodeValueContent, encodeValueContent } from '..';
+import { URLDataToEncode } from '../types';
 
 describe('utils', () => {
   describe('decodeKey edge cases', () => {
@@ -103,7 +104,28 @@ describe('utils', () => {
   });
 
   describe('encodeKey/decodeKey', () => {
-    const testCases = [
+    const testCases: Array<{
+      schema: ERC725JSONSchema;
+      decodedValue:
+        | string
+        | number
+        | URLDataToEncode
+        | URLDataToEncode[]
+        | boolean
+        | Array<
+            | string
+            | number
+            | (string | number | boolean | string[])[]
+            | URLDataToEncode
+            | URLDataToEncode[]
+            | boolean
+          >;
+      valueType?: string;
+      encodedValue:
+        | Array<{ key: `0x${string}`; value: `0x${string}` }>
+        | `0x${string}`;
+      encodedError?: `0x${string}`;
+    }> = [
       // test encoding an array of address
       {
         schema: {
@@ -302,7 +324,7 @@ describe('utils', () => {
             '0x1234567812345678123456781234567812345678123456781234567812345678',
             '0x2345678123456781234567812345678123456781234567812345678123456789',
           ],
-        ] as string[] | Array<string | string[]>,
+        ],
         encodedValue:
           '0xdeadbeaf000000000000000c0020123456781234567812345678123456781234567812345678123456781234567800202345678123456781234567812345678123456781234567812345678123456789',
       },
@@ -315,9 +337,7 @@ describe('utils', () => {
           valueContent: '(Bytes4,Number,Bytes32)',
         },
         valueType: '',
-        decodedValue: ['0xdeadbeaf', 12, null] as
-          | string[]
-          | Array<string | string[]>,
+        decodedValue: ['0xdeadbeaf', 12, null] as any,
         encodedValue: '0xdeadbeaf000000000000000c',
       },
       {
@@ -329,9 +349,7 @@ describe('utils', () => {
           valueContent: '(Bytes4,Number,Bytes32)',
         },
         valueType: '',
-        decodedValue: ['0xdeadbeaf', 12, null] as
-          | string[]
-          | Array<string | string[]>,
+        decodedValue: ['0xdeadbeaf', 12, null] as any,
         encodedValue: '0xdeadbeaf000000000000000c',
         encodedError: '0xdeadbeaf000000000000000c0020', // This encoded value has the length item of the encoded array instead of null
       },
@@ -344,7 +362,7 @@ describe('utils', () => {
           valueContent: '(Bytes4,Number)',
         },
         valueType: '',
-        decodedValue: ['0xc52d6008', 1] as string[] | Array<string | string[]>,
+        decodedValue: ['0xc52d6008', 1],
         encodedValue:
           '0xc52d60080000000000000000000000000000000000000000000000000000000000000001',
       },
@@ -357,9 +375,7 @@ describe('utils', () => {
           valueContent: '(Bytes4,Number,Bytes32)',
         },
         valueType: '',
-        decodedValue: ['0xdeadbeaf', 12, null] as
-          | string[]
-          | Array<string | string[]>,
+        decodedValue: ['0xdeadbeaf', 12, null] as any,
         encodedValue: '0xdeadbeaf000000000000000c',
         encodedError: '0xdeadbeaf000000000000000c002001234342343', // This encoded value has the length and partial byte of the encoded array instead of null
       },
@@ -379,7 +395,7 @@ describe('utils', () => {
             '0x2345678123456781234567812345678123456781234567812345678123456789',
           ],
           12,
-        ] as string[] | Array<string | string[]>,
+        ],
         encodedValue:
           '0xdeadbeaf0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000212345678123456781234567812345678123456781234567812345678123456782345678123456781234567812345678123456781234567812345678123456789000000000000000c',
       },
