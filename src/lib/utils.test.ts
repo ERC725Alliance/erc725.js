@@ -291,7 +291,7 @@ describe('utils', () => {
           name: 'TupleWithArray',
           key: '0x4b80742de2bf393a64c70000<address>',
           keyType: 'MappingWithGrouping',
-          valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
+          valueType: '(bytes4,uint64,bytes32[CompactBytesArray])',
           valueContent: '(Bytes4,Number,Bytes32)',
         },
         valueType: '',
