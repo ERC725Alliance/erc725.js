@@ -13,9 +13,6 @@
 </p>
 
 <p align="center">
-  <a href="https://codecov.io/gh/ERC725Alliance/erc725.js">
-    <img src="https://codecov.io/gh/ERC725Alliance/erc725.js/branch/main/graph/badge.svg" />
-  </a>
   <a href="https://github.com/ERC725Alliance/erc725.js/issues">
     <img alt="Issues" src="https://img.shields.io/github/issues/ERC725Alliance/erc725.js?color=0088ff" />
   </a>

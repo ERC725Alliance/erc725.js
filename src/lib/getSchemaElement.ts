@@ -18,8 +18,8 @@
  */
 
 import { isHex, isHexStrict } from 'web3-validator';
-import { DynamicKeyParts } from '../types/dynamicKeys';
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
+import type { DynamicKeyParts } from '../types/dynamicKeys';
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import {
   encodeKeyName,
   generateDynamicKeyName,

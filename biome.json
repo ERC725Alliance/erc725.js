@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.6.1/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "linter": {
     "enabled": true,
     "rules": {
@@ -17,13 +17,18 @@
   },
   "formatter": {
     "indentWidth": 2,
-    "indentStyle": "space"
+    "indentStyle": "space",
+    "lineWidth": 80
   },
   "javascript": {
+    "linter": {
+      "enabled": true
+    },
     "formatter": {
-      "semicolons": "always",
+      "enabled": true,
       "quoteStyle": "single",
-      "trailingComma": "all"
+      "semicolons": "always",
+      "trailingCommas": "all"
     }
   },
   "organizeImports": {
@@ -36,7 +41,11 @@
       "build",
       "coverage",
       ".vscode",
-      "package.json"
+      "./dist/**",
+      "package.json",
+      "report.json",
+      "mocha-results.json",
+      "report-base.json"
     ]
   }
 }

@@ -20,18 +20,22 @@
  * @date 2023
  */
 import { isHexStrict } from 'web3-utils';
-import { COMPACT_BYTES_ARRAY_STRING } from '../constants/constants';
+import {
+  COMPACT_BYTES_ARRAY_STRING,
+  COMPACT_BYTES_ARRAY_STRING_AT_END,
+} from '../constants/constants';
 
-import { DecodeDataInput, DecodeDataOutput } from '../types/decodeData';
+import type { DecodeDataInput, DecodeDataOutput } from '../types/decodeData';
 import {
   ALL_VALUE_TYPES,
-  ERC725JSONSchema,
+  type ERC725JSONSchema,
   isValidValueType,
 } from '../types/ERC725JSONSchema';
 import { isDynamicKeyName } from './encodeKeyName';
 import { valueContentEncodingMap, decodeValueType } from './encoder';
 import { getSchemaElement } from './getSchemaElement';
 import { countNumberOfBytes, decodeKeyValue, encodeArrayKey } from './utils';
+import type { ConsumedPtr } from '../types';
 
 const tupleValueTypesRegex = /bytes(\d+)/;
 const valueContentsBytesRegex = /Bytes(\d+)/;
@@ -83,7 +87,9 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
       );
     }
 
-    const valueTypeBytesLength = valueTypeParts[i].split('bytes')[1];
+    const valueTypeBytesLength = valueTypeParts[i]
+      .replace(/\[.*?\]$/, '')
+      .split('bytes')[1];
 
     if (
       valueTypeParts[i].match(tupleValueTypesRegex) &&
@@ -137,50 +143,25 @@ export const decodeTupleKeyValue = (
   // We assume data has already been validated at this stage
 
   // Sanitize the string to keep only the tuple, if we are dealing with `CompactBytesArray`
-  const valueTypeToDecode = valueType.replace(COMPACT_BYTES_ARRAY_STRING, '');
+  const valueTypeToDecode = valueType.replace(
+    COMPACT_BYTES_ARRAY_STRING_AT_END,
+    '',
+  );
 
   const valueTypeParts = extractTupleElements(valueTypeToDecode);
   const valueContentParts = extractTupleElements(valueContent);
 
-  const bytesLengths: number[] = [];
-
-  valueTypeParts.forEach((valueTypePart) => {
-    const regexMatch = valueTypePart.match(tupleValueTypesRegex);
-
-    // if we are dealing with `bytesN`
-    if (regexMatch) bytesLengths.push(Number.parseInt(regexMatch[1], 10));
-
-    const numericMatch = valueTypePart.match(/u?int(\d+)/);
-
-    if (numericMatch)
-      bytesLengths.push(Number.parseInt(numericMatch[1], 10) / 8);
-
-    if (valueTypePart === 'address') bytesLengths.push(20);
-  });
-
-  const totalBytesLength = bytesLengths.reduce(
-    (acc, bytesLength) => acc + bytesLength,
-    0,
-  );
-
-  if (value.length !== 2 + totalBytesLength * 2) {
-    console.error(
-      `Trying to decode a value: ${value} which does not match the length of the valueType: ${valueType}. Expected ${totalBytesLength} bytes.`,
+  const consumed: ConsumedPtr = {
+    bytes: 0,
+  };
+  return valueTypeParts.map((valueTypePart, index) => {
+    return decodeKeyValue(
+      valueContentParts[index],
+      valueTypePart,
+      `0x${value ? value.slice(consumed.bytes * 2 + 2) : ''}`,
+      consumed,
     );
-    return [];
-  }
-
-  let cursor = 2; // to skip the 0x
-
-  const valueParts = bytesLengths.map((bytesLength) => {
-    const splitValue = value.substring(cursor, cursor + bytesLength * 2);
-    cursor += bytesLength * 2;
-    return `0x${splitValue}`;
   });
-
-  return valueContentParts.map((valueContentPart, i) =>
-    decodeKeyValue(valueContentPart, valueTypeParts[i], valueParts[i]),
-  );
 };
 
 /**
@@ -202,7 +183,7 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
 
       // Decode as a Number when when the encoded value is to set the Array length only
       if (typeof value === 'string' && countNumberOfBytes(value) === 16) {
-        return decodeKeyValue('Number', 'uint128', value, schema.name) || 0;
+        return decodeKeyValue('Number', 'uint128+', value, schema.name) || 0;
       }
 
       const valueElement = value.find((e) => e.key === schema.key);
@@ -211,9 +192,12 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
         return [];
       }
 
+      const consumed: ConsumedPtr & { name: string } = {
+        bytes: 0,
+        name: schema.name,
+      };
       const arrayLength =
-        decodeKeyValue('Number', 'uint128', valueElement.value, schema.name) ||
-        0;
+        decodeKeyValue('Number', 'uint128+', valueElement.value, consumed) || 0;
 
       const results: any[] = [];
 
@@ -229,7 +213,7 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
               schema.valueContent,
               schema.valueType,
               dataElement.value,
-              schema.name,
+              consumed,
             ),
           );
         }
@@ -256,13 +240,13 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
         );
       }
 
-      if (schema.valueType.includes(COMPACT_BYTES_ARRAY_STRING)) {
+      if (schema.valueType.endsWith(COMPACT_BYTES_ARRAY_STRING)) {
         const valueType = schema.valueType.replace(
-          COMPACT_BYTES_ARRAY_STRING,
+          COMPACT_BYTES_ARRAY_STRING_AT_END,
           '',
         );
         const valueContent = schema.valueContent.replace(
-          COMPACT_BYTES_ARRAY_STRING,
+          COMPACT_BYTES_ARRAY_STRING_AT_END,
           '',
         );
 

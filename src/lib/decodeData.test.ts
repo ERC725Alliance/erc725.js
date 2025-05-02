@@ -16,7 +16,7 @@
 
 import { expect } from 'chai';
 
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { decodeData, decodeTupleKeyValue, isValidTuple } from './decodeData';
 
 describe('decodeData', () => {
@@ -68,6 +68,20 @@ describe('decodeData', () => {
       key: '0x6de85eaf5d982b4e5da00000<address>',
       keyType: 'Mapping',
       valueType: '(bytes4,uint128)',
+      valueContent: '(Bytes4,Number)',
+    },
+    {
+      name: 'LSP4CreatorsMap:<address>',
+      key: '0x6de85eaf5d982b4e5da00000<address>',
+      keyType: 'Mapping',
+      valueType: '(', // BAD
+      valueContent: '(Bytes4,Number)',
+    },
+    {
+      name: 'LSP4CreatorsMap:<address>',
+      key: '0x6de85eaf5d982b4e5da00000<address>',
+      keyType: 'Mapping',
+      valueType: 'bytes4,uint128', // BAD2
       valueContent: '(Bytes4,Number)',
     },
   ];
@@ -366,6 +380,61 @@ describe('tuple', () => {
             testCase.encodedValue,
           ),
         ).to.eql(testCase.decodedValue);
+      });
+    });
+
+    describe('decodeTupleKeyValue larger', () => {
+      const testCases = [
+        {
+          valueContent: '(Bytes4,Number)',
+          valueType: '(bytes4,bytes8)',
+          encodedValue:
+            '0xdeadbeaf000000000000000c0000000000000000000000000000000000000000',
+          decodedValue: ['0xdeadbeaf', 12],
+        },
+      ]; // TODO: add more cases? Address, etc.
+
+      testCases.forEach((testCase) => {
+        it('decodes tuple values', () => {
+          expect(
+            decodeTupleKeyValue(
+              testCase.valueContent,
+              testCase.valueType,
+              testCase.encodedValue,
+            ),
+          ).to.eql(testCase.decodedValue);
+        });
+      });
+    });
+
+    describe('decodeTupleKeyValue compactArray', () => {
+      const testCases = [
+        {
+          valueContent: '(Bytes4,Number,Bytes32)',
+          valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
+          encodedValue:
+            '0xdeadbeaf000000000000000c0020123456781234567812345678123456781234567812345678123456781234567800202345678123456781234567812345678123456781234567812345678123456789',
+          decodedValue: [
+            '0xdeadbeaf',
+            12,
+            [
+              '0x1234567812345678123456781234567812345678123456781234567812345678',
+              '0x2345678123456781234567812345678123456781234567812345678123456789',
+            ],
+          ],
+        },
+      ]; // TODO: add more cases? Address, etc.
+
+      testCases.forEach((testCase) => {
+        it('decodes tuple values', () => {
+          expect(
+            decodeTupleKeyValue(
+              testCase.valueContent,
+              testCase.valueType,
+              testCase.encodedValue,
+            ),
+          ).to.eql(testCase.decodedValue);
+        });
       });
     });
   });

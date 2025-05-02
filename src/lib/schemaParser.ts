@@ -19,7 +19,7 @@
 import { keccak256 } from 'web3-utils';
 import allSchemas from '../schemas';
 
-import {
+import type {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
 } from '../types/ERC725JSONSchema';
@@ -248,7 +248,7 @@ export function getSchema(
 ): ERC725JSONSchema | null | Record<string, ERC725JSONSchema | null> {
   let fullSchema: ERC725JSONSchema[] = allSchemas;
   if (providedSchemas) {
-    fullSchema = fullSchema.concat(providedSchemas);
+    fullSchema = providedSchemas.concat(fullSchema);
   }
 
   if (Array.isArray(keyOrKeys)) {

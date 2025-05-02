@@ -25,8 +25,11 @@
   this handles encoding and decoding as per necessary for the erc725 schema specifications
 */
 
-import { decodeParameter, encodeParameter } from 'web3-eth-abi';
-
+import {
+  decodeParameters,
+  encodeParameter,
+  encodeParameters,
+} from 'web3-eth-abi';
 import {
   hexToNumber,
   hexToUtf8,
@@ -39,12 +42,17 @@ import {
   bytesToHex,
   toHex,
   toNumber,
+  encodePacked,
 } from 'web3-utils';
 import { isAddress, isHex } from 'web3-validator';
 import { stripHexPrefix } from 'web3-eth-accounts';
-
-import { URLDataToEncode, URLDataWithHash, Verification } from '../types';
-import { AssetURLEncode } from '../types/encodeData';
+import type {
+  ConsumedPtr,
+  URLDataToEncode,
+  URLDataWithHash,
+  Verification,
+} from '../types';
+import type { AssetURLEncode } from '../types/encodeData';
 
 import {
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
@@ -59,9 +67,9 @@ import {
   isValidByteSize,
   isValueContentLiteralHex,
 } from './utils';
-import { ERC725JSONSchemaValueType } from '../types/ERC725JSONSchema';
+import type { ERC725JSONSchemaValueType } from '../types/ERC725JSONSchema';
 
-const uintNValueTypeRegex = /^uint(\d+)$/;
+const uintNValueTypeRegex = /^uint(\d+)(\+?)$/;
 const bytesNValueTypeRegex = /^bytes(\d+)$/;
 const BytesNValueContentRegex = /Bytes(\d+)/;
 
@@ -282,7 +290,10 @@ const encodeCompactBytesArray = (values: string[]): string => {
  * @param compactBytesArray A bytes[CompactBytesArray]
  * @returns An array of BytesLike strings decode from `compactBytesArray`
  */
-const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
+const decodeCompactBytesArray = (
+  compactBytesArray: string,
+  consumed?: ConsumedPtr,
+): string[] => {
   if (!isHex(compactBytesArray))
     throw new Error("Couldn't decode, value is not hex");
 
@@ -309,6 +320,10 @@ const decodeCompactBytesArray = (compactBytesArray: string): string[] => {
     }
 
     pointer += 2 * (length + 2);
+  }
+
+  if (consumed) {
+    consumed.bytes += pointer;
   }
 
   if (pointer > strippedCompactBytesArray.length)
@@ -348,8 +363,9 @@ const encodeBytesNCompactBytesArray = (
 const decodeBytesNCompactBytesArray = (
   compactBytesArray: string,
   numberOfBytes: number,
+  consumed?: ConsumedPtr,
 ): string[] => {
-  const bytesValues = decodeCompactBytesArray(compactBytesArray);
+  const bytesValues = decodeCompactBytesArray(compactBytesArray, consumed);
   bytesValues.forEach((bytesValue, index) => {
     if (stripHexPrefix(bytesValue).length > numberOfBytes * 2)
       throw new Error(
@@ -366,13 +382,17 @@ const decodeBytesNCompactBytesArray = (
 const returnTypesOfBytesNCompactBytesArray = () => {
   const types: Record<
     string,
-    { encode: (value: string[]) => string; decode: (value: string) => string[] }
+    {
+      encode: (value: string[]) => string;
+      decode: (value: string, consumed?: ConsumedPtr) => string[];
+    }
   > = {};
 
   for (let i = 1; i < 33; i++) {
     types[`bytes${i}[CompactBytesArray]`] = {
       encode: (value: string[]) => encodeBytesNCompactBytesArray(value, i),
-      decode: (value: string) => decodeBytesNCompactBytesArray(value, i),
+      decode: (value: string, consumed?: ConsumedPtr) =>
+        decodeBytesNCompactBytesArray(value, i, consumed),
     };
   }
   return types;
@@ -464,18 +484,65 @@ const encodeStringCompactBytesArray = (values: string[]): string => {
  * @param compactBytesArray A string[CompactBytesArray]
  * @returns An array of strings
  */
-const decodeStringCompactBytesArray = (compactBytesArray: string): string[] => {
-  const hexValues: string[] = decodeCompactBytesArray(compactBytesArray);
+const decodeStringCompactBytesArray = (
+  compactBytesArray: string,
+  consumed?: ConsumedPtr,
+): string[] => {
+  const hexValues: string[] = decodeCompactBytesArray(
+    compactBytesArray,
+    consumed,
+  );
   const stringValues: string[] = hexValues.map((element) => hexToUtf8(element));
 
   return stringValues;
 };
 
+function _decodeParameter(
+  type: string,
+): (value: string, consumed?: ConsumedPtr) => any {
+  return (value: string, consumed?: ConsumedPtr) => {
+    // we need to abi-encode the value again to ensure that:
+    //  - that data to decode does not go over N bytes.
+    //  - if the data is less than N bytes, that it gets padded to N bytes long.
+    let actualType = type;
+    const [, baseType, bitSize, append] = /^(u?int)(\d*)(.*)$/.exec(type) || [];
+    if (type === 'address') {
+      actualType = 'bytes20';
+    } else if (baseType) {
+      const byteSize = Number.parseInt(bitSize, 10) / 8;
+      actualType = `bytes${byteSize}${append}`; // decode as if they are bytes to make sure it's always right padded.
+    }
+    try {
+      let result = decodeParameters(
+        [actualType],
+        `${value}0000000000000000000000000000000000000000000000000000000000000000`, // Just add some zeros so that the native call doesn't run out of bytes.
+      )[0];
+      if (bitSize) {
+        result = Array.isArray(result)
+          ? result.map((result) => hexToNumber(result as string))
+          : hexToNumber(result as string);
+      }
+      if (consumed) {
+        const out = type.endsWith(']')
+          ? encodeParameters([actualType], [result])
+          : encodePacked({ value: result, type });
+        const length = out.slice(2).length / 2;
+        consumed.bytes += length;
+      }
+      return result;
+    } catch (error) {
+      throw new Error(
+        `Error decoding value "${value}" as type "${type}": ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  };
+}
+
 const valueTypeEncodingMap = (
   type: string,
 ): {
   encode: (value: any) => string;
-  decode: (value: string) => any;
+  decode: (value: string, consumed?: ConsumedPtr) => any;
 } => {
   const uintNRegexMatch = type.match(uintNValueTypeRegex);
   const bytesNRegexMatch = type.match(bytesNValueTypeRegex);
@@ -485,17 +552,19 @@ const valueTypeEncodingMap = (
 
   const uintLength = uintNRegexMatch
     ? Number.parseInt(uintNRegexMatch[0].slice(4), 10)
-    : '';
+    : 0;
 
   if (type.includes('[CompactBytesArray]')) {
     const compactBytesArrayMap = {
       'bytes[CompactBytesArray]': {
         encode: (value: string[]) => encodeCompactBytesArray(value),
-        decode: (value: string) => decodeCompactBytesArray(value),
+        decode: (value: string, consumed?: ConsumedPtr) =>
+          decodeCompactBytesArray(value, consumed),
       },
       'string[CompactBytesArray]': {
         encode: (value: string[]) => encodeStringCompactBytesArray(value),
-        decode: (value: string) => decodeStringCompactBytesArray(value),
+        decode: (value: string, consumed?: ConsumedPtr) =>
+          decodeStringCompactBytesArray(value, consumed),
       },
       ...returnTypesOfBytesNCompactBytesArray(),
       ...returnTypesOfUintNCompactBytesArray(),
@@ -507,7 +576,13 @@ const valueTypeEncodingMap = (
   if (type === 'bytes') {
     return {
       encode: (value: string) => toHex(value),
-      decode: (value: string) => value,
+      decode: (value: string, consumed?: ConsumedPtr) => {
+        if (consumed) {
+          const length = value.slice(2).length / 2;
+          consumed.bytes += length;
+        }
+        return value;
+      },
     };
   }
 
@@ -516,7 +591,12 @@ const valueTypeEncodingMap = (
     case 'boolean':
       return {
         encode: (value: boolean) => (value ? '0x01' : '0x00'),
-        decode: (value: string) => value === '0x01',
+        decode: (value: string, consumed?: ConsumedPtr) => {
+          if (consumed) {
+            consumed.bytes += 1;
+          }
+          return value.slice(0, 4) === '0x01';
+        },
       };
     case 'string':
       return {
@@ -528,7 +608,12 @@ const valueTypeEncodingMap = (
 
           return utf8ToHex(value);
         },
-        decode: (value: string) => hexToUtf8(value),
+        decode: (value: string, consumed?: ConsumedPtr) => {
+          if (consumed) {
+            consumed.bytes += value.slice(2).length / 2;
+          }
+          return hexToUtf8(value);
+        },
       };
     case 'address':
       return {
@@ -542,9 +627,47 @@ const valueTypeEncodingMap = (
           // just keep the last 20 bytes, starting at index 12
           return bytesToHex(bytesArray.slice(12));
         },
-        decode: (value: string) => toChecksumAddress(value),
+        decode: (value: string, consumed?: ConsumedPtr) => {
+          const out = _decodeParameter('address')(value, consumed);
+          return toChecksumAddress(out);
+        },
       };
     // NOTE: We could add conditional handling of numeric values here...
+    case `int${uintLength}`:
+      return {
+        encode: (value: string | number) => {
+          if (!isValidUintSize(uintLength as number)) {
+            throw new Error(
+              `Can't encode ${value} as ${type}. Invalid \`uintN\` provided. Expected a multiple of 8 bits between 8 and 256.`,
+            );
+          }
+          const abiEncodedValue = encodeParameter(type, value);
+
+          const numberOfBits = countSignificantBits(abiEncodedValue);
+          if (numberOfBits > (uintLength as number)) {
+            throw new Error(
+              `Can't represent value ${value} as ${type}. To many bits required ${numberOfBits} > ${uintLength}`,
+            );
+          }
+
+          const bytesArray = hexToBytes(abiEncodedValue);
+          const numberOfBytes = (uintLength as number) / 8;
+
+          // abi-encoding always pad to 32 bytes. We need to keep the `n` rightmost bytes.
+          // where `n` = `numberOfBytes`
+          const startIndex = 32 - numberOfBytes;
+          return bytesToHex(bytesArray.slice(startIndex));
+        },
+        decode: (value: string, consumed?: ConsumedPtr) => {
+          const typeLength = (uintLength / 8) * 2 + 2;
+          let actualType = type;
+          if (value.length < typeLength) {
+            actualType = `int${Math.round((value.length - 2) / 2) * 8}`;
+          }
+          const out = _decodeParameter(actualType)(value, consumed);
+          return out;
+        },
+      };
     case `uint${uintLength}`:
       return {
         encode: (value: string | number) => {
@@ -570,34 +693,39 @@ const valueTypeEncodingMap = (
           const startIndex = 32 - numberOfBytes;
           return bytesToHex(bytesArray.slice(startIndex));
         },
-        decode: (value: string) => {
-          if (!isHex(value)) {
-            throw new Error(
-              `Can't convert ${value} to ${type}, value is not hex.`,
-            );
-          }
-
+        decode: _decodeParameter(type),
+      };
+    case `uint${uintLength}\+`:
+      return {
+        encode: (value: string | number) => {
           if (!isValidUintSize(uintLength as number)) {
             throw new Error(
-              `Can't decode ${value} as ${type}. Invalid \`uintN\` provided. Expected a multiple of 8 bits between 8 and 256.`,
+              `Can't encode ${value} as ${type}. Invalid \`uintN\` provided. Expected a multiple of 8 bits between 8 and 256.`,
             );
           }
+          const abiEncodedValue = encodeParameter(type, value);
 
-          const numberOfBits = countSignificantBits(value);
+          const numberOfBits = countSignificantBits(abiEncodedValue);
           if (numberOfBits > (uintLength as number)) {
             throw new Error(
               `Can't represent value ${value} as ${type}. To many bits required ${numberOfBits} > ${uintLength}`,
             );
           }
 
-          const numberOfBytes = countNumberOfBytes(value);
-          if (numberOfBytes > (uintLength as number) / 8) {
-            console.debug(
-              `Value ${value} for ${type} is too long but value contains only ${numberOfBits}. Too many bytes. ${numberOfBytes} > 16`,
-            );
-          }
+          const bytesArray = hexToBytes(abiEncodedValue);
+          const numberOfBytes = (uintLength as number) / 8;
 
-          return toNumber(value);
+          // abi-encoding always pad to 32 bytes. We need to keep the `n` rightmost bytes.
+          // where `n` = `numberOfBytes`
+          const startIndex = 32 - numberOfBytes;
+          return bytesToHex(bytesArray.slice(startIndex));
+        },
+        decode: (value: string, consumed?: ConsumedPtr) => {
+          const byteLength = (value.length - 2) / 2;
+          const typeLength = Math.min(byteLength * 8, 256);
+          // Allow sizes smaller or larger, but consume the whole thing.
+          // This is used for arrayLengths.
+          return _decodeParameter(`uint${typeLength}`)(value, consumed);
         },
       };
     case `bytes${bytesLength}`:
@@ -610,69 +738,71 @@ const valueTypeEncodingMap = (
           }
           return encodeToBytesN(type as BytesNValueTypes, value);
         },
-        decode: (value: string) => {
-          // we need to abi-encode the value again to ensure that:
-          //  - that data to decode does not go over N bytes.
-          //  - if the data is less than N bytes, that it gets padded to N bytes long.
-          const reEncodedData = encodeParameter(type, value);
-          return decodeParameter(type, reEncodedData);
-        },
+        decode: _decodeParameter(type),
       };
     case 'bool[]':
       return {
         encode: (value: boolean) => encodeParameter('bool[]', value),
-        decode: (value: string) => decodeParameter('bool[]', value),
+        decode: _decodeParameter('bool[]'),
       };
     case 'boolean[]':
       return {
         encode: (value: boolean) => encodeParameter('bool[]', value),
-        decode: (value: string) => decodeParameter('bool[]', value),
+        decode: _decodeParameter('bool[]'),
       };
     case 'string[]':
       return {
         encode: (value: string[]) => encodeParameter('string[]', value),
-        decode: (value: string) => decodeParameter('string[]', value),
+        decode: _decodeParameter('string[]'),
       };
     case 'address[]':
       return {
         encode: (value: string[]) => encodeParameter('address[]', value),
-        decode: (value: string) => decodeParameter('address[]', value),
+        decode: _decodeParameter('address[]'),
       };
     case 'uint256[]':
       return {
         encode: (value: Array<number | string>) =>
           encodeParameter('uint256[]', value),
-        decode: (value: string) => {
+        decode: (value: string, consumed?: ConsumedPtr) => {
           // we want to return an array of numbers as [1, 2, 3], not an array of strings as [ '1', '2', '3']
-          return (decodeParameter('uint256[]', value) as string[]).map(
-            (numberAsString) => Number.parseInt(numberAsString, 10),
-          );
+          return (
+            (_decodeParameter('uint256[]')(value, consumed) as string[]) || []
+          ).map((numberAsString) => {
+            try {
+              return Number(numberAsString);
+            } catch {
+              return BigInt(numberAsString);
+            }
+          });
         },
       };
     case 'bytes32[]':
       return {
         encode: (value: string[]) => encodeParameter('bytes32[]', value),
-        decode: (value: string) => decodeParameter('bytes32[]', value),
+        decode: _decodeParameter('bytes32[]'),
       };
     case 'bytes4[]':
       return {
         encode: (value: string[]) => encodeParameter('bytes4[]', value),
-        decode: (value: string) => decodeParameter('bytes4[]', value),
+        decode: _decodeParameter('bytes4[]'),
       };
     case 'bytes[]':
       return {
         encode: (value: string[]) => encodeParameter('bytes[]', value),
-        decode: (value: string) => decodeParameter('bytes[]', value),
+        decode: _decodeParameter('bytes[]'),
       };
     case 'bytes[CompactBytesArray]':
       return {
         encode: (value: string[]) => encodeCompactBytesArray(value),
-        decode: (value: string) => decodeCompactBytesArray(value),
+        decode: (value: string, consumed?: ConsumedPtr) =>
+          decodeCompactBytesArray(value, consumed),
       };
     case 'string[CompactBytesArray]':
       return {
         encode: (value: string[]) => encodeStringCompactBytesArray(value),
-        decode: (value: string) => decodeStringCompactBytesArray(value),
+        decode: (value: string, consumed?: ConsumedPtr) =>
+          decodeStringCompactBytesArray(value, consumed),
       };
     default:
       return {
@@ -681,7 +811,7 @@ const valueTypeEncodingMap = (
             `Could not encode ${value}. Value type ${type} is unknown`,
           );
         },
-        decode: (value: any) => {
+        decode: (value: any, _consumed?: ConsumedPtr) => {
           throw new Error(
             `Could not decode ${value}. Value type ${type} is unknown`,
           );
@@ -740,7 +870,13 @@ export const valueContentEncodingMap = (
 
           throw new Error(`Address: "${value}" is an invalid address.`);
         },
-        decode: (value: string) => toChecksumAddress(value),
+        decode: (value: string) => {
+          try {
+            return toChecksumAddress(value);
+          } catch {
+            throw new Error(`Address: "${value}" is an invalid address.`);
+          }
+        },
       };
     }
     case 'String': {
@@ -842,10 +978,10 @@ export const valueContentEncodingMap = (
           }
 
           if (bytesLength && !isValidByteSize(bytesLength)) {
-            console.error(
+            // This is a schema error and not a data error so we can throw it.
+            throw new Error(
               `Provided bytes length: ${bytesLength} for encoding valueContent: ${valueContent} is not valid.`,
             );
-            return null;
           }
 
           if (bytesLength && value.length !== 2 + bytesLength * 2) {
@@ -887,12 +1023,11 @@ export const valueContentEncodingMap = (
         encode: (value: boolean): string => {
           return valueTypeEncodingMap('bool').encode(value);
         },
-        decode: (value: string): boolean => {
-          try {
-            return valueTypeEncodingMap('bool').decode(value) as any as boolean;
-          } catch (error) {
-            throw new Error(`Value ${value} is not a boolean`);
-          }
+        decode: (value: string, consumed?: ConsumedPtr): boolean => {
+          return valueTypeEncodingMap('bool').decode(
+            value,
+            consumed,
+          ) as any as boolean;
         },
       };
     }
@@ -930,6 +1065,7 @@ export function encodeValueType(
 export function decodeValueType(
   type: ERC725JSONSchemaValueType | string, // for tuples and CompactBytesArray
   data: string,
+  consumed?: ConsumedPtr, // for tuples and CompactBytesArray
 ) {
   if (data === '0x') return null;
 
@@ -937,17 +1073,17 @@ export function decodeValueType(
     return data;
   }
 
-  return valueTypeEncodingMap(type).decode(data);
+  return valueTypeEncodingMap(type).decode(data, consumed);
 }
 
 export function encodeValueContent(
   valueContent: string,
-  value: string | number | AssetURLEncode | URLDataToEncode | boolean,
-): string | false {
+  value: string | number | AssetURLEncode | URLDataToEncode | boolean | unknown,
+): string {
   if (isValueContentLiteralHex(valueContent)) {
     // hex characters are always lower case, even if the schema define some hex words uppercase
     // e.g: 0xAabbcCddeE -> encoded as 0xaabbccddee
-    return valueContent === value ? value.toLowerCase() : false;
+    return valueContent === value ? value.toLowerCase() : '0x';
   }
 
   const valueContentEncodingMethods = valueContentEncodingMap(valueContent);

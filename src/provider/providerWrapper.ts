@@ -173,14 +173,11 @@ export class ProviderWrapper {
         encodedParams,
       ),
     ]);
-    if (results.error) {
-      throw results.error;
-    }
 
     // Passing Method.IS_VALID_SIGNATURE ensures this will be string
     return decodeResult(
       Method.IS_VALID_SIGNATURE,
-      results[0].result,
+      results[0],
     ) as unknown as string;
   }
 
@@ -254,7 +251,7 @@ export class ProviderWrapper {
     ];
 
     const results: any = await this.callContract(payload);
-    const decodedValues = decodeResult(method, results[0].result);
+    const decodedValues = decodeResult(method, results[0]);
 
     return keyHashes.map<GetDataReturn>((key, index) => ({
       key,
@@ -297,18 +294,18 @@ export class ProviderWrapper {
       );
     }
 
-    const results: any = await this.callContract(payload);
+    const results: string[] = await this.callContract(payload);
 
-    return payload.map<GetDataReturn>((payloadCall, index) => ({
-      key: keyHashes[index],
-      value: decodeResult(
-        Method.GET_DATA_LEGACY,
-        results.find((element) => payloadCall.id === element.id).result,
-      ),
-    }));
+    return payload.map<GetDataReturn>((_payloadCall, index) => {
+      return {
+        key: keyHashes[index],
+        value: decodeResult(Method.GET_DATA_LEGACY, results[index]),
+      };
+    });
   }
 
-  private async callContract(payload: JsonRpc[] | JsonRpc): Promise<any> {
+  // public for testing
+  public async callContract(payload: JsonRpc[] | JsonRpc): Promise<any> {
     // Make this mock provider always return the result in terms of data.
     // So if the result is wrapped in an object as result.result then unwrap it.
     // Some code was assuming it's wrapped and other was it's not wrapped.
@@ -325,14 +322,12 @@ export class ProviderWrapper {
       return result;
     }
 
-    return new Promise((resolve, reject) => {
-      // Send old web3 method with callback to resolve promise
-      // This is deprecated: https://docs.metamask.io/guide/ethereum-provider.html#ethereum-send-deprecated
+    const handleOne = async (payload: JsonRpc) => {
+      return new Promise((resolve, reject) => {
+        // Send old web3 method with callback to resolve promise
+        // This is deprecated: https://docs.metamask.io/guide/ethereum-provider.html#ethereum-send-deprecated
 
-      this.provider.send(payload, (e, r) => {
-        if (e) {
-          reject(e);
-        } else {
+        const doResolve = (r) => {
           if (r.error) {
             let error: any;
             ({ error } = r);
@@ -340,16 +335,25 @@ export class ProviderWrapper {
               error = new Error('Call failed');
               Object.assign(error, r.error);
             }
-            reject(error);
-            return;
+            return reject(error);
           }
-          if (r.result) {
-            resolve(r.result);
-            return;
+          return resolve(r.result || '0x');
+        };
+        const promise = this.provider.send(payload, (e, r) => {
+          if (e) {
+            reject(e);
+          } else {
+            doResolve(r);
           }
-          resolve(r);
+        });
+        if (promise && typeof promise.then === 'function') {
+          promise.then(doResolve, reject);
         }
       });
-    });
+    };
+    if (Array.isArray(payload)) {
+      return Promise.all(payload.map(handleOne));
+    }
+    return handleOne(payload);
   }
 }

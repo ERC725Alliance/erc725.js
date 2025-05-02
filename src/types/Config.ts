@@ -1,4 +1,4 @@
-import { ERC725JSONSchema } from './ERC725JSONSchema';
+import type { ERC725JSONSchema } from './ERC725JSONSchema';
 
 export interface ERC725Config {
   /**
@@ -12,7 +12,10 @@ export interface ERC725Config {
    * Another example: `https://cloudflare-ipfs.com/ipfs/`
    */
   ipfsGateway?: string;
+  ipfsFetch?: (url: string, init?: unknown) => Promise<any>;
+  ipfsConvertUrl?: (url: string) => string;
   gas?: number;
+  throwSchemaErrors?: boolean; // Defaults to false
 }
 
 export interface ERC725Options {
@@ -20,5 +23,7 @@ export interface ERC725Options {
   address?: string;
   provider?;
   ipfsGateway: string;
+  ipfsFetch?: (url: string, init?: unknown) => Promise<any>;
+  ipfsConvertUrl?: (url: string) => string;
   gas: number;
 }

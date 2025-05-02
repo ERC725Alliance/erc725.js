@@ -1,6 +1,6 @@
 import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
 import { LSP6_DEFAULT_PERMISSIONS } from '../constants/constants';
-import { Permissions } from '../types/Method';
+import type { Permissions } from '../types/Method';
 import { isHexStrict } from 'web3-validator';
 
 export function encodePermissions(permissions: Permissions): string {

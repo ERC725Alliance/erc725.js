@@ -14,7 +14,7 @@
 
 import { numberToHex, keccak256, toHex } from 'web3-utils';
 
-import { MethodData, Encoding, Method } from '../types/Method';
+import { type MethodData, Encoding, Method } from '../types/Method';
 
 // https://github.com/ERC725Alliance/ERC725/blob/develop/docs/ERC-725.md#specification
 export const ERC725Y_INTERFACE_IDS = {
@@ -56,19 +56,19 @@ export enum ERC725_VERSION {
 export const METHODS: Record<Method, MethodData> = {
   [Method.GET_DATA_LEGACY]: {
     // Legacy version of ERC725Y - before v0.3.0
-    sig: '0x54f6127f',
+    sig: '0x54f6127f', // getData(bytes32)
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES,
   },
   [Method.GET_DATA]: {
     // https://github.com/ERC725Alliance/ERC725/blob/v4.0.0/docs/ERC-725.md#erc725y
-    sig: '0x4e3e6e9c',
+    sig: '0x4e3e6e9c', // getData(bytes32[])
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES_ARRAY,
   },
   [Method.GET_DATA_BATCH]: {
     // https://github.com/ERC725Alliance/ERC725/blob/v5.1.0/docs/ERC-725.md#erc725y
-    sig: '0xdedff9c6',
+    sig: '0xdedff9c6', // getDataBatch(bytes32[])
     value: numberToHex(0),
     returnEncoding: Encoding.BYTES_ARRAY,
   },
@@ -111,7 +111,7 @@ export const SUPPORTED_VERIFICATION_METHODS_LIST = Object.values(
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
 );
 
-function keccak256Method(data: object | string | Uint8Array | null) {
+export function keccak256Method(data: object | string | Uint8Array | null) {
   if (data === null) {
     return keccak256('');
   }
@@ -181,9 +181,6 @@ export const LSP6_DEFAULT_PERMISSIONS = {
   ALL_PERMISSIONS                  : '0x00000000000000000000000000000000000000000000000000000000007f3f7f'
 };
 
-export const LSP6_ALL_PERMISSIONS =
-  '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
-
 export const COMPACT_BYTES_ARRAY_STRING = '[CompactBytesArray]';
-
+export const COMPACT_BYTES_ARRAY_STRING_AT_END = /\[CompactBytesArray\]$/;
 export const DEFAULT_GAS_VALUE = 1_000_000;

@@ -1,4 +1,4 @@
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 
 import LSP1JSONSchema from '../../schemas/LSP1UniversalReceiverDelegate.json';
 import LSP3JSONSchema from '../../schemas/LSP3ProfileMetadata.json';

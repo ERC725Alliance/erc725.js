@@ -11,18 +11,22 @@ on:
 
 jobs:
   build:
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: write
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [22.x, 20.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
@@ -37,7 +41,19 @@ jobs:
         run: npm run build --if-present
 
       - name: Test
-        run: npm test
+        if: matrix.node-version == '22.x'
+        run: npm run test:ci
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+      - name: Test
+        if: matrix.node-version != '22.x'
+        run: npm run test
+    
+      - name: 📊 Code Coverage
+        uses: ArtiomTr/jest-coverage-report-action@v2
+        if: always() && matrix.node-version == '22.x'
+        with:
+          test-script: npm run test:ci
+          coverage-file: report.json
+          base-coverage-file: report-base.json
+          skip-step: install
+          annotations: 'failed-tests'

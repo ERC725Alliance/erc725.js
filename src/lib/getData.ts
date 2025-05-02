@@ -1,15 +1,15 @@
-import { DecodeDataOutput } from '../types/decodeData';
-import { GetDataDynamicKey, GetDataInput } from '../types/GetData';
+import type { DecodeDataOutput } from '../types/decodeData';
+import type { GetDataDynamicKey, GetDataInput } from '../types/GetData';
 import { isDynamicKeyName } from './encodeKeyName';
 import {
   decodeKeyValue,
   encodeArrayKey,
   generateSchemasFromDynamicKeys,
 } from './utils';
-import { KeyValuePair } from '../types';
+import type { KeyValuePair } from '../types';
 import { decodeData } from './decodeData';
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
-import { ERC725Options } from '../types/Config';
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
+import type { ERC725Options } from '../types/Config';
 
 /**
  * @internal
@@ -41,7 +41,7 @@ const getArrayValues = async (
 
   const arrayLength = await decodeKeyValue(
     'Number',
-    'uint128',
+    'uint128+',
     value.value,
     schema.name,
   ); // get the int array length
@@ -61,7 +61,7 @@ const getArrayValues = async (
     );
 
     results.push(...arrayElements);
-  } catch (err) {
+  } catch {
     // This case may happen if user requests an array key which does not exist in the contract.
     // In this case, we simply skip
   }
@@ -78,10 +78,11 @@ const getDataMultiple = async (
     erc725Options.schemas,
   );
 
+  const allKeys: string[] = schemas.map((schema) => schema.key);
   // Get all the raw data from the provider based on schema key hashes
   const allRawData: KeyValuePair[] = await erc725Options.provider?.getAllData(
     erc725Options.address as string,
-    schemas.map((schema) => schema.key),
+    allKeys,
   );
 
   const keyValueMap = allRawData.reduce<{ [key: string]: any }>(
