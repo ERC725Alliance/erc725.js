@@ -18,7 +18,6 @@ import { expect } from 'chai';
 import assert from 'node:assert';
 import { IPFS_GATEWAY, responseStore } from '../../test/serverHelpers';
 
-import { keccak256, utf8ToBytes, utf8ToHex } from 'web3-utils';
 import type {
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
@@ -48,6 +47,7 @@ import { decodeKey } from './decodeData';
 import { mockJson } from '../../test/mockSchema';
 import ERC725, { decodeValueContent, encodeValueContent } from '..';
 import { URLDataToEncode } from '../types';
+import { Hex, keccak256, stringToBytes, stringToHex, toBytes } from 'viem';
 
 describe('utils', () => {
   describe('decodeKey edge cases', () => {
@@ -108,14 +108,14 @@ describe('utils', () => {
       schema: ERC725JSONSchema;
       decodedValue:
         | string
-        | number
+        | bigint
         | URLDataToEncode
         | URLDataToEncode[]
         | boolean
         | Array<
             | string
-            | number
-            | (string | number | boolean | string[])[]
+            | bigint
+            | (string | bigint | boolean | string[])[]
             | URLDataToEncode
             | URLDataToEncode[]
             | boolean
@@ -167,7 +167,7 @@ describe('utils', () => {
             verification: {
               method: SUPPORTED_VERIFICATION_METHOD_STRINGS.KECCAK256_UTF8,
               data: keccak256(
-                utf8ToBytes(
+                stringToBytes(
                   responseStore.ipfs
                     .QmbErKh3FjsAR6YjsTjHZNm6McDp6aRt82Ftcv9AJJvZbd,
                 ),
@@ -207,7 +207,7 @@ describe('utils', () => {
           valueType: '(bytes4,bytes8)',
           valueContent: '(Bytes4,Number)',
         },
-        decodedValue: ['0xcafecafe', 11],
+        decodedValue: ['0xcafecafe', 11n],
         encodedValue: '0xcafecafe000000000000000b',
       },
       {
@@ -218,7 +218,7 @@ describe('utils', () => {
           valueType: '(bytes4,bytes8,bytes4)',
           valueContent: '(Bytes4,Number,Number)',
         },
-        decodedValue: ['0xcafecafe', 11, 8],
+        decodedValue: ['0xcafecafe', 11n, 8n],
         encodedValue: '0xcafecafe000000000000000b00000008',
       },
       {
@@ -319,7 +319,7 @@ describe('utils', () => {
         valueType: '',
         decodedValue: [
           '0xdeadbeaf',
-          12,
+          12n,
           [
             '0x1234567812345678123456781234567812345678123456781234567812345678',
             '0x2345678123456781234567812345678123456781234567812345678123456789',
@@ -337,7 +337,7 @@ describe('utils', () => {
           valueContent: '(Bytes4,Number,Bytes32)',
         },
         valueType: '',
-        decodedValue: ['0xdeadbeaf', 12, null] as any,
+        decodedValue: ['0xdeadbeaf', 12n, null] as any,
         encodedValue: '0xdeadbeaf000000000000000c',
       },
       {
@@ -349,7 +349,7 @@ describe('utils', () => {
           valueContent: '(Bytes4,Number,Bytes32)',
         },
         valueType: '',
-        decodedValue: ['0xdeadbeaf', 12, null] as any,
+        decodedValue: ['0xdeadbeaf', 12n, null] as any,
         encodedValue: '0xdeadbeaf000000000000000c',
         encodedError: '0xdeadbeaf000000000000000c0020', // This encoded value has the length item of the encoded array instead of null
       },
@@ -362,7 +362,7 @@ describe('utils', () => {
           valueContent: '(Bytes4,Number)',
         },
         valueType: '',
-        decodedValue: ['0xc52d6008', 1],
+        decodedValue: ['0xc52d6008', 1n],
         encodedValue:
           '0xc52d60080000000000000000000000000000000000000000000000000000000000000001',
       },
@@ -375,7 +375,7 @@ describe('utils', () => {
           valueContent: '(Bytes4,Number,Bytes32)',
         },
         valueType: '',
-        decodedValue: ['0xdeadbeaf', 12, null] as any,
+        decodedValue: ['0xdeadbeaf', 12n, null] as any,
         encodedValue: '0xdeadbeaf000000000000000c',
         encodedError: '0xdeadbeaf000000000000000c002001234342343', // This encoded value has the length and partial byte of the encoded array instead of null
       },
@@ -394,7 +394,7 @@ describe('utils', () => {
             '0x1234567812345678123456781234567812345678123456781234567812345678',
             '0x2345678123456781234567812345678123456781234567812345678123456789',
           ],
-          12,
+          12n,
         ],
         encodedValue:
           '0xdeadbeaf0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000212345678123456781234567812345678123456781234567812345678123456782345678123456781234567812345678123456781234567812345678123456789000000000000000c',
@@ -453,7 +453,7 @@ describe('utils', () => {
     ];
     testCases.forEach(({ value, result }) => {
       it(`should count the number of bits in ${value}`, () => {
-        assert.equal(countSignificantBits(value), result);
+        assert.equal(countSignificantBits(value as Hex), result);
       });
     });
   });
@@ -498,13 +498,13 @@ describe('utils', () => {
         valueContent: 'String',
         valueType: 'string',
         decodedValue: 'Great-string',
-        encodedValue: utf8ToHex('Great-string'),
+        encodedValue: stringToHex('Great-string'),
       },
       {
         valueContent: 'Markdown',
         valueType: 'string',
         decodedValue: '# Title',
-        encodedValue: utf8ToHex('# Title'),
+        encodedValue: stringToHex('# Title'),
       },
       {
         valueContent: 'URL',
@@ -542,8 +542,8 @@ describe('utils', () => {
       {
         valueContent: 'Bytes',
         valueType: 'bytes',
-        decodedValue: '0xaaAE32',
-        encodedValue: '0xaaAE32',
+        decodedValue: '0xaaae32',
+        encodedValue: '0xaaae32',
       },
       {
         valueContent: 'Bytes32',
@@ -597,13 +597,13 @@ describe('utils', () => {
         valueContent: '(Bytes4,Number)',
         valueType: '(bytes4,bytes8)',
         encodedValue: '0xdeadbeaf0000000000000010',
-        decodedValue: ['0xdeadbeaf', 16],
+        decodedValue: ['0xdeadbeaf', 16n],
       },
       {
         valueContent: '(Bytes4,Number)',
         valueType: '(bytes4,uint128)',
         encodedValue: '0xdeadbeaf00000000000000000000000000000020',
-        decodedValue: ['0xdeadbeaf', 32],
+        decodedValue: ['0xdeadbeaf', 32n],
       },
     ]; // we may need to add more test cases! Address, etc.
 
@@ -917,6 +917,8 @@ describe('utils', () => {
           '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000001',
           '0x0cfc51aec37c55a4d0b1a65c6255c4bf2fbdf6277f3cc0730c45b828b6db8b47',
         ],
+        // 0x00006f357c6a00200464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178
+        // 0x00006f357c6a0020820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178
         values: [
           '0x00006f357c6a0020820464ddfac1bec070cc14a8daf04129871d458f2ca94368aae8391311af6361697066733a2f2f516d597231564a4c776572673670456f73636468564775676f3339706136727963455a4c6a7452504466573834554178',
           '0x00000000000000000000000000000002',
@@ -1139,7 +1141,7 @@ describe('utils', () => {
   describe('isDataAuthentic', () => {
     it('returns true if data is authentic', () => {
       const data = 'h3ll0HowAreYou?';
-      const expectedHash = keccak256(data);
+      const expectedHash = keccak256(stringToBytes(data));
 
       const isAuthentic = isDataAuthentic(data, {
         data: expectedHash,
@@ -1150,7 +1152,7 @@ describe('utils', () => {
     });
     it('returns true if data is authentic', () => {
       const data = 'h3ll0HowAreYou?';
-      const expectedHash = keccak256(data);
+      const expectedHash = keccak256(stringToBytes(data));
 
       const isAuthentic = ERC725.isDataAuthentic(data, {
         data: expectedHash,
@@ -1173,13 +1175,13 @@ describe('utils', () => {
         '0x56570de287d73cd1cb6092bb8fdee6173974955fdef345ae579ee9f475ea7432',
       );
       assert.equal(
-        keccak256Method(new TextEncoder().encode('hello')),
+        keccak256Method(toBytes('hello')),
         '0x1c8aff950685c2ed4bc3174f3472287b56d9517b9c948127319a09a7a36deac8',
       );
     });
     it('returns true if data is authentic', () => {
       const data = 'h3ll0HowAreYou?';
-      const expectedHash = keccak256(data);
+      const expectedHash = keccak256(stringToBytes(data));
 
       const erc725 = new ERC725([]);
       const isAuthentic = erc725.isDataAuthentic(data, {

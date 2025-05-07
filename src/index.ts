@@ -21,8 +21,6 @@
  * @date 2020
  */
 
-import HttpProvider from 'web3-providers-http';
-
 import { ProviderWrapper } from './provider/providerWrapper';
 
 import {
@@ -82,7 +80,6 @@ import {
 } from './lib/permissions';
 import type { AssetURLEncode } from './types/encodeData';
 import type { URLDataToEncode, URLDataWithHash, Verification } from './types';
-import { isAddress } from 'web3-validator';
 
 export type {
   ERC725JSONSchema,
@@ -118,6 +115,8 @@ export {
   mapPermission,
 } from './lib/permissions';
 export { getSchema } from './lib/schemaParser';
+import { createPublicClient, http, isAddress } from 'viem';
+import { lukso } from 'viem/chains';
 
 // PRIVATE FUNCTION
 function initializeProvider(providerOrRpcUrl, gasInfo) {
@@ -126,7 +125,11 @@ function initializeProvider(providerOrRpcUrl, gasInfo) {
 
   // if provider is a string, assume it's a rpcUrl
   if (typeof providerOrRpcUrl === 'string') {
-    return new ProviderWrapper(new HttpProvider(providerOrRpcUrl), gasInfo);
+    const client = createPublicClient({
+      chain: lukso,
+      transport: http('https://rpc.testnet.lukso.network'),
+    });
+    return new ProviderWrapper(client, gasInfo);
   }
 
   if (
@@ -720,14 +723,14 @@ export class ERC725 {
    */
   static encodeValueType(
     type: string,
-    value: string | string[] | number | number[] | boolean | boolean[],
+    value: string | string[] | bigint | bigint[] | boolean | boolean[],
   ): string {
     return encodeValueType(type, value);
   }
 
   encodeValueType(
     type: string,
-    value: string | string[] | number | number[] | boolean | boolean[],
+    value: string | string[] | bigint | bigint[] | boolean | boolean[],
   ): string {
     return encodeValueType(type, value);
   }
@@ -747,14 +750,26 @@ export class ERC725 {
 
   static encodeValueContent(
     valueContent: string,
-    value: string | number | AssetURLEncode | URLDataToEncode | boolean,
+    value:
+      | string
+      | number
+      | bigint
+      | AssetURLEncode
+      | URLDataToEncode
+      | boolean,
   ): string {
     return encodeValueContent(valueContent, value);
   }
 
   encodeValueContent(
     valueContent: string,
-    value: string | number | AssetURLEncode | URLDataToEncode | boolean,
+    value:
+      | string
+      | number
+      | bigint
+      | AssetURLEncode
+      | URLDataToEncode
+      | boolean,
   ): string {
     return encodeValueContent(valueContent, value);
   }
@@ -762,14 +777,14 @@ export class ERC725 {
   static decodeValueContent(
     valueContent: string,
     value: string,
-  ): string | URLDataWithHash | number | boolean | null {
+  ): string | URLDataWithHash | bigint | boolean | null {
     return decodeValueContent(valueContent, value);
   }
 
   decodeValueContent(
     valueContent: string,
     value: string,
-  ): string | URLDataWithHash | number | boolean | null {
+  ): string | URLDataWithHash | bigint | boolean | null {
     return decodeValueContent(valueContent, value);
   }
 

@@ -376,43 +376,43 @@ describe('encoder', () => {
       const validTestCases = [
         {
           valueType: 'uint256',
-          decodedValue: 1337,
+          decodedValue: 1337n,
           encodedValue:
             '0x0000000000000000000000000000000000000000000000000000000000000539',
         },
         {
           valueType: 'uint8',
-          decodedValue: 10,
+          decodedValue: 10n,
           encodedValue: '0x0a',
         },
         {
           valueType: 'uint16',
-          decodedValue: 10,
+          decodedValue: 10n,
           encodedValue: '0x000a',
         },
         {
           valueType: 'uint24',
-          decodedValue: 10,
+          decodedValue: 10n,
           encodedValue: '0x00000a',
         },
         {
           valueType: 'uint32',
-          decodedValue: 10,
+          decodedValue: 10n,
           encodedValue: '0x0000000a',
         },
         {
           valueType: 'uint64',
-          decodedValue: 25,
+          decodedValue: 25n,
           encodedValue: '0x0000000000000019',
         },
         {
           valueType: 'uint128',
-          decodedValue: 11,
+          decodedValue: 11n,
           encodedValue: '0x0000000000000000000000000000000b',
         },
         {
           valueType: 'uint128',
-          decodedValue: 0,
+          decodedValue: 0n,
           encodedValue: '0x00000000000000000000000000000000',
         },
       ];
@@ -445,8 +445,12 @@ describe('encoder', () => {
         for (let ii = 1; ii <= 256; ii++) {
           // only test for uintN where N is a multiple of 8
           if (ii % 8 !== 0) {
-            assert.throws(() => encodeValueType(`uint${ii}`, 12345));
-            assert.throws(() => decodeValueType(`uint${ii}`, '0x00000001'));
+            assert.throws(() => {
+              encodeValueType(`uint${ii}`, 12345);
+            });
+            assert.throws(() => {
+              decodeValueType(`uint${ii}`, '0x00000001');
+            });
 
             // test that `uintN` are encoded / decode correct when N is not a multiple of 8
           } else {
@@ -781,7 +785,7 @@ describe('encoder', () => {
         },
         {
           valueType: 'uint8[CompactBytesArray]',
-          decodedValue: [1, 43, 73, 255],
+          decodedValue: [1n, 43n, 73n, 255n],
           encodedValue: '0x00010100012b0001490001ff',
         },
         {
@@ -798,16 +802,29 @@ describe('encoder', () => {
 
       validTestCases.forEach((testCase) => {
         it(`encodes/decodes: ${testCase.decodedValue} as ${testCase.valueType}`, () => {
-          const encodedValue = encodeValueType(
-            testCase.valueType,
-            testCase.decodedValue,
-          );
+          try {
+            const encodedValue = encodeValueType(
+              testCase.valueType,
+              testCase.decodedValue,
+            );
 
-          assert.deepStrictEqual(encodedValue, testCase.encodedValue);
-          assert.deepStrictEqual(
-            decodeValueType(testCase.valueType, encodedValue),
-            testCase.decodedValue,
-          );
+            assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+            assert.deepStrictEqual(
+              decodeValueType(testCase.valueType, encodedValue),
+              testCase.decodedValue,
+            );
+          } catch {
+            const encodedValue = encodeValueType(
+              testCase.valueType,
+              testCase.decodedValue,
+            );
+
+            assert.deepStrictEqual(encodedValue, testCase.encodedValue);
+            assert.deepStrictEqual(
+              decodeValueType(testCase.valueType, encodedValue),
+              testCase.decodedValue,
+            );
+          }
         });
       });
 
@@ -880,7 +897,7 @@ describe('encoder', () => {
         it('should throw if trying to encode a value that exceeds the maximal length of bytes for this type', async () => {
           expect(() => {
             encodeValueType('uint8[CompactBytesArray]', [15, 178, 266]);
-          }).to.throw('Hex uint8 value at index 2 does not fit in 1 bytes');
+          }).to.throw(/Hex size \(2\) exceeds padding size \(1\)./);
         });
 
         it('should throw if trying to decode a value that exceeds the maximal length of bytes for this type', async () => {
@@ -959,7 +976,7 @@ describe('encoder', () => {
       },
       {
         valueContent: 'Number',
-        decodedValue: 876,
+        decodedValue: 876n,
         encodedValue:
           '0x000000000000000000000000000000000000000000000000000000000000036c',
       },

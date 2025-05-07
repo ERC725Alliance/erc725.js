@@ -234,7 +234,7 @@ export const mockSchema: (ERC725JSONSchema & {
     valueType: 'uint256',
     returnGraphData:
       '0x0000000000000000000000000000000000000000000000000000000000000063',
-    expectedResult: 99,
+    expectedResult: 99n,
   },
 
   // Case 13
@@ -246,7 +246,7 @@ export const mockSchema: (ERC725JSONSchema & {
     valueContent: 'Number',
     valueType: 'bytes',
     returnGraphData: '0x63',
-    expectedResult: 99,
+    expectedResult: 99n,
   },
 
   // Case 14

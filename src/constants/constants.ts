@@ -12,7 +12,7 @@
     along with @erc725/erc725.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { numberToHex, keccak256, toHex } from 'web3-utils';
+import { numberToHex, keccak256, toHex, toBytes } from 'viem';
 
 import { type MethodData, Encoding, Method } from '../types/Method';
 
@@ -113,7 +113,7 @@ export const SUPPORTED_VERIFICATION_METHODS_LIST = Object.values(
 
 export function keccak256Method(data: object | string | Uint8Array | null) {
   if (data === null) {
-    return keccak256('');
+    return keccak256(new Uint8Array([]));
   }
   if (data instanceof Uint8Array) {
     const buffer = toHex(data);
@@ -121,9 +121,9 @@ export function keccak256Method(data: object | string | Uint8Array | null) {
   }
   if (typeof data === 'object') {
     const buffer = JSON.stringify(data);
-    return keccak256(buffer);
+    return keccak256(toBytes(buffer));
   }
-  return keccak256(data);
+  return keccak256(toBytes(data));
 }
 
 const KECCAK256_UTF8 = {

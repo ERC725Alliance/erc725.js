@@ -19,8 +19,6 @@
  * @date 2020
  */
 
-import { hexToBytes, leftPad, numberToHex, padLeft } from 'web3-utils';
-import { isAddress, isHexStrict } from 'web3-validator';
 import type {
   URLDataToEncode,
   EncodeDataReturn,
@@ -53,9 +51,8 @@ import { getSchemaElement } from './getSchemaElement';
 import type { EncodeDataInput } from '../types/decodeData';
 import type { GetDataDynamicKey } from '../types/GetData';
 import { isValidTuple } from './decodeData';
-import { stripHexPrefix } from 'web3-eth-accounts';
-import { checkAddressCheckSum } from 'web3-validator';
 import type { ERC725Options } from '../types/Config';
+import { Hex, hexToBytes, isAddress, isHex, pad, toHex } from 'viem';
 
 /**
  *
@@ -72,6 +69,8 @@ export function encodeKeyValue(
   decodedValue:
     | string
     | string[]
+    | bigint
+    | bigint[]
     | number
     | number[]
     | URLDataToEncode
@@ -81,6 +80,8 @@ export function encodeKeyValue(
     | Array<
         | string
         | string[]
+        | bigint
+        | bigint[]
         | number
         | number[]
         | URLDataToEncode
@@ -170,7 +171,10 @@ export function encodeKeyValue(
  * @return The raw bytes key for the array element
  */
 export function encodeArrayKey(key: string, index: number) {
-  return key.slice(0, 34) + padLeft(numberToHex(index), 32).replace('0x', '');
+  return (
+    key.slice(0, 34) +
+    pad(toHex(index), { size: 16, dir: 'left' }).replace('0x', '')
+  );
 }
 
 /**
@@ -205,7 +209,12 @@ export const encodeTupleKeyValue = (
   valueContent: string, // i.e. (Bytes4,Number,Bytes16,Address)
   valueType: string, // i.e. (bytes4,uint128,bytes16,address)
   decodedValues: Array<
-    string | number | URLDataToEncode | boolean | (string | number | boolean)[]
+    | string
+    | number
+    | bigint
+    | URLDataToEncode
+    | boolean
+    | (string | number | boolean)[]
   >,
 ) => {
   // We assume data has already been validated at this stage
@@ -236,7 +245,7 @@ export const encodeTupleKeyValue = (
         return ''; // may cause issues?
       }
 
-      return stripHexPrefix(encodedKeyValue);
+      return encodedKeyValue.slice(2);
     })
     .join('')}`;
 
@@ -254,14 +263,16 @@ export function encodeKey(
   schema: ERC725JSONSchema,
   value:
     | string
+    | bigint
     | number
     | URLDataToEncode
     | URLDataToEncode[]
     | boolean
     | Array<
         | string
+        | bigint
         | number
-        | (string | number | boolean | string[])[]
+        | (string | bigint | number | boolean | string[])[]
         | URLDataToEncode
         | URLDataToEncode[]
         | boolean
@@ -389,8 +400,8 @@ export function encodeKey(
         value as
           | string
           | string[]
-          | number
-          | number[]
+          | bigint
+          | bigint[]
           | URLDataToEncode
           | URLDataToEncode[],
         schema.name,
@@ -447,7 +458,7 @@ export function decodeKeyValue(
   }
 
   // As per exception above, if address and sameEncoding, then the address still needs to be handled
-  if (sameEncoding && isAddress(value) && !checkAddressCheckSum(value)) {
+  if (sameEncoding && isAddress(value) && !isAddress(value, { strict: true })) {
     sameEncoding = !sameEncoding;
   }
 
@@ -460,7 +471,7 @@ export function decodeKeyValue(
 
   if (isArray && Array.isArray(value)) {
     // value must be an array also
-    const results: (string | URLDataWithHash | number | null | boolean)[] = [];
+    const results: (string | URLDataWithHash | bigint | null | boolean)[] = [];
 
     for (let index = 0; index < value.length; index++) {
       const element = value[index];
@@ -565,7 +576,10 @@ export function hashData(
   data: string | Uint8Array | Record<string, any>,
   nameOrSig: SUPPORTED_VERIFICATION_METHODS | string,
 ): string {
-  return getVerificationMethod(nameOrSig)?.method(data) || leftPad(0, 64);
+  return (
+    getVerificationMethod(nameOrSig)?.method(data) ||
+    pad(toHex(0), { size: 32, dir: 'left' })
+  );
 }
 
 /**
@@ -670,12 +684,16 @@ export function patchIPFSUrlsIfApplicable(
   return receivedData;
 }
 
-export function countNumberOfBytes(data: string) {
-  return stripHexPrefix(data).length / 2;
+export function countNumberOfBytes(data: Hex) {
+  if (data == null) {
+    return 0;
+  }
+
+  return data.slice(2).length / 2;
 }
 
-export function countSignificantBits(data: string) {
-  const bytes = hexToBytes(data);
+export function countSignificantBits(data: Hex) {
+  const bytes = hexToBytes(data as Hex);
   for (let i = 0; i < bytes.length; i++) {
     if (bytes[i] !== 0) {
       return (
@@ -878,5 +896,5 @@ export function isValidByteSize(bytesSize: number) {
  * @returns true or false
  */
 export function isValueContentLiteralHex(valueContent: string): boolean {
-  return isHexStrict(valueContent);
+  return isHex(valueContent, { strict: true });
 }

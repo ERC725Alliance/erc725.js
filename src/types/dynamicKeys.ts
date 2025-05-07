@@ -2,7 +2,7 @@
 
 import type { EncodeDataType } from './encodeData/JSONURL';
 
-export type DynamicKeyParts = string | string[] | number;
+export type DynamicKeyParts = string | string[] | number | bigint;
 
 export interface DynamicKeyPartInput {
   dynamicKeyParts: DynamicKeyParts;

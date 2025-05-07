@@ -751,7 +751,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             name: 'LSP4CreatorsMap:<address>',
             dynamicName:
               'LSP4CreatorsMap:0x9139def55c73c12bcda9c44f12326686e3948634',
-            value: ['0x24871b3d', 0],
+            value: ['0x24871b3d', 0n],
           });
         });
       });
@@ -1322,32 +1322,32 @@ describe('Running @erc725/erc725.js tests...', () => {
         [
           {
             valueType: 'uint8',
-            valueToEncode: 10,
+            valueToEncode: 10n,
             expectedEncodedValue: '0x0a',
           },
           {
             valueType: 'uint16',
-            valueToEncode: 10,
+            valueToEncode: 10n,
             expectedEncodedValue: '0x000a',
           },
           {
             valueType: 'uint24',
-            valueToEncode: 10,
+            valueToEncode: 10n,
             expectedEncodedValue: '0x00000a',
           },
           {
             valueType: 'uint32',
-            valueToEncode: 10,
+            valueToEncode: 10n,
             expectedEncodedValue: '0x0000000a',
           },
           {
             valueType: 'uint128',
-            valueToEncode: 10,
+            valueToEncode: 10n,
             expectedEncodedValue: '0x0000000000000000000000000000000a',
           },
           {
             valueType: 'uint256',
-            valueToEncode: 10,
+            valueToEncode: 10n,
             expectedEncodedValue:
               '0x000000000000000000000000000000000000000000000000000000000000000a',
           },

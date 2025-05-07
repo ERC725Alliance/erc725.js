@@ -22,13 +22,12 @@
   in accordance with implementation of smart contract interfaces of ERC725
 */
 
-import { encodeParameter, encodeParameters } from 'web3-eth-abi';
-
 import type { JsonRpc } from '../types/JsonRpc';
 import { Method } from '../types/Method';
 import { constructJSONRPC, decodeResult } from '../lib/provider-wrapper-utils';
 import { ProviderTypes } from '../types/provider';
 import { ERC725_VERSION, ERC725Y_INTERFACE_IDS } from '../constants/constants';
+import { encodeAbiParameters, Hex } from 'viem';
 
 interface GetDataReturn {
   key: string;
@@ -135,9 +134,9 @@ export class ProviderWrapper {
     signature: string,
   ): Promise<string> {
     if (this.type === ProviderTypes.ETHEREUM) {
-      const encodedParams = encodeParameters(
-        ['bytes32', 'bytes'],
-        [hash, signature],
+      const encodedParams = encodeAbiParameters(
+        [{ type: 'bytes32' }, { type: 'bytes' }],
+        [hash as Hex, signature as Hex],
       );
 
       const result = await this.callContract(
@@ -160,9 +159,9 @@ export class ProviderWrapper {
       ) as unknown as string;
     }
 
-    const encodedParams = encodeParameters(
-      ['bytes32', 'bytes'],
-      [hash, signature],
+    const encodedParams = encodeAbiParameters(
+      [{ type: 'bytes32' }, { type: 'bytes' }],
+      [hash as Hex, signature as Hex],
     );
 
     const results = await this.callContract([
@@ -229,7 +228,7 @@ export class ProviderWrapper {
           address,
           method,
           undefined, // this.gas,
-          encodeParameter('bytes32[]', keyHashes),
+          encodeAbiParameters([{ type: 'bytes32[]' }], [keyHashes as Hex[]]),
         ),
       );
 
@@ -246,7 +245,7 @@ export class ProviderWrapper {
         address,
         method,
         undefined, // this.gas,
-        encodeParameter('bytes32[]', keyHashes),
+        encodeAbiParameters([{ type: 'bytes32[]' }], [keyHashes as Hex[]]),
       ),
     ];
 

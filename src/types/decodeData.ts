@@ -3,8 +3,8 @@ import type { EncodeDataType, URLDataWithHash } from './encodeData/JSONURL';
 
 export interface DataInput {
   keyName: string; // can be the name or the hex/hash
-  value;
-  dynamicKeyParts?: string | string[] | number;
+  value: unknown;
+  dynamicKeyParts?: string | string[] | number | bigint;
   totalArrayLength?: number;
   startingIndex?: number;
 }
@@ -17,7 +17,7 @@ export interface DecodeDataInput extends DataInput {
   value: string | { key: string; value: string | null }[];
 }
 
-export type Data = string | number | boolean | null;
+export type Data = string | bigint | boolean | null;
 
 export interface DecodeDataOutput {
   value: Data | Data[] | URLDataWithHash | null;
