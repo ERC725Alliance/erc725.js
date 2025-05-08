@@ -127,7 +127,7 @@ function initializeProvider(providerOrRpcUrl, gasInfo) {
   if (typeof providerOrRpcUrl === 'string') {
     const client = createPublicClient({
       chain: lukso,
-      transport: http('https://rpc.testnet.lukso.network'),
+      transport: http(providerOrRpcUrl),
     });
     return new ProviderWrapper(client, gasInfo);
   }
