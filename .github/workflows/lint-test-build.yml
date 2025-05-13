@@ -6,7 +6,6 @@ name: Lint, Build and Test
 on:
   pull_request:
     branches:
-      - 'develop'
       - 'main'
 
 jobs:
@@ -47,7 +46,7 @@ jobs:
       - name: Test
         if: matrix.node-version != '22.x'
         run: npm run test
-    
+
       - name: 📊 Code Coverage
         uses: ArtiomTr/jest-coverage-report-action@v2
         if: always() && matrix.node-version == '22.x'
