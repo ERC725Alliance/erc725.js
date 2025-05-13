@@ -49,6 +49,7 @@ import {
 import type { ERC725JSONSchemaValueType } from '../types/ERC725JSONSchema';
 import {
   bytesToHex,
+  concat,
   decodeAbiParameters,
   encodeAbiParameters,
   encodePacked,
@@ -59,11 +60,11 @@ import {
   hexToString,
   isAddress,
   isHex,
-  keccak256,
   numberToHex,
   pad,
+  size,
+  slice,
   stringToHex,
-  toBytes,
   toHex,
 } from 'viem';
 
@@ -78,25 +79,18 @@ export const encodeDataSourceWithHash = (
   const verificationMethod = getVerificationMethod(
     verification?.method || NONE_VERIFICATION_METHOD,
   );
-  return [
-    '0x0000',
-    (verificationMethod
-      ? pad(keccak256(toBytes(verificationMethod.name)).slice(0, 10) as Hex, {
-          size: 4,
-          dir: 'left',
-        })
-      : '0x00000000'
-    ).slice(2),
-    (verification?.data
-      ? pad(toHex(verification.data.slice(2).length / 2), {
+  return concat([
+    '0x0000' as Hex,
+    (verificationMethod?.sig as Hex) ?? ('0x00000000' as Hex),
+    verification?.data
+      ? pad(toHex(size(verification.data as Hex)), {
           size: 2,
           dir: 'left',
         })
-      : '0000'
-    ).slice(2),
-    (verification?.data ?? '0x').slice(2),
-    toHex(dataSource).slice(2),
-  ].join('');
+      : ('0x0000' as Hex),
+    (verification?.data as Hex) ?? '0x',
+    toHex(dataSource),
+  ]);
 };
 
 export const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
@@ -164,8 +158,8 @@ export const decodeDataSourceWithHash = (value: string): URLDataWithHash => {
     // ignore
   }
 
-  const dataHash = `0x${encodedData.slice(0, 64)}`; // Get jsonHash 32 bytes
-  const dataSource = hexToString(`0x${encodedData.slice(64)}`); // Get remainder as URI
+  const dataHash = slice(`0x${encodedData}`, 0, 32); // Get jsonHash 32 bytes
+  const dataSource = hexToString(slice(`0x${encodedData}`, 32)); // Get remainder as URI
 
   return {
     verification: {
@@ -298,7 +292,7 @@ const encodeCompactBytesArray = (values: string[]): string => {
         size: 2,
         dir: 'left',
       });
-      return acc + hexNumber.slice(2) + value.slice(2);
+      return concat([acc as Hex, hexNumber, value as Hex]);
     }, '0x');
 
   return compactBytesArray;
@@ -364,7 +358,7 @@ const encodeBytesNCompactBytesArray = (
   numberOfBytes: number,
 ): string => {
   values.forEach((value, index) => {
-    if (value.slice(2).length > numberOfBytes * 2)
+    if (size(value as Hex) > numberOfBytes)
       throw new Error(
         `Hex bytes${numberOfBytes} value at index ${index} does not fit in ${numberOfBytes} bytes`,
       );
@@ -387,7 +381,7 @@ const decodeBytesNCompactBytesArray = (
 ): string[] => {
   const bytesValues = decodeCompactBytesArray(compactBytesArray, consumed);
   bytesValues.forEach((bytesValue, index) => {
-    if (bytesValue.slice(2).length > numberOfBytes * 2)
+    if (size(bytesValue as Hex) > numberOfBytes)
       throw new Error(
         `Hex bytes${numberOfBytes} value at index ${index} does not fit in ${numberOfBytes} bytes`,
       );
@@ -553,7 +547,7 @@ function _decodeParameter(
         const out = type.endsWith(']')
           ? encodeAbiParameters([{ type: actualType }], [result] as never)
           : encodePacked([type], [result]);
-        const length = out.slice(2).length / 2;
+        const length = size(out);
         consumed.bytes += length;
       }
       return result;
@@ -606,7 +600,7 @@ const valueTypeEncodingMap = (
         isHex(value) ? (value.toLowerCase() as Hex) : toHex(value),
       decode: (value: string, consumed?: ConsumedPtr) => {
         if (consumed) {
-          const length = value.slice(2).length / 2;
+          const length = size(value as Hex);
           consumed.bytes += length;
         }
         return value;
@@ -623,7 +617,7 @@ const valueTypeEncodingMap = (
           if (consumed) {
             consumed.bytes += 1;
           }
-          return value.slice(0, 4) === '0x01';
+          return slice(value as Hex, 0, 1) === '0x01';
         },
       };
     case 'string':
@@ -638,7 +632,7 @@ const valueTypeEncodingMap = (
         },
         decode: (value: string, consumed?: ConsumedPtr) => {
           if (consumed) {
-            consumed.bytes += value.slice(2).length / 2;
+            consumed.bytes += size(value as Hex);
           }
           return hexToString(value as Hex);
         },
@@ -655,7 +649,7 @@ const valueTypeEncodingMap = (
           const bytesArray = hexToBytes(abiEncodedValue);
 
           // just keep the last 20 bytes, starting at index 12
-          return bytesToHex(bytesArray.slice(12));
+          return bytesToHex(slice(bytesArray, 12));
         },
         decode: (value: string, consumed?: ConsumedPtr) => {
           const out = _decodeParameter('address')(value, consumed);

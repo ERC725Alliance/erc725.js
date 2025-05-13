@@ -17,7 +17,7 @@
  * @date 2022
  */
 
-import { Hex, isAddress, isHex, stringToBytes, toBytes } from 'viem';
+import { Hex, isAddress, isHex, slice, stringToBytes, toBytes } from 'viem';
 import { keccak256, numberToHex, pad } from 'viem';
 
 import { encodeArrayKey, guessKeyTypeFromKeyName } from './utils';
@@ -61,7 +61,7 @@ export const encodeDynamicKeyPart = (
 
   switch (baseType) {
     case 'string':
-      return keccak256(stringToBytes(value)).slice(2, 2 + bytes * 2);
+      return slice(keccak256(stringToBytes(value)), 0, bytes).slice(2);
     case 'bool': {
       if (value !== 'true' && value !== 'false') {
         throw new Error(
@@ -88,7 +88,7 @@ export const encodeDynamicKeyPart = (
           `Wrong value: ${value} for dynamic key with type: <address>. Value is not an address.`,
         );
       }
-      return pad(value.slice(0, 2 + bytes * 2) as `0x${string}`, {
+      return pad(slice(value, 0, bytes) as `0x${string}`, {
         size: bytes,
         dir: 'left',
       })
@@ -133,7 +133,7 @@ export const encodeDynamicKeyPart = (
           `Wrong value: ${value} for dynamic key with type: $type. Value is too big.`,
         );
       }
-      return pad(value.slice(0, 2 + bytes * 2) as `0x${string}`, {
+      return pad(slice(value, 0, bytes), {
         size: bytes,
         dir: 'right',
       }).slice(2);
@@ -180,7 +180,7 @@ const encodeDynamicMapping = (name: string, dynamicKeyParts: string[]) => {
 
   const keyNameSplit = name.split(':'); // LSP5ReceivedAssetsMap:<address>
 
-  const encodedKey = keccak256(toBytes(keyNameSplit[0])).slice(0, 22);
+  const encodedKey = slice(keccak256(toBytes(keyNameSplit[0])), 0, 10);
 
   return `${encodedKey}0000${encodeDynamicKeyPart(
     keyNameSplit[1],
