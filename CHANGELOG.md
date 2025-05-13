@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.27.3](https://github.com/ERC725Alliance/erc725.js/compare/v0.27.2...v0.27.3) (2025-05-13)
+
+
+### Bug Fixes
+
+* [CompactBytesArray] type of arrays only work at the end of a tuple ([e2b7415](https://github.com/ERC725Alliance/erc725.js/commit/e2b74153603cc9d01f94b27ed358590f088b86a1))
+* Add array support inside of tuples ([e2b7415](https://github.com/ERC725Alliance/erc725.js/commit/e2b74153603cc9d01f94b27ed358590f088b86a1))
+* Add test case to cover https://github.com/ERC725Alliance/erc725.js/issues/499 ([e2b7415](https://github.com/ERC725Alliance/erc725.js/commit/e2b74153603cc9d01f94b27ed358590f088b86a1))
+* Add testing using legacy RPC provider supporting send(payload, callback) in addition to supporting async send(payload). We don't currently use async send(method, params) at all. ([e2b7415](https://github.com/ERC725Alliance/erc725.js/commit/e2b74153603cc9d01f94b27ed358590f088b86a1))
+* Allow external spec for fetch/convert ([e2b7415](https://github.com/ERC725Alliance/erc725.js/commit/e2b74153603cc9d01f94b27ed358590f088b86a1))
+* Apply suggestions from review ([6847ac6](https://github.com/ERC725Alliance/erc725.js/commit/6847ac6042f7330d2ac14d6dea270fac9eb8575f))
+* Capture final coverage for the last commit ([79b89a4](https://github.com/ERC725Alliance/erc725.js/commit/79b89a4c57e8c3e106ee407c850bbf158898044f))
+* Change to version 20 and 22 of node. ([e2b7415](https://github.com/ERC725Alliance/erc725.js/commit/e2b74153603cc9d01f94b27ed358590f088b86a1))
+* Cleanup old eslint and mov msw to be properly in devDeps. Also do some upgrades and npm audit checks. ([e2b7415](https://github.com/ERC725Alliance/erc725.js/commit/e2b74153603cc9d01f94b27ed358590f088b86a1))
+* Disable codecov badge since we don't currently have it. ([e2b7415](https://github.com/ERC725Alliance/erc725.js/commit/e2b74153603cc9d01f94b27ed358590f088b86a1))
+* Found some more testscripts missing and unexpected schema concat (provided needs to be first.) ([e2b7415](https://github.com/ERC725Alliance/erc725.js/commit/e2b74153603cc9d01f94b27ed358590f088b86a1))
+* Improve some coverage ([e2b7415](https://github.com/ERC725Alliance/erc725.js/commit/e2b74153603cc9d01f94b27ed358590f088b86a1))
+* Make all test scripts pass, use real msw, test ethers and viem. ([e2b7415](https://github.com/ERC725Alliance/erc725.js/commit/e2b74153603cc9d01f94b27ed358590f088b86a1))
+* Remove jest and @types/jest from package.json (not needed) ([e1426d8](https://github.com/ERC725Alliance/erc725.js/commit/e1426d8755805723e57052607926e3d336149fd0))
+* Repair test script to remove build dependency ([b21997b](https://github.com/ERC725Alliance/erc725.js/commit/b21997be2bd07714ca208bbe40cf580028078124))
+* Repair vulnerabilities ([e2b7415](https://github.com/ERC725Alliance/erc725.js/commit/e2b74153603cc9d01f94b27ed358590f088b86a1))
+
 ## [0.27.2](https://github.com/ERC725Alliance/erc725.js/compare/v0.27.1...v0.27.2) (2024-10-23)
 
 
