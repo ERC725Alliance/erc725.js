@@ -1,6 +1,6 @@
 // As Defined in: https://github.com/lukso-network/LIPs/blob/master/LSPs/LSP-2-ERC725YJSONSchema.md
 
-import { DynamicKeyParts } from './dynamicKeys';
+import type { DynamicKeyParts } from './dynamicKeys';
 
 export type ERC725JSONSchemaKeyType =
   | 'Singleton'

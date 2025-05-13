@@ -1,4 +1,4 @@
-import { SUPPORTED_VERIFICATION_METHODS } from '../../constants/constants';
+import type { SUPPORTED_VERIFICATION_METHODS } from '../../constants/constants';
 
 export interface KeyValuePair {
   key: string;

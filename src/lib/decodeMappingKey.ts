@@ -21,8 +21,8 @@
 import { padLeft, padRight } from 'web3-utils';
 import { isHex } from 'web3-validator';
 import { decodeValueType } from './encoder';
-import { ERC725JSONSchema } from '../types/ERC725JSONSchema';
-import { DynamicKeyPart } from '../types/dynamicKeys';
+import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
+import type { DynamicKeyPart } from '../types/dynamicKeys';
 
 function isDynamicKeyPart(keyPartName: string): boolean {
   return (
