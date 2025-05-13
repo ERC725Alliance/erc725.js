@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.28.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.27.3...v0.28.0) (2025-05-13)
+
+
+### Features
+
+* Upgrade to viem and bigint. ([6a964ac](https://github.com/ERC725Alliance/erc725.js/commit/6a964acb20d2a655d95ac7737f0e708f5294f217))
+
+
+### Bug Fixes
+
+* Cleanup Hash typedef. ([0a4ec97](https://github.com/ERC725Alliance/erc725.js/commit/0a4ec97caaf21873ea1f62bfa655fd816381e027))
+* Cleanup to use size, slice and concat instead of messing around with chars. ([a17a45f](https://github.com/ERC725Alliance/erc725.js/commit/a17a45f1317b2f6c08819b31b821d9d4bbece88d))
+* More cleanup ([5d19c18](https://github.com/ERC725Alliance/erc725.js/commit/5d19c18f9d80a3a2a2b0b6455414d45ef91d904c))
+* recent NPM upgrades ([e8300c1](https://github.com/ERC725Alliance/erc725.js/commit/e8300c189c7c395b23191a6e7512897fce1ac64d))
+* Repair mistaken hardcoded RPC URL thanks [@doubleppereira](https://github.com/doubleppereira) ([5b370d8](https://github.com/ERC725Alliance/erc725.js/commit/5b370d8866400b6cf80dea40da7fbdbac8560d01))
+* Since pad defaults to dir: 'left' don't pass dir if it's left ([adc487a](https://github.com/ERC725Alliance/erc725.js/commit/adc487ad3483ba81321146fcffad0dfc445553d5))
+
 ## [0.27.3](https://github.com/ERC725Alliance/erc725.js/compare/v0.27.2...v0.27.3) (2025-05-13)
 
 
