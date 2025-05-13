@@ -8,12 +8,13 @@ on:
     branches:
       - 'main'
 
+permissions:
+  checks: write
+  pull-requests: write
+  contents: write
+
 jobs:
   build:
-    permissions:
-      checks: write
-      pull-requests: write
-      contents: write
     runs-on: ubuntu-latest
 
     strategy:
@@ -56,3 +57,29 @@ jobs:
           base-coverage-file: report-base.json
           skip-step: install
           annotations: 'failed-tests'
+
+  coverage:
+    if: github.event.pull_request.merged == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js v22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Push coverage changes
+        run: npm run test:capture
+
+      - uses: EndBug/add-and-commit@v9
+        with:
+          default_author: github_actions
+          message: 'chore(auto-update): update code coverage base report'
+          add: './report-base.json'
+          push: true
