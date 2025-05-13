@@ -171,10 +171,7 @@ export function encodeKeyValue(
  * @return The raw bytes key for the array element
  */
 export function encodeArrayKey(key: string, index: number) {
-  return (
-    key.slice(0, 34) +
-    pad(toHex(index), { size: 16, dir: 'left' }).replace('0x', '')
-  );
+  return key.slice(0, 34) + pad(toHex(index), { size: 16 }).replace('0x', '');
 }
 
 /**
@@ -578,7 +575,7 @@ export function hashData(
 ): string {
   return (
     getVerificationMethod(nameOrSig)?.method(data) ||
-    pad(toHex(0), { size: 32, dir: 'left' })
+    pad(toHex(0), { size: 32 })
   );
 }
 
@@ -693,7 +690,7 @@ export function countNumberOfBytes(data: Hex) {
 }
 
 export function countSignificantBits(data: Hex) {
-  const bytes = hexToBytes(data as Hex);
+  const bytes = hexToBytes(data);
   for (let i = 0; i < bytes.length; i++) {
     if (bytes[i] !== 0) {
       return (

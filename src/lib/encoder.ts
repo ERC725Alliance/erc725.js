@@ -85,7 +85,6 @@ export const encodeDataSourceWithHash = (
     verification?.data
       ? pad(toHex(size(verification.data as Hex)), {
           size: 2,
-          dir: 'left',
         })
       : ('0x0000' as Hex),
     (verification?.data as Hex) ?? '0x',
@@ -221,7 +220,6 @@ const encodeToBytesN = (
     // to symmetrically encode / decode
     valueToEncode = pad(numberToHex(value), {
       size: numberOfBytesInType,
-      dir: 'left',
     });
   } else {
     valueToEncode = value;
@@ -231,7 +229,6 @@ const encodeToBytesN = (
   if (typeof value === 'number' || typeof value === 'bigint') {
     valueToEncode = pad(valueToEncode, {
       size: numberOfBytesInType,
-      dir: 'left',
     });
   } else {
     valueToEncode = pad(valueToEncode, {
@@ -290,7 +287,6 @@ const encodeCompactBytesArray = (values: string[]): string => {
       const numberOfBytes = value.slice(2).length / 2;
       const hexNumber = pad(numberToHex(numberOfBytes), {
         size: 2,
-        dir: 'left',
       });
       return concat([acc as Hex, hexNumber, value as Hex]);
     }, '0x');
@@ -425,7 +421,6 @@ const encodeUintNCompactBytesArray = (
   const hexValues: string[] = values.map((value, index) => {
     const hexNumber = pad(numberToHex(value), {
       size: numberOfBytes,
-      dir: 'left',
     });
     if (hexNumber.slice(2).length > numberOfBytes * 2)
       throw new Error(
@@ -888,7 +883,7 @@ export const valueContentEncodingMap = (
             throw new Error(error);
           }
 
-          return pad(numberToHex(parsedValue), { size: 32, dir: 'left' });
+          return pad(numberToHex(parsedValue), { size: 32 });
         },
         decode: (value) => BigInt(value),
       };

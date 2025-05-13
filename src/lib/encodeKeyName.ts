@@ -71,7 +71,7 @@ export const encodeDynamicKeyPart = (
       return pad(
         // In theory passing in 0x1 should also work
         value === 'true' || Number(value) === 1 ? '0x01' : '0x00',
-        { size: bytes, dir: 'left' },
+        { size: bytes },
       ).slice(2);
     }
     case 'address': {
@@ -90,7 +90,6 @@ export const encodeDynamicKeyPart = (
       }
       return pad(slice(value, 0, bytes) as `0x${string}`, {
         size: bytes,
-        dir: 'left',
       })
         .slice(2)
         .toLowerCase(); // keys should not contain upper case chars (i.e. original checksummed stuff)
@@ -114,7 +113,7 @@ export const encodeDynamicKeyPart = (
       } else {
         hex = `0x${hex}`;
       }
-      return pad(hex as `0x${string}`, { size: bytes, dir: 'left' }).slice(2);
+      return pad(hex as `0x${string}`, { size: bytes }).slice(2);
     }
     case 'int':
       // TODO:

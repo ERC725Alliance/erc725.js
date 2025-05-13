@@ -58,7 +58,6 @@ function decodeKeyPart(
     // this is required if the 2nd word is an address in a MappingWithGrouping
     const leftPaddedAddress = pad(`0x${encodedKeyPart}`, {
       size: 20,
-      dir: 'left',
     });
 
     decodedKey = decodeValueType(type, leftPaddedAddress);
