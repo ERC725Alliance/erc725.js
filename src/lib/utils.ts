@@ -52,7 +52,16 @@ import type { EncodeDataInput } from '../types/decodeData';
 import type { GetDataDynamicKey } from '../types/GetData';
 import { isValidTuple } from './decodeData';
 import type { ERC725Options } from '../types/Config';
-import { Hex, hexToBytes, isAddress, isHex, pad, toHex } from 'viem';
+import {
+  concat,
+  Hex,
+  hexToBytes,
+  isAddress,
+  isHex,
+  pad,
+  slice,
+  toHex,
+} from 'viem';
 
 /**
  *
@@ -171,7 +180,7 @@ export function encodeKeyValue(
  * @return The raw bytes key for the array element
  */
 export function encodeArrayKey(key: string, index: number) {
-  return key.slice(0, 34) + pad(toHex(index), { size: 16 }).replace('0x', '');
+  return concat([slice(key as Hex, 0, 16), pad(toHex(index), { size: 16 })]);
 }
 
 /**
