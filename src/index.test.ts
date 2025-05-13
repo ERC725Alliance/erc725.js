@@ -33,6 +33,7 @@ import ERC725, {
   encodeKeyName,
   encodePermissions,
   getSchema,
+  mapPermission,
   supportsInterface,
 } from '.';
 import {
@@ -58,7 +59,6 @@ import { after } from 'mocha';
 import { getDefaultProvider } from 'ethers';
 import { createPublicClient, http } from 'viem';
 import { luksoTestnet } from 'viem/chains';
-import { mapPermission } from '../build/main/src';
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
 
