@@ -18,7 +18,6 @@
  */
 
 import assert from 'assert';
-import { keccak256 } from 'web3-utils';
 
 import {
   encodeDynamicKeyPart,
@@ -26,6 +25,7 @@ import {
   generateDynamicKeyName,
   isDynamicKeyName,
 } from './encodeKeyName';
+import { keccak256, toBytes } from 'viem';
 
 describe('encodeKeyName', () => {
   const testCases: {
@@ -35,7 +35,7 @@ describe('encodeKeyName', () => {
   }[] = [
     {
       keyName: 'MyKeyName',
-      expectedKey: keccak256('MyKeyName'),
+      expectedKey: keccak256(toBytes('MyKeyName')),
     },
     {
       keyName: 'LSP12IssuedAssets[]',

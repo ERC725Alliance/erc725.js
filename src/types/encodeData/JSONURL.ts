@@ -33,7 +33,8 @@ export type EncodeDataType =
   | URLDataToEncode
   | boolean
   | number
-  | (string | number)[]; // for tuples such as `(bytes4,uint128)`
+  | bigint
+  | (string | number | bigint)[]; // for tuples such as `(bytes4,uint128)`
 
 export interface EncodeDataReturn {
   keys: string[];

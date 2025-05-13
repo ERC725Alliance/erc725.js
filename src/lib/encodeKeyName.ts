@@ -17,8 +17,8 @@
  * @date 2022
  */
 
-import { isAddress, isHex } from 'web3-validator';
-import { keccak256, leftPad, numberToHex, padLeft, padRight } from 'web3-utils';
+import { Hex, isAddress, isHex, slice, stringToBytes, toBytes } from 'viem';
+import { keccak256, numberToHex, pad } from 'viem';
 
 import { encodeArrayKey, guessKeyTypeFromKeyName } from './utils';
 import type { DynamicKeyParts } from '../types/dynamicKeys';
@@ -61,17 +61,17 @@ export const encodeDynamicKeyPart = (
 
   switch (baseType) {
     case 'string':
-      return keccak256(value).slice(2, 2 + bytes * 2);
+      return slice(keccak256(stringToBytes(value)), 0, bytes).slice(2);
     case 'bool': {
       if (value !== 'true' && value !== 'false') {
         throw new Error(
           `Wrong value: ${value} for dynamic key with type: <bool>. Expected "true" or "false".`,
         );
       }
-      return leftPad(
+      return pad(
         // In theory passing in 0x1 should also work
-        value === 'true' || Number(value) === 1 ? 1 : 0,
-        bytes * 2,
+        value === 'true' || Number(value) === 1 ? '0x01' : '0x00',
+        { size: bytes },
       ).slice(2);
     }
     case 'address': {
@@ -88,7 +88,9 @@ export const encodeDynamicKeyPart = (
           `Wrong value: ${value} for dynamic key with type: <address>. Value is not an address.`,
         );
       }
-      return padLeft(value.slice(0, 2 + bytes * 2), bytes * 2)
+      return pad(slice(value, 0, bytes) as `0x${string}`, {
+        size: bytes,
+      })
         .slice(2)
         .toLowerCase(); // keys should not contain upper case chars (i.e. original checksummed stuff)
     }
@@ -102,7 +104,7 @@ export const encodeDynamicKeyPart = (
       // NOTE: we could verify if the number given is not too big for the given size.
       // e.g.: uint8 max value is 255, uint16 is 65535...
 
-      let hex = numberToHex(value).slice(2);
+      let hex = numberToHex(BigInt(value)).slice(2);
       if (hex.length > size / 4) {
         throw new Error(`Value: ${value} is too big for uint${size}.`);
       }
@@ -111,7 +113,7 @@ export const encodeDynamicKeyPart = (
       } else {
         hex = `0x${hex}`;
       }
-      return padLeft(hex, bytes * 2).slice(2);
+      return pad(hex as `0x${string}`, { size: bytes }).slice(2);
     }
     case 'int':
       // TODO:
@@ -130,7 +132,10 @@ export const encodeDynamicKeyPart = (
           `Wrong value: ${value} for dynamic key with type: $type. Value is too big.`,
         );
       }
-      return padRight(value.slice(0, 2 + bytes * 2), bytes * 2).slice(2);
+      return pad(slice(value, 0, bytes), {
+        size: bytes,
+        dir: 'right',
+      }).slice(2);
     }
     default:
       throw new Error(`Dynamic key: ${type} is not supported`);
@@ -174,7 +179,7 @@ const encodeDynamicMapping = (name: string, dynamicKeyParts: string[]) => {
 
   const keyNameSplit = name.split(':'); // LSP5ReceivedAssetsMap:<address>
 
-  const encodedKey = keccak256(keyNameSplit[0]).slice(0, 22);
+  const encodedKey = slice(keccak256(toBytes(keyNameSplit[0])), 0, 10);
 
   return `${encodedKey}0000${encodeDynamicKeyPart(
     keyNameSplit[1],
@@ -212,20 +217,26 @@ const encodeDynamicMappingWithGrouping = (
     );
   }
 
-  const firstPart = keccak256(keyNameSplit[0]).slice(0, 14);
+  const firstPart = keccak256(toBytes(keyNameSplit[0])).slice(0, 14);
 
   let secondPart = '';
   if (keyNameSplit[1].startsWith('0x')) {
-    secondPart = padRight(keyNameSplit[1].slice(0, 2 + 4 * 2), 4 * 2).slice(2);
+    secondPart = pad(keyNameSplit[1].slice(0, 2 + 4 * 2) as Hex, {
+      size: 4,
+      dir: 'right',
+    }).slice(2);
   } else if (isDynamicKeyName(keyNameSplit[1])) {
     secondPart = encodeDynamicKeyPart(keyNameSplit[1], dynamicKeyParts[0], 4);
   } else {
-    secondPart = keccak256(keyNameSplit[1]).slice(2, 2 + 4 * 2);
+    secondPart = keccak256(keyNameSplit[1] as Hex).slice(2, 2 + 4 * 2);
   }
 
   let lastPart = '';
   if (keyNameSplit[2].startsWith('0x')) {
-    lastPart = padRight(keyNameSplit[2].slice(0, 2 + 20 * 2), 20 * 2).slice(2);
+    lastPart = pad(keyNameSplit[2].slice(0, 2 + 20 * 2) as Hex, {
+      size: 20,
+      dir: 'right',
+    }).slice(2);
   } else if (isDynamicKeyName(keyNameSplit[2])) {
     lastPart = encodeDynamicKeyPart(
       keyNameSplit[2],
@@ -233,7 +244,7 @@ const encodeDynamicMappingWithGrouping = (
       20,
     );
   } else {
-    lastPart = keccak256(keyNameSplit[2]).slice(2, 2 + 20 * 2);
+    lastPart = keccak256(keyNameSplit[2] as Hex).slice(2, 2 + 20 * 2);
   }
 
   return `${firstPart}${secondPart}0000${lastPart}`;
@@ -308,15 +319,15 @@ export function encodeKeyName(name: string, dynamicKeyParts?: DynamicKeyParts) {
     case 'Array': // Warning: this can not correctly encode subsequent keys of array, only the initial Array key will work
       // encode for array index
       if (dynamicKeyParts && typeof dynamicKeyParts === 'number') {
-        return encodeArrayKey(keccak256(name), dynamicKeyParts);
+        return encodeArrayKey(keccak256(toBytes(name)), dynamicKeyParts);
       }
 
       // encode for array length
-      return keccak256(name);
+      return keccak256(toBytes(name));
     case 'Singleton':
-      return keccak256(name);
+      return keccak256(toBytes(name));
     default:
-      return keccak256(name);
+      return keccak256(toBytes(name));
   }
 }
 

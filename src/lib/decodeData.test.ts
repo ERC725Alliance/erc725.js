@@ -206,7 +206,7 @@ describe('decodeData', () => {
       [schema],
     );
 
-    expect(decodedData.value).to.eql(['0x11223344', 12]);
+    expect(decodedData.value).to.eql(['0x11223344', 12n]);
   });
 
   it('parses type Array correctly', () => {
@@ -302,7 +302,7 @@ describe('decodeData', () => {
     );
 
     expect(decodedData.name).to.eql('LSP12IssuedAssets[]');
-    expect(decodedData.value).to.eql(3);
+    expect(decodedData.value).to.eql(3n);
   });
 
   it('parses type Array correctly, return empty array when value is 0x', () => {
@@ -367,7 +367,7 @@ describe('tuple', () => {
         valueContent: '(Bytes4,Number)',
         valueType: '(bytes4,bytes8)',
         encodedValue: '0xdeadbeaf000000000000000c',
-        decodedValue: ['0xdeadbeaf', 12],
+        decodedValue: ['0xdeadbeaf', 12n],
       },
     ]; // TODO: add more cases? Address, etc.
 
@@ -390,7 +390,7 @@ describe('tuple', () => {
           valueType: '(bytes4,bytes8)',
           encodedValue:
             '0xdeadbeaf000000000000000c0000000000000000000000000000000000000000',
-          decodedValue: ['0xdeadbeaf', 12],
+          decodedValue: ['0xdeadbeaf', 12n],
         },
       ]; // TODO: add more cases? Address, etc.
 
@@ -416,7 +416,7 @@ describe('tuple', () => {
             '0xdeadbeaf000000000000000c0020123456781234567812345678123456781234567812345678123456781234567800202345678123456781234567812345678123456781234567812345678123456789',
           decodedValue: [
             '0xdeadbeaf',
-            12,
+            12n,
             [
               '0x1234567812345678123456781234567812345678123456781234567812345678',
               '0x2345678123456781234567812345678123456781234567812345678123456789',

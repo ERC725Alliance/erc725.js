@@ -19,7 +19,6 @@
  * @author Callum Grindle <@CallumGrindle>
  * @date 2023
  */
-import { isHexStrict } from 'web3-utils';
 import {
   COMPACT_BYTES_ARRAY_STRING,
   COMPACT_BYTES_ARRAY_STRING_AT_END,
@@ -36,6 +35,7 @@ import { valueContentEncodingMap, decodeValueType } from './encoder';
 import { getSchemaElement } from './getSchemaElement';
 import { countNumberOfBytes, decodeKeyValue, encodeArrayKey } from './utils';
 import type { ConsumedPtr } from '../types';
+import { Hex, isHex } from 'viem';
 
 const tupleValueTypesRegex = /bytes(\d+)/;
 const valueContentsBytesRegex = /Bytes(\d+)/;
@@ -114,7 +114,7 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
       );
     }
 
-    if (isHexStrict(valueContentParts[i])) {
+    if (isHex(valueContentParts[i], { strict: true })) {
       // check if length of a hex literal in valueContent (e.g: 0x122334455)
       // is compatible with the valueType (e.g: bytes4)
       const hexLiteralLength = valueContentParts[i].length - 2;
@@ -182,7 +182,10 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
       }
 
       // Decode as a Number when when the encoded value is to set the Array length only
-      if (typeof value === 'string' && countNumberOfBytes(value) === 16) {
+      if (
+        typeof value === 'string' &&
+        countNumberOfBytes(value as Hex) === 16
+      ) {
         return decodeKeyValue('Number', 'uint128+', value, schema.name) || 0;
       }
 

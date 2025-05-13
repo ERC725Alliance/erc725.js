@@ -18,8 +18,7 @@
  * @date 2022
  */
 
-import { padLeft, padRight } from 'web3-utils';
-import { isHex } from 'web3-validator';
+import { pad, isHex } from 'viem';
 import { decodeValueType } from './encoder';
 import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import type { DynamicKeyPart } from '../types/dynamicKeys';
@@ -50,14 +49,16 @@ function decodeKeyPart(
   } else if (type.includes('uint'))
     decodedKey = Number.parseInt(encodedKeyPart, 16);
   else if (type.includes('bytes')) {
-    const charLength = Number.parseInt(type.replace('bytes', ''), 10) * 2;
-    decodedKey = padRight(
-      `0x${encodedKeyPart.slice(0, charLength)}`,
-      charLength,
-    );
+    const byteLength = Number.parseInt(type.replace('bytes', ''), 10);
+    decodedKey = pad(`0x${encodedKeyPart.slice(0, byteLength * 2)}`, {
+      size: byteLength,
+      dir: 'right',
+    });
   } else if (type === 'address') {
     // this is required if the 2nd word is an address in a MappingWithGrouping
-    const leftPaddedAddress = padLeft(`0x${encodedKeyPart}`, 40);
+    const leftPaddedAddress = pad(`0x${encodedKeyPart}`, {
+      size: 20,
+    });
 
     decodedKey = decodeValueType(type, leftPaddedAddress);
   } else {
@@ -85,7 +86,7 @@ export function decodeMappingKey(
     throw new Error(
       'Invalid encodedKey length, key must be 32 bytes long hexadecimal value',
     );
-  if (!isHex(hashedKey.slice(2)))
+  if (!isHex(hashedKey))
     throw new Error('Invalid encodedKey, must be a hexadecimal value');
 
   let keyParts: string[];

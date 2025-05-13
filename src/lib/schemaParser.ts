@@ -16,7 +16,7 @@
  * @author Hugo Masclet <@Hugoo>
  * @date 2022
  */
-import { keccak256 } from 'web3-utils';
+import { keccak256, slice, toBytes } from 'viem';
 import allSchemas from '../schemas';
 
 import type {
@@ -88,7 +88,9 @@ const fillDynamicKeyPart = (
 
     // if first 20 bytes of the hash of second word in schema match,
     // display the map part as plain word
-    if (keccak256(keyNameParts[1]).substring(0, 42) === `0x${secondWordHex}`) {
+    if (
+      slice(keccak256(toBytes(keyNameParts[1])), 0, 20) === `0x${secondWordHex}`
+    ) {
       dynamicPartName = keyNameParts[1];
     }
 

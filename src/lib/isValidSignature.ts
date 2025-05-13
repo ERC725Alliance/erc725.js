@@ -19,6 +19,7 @@
 
 import { keccak256 } from 'web3-utils';
 import type { ProviderWrapper } from '../provider/providerWrapper';
+import type { Hash } from 'viem';
 
 const MAGIC_VALUE = '0x1626ba7e';
 
@@ -37,13 +38,13 @@ function validateHash(hash) {
  * @returns {Promise<boolean>} Return true if the signature is valid (if the contract returns the magic value), false if not.
  */
 export const isValidSignature = async (
-  messageOrHash: string,
+  messageOrHash: Hash | string,
   signature: string,
   address: string,
   wrappedProvider: ProviderWrapper,
 ): Promise<boolean> => {
   const hash = validateHash(messageOrHash)
-    ? messageOrHash
+    ? (messageOrHash as Hash)
     : keccak256(
         `\x19Ethereum Signed Message:\n${messageOrHash.length}${messageOrHash}`,
       );

@@ -57,7 +57,7 @@ import { INTERFACE_IDS_0_12_0 } from './constants/interfaces';
 import { IPFS_GATEWAY, resetMocks, responseStore } from '../test/serverHelpers';
 import { after } from 'mocha';
 import { getDefaultProvider } from 'ethers';
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, Hex, http, slice } from 'viem';
 import { luksoTestnet } from 'viem/chains';
 
 const address = '0x0c03fba782b07bcf810deb3b7f0595024a444f4e';
@@ -751,7 +751,7 @@ describe('Running @erc725/erc725.js tests...', () => {
             name: 'LSP4CreatorsMap:<address>',
             dynamicName:
               'LSP4CreatorsMap:0x9139def55c73c12bcda9c44f12326686e3948634',
-            value: ['0x24871b3d', 0],
+            value: ['0x24871b3d', 0n],
           });
         });
       });
@@ -1322,32 +1322,32 @@ describe('Running @erc725/erc725.js tests...', () => {
         [
           {
             valueType: 'uint8',
-            valueToEncode: 10,
+            valueToEncode: 10n,
             expectedEncodedValue: '0x0a',
           },
           {
             valueType: 'uint16',
-            valueToEncode: 10,
+            valueToEncode: 10n,
             expectedEncodedValue: '0x000a',
           },
           {
             valueType: 'uint24',
-            valueToEncode: 10,
+            valueToEncode: 10n,
             expectedEncodedValue: '0x00000a',
           },
           {
             valueType: 'uint32',
-            valueToEncode: 10,
+            valueToEncode: 10n,
             expectedEncodedValue: '0x0000000a',
           },
           {
             valueType: 'uint128',
-            valueToEncode: 10,
+            valueToEncode: 10n,
             expectedEncodedValue: '0x0000000000000000000000000000000a',
           },
           {
             valueType: 'uint256',
-            valueToEncode: 10,
+            valueToEncode: 10n,
             expectedEncodedValue:
               '0x000000000000000000000000000000000000000000000000000000000000000a',
           },
@@ -1475,7 +1475,8 @@ describe('Running @erc725/erc725.js tests...', () => {
           it(`encodes all data values for keyType "Array" in: ${schemaElement.name}`, async () => {
             const data = schemaElement.expectedResult;
             const intendedResults = allGraphData.filter(
-              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
+              (e) =>
+                slice(e.key, 0, 16) === slice(schemaElement.key as Hex, 0, 16),
             );
             // handle '0x'....
             // intendedResults = intendedResults.filter(e => e !== '0x' && e.value !== '0x')
@@ -1485,7 +1486,8 @@ describe('Running @erc725/erc725.js tests...', () => {
 
           it(`decodes all data values for keyType "Array" in: ${schemaElement.name}`, async () => {
             const values = allGraphData.filter(
-              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
+              (e) =>
+                slice(e.key, 0, 16) === slice(schemaElement.key as Hex, 0, 16),
             );
             const intendedResults = schemaElement.expectedResult;
             const results = decodeKey(schemaElement, values);
@@ -1496,7 +1498,8 @@ describe('Running @erc725/erc725.js tests...', () => {
             const data = schemaElement.expectedResult;
 
             const keyValuePairs = allGraphData.filter(
-              (e) => e.key.slice(0, 34) === schemaElement.key.slice(0, 34),
+              (e) =>
+                slice(e.key, 0, 16) === slice(schemaElement.key as Hex, 0, 16),
             );
 
             const intendedResult: { keys: string[]; values: string[] } = {

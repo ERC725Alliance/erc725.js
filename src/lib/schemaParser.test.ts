@@ -16,6 +16,7 @@ import assert from 'assert';
 import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 
 import { getSchema } from './schemaParser';
+import { Hex, slice } from 'viem';
 
 describe('schemaParser getSchema', () => {
   describe('Singleton', () => {
@@ -141,7 +142,7 @@ describe('schemaParser getSchema', () => {
       const bytes32Value =
         '1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff';
       const name = 'SomeBytes32Mapping:<bytes32>';
-      const dynamicPart = bytes32Value.slice(0, 40);
+      const dynamicPart = slice(bytes32Value as Hex, 0, 20);
       const dynamicName = `SomeBytes32Mapping:0x${dynamicPart}`;
       const key = `0x0cfc51aec37c55a4d0b10000${dynamicPart}`;
 

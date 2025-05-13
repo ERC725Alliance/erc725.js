@@ -1,4 +1,4 @@
-import type { Address } from 'viem';
+import type { Address, Hex } from 'viem';
 import { encodeArrayKey } from '../src';
 import { mockJson, mockJson2, mockSchema } from './mockSchema';
 import { ERC725Y_INTERFACE_IDS } from '../src/constants/constants';
@@ -23,7 +23,7 @@ for (const schemaElement of mockSchema) {
       .slice(1)
       .entries()) {
       itemizedSchema.set(
-        encodeArrayKey(schemaElement.key, index) as `0x${string}`,
+        encodeArrayKey(schemaElement.key as Hex, index) as `0x${string}`,
         value as `0x${string}`,
       );
     }
