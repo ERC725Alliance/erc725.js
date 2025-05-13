@@ -115,7 +115,7 @@ export {
   mapPermission,
 } from './lib/permissions';
 export { getSchema } from './lib/schemaParser';
-import { createPublicClient, http, isAddress } from 'viem';
+import { createPublicClient, Hex, http, isAddress } from 'viem';
 import { lukso } from 'viem/chains';
 
 // PRIVATE FUNCTION
@@ -522,8 +522,8 @@ export class ERC725 {
    * @returns true if isValidSignature call on the contract returns the magic value. false otherwise
    */
   async isValidSignature(
-    messageOrHash: string,
-    signature: string,
+    messageOrHash: Hex | string,
+    signature: Hex,
   ): Promise<boolean> {
     if (!this.options.address || !isAddress(this.options.address)) {
       throw new Error('Missing ERC725 contract address.');
