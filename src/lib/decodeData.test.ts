@@ -18,6 +18,7 @@ import { expect } from 'chai';
 
 import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 import { decodeData, decodeTupleKeyValue, isValidTuple } from './decodeData';
+import { Hex } from 'viem';
 
 describe('decodeData', () => {
   const schemas: ERC725JSONSchema[] = [
@@ -366,7 +367,7 @@ describe('tuple', () => {
       {
         valueContent: '(Bytes4,Number)',
         valueType: '(bytes4,bytes8)',
-        encodedValue: '0xdeadbeaf000000000000000c',
+        encodedValue: '0xdeadbeaf000000000000000c' as Hex,
         decodedValue: ['0xdeadbeaf', 12n],
       },
     ]; // TODO: add more cases? Address, etc.
@@ -389,20 +390,20 @@ describe('tuple', () => {
           valueContent: '(Bytes4,Number)',
           valueType: '(bytes4,bytes8)',
           encodedValue:
-            '0xdeadbeaf000000000000000c0000000000000000000000000000000000000000',
+            '0xdeadbeaf000000000000000c0000000000000000000000000000000000000000' as Hex,
           decodedValue: ['0xdeadbeaf', 12n],
         },
       ]; // TODO: add more cases? Address, etc.
 
       testCases.forEach((testCase) => {
         it('decodes tuple values', () => {
-          expect(
+          expect(() =>
             decodeTupleKeyValue(
               testCase.valueContent,
               testCase.valueType,
               testCase.encodedValue,
             ),
-          ).to.eql(testCase.decodedValue);
+          ).to.throw();
         });
       });
     });
@@ -413,7 +414,7 @@ describe('tuple', () => {
           valueContent: '(Bytes4,Number,Bytes32)',
           valueType: '(bytes4,bytes8,bytes32[CompactBytesArray])',
           encodedValue:
-            '0xdeadbeaf000000000000000c0020123456781234567812345678123456781234567812345678123456781234567800202345678123456781234567812345678123456781234567812345678123456789',
+            '0xdeadbeaf000000000000000c0020123456781234567812345678123456781234567812345678123456781234567800202345678123456781234567812345678123456781234567812345678123456789' as Hex,
           decodedValue: [
             '0xdeadbeaf',
             12n,

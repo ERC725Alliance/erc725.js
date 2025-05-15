@@ -19,6 +19,7 @@ import assert from 'node:assert';
 import { IPFS_GATEWAY, responseStore } from '../../test/serverHelpers';
 
 import type {
+  DynamicNameSchema,
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
 } from '../types/ERC725JSONSchema';
@@ -59,7 +60,6 @@ describe('utils', () => {
           keyType: 'Array',
           valueContent: 'Address',
           valueType: 'address',
-          dynamicName: 'NonExistingArray[]',
         },
         [{}],
       ),
@@ -650,7 +650,7 @@ describe('utils', () => {
   });
 
   describe('Invalid valueType', () => {
-    const schema: ERC725JSONSchema = {
+    const schema: DynamicNameSchema = {
       name: 'TestStringWithBytes32ValueType',
       dynamicName: 'TestStringWithBytes32ValueType',
       key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',
@@ -667,7 +667,7 @@ describe('utils', () => {
   });
 
   describe('Invalid valueContent in decodeValueContent', () => {
-    const schema: ERC725JSONSchema = {
+    const schema: DynamicNameSchema = {
       name: 'TestStringWithBytes32ValueType',
       dynamicName: 'TestStringWithBytes32ValueType',
       key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',
@@ -684,7 +684,7 @@ describe('utils', () => {
   });
 
   describe('Invalid valueType', () => {
-    const schema: ERC725JSONSchema = {
+    const schema: DynamicNameSchema = {
       name: 'TestStringWithBytes32ValueType',
       dynamicName: 'TestStringWithBytes32ValueType',
       key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',

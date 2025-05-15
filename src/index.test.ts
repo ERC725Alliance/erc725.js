@@ -509,7 +509,6 @@ describe('Running @erc725/erc725.js tests...', () => {
               keyType: 'Array',
               valueContent: 'Address',
               valueType: 'address',
-              dynamicName: 'NonExistingArray[]',
             },
           ],
           ERC725_CONTRACT_ADDRESS,
@@ -1745,7 +1744,7 @@ describe('Running @erc725/erc725.js tests...', () => {
     });
 
     describe('permissions', () => {
-      const testCases: { hex: string; permissions }[] = [
+      const testCases: { hex: Hex; permissions }[] = [
         {
           permissions: {
             CHANGEOWNER: true,
@@ -2060,6 +2059,15 @@ describe('Running @erc725/erc725.js tests...', () => {
           );
         });
 
+        it('should decode 0x', () => {
+          const decodedPermissions = decodePermissions('0x');
+
+          assert.strictEqual(
+            decodedPermissions.CHANGEOWNER,
+            false,
+            'Decoded permissions is empty',
+          );
+        });
         it('should not decode CALL or ALL_PERMISSIONS if perms are missing', () => {
           const permissions = { ALL_PERMISSIONS: true, CALL: false };
           const encoded = encodePermissions(permissions);
@@ -2176,7 +2184,7 @@ describe('Running @erc725/erc725.js tests...', () => {
           let decoded = erc725Instance.decodePermissions(
             '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
           );
-          let reencoded = erc725Instance.encodePermissions(decoded);
+          let reencoded: Hex = erc725Instance.encodePermissions(decoded);
           assert.deepStrictEqual(
             reencoded,
             '0x0000000000000000000000000000000000000000000000000000000000ffffff',

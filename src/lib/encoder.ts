@@ -307,38 +307,33 @@ const decodeCompactBytesArray = (
   if (!isHex(compactBytesArray))
     throw new Error("Couldn't decode, value is not hex");
 
-  let pointer = 0;
   const encodedValues: string[] = [];
-
-  const strippedCompactBytesArray = compactBytesArray.slice(2);
-
-  while (pointer < strippedCompactBytesArray.length) {
-    const length = Number(
-      hexToNumber(`0x${strippedCompactBytesArray.slice(pointer, pointer + 4)}`),
-    );
-
+  let current = compactBytesArray;
+  while (size(current) > 0) {
+    const length = hexToNumber(slice(current, 0, 2));
     if (length === 0) {
       // empty entries (`0x0000`) in a CompactBytesArray are returned as empty entries in the array
       encodedValues.push('');
+      current = slice(current, 2);
+      if (consumed) {
+        consumed.bytes += 2;
+      }
     } else {
-      encodedValues.push(
-        `0x${strippedCompactBytesArray.slice(
-          pointer + 4,
-          pointer + 2 * (length + 2),
-        )}`,
-      );
+      if (length > size(current) - 2) {
+        throw new Error(
+          "Couldn't decode bytes[CompactBytesArray] (invalid array item length)",
+        );
+      }
+      encodedValues.push(slice(current, 2, 2 + length));
+      if (consumed) {
+        consumed.bytes += 2 + length;
+      }
+      if (size(current) === 2 + length) {
+        break;
+      }
+      current = slice(current, 2 + length);
     }
-
-    pointer += 2 * (length + 2);
   }
-
-  if (consumed) {
-    consumed.bytes += pointer;
-  }
-
-  if (pointer > strippedCompactBytesArray.length)
-    throw new Error("Couldn't decode bytes[CompactBytesArray]");
-
   return encodedValues;
 };
 

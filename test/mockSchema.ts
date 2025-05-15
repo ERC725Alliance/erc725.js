@@ -4,7 +4,7 @@
 import { encodeParameter } from 'web3-eth-abi';
 import { keccak256, leftPad, utf8ToBytes, utf8ToHex } from 'web3-utils';
 
-import type { ERC725JSONSchema } from '../src/types/ERC725JSONSchema';
+import type { DynamicNameSchema } from '../src/types/ERC725JSONSchema';
 
 const mockJsonString = `{"LSP3Profile":{"profileImage":"ipfs://QmYo8yg4zzmdu26NSvtsoKeU5oVR6h2ohmoa2Cx5i91mPf","backgroundImage":"ipfs://QmZF5pxDJcB8eVvCd74rsXBFXhWL3S1XR5tty2cy1a58Ew","description":"Beautiful clothing that doesn't cost the Earth. A sustainable designer based in London Patrick works with brand partners to refocus on systemic change centred around creative education. "}}`;
 
@@ -22,7 +22,7 @@ export const mockJson2 = {
   url: 'ipfs://QmbErKh3Fjsxxxxxxxxxxxxxxxxxxxxxxxxxxv9AJJvZbd', // dummy url
 };
 
-export const mockSchema: (ERC725JSONSchema & {
+export const mockSchema: (DynamicNameSchema & {
   returnGraphData?;
   dynamicKeyParts?: string | string[];
   expectedResult?;

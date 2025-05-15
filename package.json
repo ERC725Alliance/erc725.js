@@ -80,16 +80,16 @@
     "standard-version": "^9.5.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
-    "viem": "^2.28.1"
-  },
-  "dependencies": {
-    "cross-fetch": "^4.1.0",
     "web3": "^4.16.0",
     "web3-eth-abi": "^4.4.1",
     "web3-eth-accounts": "^4.3.1",
     "web3-providers-http": "^4.2.0",
     "web3-utils": "^4.3.3",
     "web3-validator": "^2.0.6"
+  },
+  "dependencies": {
+    "cross-fetch": "^4.1.0",
+    "viem": "^2.28.1"
   },
   "ts-node": {
     "compilerOptions": {

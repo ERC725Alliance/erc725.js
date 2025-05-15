@@ -50,6 +50,7 @@ import type {
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
+  DynamicNameSchema,
 } from './types/ERC725JSONSchema';
 import type {
   DecodeDataInput,
@@ -86,7 +87,16 @@ export type {
   ERC725JSONSchemaKeyType,
   ERC725JSONSchemaValueContent,
   ERC725JSONSchemaValueType,
+  DynamicNameSchema,
   Permissions,
+  FetchDataOutput,
+  DecodeDataInput,
+  DecodeDataOutput,
+  GetDataDynamicKey,
+  GetDataInput,
+  URLDataWithHash,
+  SUPPORTED_VERIFICATION_METHODS,
+  SUPPORTED_VERIFICATION_METHOD_STRINGS,
 };
 
 export type { ERC725Config, KeyValuePair, ProviderTypes } from './types';
@@ -649,7 +659,7 @@ export class ERC725 {
    * @param permissions The permissions you want to specify to be included or excluded. Any ommitted permissions will default to false.
    * @returns {*} The permissions encoded as a hexadecimal string as defined by the LSP6 Standard.
    */
-  encodePermissions(permissions: Permissions): string {
+  encodePermissions(permissions: Permissions): Hex {
     return encodePermissions(permissions);
   }
 
@@ -660,7 +670,7 @@ export class ERC725 {
    * @param permissionHex The permission hexadecimal value to be decoded.
    * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
    */
-  static decodePermissions(permissionHex: string) {
+  static decodePermissions(permissionHex: Hex) {
     return decodePermissions(permissionHex);
   }
 
@@ -671,7 +681,7 @@ export class ERC725 {
    * @param permissionHex The permission hexadecimal value to be decoded.
    * @returns Object specifying whether default LSP6 permissions are included in provided hexademical string.
    */
-  decodePermissions(permissionHex: string) {
+  decodePermissions(permissionHex: Hex) {
     return decodePermissions(permissionHex);
   }
 
@@ -685,7 +695,7 @@ export class ERC725 {
    */
   static checkPermissions(
     requiredPermissions: string[] | string,
-    grantedPermissions: string,
+    grantedPermissions: Hex,
   ): boolean {
     return checkPermissions(requiredPermissions, grantedPermissions);
   }
@@ -700,7 +710,7 @@ export class ERC725 {
    */
   checkPermissions(
     requiredPermissions: string[] | string,
-    grantedPermissions: string,
+    grantedPermissions: Hex,
   ): boolean {
     return checkPermissions(requiredPermissions, grantedPermissions);
   }

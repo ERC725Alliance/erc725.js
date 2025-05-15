@@ -12,9 +12,6 @@
     along with @erc725/erc725.js.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import { decodeParameter } from 'web3-eth-abi';
-import { numberToHex } from 'web3-utils';
-
 import type {
   JsonRpc,
   JsonRpcEthereumProviderParamsWithLatest,
@@ -22,21 +19,23 @@ import type {
 import type { Method } from '../types/Method';
 
 import { METHODS } from '../constants/constants';
+import { decodeAbiParameters, Hex, isHex, toHex } from 'viem';
 
 let idCount = 0;
 
 export function decodeResult(
   method: Method,
-  hexString: string,
+  hexString: Hex,
 ): Record<string, any> | null {
-  if (!hexString || hexString === '0x' || hexString === '') {
+  if (!isHex(hexString)) {
     return null;
   }
 
-  const decodedData = decodeParameter(
-    METHODS[method].returnEncoding,
-    hexString,
-  ) as Record<string, any> | null;
+  const decodedData =
+    decodeAbiParameters(
+      [{ type: METHODS[method].returnEncoding }],
+      hexString,
+    )[0] || (null as Record<string, any> | null);
 
   if (
     Array.isArray(decodedData) &&
@@ -62,7 +61,7 @@ const constructJSONRPCParams = (
     {
       to: address,
       value: METHODS[method].value,
-      ...(gasInfo ? { gas: numberToHex(gasInfo) } : {}),
+      ...(gasInfo ? { gas: toHex(gasInfo) } : {}),
       data,
     },
     'latest',
