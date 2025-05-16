@@ -10,9 +10,7 @@ const decode = (receivedData: Uint8Array) => {
   if (receivedData.length > 1) {
     capture.push(receivedData[receivedData.length - 1]);
   }
-  const key = String.fromCharCode.apply(null, capture);
-  // console.log(capture, key, /^(\[.*\]|\{.*\})\s*$/.test(key));
-  return key;
+  return String.fromCharCode.apply(null, capture);
 };
 
 decode(Uint8Array.from(Buffer.from(JSON.stringify({ k: 0 }))));

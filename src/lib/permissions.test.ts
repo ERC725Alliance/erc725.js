@@ -14,6 +14,13 @@ describe('checkPermissions', () => {
       );
     });
 
+    it('should assume 0x is no permissions', async () => {
+      const requiredPermissions = 'CHANGEOWNER';
+      const grantedPermissions = '0x';
+      expect(checkPermissions(requiredPermissions, grantedPermissions)).to.be
+        .false;
+    });
+
     it('should throw an error when given an invalid 32-byte hex string', async () => {
       const requiredPermissions = '0xinvalidhexstring';
       const grantedPermissions =

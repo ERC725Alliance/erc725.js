@@ -27,6 +27,7 @@ import {
 import type { DecodeDataInput, DecodeDataOutput } from '../types/decodeData';
 import {
   ALL_VALUE_TYPES,
+  DynamicNameSchema,
   type ERC725JSONSchema,
   isValidValueType,
 } from '../types/ERC725JSONSchema';
@@ -35,7 +36,7 @@ import { valueContentEncodingMap, decodeValueType } from './encoder';
 import { getSchemaElement } from './getSchemaElement';
 import { countNumberOfBytes, decodeKeyValue, encodeArrayKey } from './utils';
 import type { ConsumedPtr } from '../types';
-import { Hex, isHex } from 'viem';
+import { Hex, isHex, size, slice } from 'viem';
 
 const tupleValueTypesRegex = /bytes(\d+)/;
 const valueContentsBytesRegex = /Bytes(\d+)/;
@@ -138,7 +139,7 @@ export const isValidTuple = (valueType: string, valueContent: string) => {
 export const decodeTupleKeyValue = (
   valueContent: string, // i.e. (bytes4,Number,bytes16)
   valueType: string, // i.e. (bytes4,bytes8,bytes16)
-  value: string, // should start with 0x
+  value: Hex, // should start with 0x
 ): Array<string> => {
   // We assume data has already been validated at this stage
 
@@ -154,14 +155,19 @@ export const decodeTupleKeyValue = (
   const consumed: ConsumedPtr = {
     bytes: 0,
   };
-  return valueTypeParts.map((valueTypePart, index) => {
+  const total = size(value);
+  const output = valueTypeParts.map((valueTypePart, index) => {
     return decodeKeyValue(
       valueContentParts[index],
       valueTypePart,
-      `0x${value ? value.slice(consumed.bytes * 2 + 2) : ''}`,
+      consumed.bytes < size(value) ? slice(value as Hex, consumed.bytes) : '0x',
       consumed,
     );
   });
+  if (total !== consumed.bytes) {
+    throw new Error('Tuple value is the wrong length returning null');
+  }
+  return output;
 };
 
 /**
@@ -281,10 +287,9 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
       );
     }
     default: {
-      console.error(
+      throw new Error(
         `Incorrect data match or keyType in schema from decodeKey(): "${schema.keyType}"`,
       );
-      return null;
     }
   }
 }
@@ -298,14 +303,17 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
 export function decodeData(
   data: DecodeDataInput[],
   schema: ERC725JSONSchema[],
+  throwExceptions?: boolean,
 ): DecodeDataOutput[];
 export function decodeData(
   data: DecodeDataInput,
   schema: ERC725JSONSchema[],
+  throwExceptions?: boolean,
 ): DecodeDataOutput;
 export function decodeData(
   data: DecodeDataInput | DecodeDataInput[],
   schema: ERC725JSONSchema[],
+  throwExceptions = false,
 ): DecodeDataOutput | DecodeDataOutput[] {
   const processDataInput = (
     { keyName, dynamicKeyParts, value }: DecodeDataInput,
@@ -313,7 +321,7 @@ export function decodeData(
   ) => {
     const isDynamic = isDynamicKeyName(keyName);
 
-    const schemaElement: ERC725JSONSchema = isDynamic
+    const schemaElement: DynamicNameSchema = isDynamic
       ? getSchemaElement(schema, keyName, dynamicKeyParts)
       : getSchemaElement(schema, keyName);
     let decodedValue: any = null;
@@ -336,8 +344,10 @@ export function decodeData(
   };
 
   if (Array.isArray(data)) {
-    return data.map((dataInput) => processDataInput(dataInput, false));
+    return data.map((dataInput) =>
+      processDataInput(dataInput, throwExceptions),
+    );
   }
 
-  return processDataInput(data);
+  return processDataInput(data, throwExceptions);
 }

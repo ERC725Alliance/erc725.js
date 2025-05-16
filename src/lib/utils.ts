@@ -33,10 +33,10 @@ import type {
 
 import {
   HASH_METHODS,
-  type SUPPORTED_VERIFICATION_METHODS,
+  SUPPORTED_VERIFICATION_METHODS,
   SUPPORTED_VERIFICATION_METHODS_LIST,
   COMPACT_BYTES_ARRAY_STRING,
-  type SUPPORTED_VERIFICATION_METHOD_STRINGS,
+  SUPPORTED_VERIFICATION_METHOD_STRINGS,
 } from '../constants/constants';
 import {
   decodeValueContent,
@@ -59,6 +59,7 @@ import {
   isAddress,
   isHex,
   pad,
+  size,
   slice,
   toHex,
 } from 'viem';
@@ -112,7 +113,9 @@ export function encodeKeyValue(
   const isValueTypeArray = valueType.slice(valueType.length - 1) === ']';
 
   if (
-    (valueType.startsWith('uint') || valueType.startsWith('bytes')) &&
+    (valueType.startsWith('uint') ||
+      valueType.startsWith('int') ||
+      valueType.startsWith('bytes')) &&
     typeof decodedValue !== 'object'
   ) {
     return encodeValueType(valueType, decodedValue);
@@ -691,11 +694,7 @@ export function patchIPFSUrlsIfApplicable(
 }
 
 export function countNumberOfBytes(data: Hex) {
-  if (data == null) {
-    return 0;
-  }
-
-  return data.slice(2).length / 2;
+  return size(data);
 }
 
 export function countSignificantBits(data: Hex) {
@@ -903,4 +902,26 @@ export function isValidByteSize(bytesSize: number) {
  */
 export function isValueContentLiteralHex(valueContent: string): boolean {
   return isHex(valueContent, { strict: true });
+}
+
+/**
+ * @dev Negate a 2's complement signed bigint given its bit length
+ * @param value The bigint value to negate
+ * @param bitLength The bit length of the number
+ * @returns The negated bigint
+ */
+export function negateSignedBigInt(value: bigint, bitLength: number): bigint {
+  // Special case: zero remains zero
+  if (value === 0n) {
+    return 0n;
+  }
+
+  // Calculate the maximum value for the given bit length
+  const maxValue = 1n << BigInt(bitLength);
+
+  // Calculate the mask for all bits
+  const mask = maxValue - 1n;
+
+  // Negate using 2's complement: invert all bits and add 1
+  return (~value & mask) + 1n;
 }

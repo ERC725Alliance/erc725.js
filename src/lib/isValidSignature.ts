@@ -17,9 +17,8 @@
  * @date 2022
  */
 
-import { keccak256 } from 'web3-utils';
 import type { ProviderWrapper } from '../provider/providerWrapper';
-import type { Hash } from 'viem';
+import { keccak256, stringToHex, type Hash } from 'viem';
 
 const MAGIC_VALUE = '0x1626ba7e';
 
@@ -46,7 +45,9 @@ export const isValidSignature = async (
   const hash = validateHash(messageOrHash)
     ? (messageOrHash as Hash)
     : keccak256(
-        `\x19Ethereum Signed Message:\n${messageOrHash.length}${messageOrHash}`,
+        stringToHex(
+          `\x19Ethereum Signed Message:\n${messageOrHash.length}${messageOrHash}`,
+        ),
       );
 
   if (signature.length !== 132) {

@@ -19,6 +19,7 @@ import assert from 'node:assert';
 import { IPFS_GATEWAY, responseStore } from '../../test/serverHelpers';
 
 import type {
+  DynamicNameSchema,
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
 } from '../types/ERC725JSONSchema';
@@ -41,6 +42,7 @@ import {
   duplicateMultiTypeERC725SchemaEntry,
   splitMultiDynamicKeyNamePart,
   countSignificantBits,
+  negateSignedBigInt,
 } from './utils';
 import { isDynamicKeyName } from './encodeKeyName';
 import { decodeKey } from './decodeData';
@@ -59,7 +61,6 @@ describe('utils', () => {
           keyType: 'Array',
           valueContent: 'Address',
           valueType: 'address',
-          dynamicName: 'NonExistingArray[]',
         },
         [{}],
       ),
@@ -650,7 +651,7 @@ describe('utils', () => {
   });
 
   describe('Invalid valueType', () => {
-    const schema: ERC725JSONSchema = {
+    const schema: DynamicNameSchema = {
       name: 'TestStringWithBytes32ValueType',
       dynamicName: 'TestStringWithBytes32ValueType',
       key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',
@@ -667,7 +668,7 @@ describe('utils', () => {
   });
 
   describe('Invalid valueContent in decodeValueContent', () => {
-    const schema: ERC725JSONSchema = {
+    const schema: DynamicNameSchema = {
       name: 'TestStringWithBytes32ValueType',
       dynamicName: 'TestStringWithBytes32ValueType',
       key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',
@@ -684,7 +685,7 @@ describe('utils', () => {
   });
 
   describe('Invalid valueType', () => {
-    const schema: ERC725JSONSchema = {
+    const schema: DynamicNameSchema = {
       name: 'TestStringWithBytes32ValueType',
       dynamicName: 'TestStringWithBytes32ValueType',
       key: '0xbaced8d1d0b02d5f412674cac7ad60f0f3e8ae29f2b8d4ad463fa1f5fc103d4d',
@@ -1498,6 +1499,41 @@ describe('utils', () => {
       const duplicatedSchemas = duplicateMultiTypeERC725SchemaEntry(schema);
 
       assert.deepStrictEqual(duplicatedSchemas, expectedSchemas);
+    });
+  });
+
+  describe('negateSignedBigInt', () => {
+    it('should negate positive numbers', () => {
+      // For 8-bit: 5 -> -5
+      assert.equal(negateSignedBigInt(5n, 8), 251n); // 2^8 - 5 = 251
+
+      // For 16-bit: 100 -> -100
+      assert.equal(negateSignedBigInt(100n, 16), 65436n); // 2^16 - 100 = 65436
+
+      // For 32-bit: 1000 -> -1000
+      assert.equal(negateSignedBigInt(1000n, 32), 4294966296n); // 2^32 - 1000 = 4294966296
+    });
+
+    it('should negate negative numbers (2s complement)', () => {
+      // For 8-bit: -5 (251) -> 5
+      assert.equal(negateSignedBigInt(251n, 8), 5n);
+
+      // For 16-bit: -100 (65436) -> 100
+      assert.equal(negateSignedBigInt(65436n, 16), 100n);
+
+      // For 32-bit: -1000 (4294966296) -> 1000
+      assert.equal(negateSignedBigInt(4294966296n, 32), 1000n);
+    });
+
+    it('should handle edge cases', () => {
+      // For 8-bit: 0 -> 0
+      assert.equal(negateSignedBigInt(0n, 8), 0n);
+
+      // For 8-bit: -128 (128) -> -128 (128)
+      assert.equal(negateSignedBigInt(128n, 8), 128n);
+
+      // For 16-bit: -32768 (32768) -> -32768 (32768)
+      assert.equal(negateSignedBigInt(32768n, 16), 32768n);
     });
   });
 });

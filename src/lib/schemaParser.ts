@@ -16,10 +16,11 @@
  * @author Hugo Masclet <@Hugoo>
  * @date 2022
  */
-import { keccak256, slice, toBytes } from 'viem';
+import { concat, Hex, keccak256, slice, toBytes } from 'viem';
 import allSchemas from '../schemas';
 
 import type {
+  DynamicNameSchema,
   ERC725JSONSchema,
   ERC725JSONSchemaKeyType,
 } from '../types/ERC725JSONSchema';
@@ -41,13 +42,13 @@ const getSchemasByKeyType = (
 const fillDynamicKeyPart = (
   key: string,
   keySchema: ERC725JSONSchema | ERC725JSONSchema[],
-): ERC725JSONSchema => {
+): ERC725JSONSchema | DynamicNameSchema => {
   const fillOneDynamicKeyPart = (
     key: string,
     keySchema: ERC725JSONSchema,
     insertQuestionMarks = false,
   ) => {
-    const result: ERC725JSONSchema = {
+    const result: DynamicNameSchema = {
       ...keySchema,
       key,
     };
@@ -89,7 +90,8 @@ const fillDynamicKeyPart = (
     // if first 20 bytes of the hash of second word in schema match,
     // display the map part as plain word
     if (
-      slice(keccak256(toBytes(keyNameParts[1])), 0, 20) === `0x${secondWordHex}`
+      concat([slice(keccak256(toBytes(keyNameParts[1])), 0, 10), '0x0000']) ===
+      `0x${secondWordHex}`
     ) {
       dynamicPartName = keyNameParts[1];
     }
@@ -101,7 +103,12 @@ const fillDynamicKeyPart = (
     return result;
   };
   if (Array.isArray(keySchema)) {
-    const singleSchema = keySchema.find((schema) => schema.key === key);
+    const firstWord = slice(key as Hex, 0, 12);
+    const singleSchema = keySchema.find(
+      // Use string slice here, because the key can have : or < separators.
+      (schema) =>
+        concat([schema.key.slice(0, 22) as Hex, '0x0000']) === firstWord,
+    );
     if (singleSchema) {
       return fillOneDynamicKeyPart(key, singleSchema);
     }
@@ -120,7 +127,7 @@ const findSingletonSchemaForKey = (
 const findArraySchemaForKey = (
   key: string,
   schemas: ERC725JSONSchema[],
-): ERC725JSONSchema | null => {
+): ERC725JSONSchema | DynamicNameSchema | null => {
   // Should detect:
 
   // 1. Initial key
@@ -185,13 +192,15 @@ const findMappingSchemaForKey = (
 const findMappingWithGroupingSchemaForKey = (
   key: string,
   schemas: ERC725JSONSchema[],
-): ERC725JSONSchema | null => {
-  const keySchema =
+): ERC725JSONSchema | DynamicNameSchema | null => {
+  let keySchema: DynamicNameSchema | null =
     schemas.find(
       (schema) => schema.key.substring(0, 26) === key.substring(0, 26),
     ) || null;
 
   if (keySchema) {
+    keySchema = { ...keySchema };
+
     const keyNameParts = keySchema.name.split(':');
 
     const dynamicKeyPart = key.substring(26);

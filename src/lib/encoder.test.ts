@@ -271,6 +271,21 @@ describe('encoder', () => {
             ) + toBigInt(1),
           ),
         },
+        {
+          valueType: 'uint8',
+          // overflow uint8
+          input: 512,
+        },
+        {
+          valueType: 'int8',
+          // overflow int8
+          input: -512,
+        },
+        {
+          valueType: 'int9',
+          // int9 is not a legit type (int8, int16 and so on)
+          input: -512,
+        },
       ];
 
       errorEncodingTestCases.forEach((testCase) => {

@@ -344,6 +344,12 @@ describe('encodeDynamicKeyPart', () => {
       expectedEncoding: '00000000000000000000000000000000f342d33d', // left padded
     },
     {
+      type: '<int32>',
+      value: '4081242941',
+      bytes: 20,
+      expectedEncoding: '00000000000000000000000000000000f342d33d', // left padded
+    },
+    {
       type: '<uint32>',
       value: '0xf342d33d',
       bytes: 20,
@@ -351,6 +357,12 @@ describe('encodeDynamicKeyPart', () => {
     },
     {
       type: '<uint32>',
+      value: '4081242941',
+      bytes: 2,
+      expectedEncoding: 'd33d', // left cut
+    },
+    {
+      type: '<int32>',
       value: '4081242941',
       bytes: 2,
       expectedEncoding: 'd33d', // left cut
