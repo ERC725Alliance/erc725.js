@@ -923,5 +923,5 @@ export function negateSignedBigInt(value: bigint, bitLength: number): bigint {
   const mask = maxValue - 1n;
 
   // Negate using 2's complement: invert all bits and add 1
-  return ((~value) & mask) + 1n;
+  return (~value & mask) + 1n;
 }
