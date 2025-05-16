@@ -137,12 +137,6 @@ export const checkPermissions = (
       }
       const requiredPermissionBigInt = BigInt(requiredPermission);
       const grantedPermissionsBigInt = BigInt(grantedPermissions);
-      console.log(
-        requiredPermission,
-        grantedPermissions,
-        requiredPermissionBigInt,
-        grantedPermissionsBigInt,
-      );
       return (
         (requiredPermissionBigInt & grantedPermissionsBigInt) ===
         requiredPermissionBigInt
