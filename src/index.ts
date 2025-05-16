@@ -37,8 +37,8 @@ import { isValidSignature } from './lib/isValidSignature';
 
 import {
   DEFAULT_GAS_VALUE,
-  type SUPPORTED_VERIFICATION_METHODS,
-  type SUPPORTED_VERIFICATION_METHOD_STRINGS,
+  SUPPORTED_VERIFICATION_METHODS,
+  SUPPORTED_VERIFICATION_METHOD_STRINGS,
 } from './constants/constants';
 import { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
 
@@ -95,6 +95,9 @@ export type {
   GetDataDynamicKey,
   GetDataInput,
   URLDataWithHash,
+};
+
+export {
   SUPPORTED_VERIFICATION_METHODS,
   SUPPORTED_VERIFICATION_METHOD_STRINGS,
 };
