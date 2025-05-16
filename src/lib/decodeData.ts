@@ -287,10 +287,9 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
       );
     }
     default: {
-      console.error(
+      throw new Error(
         `Incorrect data match or keyType in schema from decodeKey(): "${schema.keyType}"`,
       );
-      return null;
     }
   }
 }
@@ -304,14 +303,17 @@ export function decodeKey(schema: ERC725JSONSchema, value) {
 export function decodeData(
   data: DecodeDataInput[],
   schema: ERC725JSONSchema[],
+  throwExceptions?: boolean,
 ): DecodeDataOutput[];
 export function decodeData(
   data: DecodeDataInput,
   schema: ERC725JSONSchema[],
+  throwExceptions?: boolean,
 ): DecodeDataOutput;
 export function decodeData(
   data: DecodeDataInput | DecodeDataInput[],
   schema: ERC725JSONSchema[],
+  throwExceptions = false,
 ): DecodeDataOutput | DecodeDataOutput[] {
   const processDataInput = (
     { keyName, dynamicKeyParts, value }: DecodeDataInput,
@@ -342,8 +344,10 @@ export function decodeData(
   };
 
   if (Array.isArray(data)) {
-    return data.map((dataInput) => processDataInput(dataInput, false));
+    return data.map((dataInput) =>
+      processDataInput(dataInput, throwExceptions),
+    );
   }
 
-  return processDataInput(data);
+  return processDataInput(data, throwExceptions);
 }

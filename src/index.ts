@@ -481,8 +481,9 @@ export class ERC725 {
   decodeData(
     data: DecodeDataInput[],
     schemas?: ERC725JSONSchema[],
+    throwExceptions = false,
   ): { [key: string]: any } {
-    return decodeData(data, schemas || this.options.schemas);
+    return decodeData(data, schemas || this.options.schemas, throwExceptions);
   }
 
   /**
@@ -500,8 +501,9 @@ export class ERC725 {
   static decodeData(
     data: DecodeDataInput[],
     schemas: ERC725JSONSchema[],
+    throwExceptions = false,
   ): { [key: string]: any } {
-    return decodeData(data, schemas);
+    return decodeData(data, schemas, throwExceptions);
   }
 
   /**

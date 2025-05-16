@@ -17,8 +17,14 @@
 import { expect } from 'chai';
 
 import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
-import { decodeData, decodeTupleKeyValue, isValidTuple } from './decodeData';
-import { Hex } from 'viem';
+import {
+  decodeData,
+  decodeKey,
+  decodeTupleKeyValue,
+  isValidTuple,
+} from './decodeData';
+import { Hex, keccak256, stringToBytes } from 'viem';
+import { encodeArrayKey } from './utils';
 
 describe('decodeData', () => {
   const schemas: ERC725JSONSchema[] = [
@@ -435,6 +441,153 @@ describe('tuple', () => {
               testCase.encodedValue,
             ),
           ).to.eql(testCase.decodedValue);
+        });
+      });
+    });
+
+    describe('decode plain compactArray', () => {
+      const key = keccak256(stringToBytes('test'));
+      const testCases = [
+        {
+          key,
+          valueContent: 'Bytes8',
+          keyType: 'Singleton',
+          valueType: 'bytes8[CompactBytesArray]',
+          encodedValue: '0x0008010203040506070800081020304050607080' as Hex,
+          decodedValue: ['0x0102030405060708', '0x1020304050607080'],
+        },
+        {
+          key,
+          valueContent: 'Bytes8',
+          valueType: 'bytes8',
+          keyType: 'Array',
+          encodedValue: '0x00000000000000000000000000000001' as Hex,
+          decodedValue: 1n,
+        },
+        {
+          key: encodeArrayKey(key, 0),
+          valueContent: 'Bytes8',
+          valueType: 'bytes8',
+          keyType: 'Array',
+          encodedValue: [
+            { key, value: '0x00000000000000000000000000000001' },
+            { key: encodeArrayKey(key, 0), value: '0x0000000000000008' as Hex },
+          ],
+          decodedValue: ['0x0000000000000008'],
+        },
+      ]; // TODO: add more cases? Address, etc.
+
+      testCases.forEach((testCase) => {
+        it('decodes tuple values', () => {
+          expect(
+            decodeKey(
+              {
+                name: 'test',
+                keyType: testCase.keyType,
+                key,
+                valueContent: testCase.valueContent,
+                valueType: testCase.valueType,
+              },
+              testCase.encodedValue,
+            ),
+          ).to.eql(testCase.decodedValue);
+        });
+      });
+    });
+
+    describe('decode bad values with exceptions', () => {
+      const testCases = [
+        {
+          valueContent: 'Bytes8',
+          valueType: 'bytes8[CompactBytesArray]',
+          keyType: 'WhatShallMaCallIt',
+          encodedValue: '0x0008010203040506070800081020304050607080' as Hex,
+          decodedValue: ['0x0102030405060708', '0x1020304050607080'],
+          message:
+            /Incorrect data match or keyType in schema from decodeKey\(\)/,
+        },
+        {
+          valueContent: 'Bytes8',
+          valueType: 'bytes8[CompactBytesArray]',
+          keyType: 'Singleton',
+          encodedValue: '0x0508010203040506070800081020304050607080' as Hex,
+          decodedValue: ['0x0102030405060708', '0x1020304050607080'],
+          message:
+            /Couldn't decode bytes\[CompactBytesArray\] \(invalid array item length\)/,
+        },
+      ]; // TODO: add more cases? Address, etc.
+
+      testCases.forEach((testCase) => {
+        it('decodes tuple values', () => {
+          const key = keccak256(stringToBytes('test'));
+          expect(() =>
+            decodeData(
+              [
+                {
+                  keyName: key,
+                  value: testCase.encodedValue,
+                },
+              ],
+              [
+                {
+                  name: 'test',
+                  keyType: testCase.keyType,
+                  key,
+                  valueContent: 'Bytes8',
+                  valueType: 'bytes8[CompactBytesArray]',
+                },
+              ],
+              true,
+            ),
+          ).to.throw(testCase.message);
+        });
+      });
+    });
+
+    describe('decode bad values without exceptions', () => {
+      const testCases = [
+        {
+          valueContent: 'Bytes8',
+          valueType: 'bytes8[CompactBytesArray]',
+          keyType: 'WhatShallMaCallIt',
+          encodedValue: '0x0008010203040506070800081020304050607080' as Hex,
+          decodedValue: ['0x0102030405060708', '0x1020304050607080'],
+          message:
+            /Incorrect data match or keyType in schema from decodeKey\(\)/,
+        },
+        {
+          valueContent: 'Bytes8',
+          valueType: 'bytes8[CompactBytesArray]',
+          keyType: 'Singleton',
+          encodedValue: '0x0508010203040506070800081020304050607080' as Hex,
+          decodedValue: ['0x0102030405060708', '0x1020304050607080'],
+          message:
+            /Couldn't decode bytes\[CompactBytesArray\] \(invalid array item length\)/,
+        },
+      ]; // TODO: add more cases? Address, etc.
+
+      testCases.forEach((testCase) => {
+        it('decodes tuple values', () => {
+          const key = keccak256(stringToBytes('test'));
+          expect(
+            decodeData(
+              [
+                {
+                  keyName: key,
+                  value: testCase.encodedValue,
+                },
+              ],
+              [
+                {
+                  name: 'test',
+                  keyType: testCase.keyType,
+                  key,
+                  valueContent: 'Bytes8',
+                  valueType: 'bytes8[CompactBytesArray]',
+                },
+              ],
+            )[0],
+          ).to.have.property('value', null);
         });
       });
     });

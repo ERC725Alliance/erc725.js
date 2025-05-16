@@ -45,6 +45,7 @@ import {
   countSignificantBits,
   isValidByteSize,
   isValueContentLiteralHex,
+  negateSignedBigInt,
 } from './utils';
 import type { ERC725JSONSchemaValueType } from '../types/ERC725JSONSchema';
 import {
@@ -68,7 +69,7 @@ import {
   toHex,
 } from 'viem';
 
-const uintNValueTypeRegex = /^uint(\d+)(\+?)$/;
+const uintNValueTypeRegex = /^u?int(\d+)(\+?)$/;
 const bytesNValueTypeRegex = /^bytes(\d+)$/;
 const BytesNValueContentRegex = /Bytes(\d+)/;
 
@@ -517,10 +518,11 @@ function _decodeParameter(
         `Invalid \`${type}\` provided. Expected a multiple of 8 bits between 8 and 256.`,
       );
     }
+    const numberOfBits = Number.parseInt(bitSize, 10);
     if (type === 'address') {
       actualType = 'bytes20';
     } else if (baseType) {
-      const byteSize = Number.parseInt(bitSize, 10) / 8;
+      const byteSize = numberOfBits / 8;
       actualType = `bytes${byteSize}${append}`; // decode as if they are bytes to make sure it's always right padded.
     }
     try {
@@ -529,9 +531,17 @@ function _decodeParameter(
         `${value}0000000000000000000000000000000000000000000000000000000000000000` as Hex, // Just add some zeros so that the native call doesn't run out of bytes.
       )[0];
       if (bitSize) {
+        const convert = (value: Hex) => {
+          const isLikelyNegative = value.startsWith('0xff');
+          const result = BigInt(value);
+          if (!type.startsWith('u') && isLikelyNegative) {
+            return -negateSignedBigInt(result as bigint, numberOfBits);
+          }
+          return result;
+        };
         result = Array.isArray(result)
-          ? result.map((result) => BigInt(result as string))
-          : BigInt(result as string);
+          ? result.map((result) => convert(result as Hex))
+          : convert(result as Hex);
       }
       if (consumed) {
         const out = type.endsWith(']')
@@ -562,7 +572,7 @@ const valueTypeEncodingMap = (
     : '';
 
   const uintLength = uintNRegexMatch
-    ? Number.parseInt(uintNRegexMatch[0].slice(4), 10)
+    ? Number.parseInt(uintNRegexMatch[1], 10)
     : 0;
 
   if (type.includes('[CompactBytesArray]')) {
@@ -656,13 +666,6 @@ const valueTypeEncodingMap = (
             );
           }
           const abiEncodedValue = encodeAbiParameters([{ type }], [value]);
-
-          const numberOfBits = countSignificantBits(abiEncodedValue);
-          if (numberOfBits > (uintLength as number)) {
-            throw new Error(
-              `Can't represent value ${value} as ${type}. To many bits required ${numberOfBits} > ${uintLength}`,
-            );
-          }
 
           const bytesArray = hexToBytes(abiEncodedValue);
           const numberOfBytes = (uintLength as number) / 8;

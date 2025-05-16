@@ -448,6 +448,28 @@ export const mockSchema: (DynamicNameSchema & {
     expectedResult: '0xcafecafe',
     returnGraphData: '0xcafecafe',
   },
+  {
+    name: 'TestIntValueType',
+    dynamicName: 'TestIntValueType',
+    key: '0x6d5b3990b84f0f00ddee65cc1db81a399c56b489126d08f91b4fccaeae5a468e',
+    keyType: 'Singleton',
+    valueContent: 'Number',
+    valueType: 'int256',
+    returnGraphData:
+      '0x0000000000000000000000000000000000000000000000000000000000000063',
+    expectedResult: 99n,
+  },
+  {
+    name: 'TestIntNegValueType',
+    dynamicName: 'TestIntNegValueType',
+    key: '0x6f78bbd7ea9c0540ec6e7656f3c02d7037be5be5b201731395f7dcc36396b81b',
+    keyType: 'Singleton',
+    valueContent: 'Number',
+    valueType: 'int256',
+    returnGraphData:
+      '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff9d',
+    expectedResult: -99n,
+  },
 
   // Nested array tests
   // NOTE: The below are failing on decode all (no source loops, or individual) with data out-of-bounds

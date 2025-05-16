@@ -94,6 +94,7 @@ export const encodeDynamicKeyPart = (
         .slice(2)
         .toLowerCase(); // keys should not contain upper case chars (i.e. original checksummed stuff)
     }
+    case 'int':
     case 'uint': {
       if (size > 256 || size % 8 !== 0) {
         throw new Error(
@@ -115,9 +116,6 @@ export const encodeDynamicKeyPart = (
       }
       return pad(hex as `0x${string}`, { size: bytes }).slice(2);
     }
-    case 'int':
-      // TODO:
-      throw new Error('The encoding of <intM> has not been implemented yet.');
     case 'bytes': {
       if (!value.startsWith('0x')) {
         value = `0x${value}`;
