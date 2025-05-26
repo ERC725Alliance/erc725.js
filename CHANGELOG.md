@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.28.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.28.0...v0.28.1) (2025-05-26)
+
+
+### Bug Fixes
+
+* Final small fixes to repair exports. ([4083269](https://github.com/ERC725Alliance/erc725.js/commit/4083269f856df7d4d23074c19fbd27af88d82d02))
+* Forgot to run lint ([690cf4d](https://github.com/ERC725Alliance/erc725.js/commit/690cf4d6ac775ab8d50f41d6dbd52a9d0e7dd605))
+* Hmm test scripts not running ([901dc28](https://github.com/ERC725Alliance/erc725.js/commit/901dc2845212dc5b1d134cd4493f91b471cbd22d))
+* Improve coverage a little more. ([81320c8](https://github.com/ERC725Alliance/erc725.js/commit/81320c887bc3598c4d16ce860d662e1cf7ef02e3))
+* Repair github action test run. ([c913b78](https://github.com/ERC725Alliance/erc725.js/commit/c913b785b4884c41b8dbe769c05b54b00b975241))
+* Upgrades in examples folder. ([39f6cec](https://github.com/ERC725Alliance/erc725.js/commit/39f6cecf6e8acd6c7e3478698003ee5c01fa7f0d))
+* Work on making extension tests pass, they are more extensive ([a1d9eda](https://github.com/ERC725Alliance/erc725.js/commit/a1d9eda0e29d5cbfff9714c4a6a99743efc3e11d))
+
 ## [0.28.0](https://github.com/ERC725Alliance/erc725.js/compare/v0.27.3...v0.28.0) (2025-05-13)
 
 
