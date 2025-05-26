@@ -17,15 +17,18 @@
  * @date 2021
  */
 
-import { isHex, isHexStrict } from 'web3-validator';
 import type { DynamicKeyParts } from '../types/dynamicKeys';
-import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
+import type {
+  DynamicNameSchema,
+  ERC725JSONSchema,
+} from '../types/ERC725JSONSchema';
 import {
   encodeKeyName,
   generateDynamicKeyName,
   isDynamicKeyName,
 } from './encodeKeyName';
 import { decodeMappingKey } from './decodeMappingKey';
+import { isHex } from 'viem';
 
 /**
  *
@@ -38,7 +41,7 @@ const getSchemaElementForDynamicKeyName = (
   schemas: ERC725JSONSchema[],
   namedDynamicKey: string,
   dynamicKeyParts: DynamicKeyParts,
-): ERC725JSONSchema => {
+): ERC725JSONSchema | DynamicNameSchema => {
   // In that case, we will generate a new schema element with the final computed name and encoded key hash.
 
   const schemaElement = schemas.find((e) => e.name === namedDynamicKey);
@@ -72,10 +75,14 @@ const getSchemaElementForDynamicKeyName = (
  */
 export function getSchemaElement(
   schemas: ERC725JSONSchema[],
-  namedOrHashedKey: string,
+  _namedOrHashedKey: string,
   dynamicKeyParts?: DynamicKeyParts,
 ): ERC725JSONSchema {
   let keyHash: string;
+  let namedOrHashedKey = _namedOrHashedKey;
+  if (/^[0-9a-f]{64}$/i.test(_namedOrHashedKey)) {
+    namedOrHashedKey = `0x${_namedOrHashedKey}`;
+  }
   if (namedOrHashedKey.startsWith('0x')) {
     const index = namedOrHashedKey.indexOf('<');
     if (index !== -1) {
@@ -109,7 +116,7 @@ export function getSchemaElement(
   }
 
   if (isHex(namedOrHashedKey)) {
-    keyHash = isHexStrict(namedOrHashedKey)
+    keyHash = isHex(namedOrHashedKey, { strict: true })
       ? namedOrHashedKey
       : `0x${namedOrHashedKey}`;
   } else {

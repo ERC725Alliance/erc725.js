@@ -1,9 +1,8 @@
-import { hexToNumber, leftPad, numberToHex } from 'web3-utils';
+import { Hex, hexToBigInt, isHex, pad, toHex } from 'viem';
 import { LSP6_DEFAULT_PERMISSIONS } from '../constants/constants';
 import type { Permissions } from '../types/Method';
-import { isHexStrict } from 'web3-validator';
 
-export function encodePermissions(permissions: Permissions): string {
+export function encodePermissions(permissions: Permissions): Hex {
   let basePermissions = BigInt(0);
 
   // Process each permission to potentially switch off permissions included in ALL_PERMISSIONS
@@ -15,7 +14,7 @@ export function encodePermissions(permissions: Permissions): string {
   // Do not use an for of loop here to not require the regenerator runtime
   for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i];
-    const permissionValue = BigInt(hexToNumber(LSP6_DEFAULT_PERMISSIONS[key]));
+    const permissionValue = hexToBigInt(LSP6_DEFAULT_PERMISSIONS[key], {});
     if (key in permissions) {
       if (permissions[key]) {
         basePermissions |= permissionValue;
@@ -25,10 +24,10 @@ export function encodePermissions(permissions: Permissions): string {
     }
   }
   // Convert the final BigInt permission value back to a hex string, properly padded
-  return leftPad(numberToHex(basePermissions.toString()), 64);
+  return pad(toHex(basePermissions), { size: 32 });
 }
 
-export function decodePermissions(permissionHex: string) {
+export function decodePermissions(permissionHex: Hex) {
   const result = {
     CHANGEOWNER: false,
     ADDCONTROLLER: false,
@@ -58,7 +57,8 @@ export function decodePermissions(permissionHex: string) {
   };
 
   const permissionsToTest = Object.keys(LSP6_DEFAULT_PERMISSIONS);
-  const passedPermissionDecimal = BigInt(hexToNumber(permissionHex));
+  const passedPermissionDecimal =
+    permissionHex === '0x' ? 0n : hexToBigInt(permissionHex);
 
   // Do not use an for of loop here to not require the regenerator runtime
   // Deal with ALL_PERMISSIONS the same way. So as long as all the bits in ALL_PERMISSIONS
@@ -67,8 +67,8 @@ export function decodePermissions(permissionHex: string) {
   // It does not mean some extra permissions are not included.
   for (let i = 0; i < permissionsToTest.length; i += 1) {
     const testPermission = permissionsToTest[i];
-    const decimalTestPermission = BigInt(
-      hexToNumber(LSP6_DEFAULT_PERMISSIONS[testPermission]),
+    const decimalTestPermission = hexToBigInt(
+      LSP6_DEFAULT_PERMISSIONS[testPermission],
     );
     const isPermissionIncluded =
       (passedPermissionDecimal & decimalTestPermission) ===
@@ -87,7 +87,10 @@ export function decodePermissions(permissionHex: string) {
  * @dev Return null if the input is not a known permission name or a valid 32-byte hex string.
  */
 export function mapPermission(permission: string): string | null {
-  if (!LSP6_DEFAULT_PERMISSIONS[permission] && !isHexStrict(permission)) {
+  if (
+    !LSP6_DEFAULT_PERMISSIONS[permission] &&
+    !isHex(permission, { strict: true })
+  ) {
     return null;
   }
   return LSP6_DEFAULT_PERMISSIONS[permission] || permission;
@@ -102,10 +105,14 @@ export function mapPermission(permission: string): string | null {
  */
 export const checkPermissions = (
   requiredPermissions: string[] | string,
-  grantedPermissions: string,
+  _grantedPermissions: Hex,
 ): boolean => {
-  // Validate the grantedPermissions string
-  if (!isHexStrict(grantedPermissions)) {
+  let grantedPermissions = _grantedPermissions;
+  if (grantedPermissions === '0x') {
+    grantedPermissions = '0x0';
+  }
+  if (!isHex(grantedPermissions, { strict: true })) {
+    // Validate the grantedPermissions string
     throw new Error(
       'Invalid grantedPermissions string. It must be a valid 32-byte hex string.',
     );
@@ -130,7 +137,6 @@ export const checkPermissions = (
       }
       const requiredPermissionBigInt = BigInt(requiredPermission);
       const grantedPermissionsBigInt = BigInt(grantedPermissions);
-
       return (
         (requiredPermissionBigInt & grantedPermissionsBigInt) ===
         requiredPermissionBigInt

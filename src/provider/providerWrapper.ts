@@ -293,7 +293,7 @@ export class ProviderWrapper {
       );
     }
 
-    const results: string[] = await this.callContract(payload);
+    const results: Hex[] = await this.callContract(payload);
 
     return payload.map<GetDataReturn>((_payloadCall, index) => {
       return {
