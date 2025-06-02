@@ -214,7 +214,7 @@ await myErc725.fetchData();
 */
 ```
 
-For more information 👉 [check the docs](https://docs.lukso.tech/tools/erc725js/classes/ERC725).
+For more information 👉 [check the docs](https://docs.lukso.tech/tools/dapps/erc725js/getting-started).
 
 ## Contributing
 
