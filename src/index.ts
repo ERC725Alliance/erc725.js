@@ -95,6 +95,7 @@ export type {
   GetDataDynamicKey,
   GetDataInput,
   URLDataWithHash,
+  ERC725Options,
 };
 
 export {
@@ -108,6 +109,7 @@ export {
   encodeArrayKey,
   getVerificationMethod,
   isDataAuthentic,
+  patchIPFSUrlsIfApplicable,
 } from './lib/utils';
 export { decodeData } from './lib/decodeData';
 export { encodeKeyName, isDynamicKeyName } from './lib/encodeKeyName';
