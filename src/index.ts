@@ -57,6 +57,7 @@ import type {
   DecodeDataOutput,
   EncodeDataInput,
   FetchDataOutput,
+  GetDataExternalSourcesOutput,
 } from './types/decodeData';
 import type { GetDataDynamicKey, GetDataInput } from './types/GetData';
 import { decodeData } from './lib/decodeData';
@@ -79,7 +80,7 @@ import {
   checkPermissions,
   mapPermission,
 } from './lib/permissions';
-import type { AssetURLEncode } from './types/encodeData';
+import type { AssetURLEncode, EncodeDataReturn } from './types/encodeData';
 import type { URLDataToEncode, URLDataWithHash, Verification } from './types';
 
 export type {
@@ -93,9 +94,12 @@ export type {
   DecodeDataInput,
   DecodeDataOutput,
   GetDataDynamicKey,
+  EncodeDataReturn,
   GetDataInput,
   URLDataWithHash,
   ERC725Options,
+  GetDataExternalSourcesOutput,
+  Verification,
 };
 
 export {

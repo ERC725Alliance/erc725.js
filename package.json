@@ -1,17 +1,31 @@
 {
   "name": "@erc725/erc725.js",
-  "version": "0.28.1",
+  "version": "0.28.1-p9",
   "description": "Library to interact with ERC725 smart contracts",
-  "main": "build/main/src/index.js",
-  "typings": "build/main/src/index.d.ts",
-  "module": "build/module/src/index.js",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "module": "build/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.mjs",
+      "require": "./build/index.js"
+    },
+    "./schemas": {
+      "types": "./build/schemas/index.d.ts",
+      "import": "./build/schemas/index.mjs",
+      "require": "./build/schemas/index.js"
+    },
+    "./schemas/*": "./schemas/*"
+  },
   "files": [
     "build",
     "schemas",
     "docs"
   ],
   "scripts": {
-    "build": "run-p build:*",
+    "build": "tsup",
+    "build:legacy": "run-p build:main build:module",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
     "test:lcov": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=lcov mocha --silent --verbose",
@@ -79,6 +93,7 @@
     "sinon": "^20.0.0",
     "standard-version": "^9.5.0",
     "ts-node": "^10.9.2",
+    "tsup": "^8.5.0",
     "typescript": "^5.8.3",
     "web3": "^4.16.0",
     "web3-eth-abi": "^4.4.1",

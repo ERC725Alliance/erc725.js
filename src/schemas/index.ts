@@ -1,16 +1,16 @@
 import type { ERC725JSONSchema } from '../types/ERC725JSONSchema';
 
-import LSP1JSONSchema from '../../schemas/LSP1UniversalReceiverDelegate.json';
-import LSP3JSONSchema from '../../schemas/LSP3ProfileMetadata.json';
-import LSP4JSONSchema from '../../schemas/LSP4DigitalAsset.json';
-import LSP4LegacyJSONSchema from '../../schemas/LSP4DigitalAssetLegacy.json';
-import LSP5JSONSchema from '../../schemas/LSP5ReceivedAssets.json';
-import LSP6JSONSchema from '../../schemas/LSP6KeyManager.json';
-import LSP8JSONSchema from '../../schemas/LSP8IdentifiableDigitalAsset.json';
-import LSP9JSONSchema from '../../schemas/LSP9Vault.json';
-import LSP10JSONSchema from '../../schemas/LSP10ReceivedVaults.json';
-import LSP12JSONSchema from '../../schemas/LSP12IssuedAssets.json';
-import LSP17JSONSchema from '../../schemas/LSP17ContractExtension.json';
+import LSP1JSONSchema from '../../schemas/LSP1UniversalReceiverDelegate.json' with { type: 'json' };
+import LSP3JSONSchema from '../../schemas/LSP3ProfileMetadata.json' with { type: 'json' };
+import LSP4JSONSchema from '../../schemas/LSP4DigitalAsset.json' with { type: 'json' };
+import LSP4LegacyJSONSchema from '../../schemas/LSP4DigitalAssetLegacy.json' with { type: 'json' };
+import LSP5JSONSchema from '../../schemas/LSP5ReceivedAssets.json' with { type: 'json' };
+import LSP6JSONSchema from '../../schemas/LSP6KeyManager.json' with { type: 'json' };
+import LSP8JSONSchema from '../../schemas/LSP8IdentifiableDigitalAsset.json' with { type: 'json' };
+import LSP9JSONSchema from '../../schemas/LSP9Vault.json' with { type: 'json' };
+import LSP10JSONSchema from '../../schemas/LSP10ReceivedVaults.json' with { type: 'json' };
+import LSP12JSONSchema from '../../schemas/LSP12IssuedAssets.json' with { type: 'json' };
+import LSP17JSONSchema from '../../schemas/LSP17ContractExtension.json' with { type: 'json' };
 
 type schemaType = ERC725JSONSchema[];
 
