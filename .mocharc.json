@@ -2,8 +2,5 @@
   "extension": ["ts"],
   "spec": "src/**/*.test.ts",
   "timeout": 20000,
-  "node-option": [
-    "import=tsx",
-    "import=./test/server.ts"
-  ]
+  "node-option": ["import=tsx", "import=./test/server.ts"]
 }
