@@ -5,7 +5,7 @@ title: 'Methods'
 
 import CodeSandbox from "@site/src/components/CodeSandbox";
 
-<CodeSandbox />
+<CodeSandbox /> 
 
 ## Encoding
 
@@ -570,6 +570,50 @@ ERC725.encodeData(
 
 ---
 
+### encodeArrayKey
+
+```js
+ERC725.encodeArrayKey(key, index);
+```
+
+Generate the raw bytes key for an array element at a specific index according to the LSP2 ERC725Y JSON Schema standard.
+
+:::info
+
+`encodeArrayKey` is available as a static function.
+
+:::
+
+#### Parameters
+
+##### 1. `key` - String
+
+The schema key of a schema with keyType = 'Array'
+
+##### 2. `index` - Number
+
+An integer representing the intended array index
+
+#### Returns
+
+| Name          | Type   | Description                                |
+| :------------ | :----- | :----------------------------------------- |
+| `encodedKey`  | string | The raw bytes key for the array element    |
+
+#### Example
+
+```javascript title="Encode an array key for a specific index"
+import { encodeArrayKey } from '@erc725/erc725.js';
+
+const arrayKey = '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd'; // LSP12IssuedAssets[]
+const index = 2;
+
+const encodedArrayKey = encodeArrayKey(arrayKey, index);
+// '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000002'
+```
+
+---
+
 ### encodeKeyName
 
 ```js
@@ -629,6 +673,57 @@ ERC725.encodeKeyName('MyKeyName:<uint32>', ['4081242941']);
 
 // This method is also available on the instance:
 myErc725.encodeKeyName('LSP3Profile');
+```
+
+---
+
+### isDynamicKeyName
+
+```js
+import { isDynamicKeyName } from '@erc725/erc725.js';
+
+isDynamicKeyName(keyName);
+```
+
+Check if a key name contains dynamic parts (like `<address>`, `<bytes32>`, etc.) according to the LSP2 ERC725Y JSON Schema standard.
+
+:::info
+
+`isDynamicKeyName` is available as a standalone function import.
+
+:::
+
+#### Parameters
+
+##### 1. `keyName` - String
+
+The key name to check for dynamic parts.
+
+#### Returns
+
+| Name     | Type    | Description                                                    |
+| :------- | :------ | :------------------------------------------------------------- |
+| `result` | boolean | `true` if the key name contains dynamic parts, `false` otherwise. |
+
+#### Examples
+
+```javascript title="Check if key names are dynamic"
+import { isDynamicKeyName } from '@erc725/erc725.js';
+
+isDynamicKeyName('LSP3Profile');
+// false
+
+isDynamicKeyName('LSP5ReceivedAssetsMap:<address>');
+// true
+
+isDynamicKeyName('AddressPermissions:AllowedStandards:<address>');
+// true
+
+isDynamicKeyName('MyKey:<bytes4>:<uint32>');
+// true
+
+isDynamicKeyName('<string>');
+// true
 ```
 
 ---
