@@ -28,12 +28,12 @@
     "build:legacy": "run-p build:main build:module",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
-    "test:lcov": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=lcov mocha --silent --verbose",
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=json --reporter=text mocha",
-    "test:ci": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --reporter json > mocha-results.json && nyc --reporter=json --reporter=text mocha --silent && node ./merge-reports.js",
-    "test:capture": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --silent --reporter json > mocha-results.json && nyc --reporter=json --reporter=text mocha --silent && node ./merge-reports.js && cp ./report.json ./report-base.json",
+    "test:lcov": "nyc --reporter=lcov mocha --silent --verbose",
+    "test": "nyc --reporter=json --reporter=text mocha",
+    "test:ci": "mocha --reporter json > mocha-results.json && nyc --reporter=json --reporter=text mocha --silent && node ./merge-reports.js",
+    "test:capture": "mocha --silent --reporter json > mocha-results.json && nyc --reporter=json --reporter=text mocha --silent && node ./merge-reports.js && cp ./report.json ./report-base.json",
     "lint": "biome check .",
-    "test:debug": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --silent -j 1",
+    "test:debug": "mocha --silent -j 1",
     "lint:fix": "biome check --apply .",
     "check": "tsc --noEmit && biome check .",
     "format:fix": "biome format --write .",
@@ -94,6 +94,7 @@
     "standard-version": "^9.5.0",
     "ts-node": "^10.9.2",
     "tsup": "^8.5.0",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "web3": "^4.16.0",
     "web3-eth-abi": "^4.4.1",
@@ -105,11 +106,6 @@
   "dependencies": {
     "cross-fetch": "^4.1.0",
     "viem": "^2.28.1"
-  },
-  "ts-node": {
-    "compilerOptions": {
-      "module": "commonjs"
-    }
   },
   "packageManager": "pnpm@10.12.2+sha512.a32540185b964ee30bb4e979e405adc6af59226b438ee4cc19f9e8773667a66d302f5bfee60a39d3cac69e35e4b96e708a71dd002b7e9359c4112a1722ac323f"
 }
