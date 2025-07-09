@@ -5,7 +5,7 @@ title: 'Methods'
 
 import CodeSandbox from "@site/src/components/CodeSandbox";
 
-<CodeSandbox /> 
+<CodeSandbox />
 
 ## Encoding
 
@@ -596,16 +596,17 @@ An integer representing the intended array index
 
 #### Returns
 
-| Name          | Type   | Description                                |
-| :------------ | :----- | :----------------------------------------- |
-| `encodedKey`  | string | The raw bytes key for the array element    |
+| Name         | Type   | Description                             |
+| :----------- | :----- | :-------------------------------------- |
+| `encodedKey` | string | The raw bytes key for the array element |
 
 #### Example
 
 ```javascript title="Encode an array key for a specific index"
 import { encodeArrayKey } from '@erc725/erc725.js';
 
-const arrayKey = '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd'; // LSP12IssuedAssets[]
+const arrayKey =
+  '0x7c8c3416d6cda87cd42c71ea1843df28ac4850354f988d55ee2eaa47b6dc05cd'; // LSP12IssuedAssets[]
 const index = 2;
 
 const encodedArrayKey = encodeArrayKey(arrayKey, index);
@@ -701,8 +702,8 @@ The key name to check for dynamic parts.
 
 #### Returns
 
-| Name     | Type    | Description                                                    |
-| :------- | :------ | :------------------------------------------------------------- |
+| Name     | Type    | Description                                                       |
+| :------- | :------ | :---------------------------------------------------------------- |
 | `result` | boolean | `true` if the key name contains dynamic parts, `false` otherwise. |
 
 #### Examples
@@ -2038,7 +2039,7 @@ await myErc725.isValidSignature(
 // false
 ```
 
-[lsp6 keymanager permissions]: ../../../../../standards/universal-profile/lsp6-key-manager#permissions
+[lsp6 keymanager permissions]: https://docs.lukso.tech/standards/universal-profile/lsp6-key-manager#permissions
 [lsp6 keymanager standard]: https://docs.lukso.tech/standards/universal-profile/lsp6-key-manager
 [lsp-2 erc725yjsonschema]: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md
 
@@ -2826,7 +2827,7 @@ The encoded permission (32bytes hex).
 
 | Name                 | Type   | Description                                                                                        |
 | :------------------- | :----- | :------------------------------------------------------------------------------------------------- |
-| `decodedPermissions` | Object | An object specifying whether default LSP6 permissions are included in provided hexademical string. |
+| `decodedPermissions` | Object | An object specifying whether default LSP6 permissions are included in provided hexadecimal string. |
 
 #### Example
 
