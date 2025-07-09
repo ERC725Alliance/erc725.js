@@ -2827,7 +2827,7 @@ The encoded permission (32bytes hex).
 
 | Name                 | Type   | Description                                                                                        |
 | :------------------- | :----- | :------------------------------------------------------------------------------------------------- |
-| `decodedPermissions` | Object | An object specifying whether default LSP6 permissions are included in provided hexademical string. |
+| `decodedPermissions` | Object | An object specifying whether default LSP6 permissions are included in provided hexadecimal string. |
 
 #### Example
 
