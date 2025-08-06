@@ -10,7 +10,7 @@ For more details on schemas, see the [**official specification** of the LSP2 ERC
 
 :::
 
-The ⚒️ [erc725.js](https://npmjs.com/package/@erc725/erc725.js) library works with [ERC725Y JSON schemas](../../../standards/metadata/lsp2-json-schema.md). These schemas are JSON structures that tell developers and programs how to decode and encode 🗂️ [ERC725Y data keys](../../../standards/erc725#erc725y-generic-data-keyvalue-store) from any [ERC725Y](https://eips.ethereum.org/EIPS/eip-725) smart contract.. You need to load the required schemas of the data keys you want to fetch when initializing the `ERC725` class.
+The ⚒️ [erc725.js](https://npmjs.com/package/@erc725/erc725.js) library works with [ERC725Y JSON schemas](/standards/metadata/lsp2-json-schema.md). These schemas are JSON structures that tell developers and programs how to decode and encode 🗂️ [ERC725Y data keys](/standards/erc725#erc725y-generic-data-keyvalue-store) from any [ERC725Y](https://eips.ethereum.org/EIPS/eip-725) smart contract.. You need to load the required schemas of the data keys you want to fetch when initializing the `ERC725` class.
 
 The most common and standard schemas are [available](https://docs.lukso.tech/tools/dapps/erc725js/schemas) directly within the _erc725.js_ library. But you can also create and load your own ERC725Y JSON schemas if you want to use custom data keys.
 
