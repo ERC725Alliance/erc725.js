@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.28.2](https://github.com/ERC725Alliance/erc725.js/compare/v0.28.1...v0.28.2) (2025-08-06)
+
+
+### Bug Fixes
+
+* broken link in README.md ([36c58fa](https://github.com/ERC725Alliance/erc725.js/commit/36c58fab23118a26e75aafed8823b5aedfdccfef))
+* new doc redirects for trailing slash flag ([35940ad](https://github.com/ERC725Alliance/erc725.js/commit/35940ad8250205d4b0287dea1f2ffa9cdf65e932))
+* prettier + redirects ([ffcd874](https://github.com/ERC725Alliance/erc725.js/commit/ffcd8743fc2692680fdc68763e72011f15f611cc))
+* spelling ([5a89f78](https://github.com/ERC725Alliance/erc725.js/commit/5a89f78afc858b205aa6d2b49950cf60cc5b310d))
+
 ## [0.28.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.28.0...v0.28.1) (2025-05-26)
 
 
