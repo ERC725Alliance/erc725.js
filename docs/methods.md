@@ -1436,7 +1436,7 @@ myErc725.getSchema(keys [, providedSchemas]);
 
 Parses a hashed key or a list of hashed keys and will attempt to return its corresponding [LSP2 ERC725YJSONSchema](https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md) object. Additionally, it will look for a corresponding key within the schemas:
 
-- in the [`schemas`](https://github.com/ERC725Alliance/myErc725.js/tree/main/schemas) folder (which includes all [LSPs](https://github.com/lukso-network/LIPs/tree/main/LSPs)),
+- in the [`schemas`](https://github.com/ERC725Alliance/erc725.js/tree/main/schemas) folder (which includes all [LSPs](https://github.com/lukso-network/LIPs/tree/main/LSPs)),
 - that were provided at ERC725 initialization, and
 - that were provided in the function call (`providedSchemas`).
 
