@@ -34,7 +34,7 @@ import {
 } from '../constants/constants';
 import type { URLDataToEncode, URLDataWithHash } from '../types';
 import ERC725, { getVerificationMethod } from '..';
-import { mockJson } from '../../test/mockSchema';
+import { mockJson } from '../../test/mockSchema' with { type: 'json' };
 
 describe('encoder', () => {
   describe('valueType', () => {
