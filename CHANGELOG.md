@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.28.2](https://github.com/ERC725Alliance/erc725.js/compare/v0.28.1...v0.28.2) (2025-10-01)
+
+
+### Bug Fixes
+
+* broken link in README.md ([36c58fa](https://github.com/ERC725Alliance/erc725.js/commit/36c58fab23118a26e75aafed8823b5aedfdccfef))
+* decode array indexes correctly from hex to number in `dynamicName` returned by `getSchema` ([ee694bd](https://github.com/ERC725Alliance/erc725.js/commit/ee694bdb03e0b474ebb02030736d918bf182fc57))
+* Fix mocha to use full esm and tsx ([aba90a4](https://github.com/ERC725Alliance/erc725.js/commit/aba90a45a313bf686a9bb69e8f3cc41227bbe2bd))
+* Missing exports patchIPFSUrlsIfApplicable and ERC725Options ([f85039e](https://github.com/ERC725Alliance/erc725.js/commit/f85039eb67b0621c74ea0cab54426b8a6f6bea64))
+* new doc redirects for trailing slash flag ([35940ad](https://github.com/ERC725Alliance/erc725.js/commit/35940ad8250205d4b0287dea1f2ffa9cdf65e932))
+* prettier + redirects ([ffcd874](https://github.com/ERC725Alliance/erc725.js/commit/ffcd8743fc2692680fdc68763e72011f15f611cc))
+* Repair lint ([08be2cf](https://github.com/ERC725Alliance/erc725.js/commit/08be2cfccdc22242824565e8b94b66608600aa60))
+* Repair lint ([b4e002f](https://github.com/ERC725Alliance/erc725.js/commit/b4e002f99e573d04db99578c7c9a659253ad56b1))
+* spelling ([5a89f78](https://github.com/ERC725Alliance/erc725.js/commit/5a89f78afc858b205aa6d2b49950cf60cc5b310d))
+* Switch to tsup to import raw json. The new json with { type: 'json' } will cause huge problems for everyone. ([452ecf7](https://github.com/ERC725Alliance/erc725.js/commit/452ecf769cb249743295fb888b3d9585f4cfe0d6))
+
 ## [0.28.1](https://github.com/ERC725Alliance/erc725.js/compare/v0.28.0...v0.28.1) (2025-05-26)
 
 
