@@ -49,6 +49,7 @@ describe('schemaParser getSchema', () => {
         valueType: 'address',
       });
     });
+
     it('finds subsequent key of type Array correctly', () => {
       const schema = getSchema([
         '0x7c8c3416d6cda87cd42c71ea1843df2800000000000000000000000000000001',
@@ -76,6 +77,64 @@ describe('schemaParser getSchema', () => {
         },
       });
     });
+
+    it('finds subsequent key of type Array correctly with index being large numbers', () => {
+      const schema = getSchema([
+        '0x7c8c3416d6cda87cd42c71ea1843df280000000000000000000000000000000a',
+        '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000023',
+      ]);
+
+      assert.deepStrictEqual(schema, {
+        '0x7c8c3416d6cda87cd42c71ea1843df280000000000000000000000000000000a': {
+          name: 'LSP12IssuedAssets[]',
+          key: '0x7c8c3416d6cda87cd42c71ea1843df280000000000000000000000000000000a',
+          dynamicName: 'LSP12IssuedAssets[10]',
+          dynamicKeyParts: '0x0000000000000000000000000000000a',
+          keyType: 'Singleton',
+          valueContent: 'Address',
+          valueType: 'address',
+        },
+        '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000023': {
+          name: 'AddressPermissions[]',
+          key: '0xdf30dba06db6a30e65354d9a64c6098600000000000000000000000000000023',
+          dynamicName: 'AddressPermissions[35]',
+          dynamicKeyParts: '0x00000000000000000000000000000023',
+          keyType: 'Singleton',
+          valueContent: 'Address',
+          valueType: 'address',
+        },
+      });
+    });
+
+    it('returns `null` when the data key contains characters that are not hex on the prefix part of the array data key', () => {
+      const schema = getSchema([
+        '0x7c8c3416d6cda87cd4hijkea1843df2800000000000000000000000000000002',
+        '0xdf30dba06db6a30e65354d9a64c609--00000000000000000000000000000023',
+      ]);
+
+      assert.deepStrictEqual(schema, {
+        '0x7c8c3416d6cda87cd4hijkea1843df2800000000000000000000000000000002':
+          null,
+        '0xdf30dba06db6a30e65354d9a64c609--00000000000000000000000000000023':
+          null,
+      });
+    });
+
+    it('returns `null` when the data key contains characters that are not hex on the index part of the array data key', () => {
+      // these are known schemas
+      const schema = getSchema([
+        '0x7c8c3416d6cda87cd42c71ea1843df280000000000000000000000000000xxxx',
+        '0xdf30dba06db6a30e65354d9a64c60986000000000000000000000000000012h1',
+      ]);
+
+      assert.deepStrictEqual(schema, {
+        '0x7c8c3416d6cda87cd42c71ea1843df280000000000000000000000000000xxxx':
+          null,
+        '0xdf30dba06db6a30e65354d9a64c60986000000000000000000000000000012h1':
+          null,
+      });
+    });
+
     it('finds subsequent key of type Array correctly', () => {
       const schema = getSchema(
         '0x3a47ab5bd3a594c3a8995f8fa58d087600000000000fab000000000000000001',
