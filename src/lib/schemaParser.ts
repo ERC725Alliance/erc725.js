@@ -16,7 +16,7 @@
  * @author Hugo Masclet <@Hugoo>
  * @date 2022
  */
-import { concat, Hex, keccak256, slice, toBytes } from 'viem';
+import { concat, Hex, isHex, keccak256, slice, toBytes } from 'viem';
 import allSchemas from '../schemas';
 
 import type {
@@ -25,6 +25,7 @@ import type {
   ERC725JSONSchemaKeyType,
 } from '../types/ERC725JSONSchema';
 import { dynamicTypesRegex, isDynamicKeyName } from './encodeKeyName';
+import { decodeValueType } from './encoder';
 
 const getSchemasByKeyType = (
   schemas: ERC725JSONSchema[],
@@ -138,27 +139,29 @@ const findArraySchemaForKey = (
   }
 
   // 2. Subsequent keys
-  const bytes16Key = key.substring(0, 34);
+  const first16Bytes = slice(key as Hex, 0, 16);
+  const last16Bytes = slice(key as Hex, 16);
+
+  if (!isHex(first16Bytes) || !isHex(last16Bytes)) {
+    return null;
+  }
+
   const arraySchema =
-    schemas.find((schema) => schema.key.substring(0, 34) === bytes16Key) ||
-    null;
+    schemas.find(
+      (schema) => slice(schema.key as Hex, 0, 16) === first16Bytes,
+    ) || null;
 
   if (!arraySchema) {
     return null;
   }
 
-  // https://stackoverflow.com/a/1779019/651299
-  if (!/^\d+$/.test(key.substring(34))) {
-    return null;
-  }
-
-  const elementIndex = Number.parseInt(key.substring(34), 10);
+  const index = decodeValueType('uint128', last16Bytes);
 
   return {
     ...arraySchema,
     key,
-    dynamicName: arraySchema.name.replace('[]', `[${elementIndex}]`),
-    dynamicKeyParts: `0x${key.substring(34)}`,
+    dynamicName: arraySchema.name.replace('[]', `[${index}]`),
+    dynamicKeyParts: last16Bytes,
     name: arraySchema.name,
     keyType: 'Singleton',
   };
