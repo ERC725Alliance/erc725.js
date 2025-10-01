@@ -4,7 +4,7 @@
     "outDir": "build/main",
     "rootDirs": ["src", "schemas"],
     "moduleResolution": "node",
-    "module": "commonjs",
+    "module": "esnext",
     "declaration": true,
     "strict": true,
     "noImplicitAny": false, //TODO: this should be removed
