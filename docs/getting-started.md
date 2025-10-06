@@ -39,7 +39,7 @@ There are 3 main ways to use _erc725.js_.
 
 ### Option 1: use a schema for encoding / decoding data
 
-Create an instance of `ERC725` with just a [schema](https://docs.lukso.tech/tools/erc725js/schemas). **Useful for just encoding / decoding data.**
+Create an instance of `ERC725` with just a [schema](https://docs.lukso.tech/tools/dapps/erc725js/schemas/). **Useful for just encoding / decoding data.**
 
 ```js
 import ERC725, { ERC725JSONSchema } from '@erc725/erc725.js';

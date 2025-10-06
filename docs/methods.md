@@ -2039,8 +2039,8 @@ await myErc725.isValidSignature(
 // false
 ```
 
-[lsp6 keymanager permissions]: https://docs.lukso.tech/standards/universal-profile/lsp6-key-manager#permissions
-[lsp6 keymanager standard]: https://docs.lukso.tech/standards/universal-profile/lsp6-key-manager
+[lsp6 keymanager permissions]: https://docs.lukso.tech/standards/access-control/lsp6-key-manager/#permissions
+[lsp6 keymanager standard]: https://docs.lukso.tech/standards/access-control/lsp6-key-manager/
 [lsp-2 erc725yjsonschema]: https://github.com/lukso-network/LIPs/blob/main/LSPs/LSP-2-ERC725YJSONSchema.md
 
 ### supportsInterface
@@ -2065,18 +2065,18 @@ The `interfaceId` is not the most secure way to check for a standard, as they co
 
 Either a string of the hexadecimal `interfaceID` as defined by [ERC165](https://eips.ethereum.org/EIPS/eip-165) or one of the predefined interface names:
 
-| interfaceName                   | Standard                                                                                                                   |
-| :------------------------------ | :------------------------------------------------------------------------------------------------------------------------- |
-| `ERC1271`                       | [EIP-1271: Standard Signature Validation Method for Contracts](https://eips.ethereum.org/EIPS/eip-1271)                    |
-| `ERC725X`                       | [EIP-725: General execution standard](https://eips.ethereum.org/EIPS/eip-725)                                              |
-| `ERC725Y`                       | [EIP-725: General key-value store](https://eips.ethereum.org/EIPS/eip-725)                                                 |
-| `LSP0ERC725Account`             | [LSP-0: ERC725 Account](https://docs.lukso.tech/standards/universal-profile/lsp0-erc725account)                            |
-| `LSP1UniversalReceiver`         | [LSP-1: Universal Receiver](https://docs.lukso.tech/standards/generic-standards/lsp1-universal-receiver)                   |
-| `LSP1UniversalReceiverDelegate` | [LSP-1: Universal Receiver Delegate](https://docs.lukso.tech/standards/universal-profile/lsp1-universal-receiver-delegate) |
-| `LSP6KeyManager`                | [LSP-6: Key Manager](https://docs.lukso.tech/standards/universal-profile/lsp6-key-manager)                                 |
-| `LSP7DigitalAsset`              | [LSP-7: Digital Asset](https://docs.lukso.tech/standards/nft-2.0/LSP7-Digital-Asset)                                       |
-| `LSP8IdentifiableDigitalAsset`  | [LSP-8: Identifiable Digital Asset](https://docs.lukso.tech/standards/nft-2.0/LSP8-Identifiable-Digital-Asset)             |
-| `LSP9Vault`                     | [LSP-9: Vault](https://docs.lukso.tech/standards/universal-profile/lsp9-vault)                                             |
+| interfaceName                   | Standard                                                                                                           |
+| :------------------------------ | :----------------------------------------------------------------------------------------------------------------- |
+| `ERC1271`                       | [EIP-1271: Standard Signature Validation Method for Contracts](https://eips.ethereum.org/EIPS/eip-1271)            |
+| `ERC725X`                       | [EIP-725: General execution standard](https://eips.ethereum.org/EIPS/eip-725)                                      |
+| `ERC725Y`                       | [EIP-725: General key-value store](https://eips.ethereum.org/EIPS/eip-725)                                         |
+| `LSP0ERC725Account`             | [LSP-0: ERC725 Account](https://docs.lukso.tech/standards/accounts/lsp0-erc725account/)                            |
+| `LSP1UniversalReceiver`         | [LSP-1: Universal Receiver](https://docs.lukso.tech/standards/accounts/lsp1-universal-receiver/)                   |
+| `LSP1UniversalReceiverDelegate` | [LSP-1: Universal Receiver Delegate](https://docs.lukso.tech/standards/accounts/lsp1-universal-receiver-delegate/) |
+| `LSP6KeyManager`                | [LSP-6: Key Manager](https://docs.lukso.tech/standards/access-control/lsp6-key-manager/)                           |
+| `LSP7DigitalAsset`              | [LSP-7: Digital Asset](https://docs.lukso.tech/standards/tokens/LSP7-Digital-Asset/)                               |
+| `LSP8IdentifiableDigitalAsset`  | [LSP-8: Identifiable Digital Asset](https://docs.lukso.tech/standards/tokens/LSP8-Identifiable-Digital-Asset/)     |
+| `LSP9Vault`                     | [LSP-9: Vault](https://docs.lukso.tech/standards/accounts/lsp9-vault/)                                             |
 
 :::info
 
@@ -2654,7 +2654,7 @@ myErc725.checkPermissions(requiredPermissions, grantedPermissions);
 ERC725.checkPermissions(requiredPermissions, grantedPermissions);
 ```
 
-Check if the required permissions are included in the granted permissions as defined by the [LSP6 KeyManager Standard](https://docs.lukso.tech/standards/universal-profile/lsp6-key-manager).
+Check if the required permissions are included in the granted permissions as defined by the [LSP6 KeyManager Standard](https://docs.lukso.tech/standards/access-control/lsp6-key-manager/).
 
 :::info
 
@@ -2728,7 +2728,7 @@ myErc725.checkPermissions(requiredPermissions, grantedPermissions);
 ERC725.encodePermissions(permissions);
 ```
 
-Encodes permissions into a hexadecimal string as defined by the [LSP6 KeyManager Standard](https://docs.lukso.tech/standards/universal-profile/lsp6-key-manager).
+Encodes permissions into a hexadecimal string as defined by the [LSP6 KeyManager Standard](https://docs.lukso.tech/standards/access-control/lsp6-key-manager/).
 
 :::info
 
@@ -2809,7 +2809,7 @@ myErc725.encodePermissions({
 ERC725.decodePermissions(permission);
 ```
 
-Decodes permissions from hexadecimal defined by the [LSP6 KeyManager Standard](https://docs.lukso.tech/standards/universal-profile/lsp6-key-manager).
+Decodes permissions from hexadecimal defined by the [LSP6 KeyManager Standard](https://docs.lukso.tech/standards/access-control/lsp6-key-manager/).
 
 :::info
 
