@@ -20,7 +20,7 @@
     <img alt="GitHub pull requests" src="https://img.shields.io/github/issues-pr/ERC725Alliance/erc725.js?color=0088ff" />
   </a>
 </p>
-<p align="center">For more information see the <a href="https://docs.lukso.tech/tools/erc725js/getting-started">Documentation</a>.</p>
+<p align="center">For more information see the <a href="https://docs.lukso.tech/tools/dapps/erc725js/getting-started">Documentation</a>.</p>
 
 ## Installation
 
